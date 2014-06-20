@@ -1,4 +1,4 @@
-// Last time updated at June 19, 2014, 08:32:23
+// Last time updated at June 20, 2014, 08:32:23
 
 // Latest file can be found here: https://www.rtcmulticonnection.org/latest.js
 
@@ -13,6 +13,10 @@
 // RTCMultiConnection-v1.8
 
 /* issues/features need to be fixed & implemented:
+
+-. via: https://github.com/muaz-khan/WebRTC-Experiment/issues/225#issuecomment-46571924
+-. todo: fix OfferToReceiveAudio and OfferToReceiveVideo issues for Firefox if user is doing "something-only" streaming.
+-. connection.sdpConstraints.mandatory is now set by default.
 
 -. (fixed): all other webrtc-experiments works if firefox creates offer; but RTCMultiConnection fails.
 -. function "stopTracks" updated.
@@ -865,7 +869,7 @@
 
                     // if ICE connectivity check is failed; renegotiate or redial
                     if (connection.peers[_config.userid] && connection.peers[_config.userid].peer.connection.iceConnectionState == 'failed') {
-                        if (isFirefox || _config.targetBrowser == 'gecko') {
+                        if (isFirefox || _config.userinfo.browser == 'firefox') {
                             warn('ICE connectivity check is failed. Re-establishing peer connection.');
                             connection.peers[_config.userid].redial();
                         } else {
@@ -1092,7 +1096,7 @@
                     peer: peer,
                     userid: _config.userid,
                     extra: _config.extra,
-                    targetBrowser: _config.targetBrowser,
+                    userinfo: _config.userinfo,
                     addStream: function (session00) {
                         // connection.peers['user-id'].addStream({audio: true, video: true);
 
@@ -1350,7 +1354,7 @@
                 // 1st: renegotiation is supported only on chrome
                 // 2nd: must not renegotiate same media multiple times
                 // 3rd: todo: make sure that target-user has no such "renegotiated" media.
-                if (_config.targetBrowser == 'chromium' && !_config.renegotiatedOnce) {
+                if (_config.userinfo.browser == 'chrome' && !_config.renegotiatedOnce) {
                     // this code snippet is added to make sure that "previously-renegotiated" streams are also 
                     // renegotiated to this new user
                     for (var rSession in connection.renegotiatedSessions) {
@@ -1373,7 +1377,7 @@
                     _config.renegotiate = response.renegotiate;
                     _config.streaminfo = response.streaminfo;
                     _config.isInitiator = response.isInitiator;
-                    _config.targetBrowser = response.targetBrowser;
+                    _config.userinfo = response.userinfo;
 
                     var sdp = JSON.parse(response.sdp);
 
@@ -1636,8 +1640,6 @@
             };
 
             function sdpInvoker(sdp, labels) {
-                log(sdp.type, sdp.sdp);
-
                 if (sdp.type == 'answer') {
                     peer.setRemoteDescription(sdp);
                     updateSocket();
@@ -1645,6 +1647,7 @@
                 }
                 if (!_config.renegotiate && sdp.type == 'offer') {
                     peerConfig.offerDescription = sdp;
+                    
                     peerConfig.session = connection.session;
                     if (!peer) peer = new PeerConnection();
                     peer.create('answer', peerConfig);
@@ -1685,9 +1688,9 @@
                 }
 
                 function createAnswer() {
-                    // because gecko has no support of renegotiation yet;
+                    // because Firefox has no support of renegotiation yet;
                     // so both chrome and firefox should redial instead of renegotiate!
-                    if (isFirefox || _config.targetBrowser == 'gecko') {
+                    if (isFirefox || _config.userinfo.browser == 'firefox') {
                         if (connection.peers[_config.userid]) {
                             connection.peers[_config.userid].redial();
                         }
@@ -1726,7 +1729,9 @@
                 preferSCTP: !!connection.preferSCTP,
                 fakeDataChannels: !!connection.fakeDataChannels,
                 isInitiator: !!connection.isInitiator,
-                targetBrowser: isFirefox ? 'gecko' : 'chromium'
+                userinfo: {
+                    browser: isFirefox ? 'firefox' : 'chrome'
+                }
             });
         }
 
@@ -2121,7 +2126,7 @@
             _config = _config || {};
             participants = {};
 
-            // dont-override-session allows you force RTCMultiConnection
+            // dontOverrideSession allows you force RTCMultiConnection
             // to not override default session of participants;
             // by default, session is always overridden and set to the session coming from initiator!
             if (!connection.dontOverrideSession) {
@@ -2143,6 +2148,24 @@
                 extra: _config.extra || {},
                 userid: _config.userid
             });
+            
+            connection.sdpConstraints.mandatory.OfferToReceiveAudio = !!connection.session.audio;
+            connection.sdpConstraints.mandatory.OfferToReceiveVideo = !!connection.session.video || !!connection.session.screen;
+            
+            log(toStr(connection.sdpConstraints.mandatory));
+            
+            var offers = {};
+            if(connection.attachStreams.length) {
+                var stream = connection.attachStreams[0];
+                if(stream.getAudioTracks().length) {
+                    offers.audio = true;
+                }
+                if(stream.getVideoTracks().length) {
+                    offers.video = true;
+                }
+            }
+            
+            log(toStr(offers));
 
             defaultSocket.send({
                 participant: true,
@@ -2150,7 +2173,11 @@
                 channel: channel,
                 targetUser: _config.userid,
                 extra: connection.extra,
-                session: connection.session
+                session: connection.session,
+                offers: {
+                    audio: !!offers.audio,
+                    video: !!offers.video
+                }
             });
         };
 
@@ -2233,9 +2260,9 @@
                     }
                 }
 
-                // because gecko has no support of renegotiation yet;
+                // because Firefox has no support of renegotiation yet;
                 // so both chrome and firefox should redial instead of renegotiate!
-                if (isFirefox || _peer.targetBrowser == 'gecko') {
+                if (isFirefox || _peer.userinfo.browser == 'firefox') {
                     return _peer.redial();
                 }
 
@@ -2282,6 +2309,14 @@
                 channel: response.channel || response.userid,
                 session: response.session || connection.session
             };
+            
+            // check how participant is willing to join
+            if(response.offers) {
+                log(toStr(response.offers));
+                connection.sdpConstraints.mandatory.OfferToReceiveAudio = !!response.offers.audio;
+                connection.sdpConstraints.mandatory.OfferToReceiveVideo = !!response.offers.video;
+                log(toStr(connection.sdpConstraints.mandatory));
+            }
 
             rtcMultiSession.requestsFrom[response.userid] = obj;
 
@@ -4656,6 +4691,13 @@
             firebase: 'https://www.webrtc-experiment.com/firebase.js',
             firebaseio: 'https://chat.firebaseIO.com/',
             muted: 'https://www.webrtc-experiment.com/images/muted.png'
+        };
+
+        // as @serhanters proposed in #225
+        // it will fix auto fix "all" renegotiation scenarios
+        connection.sdpConstraints.mandatory = {
+            OfferToReceiveAudio: true,
+            OfferToReceiveVideo: true
         };
 
         // part-of-screen fallback for firefox
