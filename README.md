@@ -8,13 +8,7 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 
 ## Issues?
 
-1. If Chrome starts video-only session; and Firefox joins with only audio. Then both fails to connect; though sendrecv/recvonly/sendonly everything is correctly implemented.
-2. New changes affects renegotiation because new-changes are manually checking for:
-
-    ```javascript
-    // i.e. checking only first media stream
-    connection.attachStreams[0].getVideoTracks();
-    ```
+No known issue yet.
     
 =
 
@@ -24,6 +18,21 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 2. If Firefox starts audio+video, then Chrome can join it with only audio or only video or audio+video.
 
 You don't need to manually set "OfferToReceiveAudio" and/or "OfferToReceiveVideo".
+
+Following issue is also fixed:
+
+> New changes affects renegotiation because new-changes are manually checking for:
+>
+>    ```javascript
+>    // i.e. checking only first media stream
+>    connection.attachStreams[0].getVideoTracks();
+>    ```
+
+Fixed: "the videos are not square and they look grainy not has sharp as before". Now video is captured & streamed with better quality.
+
+Fixed following:
+
+> If Chrome starts video-only session; and Firefox joins with only audio. Then both fails to connect; though sendrecv/recvonly/sendonly everything is correctly implemented.
 
 =
 
@@ -35,9 +44,7 @@ It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licenced</a>, whi
 
 =
 
-## How to use latest version?
-
-Remember, below give link is stable. You can use RTCMultiConnection.js from the same page to test recent changes.
+## Want to try latest stable version?
 
 ```html
 <script src="//www.rtcmulticonnection.org/latest.js"></script>

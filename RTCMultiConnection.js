@@ -1,4 +1,4 @@
-// Last time updated at June 20, 2014, 08:32:23
+// Last time updated at June 21, 2014, 08:32:23
 
 // Latest file can be found here: https://www.rtcmulticonnection.org/latest.js
 
@@ -18,14 +18,8 @@
 -. todo: fix OfferToReceiveAudio and OfferToReceiveVideo issues for Firefox if user is doing "something-only" streaming.
 -. connection.sdpConstraints.mandatory is now set by default.
 
--. (fixed): all other webrtc-experiments works if firefox creates offer; but RTCMultiConnection fails.
--. function "stopTracks" updated.
--. startRecording/stopRecording updated & fixed.
--. "PreRecordedMediaStreamer" is moved to a separate javascript file.
-
--. todo: remove pre-recorded media streaming modules.
--. ----- todo: add mp3-live streaming support
--. ----- todo: add mozCaptureStreamUntilEnded streaming support.
+-. todo: add mp3-live streaming support
+-. todo: add mozCaptureStreamUntilEnded streaming support.
 
 -. [dirty-workaround added] fix "disconnected" which happens very often.
 -.                          todo: use WebRTC data channels for dirty workaround whenever possible.
@@ -2156,7 +2150,7 @@
             
             var offers = {};
             if(connection.attachStreams.length) {
-                var stream = connection.attachStreams[0];
+                var stream = connection.attachStreams[connection.attachStreams.length - 1];
                 if(stream.getAudioTracks().length) {
                     offers.audio = true;
                 }
@@ -2899,6 +2893,19 @@
 
         if (mediaConstraints.mandatory) {
             hints.video.mandatory = merge(hints.video.mandatory, mediaConstraints.mandatory);
+        }
+        
+        if(hints.video && hints.video.optional) {
+            if(media.minFrameRate) {
+                hints.video.optional.push({
+                    minFrameRate: media.minFrameRate
+                });
+            }
+            if(media.bandwidth) {
+                hints.video.optional.push({
+                    bandwidth: media.bandwidth
+                });
+            }
         }
 
         // mediaConstraints.optional.bandwidth = 1638400;
@@ -4069,7 +4076,10 @@
             max: function (width, height) {
                 this.maxWidth = width;
                 this.maxHeight = height;
-            }
+            },
+            bandwidth: 256,
+            minFrameRate: 32,
+            minAspectRatio: 1.77
         };
 
         // www.RTCMultiConnection.org/docs/candidates/
@@ -4694,7 +4704,7 @@
         };
 
         // as @serhanters proposed in #225
-        // it will fix auto fix "all" renegotiation scenarios
+        // it will auto fix "all" renegotiation scenarios
         connection.sdpConstraints.mandatory = {
             OfferToReceiveAudio: true,
             OfferToReceiveVideo: true
