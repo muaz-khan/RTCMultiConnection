@@ -34,6 +34,39 @@ Fixed following:
 
 > If Chrome starts video-only session; and Firefox joins with only audio. Then both fails to connect; though sendrecv/recvonly/sendonly everything is correctly implemented.
 
+Another issue:
+
+> Anyway to cancel joining the session after giving camera permission if the session no longer exists?
+
+Though you can't manually cancel session however you can detect if session no longer exists.
+
+```javascript
+connection.onstatechange = function (state, reason) {
+    // fetching-usermedia
+    // usermedia-fetched
+
+    // detecting-room-presence
+    // room-not-available
+    // room-available
+
+    // connecting-with-initiator
+    // connected-with-initiator
+
+    // failed---has reason
+
+    // request-accepted
+    // request-rejected
+
+    if(state == 'room-not-available') {
+        // room no longer exist
+    }
+};
+```
+
+Remember, ["onstats"](http://www.rtcmulticonnection.org/docs/onstats/) has been removed in v1.8 and replaced with "onstatechange" event.
+
+
+
 =
 
 ## What is RTCMultiConnection?

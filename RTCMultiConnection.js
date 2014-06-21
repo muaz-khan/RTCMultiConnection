@@ -236,7 +236,11 @@
 
             if (!session || !session.userid || !session.sessionid) {
                 error('missing arguments', arguments);
-                throw 'invalid data passed over "join" method';
+                
+                var error = 'invalid data passed over "join" method';
+                connection.onstatechange('failed', error);
+                
+                throw error;
             }
 
             if (!connection.dontOverrideSession) {
@@ -352,6 +356,8 @@
                     _captureUserMedia(constraints, callback);
                 } : callback);
             } else _captureUserMedia(constraints, callback, session.audio && !session.video);
+            
+            connection.onstatechange('fetching-usermedia');
 
             function _captureUserMedia(forcedConstraints, forcedCallback, isRemoveVideoTracks, dontPreventSSLAutoAllowed) {
 
@@ -379,6 +385,8 @@
 
                 var mediaConfig = {
                     onsuccess: function (stream, returnBack, idInstance, streamid) {
+                        connection.onstatechange('usermedia-fetched');
+                        
                         if (isRemoveVideoTracks) {
                             stream = convertToAudioStream(stream);
                         }
@@ -856,7 +864,13 @@
                 },
 
                 oniceconnectionstatechange: function (event) {
+                    
                     log('oniceconnectionstatechange', toStr(event));
+                    
+                    if(!connection.isInitiator && peer.connection && peer.connection.iceConnectionState == 'connected' && peer.connection.iceGatheringState == 'complete' && peer.connection.signalingState == 'stable' && connection.stats.numberOfConnectedUsers == 1) {
+                        connection.onstatechange('connected-with-initiator');
+                    }
+                    
                     if (connection.peers[_config.userid] && connection.peers[_config.userid].oniceconnectionstatechange) {
                         connection.peers[_config.userid].oniceconnectionstatechange(event);
                     }
@@ -1977,11 +1991,11 @@
                 }
 
                 if (response.acceptedRequestOf == connection.userid) {
-                    if (connection.onstats) connection.onstats('accepted', response);
+                    connection.onstatechange('request-accepted');
                 }
 
                 if (response.rejectedRequestOf == connection.userid) {
-                    if (connection.onstats) connection.onstats('rejected', response);
+                    connection.onstatechange('request-rejected');
                 }
 
                 if (response.customMessage) {
@@ -2047,6 +2061,22 @@
                         }
                     } else joinParticipants(response.joinUsers);
                 }
+                
+                if(response.messageFor == connection.userid && response.presenceState) {
+                    if(response.presenceState == 'checking') {
+                        defaultSocket.send({
+                            userid: connection.userid,
+                            extra: connection.extra,
+                            messageFor: response.userid,
+                            presenceState: 'available',
+                            _config: response._config
+                        });
+                    }
+                    
+                    if(response.presenceState == 'available') {
+                        joinSession(response._config);
+                    }
+                }
             },
             callback: function (socket) {
                 if (socket) defaultSocket = socket;
@@ -2108,18 +2138,11 @@
             // todo: test and fix next line.
             if (!args.dontTransmit /* || connection.transmitRoomOnce */ ) transmit();
         };
-
-        // join existing session
-        this.joinSession = function (_config) {
-            if (!defaultSocket)
-                return setTimeout(function () {
-                    warn('Default-Socket is not yet initialized.');
-                    rtcMultiSession.joinSession(_config);
-                }, 1000);
-
-            _config = _config || {};
-            participants = {};
-
+        
+        function joinSession(_config) {
+            rtcMultiSession.presenceState = 'available';
+            connection.onstatechange('room-available');
+            
             // dontOverrideSession allows you force RTCMultiConnection
             // to not override default session of participants;
             // by default, session is always overridden and set to the session coming from initiator!
@@ -2161,6 +2184,7 @@
             
             log(toStr(offers));
 
+            connection.onstatechange('connecting-with-initiator');
             defaultSocket.send({
                 participant: true,
                 userid: connection.userid,
@@ -2173,6 +2197,41 @@
                     video: !!offers.video
                 }
             });
+        }
+
+        // join existing session
+        this.joinSession = function (_config) {
+            if (!defaultSocket)
+                return setTimeout(function () {
+                    warn('Default-Socket is not yet initialized.');
+                    rtcMultiSession.joinSession(_config);
+                }, 1000);
+                
+            _config = _config || {};
+            participants = {};
+            
+            rtcMultiSession.presenceState = 'checking';
+            
+            connection.onstatechange('detecting-room-presence');
+            
+            defaultSocket.send({
+                userid: connection.userid,
+                extra: connection.extra,
+                messageFor: _config.userid,
+                presenceState: rtcMultiSession.presenceState,
+                _config: {
+                    userid: _config.userid,
+                    extra: _config.extra || {},
+                    sessionid: _config.sessionid,
+                    session: _config.session || false
+                }
+            });
+            
+            setTimeout(function() {
+                if(rtcMultiSession.presenceState == 'checking') {
+                    connection.onstatechange('room-not-available', 'Unable to reach session initiator.');
+                }
+            }, 3000);
         };
 
         // send file/data or text message
@@ -2869,6 +2928,14 @@
             if (media.minAspectRatio) {
                 mandatory.minAspectRatio = media.minAspectRatio;
             }
+            
+            if (media.maxFrameRate) {
+                mandatory.maxFrameRate = media.maxFrameRate;
+            }
+            
+            if (media.minFrameRate) {
+                mandatory.minFrameRate = media.minFrameRate;
+            }
 
             if (mandatory.minWidth && mandatory.minHeight) {
                 // code.google.com/p/chromium/issues/detail?id=143631#c9
@@ -2896,11 +2963,6 @@
         }
         
         if(hints.video && hints.video.optional) {
-            if(media.minFrameRate) {
-                hints.video.optional.push({
-                    minFrameRate: media.minFrameRate
-                });
-            }
             if(media.bandwidth) {
                 hints.video.optional.push({
                     bandwidth: media.bandwidth
@@ -4078,7 +4140,7 @@
                 this.maxHeight = height;
             },
             bandwidth: 256,
-            minFrameRate: 32,
+            maxFrameRate: 32,
             minAspectRatio: 1.77
         };
 
@@ -4708,6 +4770,25 @@
         connection.sdpConstraints.mandatory = {
             OfferToReceiveAudio: true,
             OfferToReceiveVideo: true
+        };
+        
+        connection.onstatechange = function(state, reason) {
+            // fetching-usermedia
+            // usermedia-fetched
+            
+            // detecting-room-presence
+            // room-not-available
+            // room-available
+            
+            // connecting-with-initiator
+            // connected-with-initiator
+            
+            // failed---has reason
+            
+            // request-accepted
+            // request-rejected
+            
+            log('onstatechange:', state, reason ? ':- ' + reason : '');
         };
 
         // part-of-screen fallback for firefox
