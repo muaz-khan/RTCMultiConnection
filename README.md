@@ -14,6 +14,28 @@ No known issue yet.
 
 ## Recent Changes?
 
+`connection.resumePartOfScreenSharing()` added.
+
+Now if you'll invoke `connection.sharePartOfScreen(...)` and a new user will join you; existing part of screen will be auto shared with him.
+
+It means that sharePartOfScreen will work with all new/old users.
+
+-. renegotiation scenarios that fails:
+-. 1) if chrome starts video-only session and firefox joins with only audio
+-. 2) if chrome starts with audio-only session and firefox joins with only video
+-. 3) if chrome starts only audio and firefox joins with audio+video
+-. renegotiation scenarios that works:
+-. 1) if chrome starts audio+video and firefox joins with only audio or audio+video
+-. 2) if both browsers has similar streams
+
+You can set `connection.DetectRTC.screen.extensionid="your-chrome-extensionid"` to make sure inline (newly) installed chrome extension is quickly used for screen capturing instead of prompting user to reload page once to use it.
+
+It means that install the chrome extension and RTCMultiConnection will auto use it. Don't ask your users to reload the page:
+
+```javascript
+connection.DetectRTC.screen.extensionid = 'ajhifddimkapgcifgcodmmfdlknahffk';
+```
+
 1. If Chrome starts audio+video, then Firefox can join it with only audio or only video or audio+video.
 2. If Firefox starts audio+video, then Chrome can join it with only audio or only video or audio+video.
 

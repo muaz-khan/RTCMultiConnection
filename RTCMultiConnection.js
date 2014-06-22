@@ -1,4 +1,4 @@
-// Last time updated at June 21, 2014, 08:32:23
+// Last time updated at June 22, 2014, 08:32:23
 
 // Latest file can be found here: https://www.rtcmulticonnection.org/latest.js
 
@@ -14,9 +14,15 @@
 
 /* issues/features need to be fixed & implemented:
 
--. via: https://github.com/muaz-khan/WebRTC-Experiment/issues/225#issuecomment-46571924
--. todo: fix OfferToReceiveAudio and OfferToReceiveVideo issues for Firefox if user is doing "something-only" streaming.
--. connection.sdpConstraints.mandatory is now set by default.
+-. sharePartOfScreen currently works only with existing peers. Newcomers can't see part of screen.
+
+-. renegotiation scenarios that fails:
+-. 1) if chrome starts video-only session and firefox joins with only audio
+-. 2) if chrome starts with audio-only session and firefox joins with only video
+-. 3) if chrome starts only audio and firefox joins with audio+video
+-. renegotiation scenarios that works:
+-. 1) if chrome starts audio+video and firefox joins with only audio or audio+video
+-. 2) if both browsers has similar streams
 
 -. todo: add mp3-live streaming support
 -. todo: add mozCaptureStreamUntilEnded streaming support.
@@ -265,7 +271,7 @@
 
         // www.RTCMultiConnection.org/docs/captureUserMedia/
 
-        function captureUserMedia(callback, _session) {
+        function captureUserMedia(callback, _session, dontCheckChromExtension) {
             // capture user's media resources
             var session = _session || connection.session;
 
@@ -324,6 +330,20 @@
 
             // if screen is prompted
             if (session.screen) {
+                // check if screen capturing extension is installed.
+                if(!dontCheckChromExtension && DetectRTC.screen.chromeMediaSource == 'screen' && DetectRTC.screen.extensionid) {
+                    log('checking if chrome extension is installed.');
+                    DetectRTC.screen.getChromeExtensionStatus(DetectRTC.screen.extensionid, function(status) {
+                        if(status == 'installed-enabled') {
+                            DetectRTC.screen.chromeMediaSource = 'desktop';
+                        }
+                        
+                        captureUserMedia(callback, _session, true);
+                        log('chrome extension is installed?', DetectRTC.screen.chromeMediaSource == 'desktop');
+                    });
+                    return;
+                }
+                
                 if (DetectRTC.screen.chromeMediaSource == 'desktop' && !DetectRTC.screen.sourceId) {
                     DetectRTC.screen.getSourceId(function (error) {
                         if (error && error == 'PermissionDeniedError') {
@@ -1087,6 +1107,10 @@
                 }
 
                 if (isData(connection.session)) onSessionOpened();
+                
+                if(connection.partOfScreen && connection.partOfScreen.sharing) {
+                    connection.peers[_config.userid].sharePartOfScreen(connection.partOfScreen);
+                }
             }
 
             function updateSocket() {
@@ -1886,6 +1910,9 @@
 
             rtcMultiSession.isOwnerLeaving = true;
             connection.isInitiator = false;
+            
+            connection.sessionDescriptions =  { };
+            connection.stats.sessions = { };
         };
 
         // www.RTCMultiConnection.org/docs/reject/
@@ -4141,6 +4168,7 @@
             },
             bandwidth: 256,
             maxFrameRate: 32,
+            minFrameRate: 3,
             minAspectRatio: 1.77
         };
 
@@ -4669,17 +4697,39 @@
             for (var peer in connection.peers) {
                 connection.peers[peer].sharePartOfScreen(args);
             }
+            
+            connection.partOfScreen = merge({
+                sharing: true
+            }, args);
         };
 
         connection.pausePartOfScreenSharing = function () {
             for (var peer in connection.peers) {
                 connection.peers[peer].pausePartOfScreenSharing = true;
             }
+            
+            if(connection.partOfScreen) {
+                connection.partOfScreen.sharing = false;
+            }
+        };
+        
+        connection.resumePartOfScreenSharing = function () {
+            for (var peer in connection.peers) {
+                connection.peers[peer].pausePartOfScreenSharing = true;
+            }
+            
+            if(connection.partOfScreen) {
+                connection.partOfScreen.sharing = true;
+            }
         };
 
         connection.stopPartOfScreenSharing = function () {
             for (var peer in connection.peers) {
                 connection.peers[peer].stopPartOfScreenSharing = true;
+            }
+            
+            if(connection.partOfScreen) {
+                connection.partOfScreen.sharing = false;
             }
         };
 
