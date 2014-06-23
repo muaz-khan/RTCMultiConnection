@@ -14,7 +14,8 @@
 
 /* issues/features need to be fixed & implemented:
 
--. sharePartOfScreen currently works only with existing peers. Newcomers can't see part of screen.
+-. (fixed) sharePartOfScreen currently works only with existing peers. Newcomers can't see part of screen.
+-. resumePartOfScreenSharing added.
 
 -. renegotiation scenarios that fails:
 -. 1) if chrome starts video-only session and firefox joins with only audio
@@ -2104,6 +2105,10 @@
                         joinSession(response._config);
                     }
                 }
+                
+                if(response.donotJoin && response.messageFor == connection.userid) {
+                    log(response.userid, 'is not joining your room.');
+                }
             },
             callback: function (socket) {
                 if (socket) defaultSocket = socket;
@@ -2167,6 +2172,10 @@
         };
         
         function joinSession(_config) {
+            if(rtcMultiSession.donotJoin && rtcMultiSession.donotJoin == _config.sessionid) {
+                return;
+            }
+            
             rtcMultiSession.presenceState = 'available';
             connection.onstatechange('room-available');
             
@@ -2259,6 +2268,25 @@
                     connection.onstatechange('room-not-available', 'Unable to reach session initiator.');
                 }
             }, 3000);
+        };
+        
+        connection.donotJoin = function(sessionid) {
+            rtcMultiSession.donotJoin = sessionid;
+            
+            var session = connection.sessionDescriptions[sessionid];
+            if(!session) return;
+            
+            defaultSocket.send({
+                userid: connection.userid,
+                extra: connection.extra,
+                donotJoin: true,
+                messageFor: session.userid,
+                sessionid: sessionid
+            });
+            
+            participants = {};
+            connection.isAcceptNewSession = true;
+            connection.sessionid = null;
         };
 
         // send file/data or text message
@@ -4167,8 +4195,8 @@
                 this.maxHeight = height;
             },
             bandwidth: 256,
-            maxFrameRate: 32,
-            minFrameRate: 3,
+            // maxFrameRate: 32,
+            // minFrameRate: 3,
             minAspectRatio: 1.77
         };
 

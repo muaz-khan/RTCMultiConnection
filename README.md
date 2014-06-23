@@ -14,12 +14,31 @@ No known issue yet.
 
 ## Recent Changes?
 
+`connection.donotJoin` added:
+
+```javascript
+connection.onstatechange = function (state) {
+    if(state == 'room-not-available') {
+        connection.donotJoin(connection.sessionid);
+    }
+};
+```
+
+You can use `donotJoin` in following cases:
+
+1. If `onstatechange` indicated that room isn't available.
+2. If you invoked `connection.join` but you didn't yet allowed the camera.
+3. If you invoked `connection.join` and you allowed the camera but you quickly changed your mind to not join the session.
+
+When you'll invoke `connection.donotJoin`, RTCMultiConnection will NEVER send participation request to the initiator. Without participation request, you can't join a session.
+
 `connection.resumePartOfScreenSharing()` added.
 
 Now if you'll invoke `connection.sharePartOfScreen(...)` and a new user will join you; existing part of screen will be auto shared with him.
 
 It means that sharePartOfScreen will work with all new/old users.
 
+```
 -. renegotiation scenarios that fails:
 -. 1) if chrome starts video-only session and firefox joins with only audio
 -. 2) if chrome starts with audio-only session and firefox joins with only video
@@ -27,6 +46,7 @@ It means that sharePartOfScreen will work with all new/old users.
 -. renegotiation scenarios that works:
 -. 1) if chrome starts audio+video and firefox joins with only audio or audio+video
 -. 2) if both browsers has similar streams
+```
 
 You can set `connection.DetectRTC.screen.extensionid="your-chrome-extensionid"` to make sure inline (newly) installed chrome extension is quickly used for screen capturing instead of prompting user to reload page once to use it.
 
@@ -93,9 +113,9 @@ Remember, ["onstats"](http://www.rtcmulticonnection.org/docs/onstats/) has been 
 
 ## What is RTCMultiConnection?
 
-RTCMultiConnection runs top over RTCPeerConnection API to provide multi-session establishment scenarios. It also provides dozens of unique [WebRTC](https://www.webrtc-experiment.com/) features like hybrid-less mesh networking model, a very reliable presence detection and syncing system; very complex renegotiation scenarios; and much more. It provides everything you've in your mind! Just understand the API and you'll enjoy using it! It is very simple and its syntax is similar like WebSockets JavaScript API and most importantly RTCPeerConnection API.
+RTCMultiConnection is a <a href="https://www.webrtc-experiment.com/">WebRTC</a> JavaScript wrapper library runs top over RTCPeerConnection API to provide multi-session establishment scenarios. It also provides dozens of features as hybrid-less mesh networking model, a reliable presence detection and syncing system; complex renegotiation scenarios; and much more. It provides everything you've in your mind! Just understand the API and you'll enjoy using it! It is simple and its syntax is similar as WebSockets JavaScript API and RTCPeerConnection API.
 
-It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licenced</a>, which means that you can use it in any commercial/non-commercial product.
+It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licenced</a>, which means that you can use it in any commercial/non-commercial product, free of cost.
 
 =
 
