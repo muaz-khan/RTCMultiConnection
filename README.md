@@ -8,8 +8,61 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 
 ## Issues?
 
-No known issue yet.
+<ol>
+    <li>
+        <h3>
+            (wontfix) Renegotiation scenarios that fails:
+        </h3>
+        <p>
+            <ol>
+                <li>if chrome starts video-only session and firefox joins with only audio</li>
+                <li>if chrome starts with audio-only session and firefox joins with only video</li>
+                <li>if chrome starts only audio and firefox joins with audio+video</li>
+            </ol>
+        </p>
+    </li>
+    <li>
+        <h3>
+            Dirty workaround for "ice-connection-state==disconnected"
+        </h3>
+        <p>
+            Fix "disconnected" which happens often. Need to use WebRTC data channels for dirty workaround whenever possible; currently we're relying on signaling medium.
+        </p>
+    </li>
     
+    <li>
+        "removeStream" and Firefox.
+    </li>
+    
+    <li>
+        "stream.onended" and Firefox.
+    </li>
+    
+    <li>
+        "connection.trickleIce=false" and renegotiation fails.
+    </li>
+    
+    <li>
+        "<input type=file multiparts>": RTCMultiConnection fails to send multiple files, simultaneously.
+    </li>
+    
+    <li>
+        "DetectRTC" fails to detect microphone or camera presence, in case if there are more than one devices attached to the system. "navigator.getMediaDevices" fails to list those rejected/denied/not-available devices.
+    </li>
+    
+    <li>
+        "navigator.getMediaDevices" works with only audio devices (on canary). Though, it seems chromium issue.
+    </li>
+    
+    <li>
+        "connection.autoRedialOnFailure" still fails with renegotiation scenarios because when renegotiating media, connection state always changes to "disconnected" then it follows connection steps from beginning i.e. `disconnected > new > checking > connected > completed` . Read more <a href="http://muaz-khan.blogspot.com/2014/05/webrtc-tips-tricks.html">here</a>.
+    </li>
+    
+    <li>
+        "connection.onSessionClosed" isn't fired.
+    </li>
+</ol>
+
 =
 
 ## Recent Changes?

@@ -14,10 +14,8 @@
 
 /* issues/features need to be fixed & implemented:
 
--. todo: renegotiation has been affected by recent chagnes. V. urgent to be fixed.
-
+-. (fixed) renegotiation scenarios.
 -. connection.donotJoin added.
-
 -. (fixed) sharePartOfScreen currently works only with existing peers. Newcomers can't see part of screen.
 -. resumePartOfScreenSharing added.
 
@@ -32,8 +30,7 @@
 -. todo: add mp3-live streaming support
 -. todo: add mozCaptureStreamUntilEnded streaming support.
 
--. [dirty-workaround added] fix "disconnected" which happens very often.
--.                          todo: use WebRTC data channels for dirty workaround whenever possible.
+-. todo: Fix "disconnected" which happens often. Need to use WebRTC data channels for dirty workaround whenever possible; currently we're relying on signaling medium.
 
 -. todo: check if stream.onended is fired on Firefox.
 -. todo: add removeStream workaround for Firefox.
@@ -45,7 +42,6 @@
 
 -. "channel" object in the openSignalingChannel shouldn't be mandatory!
 -. JSON parse/stringify options for data transmitted using data-channels; e.g. connection.preferJSON = true;
--. "onspeaking" and "onsilence" fires too often!
 -. removeTrack() and addTracks() instead of "stop"
 -. voice translation using Translator.js
 */
