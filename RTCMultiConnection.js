@@ -1,4 +1,4 @@
-// Last time updated at June 22, 2014, 08:32:23
+// Last time updated at June 25, 2014, 08:32:23
 
 // Latest file can be found here: https://www.rtcmulticonnection.org/latest.js
 
@@ -13,6 +13,10 @@
 // RTCMultiConnection-v1.8
 
 /* issues/features need to be fixed & implemented:
+
+-. todo: renegotiation has been affected by recent chagnes. V. urgent to be fixed.
+
+-. connection.donotJoin added.
 
 -. (fixed) sharePartOfScreen currently works only with existing peers. Newcomers can't see part of screen.
 -. resumePartOfScreenSharing added.
@@ -2202,8 +2206,13 @@
                 userid: _config.userid
             });
             
-            connection.sdpConstraints.mandatory.OfferToReceiveAudio = !!connection.session.audio;
-            connection.sdpConstraints.mandatory.OfferToReceiveVideo = !!connection.session.video || !!connection.session.screen;
+            var mandatory = connection.sdpConstraints.mandatory;
+            if(typeof mandatory.OfferToReceiveAudio == 'undefined') {
+                connection.sdpConstraints.mandatory.OfferToReceiveAudio = !!connection.session.audio;
+            }
+            if(typeof mandatory.OfferToReceiveVideo == 'undefined') {
+                connection.sdpConstraints.mandatory.OfferToReceiveVideo = !!connection.session.video || !!connection.session.screen;
+            }
             
             log(toStr(connection.sdpConstraints.mandatory));
             
@@ -2330,10 +2339,14 @@
             }
 
             if (e.socket) {
-                addStream(connection.peers[e.socket.userid]);
+                if(e.socket.userid != connection.userid) {
+                    addStream(connection.peers[e.socket.userid]);
+                }
             } else {
                 for (var peer in connection.peers) {
-                    addStream(connection.peers[peer]);
+                    if(peer != connection.userid) {
+                        addStream(connection.peers[peer]);
+                    }
                 }
             }
 
@@ -2421,8 +2434,15 @@
             // check how participant is willing to join
             if(response.offers) {
                 log(toStr(response.offers));
-                connection.sdpConstraints.mandatory.OfferToReceiveAudio = !!response.offers.audio;
-                connection.sdpConstraints.mandatory.OfferToReceiveVideo = !!response.offers.video;
+                
+                var mandatory = connection.sdpConstraints.mandatory;
+                if(typeof mandatory.OfferToReceiveAudio == 'undefined') {
+                    connection.sdpConstraints.mandatory.OfferToReceiveAudio = !!response.offers.audio;
+                }
+                if(typeof mandatory.OfferToReceiveVideo == 'undefined') {
+                    connection.sdpConstraints.mandatory.OfferToReceiveVideo = !!response.offers.video;
+                }
+                
                 log(toStr(connection.sdpConstraints.mandatory));
             }
 

@@ -14,6 +14,17 @@ No known issue yet.
 
 ## Recent Changes?
 
+Renegotiation scenarios fixed. As [`sdpConstraints`](http://www.rtcmulticonnection.org/docs/sdpConstraints/) suggests, you MUST always "manually" set `OfferToReceiveAudio` and `OfferToReceiveVideo` to make sure renegotiation works.
+
+```javascript
+connection.sdpConstraints.mandatory = {
+    OfferToReceiveAudio: true,
+    OfferToReceiveVideo: true
+};
+```
+
+Actually, assume that you're using [MultiRTC Demo](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/MultiRTC-simple) which, by default, opens text only conversation i.e. only WebRTC data connection is established on initial handshake. It means that, in theory, we don't need to set `OfferToReceiveAudio` and `OfferToReceiveVideo` to `true` however MultiRTC demo will fail to renegotiate audio/video/screen if media-lines are not included in the initial session descriptions. Behind the scene, chrome fails to gather ice candidates **if we add media lines at runtime**. Personally I think it is a bug in chromium, however I don't know inner working issues. Until it is fixed in chromium, I'll always recommend to include both audio/video media lines in the session descriptions to make sure later renegotiated sessions are capable to gather candidates or older relevant "pending" ports can be used for connection setup.
+
 `connection.donotJoin` added:
 
 ```javascript
