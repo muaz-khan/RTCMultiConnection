@@ -14,6 +14,21 @@
 
 /* issues/features need to be fixed & implemented:
 
+-. "groupId" returned by MediaDeviceInfo object refers to single device with multiple tracks.
+-. need to provide API like this:
+connection.DetectRTC.MediaDevices.forEach(function(device) {
+--- device.audioinput (headset's microphone)
+-------- device.audioinput.deviceid
+
+--- device.audiooutput (headset's speakers);
+-------- device.audioinput.audiooutput
+
+--- device.videoinput (webcam)
+-------- device.videoinput.audiooutput
+});
+
+
+-. onstream: event.blobURL for Firefox, fixed.
 -. (fixed) renegotiation scenarios.
 -. connection.donotJoin added.
 -. (fixed) sharePartOfScreen currently works only with existing peers. Newcomers can't see part of screen.
@@ -449,7 +464,7 @@
                             stream: stream,
                             streamid: streamid,
                             mediaElement: mediaElement,
-                            blobURL: mediaElement.mozSrcObject || mediaElement.src,
+                            blobURL: mediaElement.mozSrcObject ? URL.createObjectURL(stream) : mediaElement.src,
                             type: 'local',
                             userid: connection.userid,
                             extra: connection.extra,
@@ -1049,7 +1064,7 @@
                     streamid: stream.streamid,
                     session: session || connection.session,
 
-                    blobURL: mediaElement.mozSrcObject || mediaElement.src,
+                    blobURL: mediaElement.mozSrcObject ? URL.createObjectURL(stream) : mediaElement.src,
                     type: 'remote',
 
                     extra: _config.extra,
@@ -3107,6 +3122,8 @@
             streaming(currentUserMediaRequest.streams[idInstance].stream, true, currentUserMediaRequest.streams[idInstance].streamid);
         } else {
             n.getMedia = n.webkitGetUserMedia || n.mozGetUserMedia;
+            
+            // http://dev.w3.org/2011/webrtc/editor/getusermedia.html#navigatorusermedia-interface-extensions
             n.getMedia(hints, streaming, function (error) {
                 options.onerror(error, hints);
             });
@@ -3682,15 +3699,18 @@
     (function () {
 
         DetectRTC.hasMicrophone = false;
+        DetectRTC.hasSpeakers = false;
         DetectRTC.hasWebcam = false;
         
         DetectRTC.MediaDevices = [];
 
+        // http://dev.w3.org/2011/webrtc/editor/getusermedia.html#mediadevices
+        // todo: switch to enumerateDevices when landed in canary.
         function CheckDeviceSupport(callback) {
             // This method is useful only for Chrome!
 
-            // Firefox has "navigator.getMediaDevices" which isn't working properly
-            // todo: remove this if-block when Firefox issue is fixed.
+            // Firefox seems having no support of enumerateDevices feature.
+            // Though there seems some clues of "navigator.getMediaDevices" implementation.
             if (isFirefox) {
                 callback && callback();
                 return;
@@ -3706,6 +3726,7 @@
                 // assuming that it is older chrome or chromium implementation
                 if (isChrome) {
                     DetectRTC.hasMicrophone = true;
+                    DetectRTC.hasSpeakers = true;
                     DetectRTC.hasWebcam = true;
                 }
 
@@ -3738,9 +3759,15 @@
                         DetectRTC.hasMicrophone = true;
                     }
                     
+                    if(device.kind == 'audiooutput') {
+                        DetectRTC.hasSpeakers = true;
+                    }
+                    
                     if(device.kind == 'videoinput' || device.kind == 'video') {
                         DetectRTC.hasWebcam = true;
                     }
+                    
+                    // there is no "videoouput" in the spec.
                 });
 
                 if (callback) callback();

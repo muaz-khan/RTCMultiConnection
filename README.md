@@ -10,9 +10,76 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 
 <ol>
     <li>
-        <h3>
+        <p>
+            "groupId" returned by MediaDeviceInfo object refers to single device with multiple tracks.
+        </p>
+        
+        <p>
+            Need to provide API like this:
+        </p>
+        
+        <pre>
+connection.DetectRTC.MediaDevices.forEach(function (device) {
+    //---device.audioinput(headset's microphone)
+    //-------- device.audioinput.deviceid
+
+    //--- device.audiooutput (headset's speakers);
+    //--------device.audioinput.audiooutput
+
+    //---device.videoinput(webcam)
+    //--------device.videoinput.audiooutput
+});
+
+// there is no "videoutput" in the spec.
+// it means that we can't detect which monitor is used for video output.
+</pre>
+    </li>
+    
+    <li>
+        <p>
+            Dirty workaround for "<code>ice-connection-state==disconnected</code>"
+        </p>
+        <p>
+            Fix "<code>disconnected</code>" which happens often. Need to use WebRTC data channels for dirty workaround whenever possible; currently we're relying on signaling medium.
+        </p>
+    </li>
+    
+    <li>
+        "<code>removeStream</code>" shim needed for Firefox.
+    </li>
+    
+    <li>
+        "<code>stream.onended</code>" should be thoroughly tested for Firefox. <a href="http://www.rtcmulticonnection.org/docs/onstreamended/">onstreamended</a> event must be fired once.
+    </li>
+    
+    <li>
+        if("<code>connection.trickleIce==false</code>") then renegotiation fails.
+    </li>
+    
+    <li>
+        "<code>&lt;input type=file multiparts&gt;</code>": RTCMultiConnection fails to send multiple files, simultaneously.
+    </li>
+    
+    <li>
+        "<code>DetectRTC</code>" fails to detect microphone or camera presence, in case if there are more than one devices attached to the system. "<code>navigator.getMediaDevices</code>" fails to list those rejected/denied/not-available devices.
+    </li>
+    
+    <li>
+        "<code>navigator.getMediaDevices</code>" works with only audio devices (on canary). Though, it seems chromium issue.
+    </li>
+    
+    <li>
+        "<code>connection.autoRedialOnFailure</code>" still fails with renegotiation scenarios because when renegotiating media, connection state always changes to "disconnected" then it follows connection steps from beginning i.e. `disconnected > new > checking > connected > completed` . Read more <a href="http://muaz-khan.blogspot.com/2014/05/webrtc-tips-tricks.html">here</a>.
+    </li>
+    
+    <li>
+        "<code>connection.onSessionClosed</code>" isn't fired. This should be fired if initiator closes the entire session.
+    </li>
+    
+    <li>
+        <p>
             (wontfix) Renegotiation scenarios that fails:
-        </h3>
+        </p>
         <p>
             <ol>
                 <li>if chrome starts video-only session and firefox joins with only audio</li>
@@ -21,51 +88,28 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
             </ol>
         </p>
     </li>
-    <li>
-        <h3>
-            Dirty workaround for "ice-connection-state==disconnected"
-        </h3>
-        <p>
-            Fix "disconnected" which happens often. Need to use WebRTC data channels for dirty workaround whenever possible; currently we're relying on signaling medium.
-        </p>
-    </li>
     
     <li>
-        "removeStream" and Firefox.
-    </li>
-    
-    <li>
-        "stream.onended" and Firefox.
-    </li>
-    
-    <li>
-        "connection.trickleIce=false" and renegotiation fails.
-    </li>
-    
-    <li>
-        "<input type=file multiparts>": RTCMultiConnection fails to send multiple files, simultaneously.
-    </li>
-    
-    <li>
-        "DetectRTC" fails to detect microphone or camera presence, in case if there are more than one devices attached to the system. "navigator.getMediaDevices" fails to list those rejected/denied/not-available devices.
-    </li>
-    
-    <li>
-        "navigator.getMediaDevices" works with only audio devices (on canary). Though, it seems chromium issue.
-    </li>
-    
-    <li>
-        "connection.autoRedialOnFailure" still fails with renegotiation scenarios because when renegotiating media, connection state always changes to "disconnected" then it follows connection steps from beginning i.e. `disconnected > new > checking > connected > completed` . Read more <a href="http://muaz-khan.blogspot.com/2014/05/webrtc-tips-tricks.html">here</a>.
-    </li>
-    
-    <li>
-        "connection.onSessionClosed" isn't fired.
+        <pre>
+-. getMediaDevices is going to be renamed enumerateDevices which will cause more shims. <a href="https://code.google.com/p/chromium/issues/detail?id=388648">chromium#388648</a>
+-. 
+</pre>
     </li>
 </ol>
 
 =
 
 ## Recent Changes?
+
+[`onstream`](http://www.rtcmulticonnection.org/docs/onstream/): "event.blobURL" for Firefox, fixed. Previously it was returning "MediaStream" object.
+
+```javascript
+connection.onstream = function(e) {
+    // e.blobURL -- now it is always blob:URI
+};
+```
+
+`connection.DetectRTC.hasSpeakers` added. It works only on Chrome Canary, though.
 
 Renegotiation scenarios fixed. As [`sdpConstraints`](http://www.rtcmulticonnection.org/docs/sdpConstraints/) suggests, you MUST always "manually" set `OfferToReceiveAudio` and `OfferToReceiveVideo` to make sure renegotiation works.
 
