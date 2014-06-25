@@ -28,6 +28,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 });
 
 
+-. connection.leaveOnPageUnload added.
 -. onstream: event.blobURL for Firefox, fixed.
 -. (fixed) renegotiation scenarios.
 -. connection.donotJoin added.
@@ -1955,11 +1956,15 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
         }
 
         window.addEventListener('beforeunload', function () {
+            if(!connection.leaveOnPageUnload) return;
+            
             fireOnSessionRemoved();
             clearSession();
         }, false);
 
         window.addEventListener('keyup', function (e) {
+            if(!connection.leaveOnPageUnload) return;
+            
             if (e.keyCode == 116) {
                 fireOnSessionRemoved();
                 clearSession();
@@ -4911,6 +4916,9 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
             
             log('onstatechange:', state, reason ? ':- ' + reason : '');
         };
+        
+        // auto leave on page unload
+        connection.leaveOnPageUnload = true;
 
         // part-of-screen fallback for firefox
         // when { screen: true }

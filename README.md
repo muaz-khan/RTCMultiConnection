@@ -80,26 +80,38 @@ connection.DetectRTC.MediaDevices.forEach(function (device) {
         <p>
             (wontfix) Renegotiation scenarios that fails:
         </p>
-        <p>
-            <ol>
-                <li>if chrome starts video-only session and firefox joins with only audio</li>
-                <li>if chrome starts with audio-only session and firefox joins with only video</li>
-                <li>if chrome starts only audio and firefox joins with audio+video</li>
-            </ol>
-        </p>
+        <ol>
+            <li>if chrome starts video-only session and firefox joins with only audio</li>
+            <li>if chrome starts with audio-only session and firefox joins with only video</li>
+            <li>if chrome starts only audio and firefox joins with audio+video</li>
+        </ol>
     </li>
     
     <li>
-        <pre>
--. getMediaDevices is going to be renamed enumerateDevices which will cause more shims. <a href="https://code.google.com/p/chromium/issues/detail?id=388648">chromium#388648</a>
--. 
-</pre>
+        getMediaDevices is going to be renamed enumerateDevices which will cause more shims. <a href="https://code.google.com/p/chromium/issues/detail?id=388648">chromium#388648</a>
     </li>
 </ol>
 
 =
 
 ## Recent Changes?
+
+"connection.leaveOnPageUnload" added.
+
+```javascript
+// if you want to prevent default behaviour
+connection.leaveOnPageUnload = false;
+
+// display a notification box
+window.addEventListener('beforeunload', function () {
+    return 'Are you want to leave?';
+}, false);
+
+// leave here
+window.addEventListener('unload', function () {
+    connection.leave();
+}, false);
+```
 
 [`onstream`](http://www.rtcmulticonnection.org/docs/onstream/): "event.blobURL" for Firefox, fixed. Previously it was returning "MediaStream" object.
 
