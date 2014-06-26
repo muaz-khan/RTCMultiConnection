@@ -222,6 +222,10 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
         }
 
         function joinSession(session, joinAs) {
+            if (typeof session == 'string') {
+                connection.skipOnNewSession = true;
+            }
+            
             if (!rtcMultiSession) {
                 log('Signaling channel is not ready. Connecting...');
                 // connect with signaling channel
@@ -742,6 +746,8 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
         }
 
         function onNewSession(session) {
+            if(connection.skipOnNewSession) return;
+            
             // todo: make sure this works as expected.
             // i.e. "onNewSession" should be fired only for 
             // sessionid that is passed over "connect" method.
@@ -2254,6 +2260,8 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                     video: !!offers.video
                 }
             });
+            
+            connection.skipOnNewSession = false;
         }
 
         // join existing session

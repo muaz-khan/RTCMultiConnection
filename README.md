@@ -100,6 +100,19 @@ connection.DetectRTC.MediaDevices.forEach(function (device) {
 
 ## Recent Changes?
 
+`connection.join('sessionid')` fixed. Now, `onNewSession` will NEVER be fired if you're calling "join" method whilst passing "string" as session-id.
+
+```javascript
+connection.onNewSession = function(session) {
+    // this code isn't called
+    // because "join" method is called with string-argument
+    // you should use "connect" method if you want "onNewSession" to be fired.
+    session.join();
+};
+
+connection.join('session-id');
+```
+
 (to fix canary ipv6 candidates issues): disabled "googIPv6", "googDscp" and "googImprovedWifiBwe"
 
 =
