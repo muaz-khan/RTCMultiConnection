@@ -90,144 +90,17 @@ connection.DetectRTC.MediaDevices.forEach(function (device) {
     <li>
         getMediaDevices is going to be renamed enumerateDevices which will cause more shims. <a href="https://code.google.com/p/chromium/issues/detail?id=388648">chromium#388648</a>
     </li>
+    
+    <li>
+        Use "googIPv6" when canary is fixed to add both UDP and TCP ipv6 addresses.
+    </li>
 </ol>
 
 =
 
 ## Recent Changes?
 
-"connection.leaveOnPageUnload" added.
-
-```javascript
-// if you want to prevent default behaviour
-connection.leaveOnPageUnload = false;
-
-// display a notification box
-window.addEventListener('beforeunload', function () {
-    return 'Are you want to leave?';
-}, false);
-
-// leave here
-window.addEventListener('unload', function () {
-    connection.leave();
-}, false);
-```
-
-[`onstream`](http://www.rtcmulticonnection.org/docs/onstream/): "event.blobURL" for Firefox, fixed. Previously it was returning "MediaStream" object.
-
-```javascript
-connection.onstream = function(e) {
-    // e.blobURL -- now it is always blob:URI
-};
-```
-
-`connection.DetectRTC.hasSpeakers` added. It works only on Chrome Canary, though.
-
-Renegotiation scenarios fixed. As [`sdpConstraints`](http://www.rtcmulticonnection.org/docs/sdpConstraints/) suggests, you MUST always "manually" set `OfferToReceiveAudio` and `OfferToReceiveVideo` to make sure renegotiation works.
-
-```javascript
-connection.sdpConstraints.mandatory = {
-    OfferToReceiveAudio: true,
-    OfferToReceiveVideo: true
-};
-```
-
-Actually, assume that you're using [MultiRTC Demo](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/MultiRTC-simple) which, by default, opens text only conversation i.e. only WebRTC data connection is established on initial handshake. It means that, in theory, we don't need to set `OfferToReceiveAudio` and `OfferToReceiveVideo` to `true` however MultiRTC demo will fail to renegotiate audio/video/screen if media-lines are not included in the initial session descriptions. Behind the scene, chrome fails to gather ice candidates **if we add media lines at runtime**. Personally I think it is a bug in chromium, however I don't know inner working issues. Until it is fixed in chromium, I'll always recommend to include both audio/video media lines in the session descriptions to make sure later renegotiated sessions are capable to gather candidates or older relevant "pending" ports can be used for connection setup.
-
-`connection.donotJoin` added:
-
-```javascript
-connection.onstatechange = function (state) {
-    if(state == 'room-not-available') {
-        connection.donotJoin(connection.sessionid);
-    }
-};
-```
-
-You can use `donotJoin` in following cases:
-
-1. If `onstatechange` indicated that room isn't available.
-2. If you invoked `connection.join` but you didn't yet allowed the camera.
-3. If you invoked `connection.join` and you allowed the camera but you quickly changed your mind to not join the session.
-
-When you'll invoke `connection.donotJoin`, RTCMultiConnection will NEVER send participation request to the initiator. Without participation request, you can't join a session.
-
-`connection.resumePartOfScreenSharing()` added.
-
-Now if you'll invoke `connection.sharePartOfScreen(...)` and a new user will join you; existing part of screen will be auto shared with him.
-
-It means that sharePartOfScreen will work with all new/old users.
-
-```
--. renegotiation scenarios that fails:
--. 1) if chrome starts video-only session and firefox joins with only audio
--. 2) if chrome starts with audio-only session and firefox joins with only video
--. 3) if chrome starts only audio and firefox joins with audio+video
--. renegotiation scenarios that works:
--. 1) if chrome starts audio+video and firefox joins with only audio or audio+video
--. 2) if both browsers has similar streams
-```
-
-You can set `connection.DetectRTC.screen.extensionid="your-chrome-extensionid"` to make sure inline (newly) installed chrome extension is quickly used for screen capturing instead of prompting user to reload page once to use it.
-
-It means that install the chrome extension and RTCMultiConnection will auto use it. Don't ask your users to reload the page:
-
-```javascript
-connection.DetectRTC.screen.extensionid = 'ajhifddimkapgcifgcodmmfdlknahffk';
-```
-
-1. If Chrome starts audio+video, then Firefox can join it with only audio or only video or audio+video.
-2. If Firefox starts audio+video, then Chrome can join it with only audio or only video or audio+video.
-
-You don't need to manually set "OfferToReceiveAudio" and/or "OfferToReceiveVideo".
-
-Following issue is also fixed:
-
-> New changes affects renegotiation because new-changes are manually checking for:
->
->    ```javascript
->    // i.e. checking only first media stream
->    connection.attachStreams[0].getVideoTracks();
->    ```
-
-Fixed: "the videos are not square and they look grainy not has sharp as before". Now video is captured & streamed with better quality.
-
-Fixed following:
-
-> If Chrome starts video-only session; and Firefox joins with only audio. Then both fails to connect; though sendrecv/recvonly/sendonly everything is correctly implemented.
-
-Another issue:
-
-> Anyway to cancel joining the session after giving camera permission if the session no longer exists?
-
-Though you can't manually cancel session however you can detect if session no longer exists.
-
-```javascript
-connection.onstatechange = function (state, reason) {
-    // fetching-usermedia
-    // usermedia-fetched
-
-    // detecting-room-presence
-    // room-not-available
-    // room-available
-
-    // connecting-with-initiator
-    // connected-with-initiator
-
-    // failed---has reason
-
-    // request-accepted
-    // request-rejected
-
-    if(state == 'room-not-available') {
-        // room no longer exist
-    }
-};
-```
-
-Remember, ["onstats"](http://www.rtcmulticonnection.org/docs/onstats/) has been removed in v1.8 and replaced with "onstatechange" event.
-
-
+(to fix canary ipv6 candidates issues): disabled "googIPv6", "googDscp" and "googImprovedWifiBwe"
 
 =
 
@@ -253,6 +126,116 @@ It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licenced</a>, whi
 ## Experimental features in this build?
 
 <ol>
+                    <li>
+                        (to fix canary ipv6 candidates issues): disabled "googIPv6", "googDscp" and "googImprovedWifiBwe"
+                    </li>
+                    
+                    <li>
+                        "<code>connection.leaveOnPageUnload</code>" added.
+                        <pre class="sh_javascript">
+// if you want to prevent default behaviour
+connection.leaveOnPageUnload = false;
+
+// display a notification box
+window.addEventListener('beforeunload', function () {
+    return 'Are you want to leave?';
+}, false);
+
+// leave here
+window.addEventListener('unload', function () {
+    connection.leave();
+}, false);
+</pre>
+                    </li>
+                    
+                    <li>
+                        <pre class="sh_javascript">
+-. renegotiation scenarios that fails:
+-. 1) if chrome starts video-only session and firefox joins with only audio
+-. 2) if chrome starts with audio-only session and firefox joins with only video
+-. 3) if chrome starts only audio and firefox joins with audio+video
+-. renegotiation scenarios that works:
+-. 1) if chrome starts audio+video and firefox joins with only audio or audio+video
+-. 2) if both browsers has similar streams
+</pre>
+                    </li>
+                    
+                    <li>
+                        "<code>connection.onstatechange</code>" added:
+                        <pre class="sh_javascript">
+connection.onstatechange = function (state, reason) {
+    // fetching-usermedia
+    // usermedia-fetched
+
+    // detecting-room-presence
+    // room-not-available
+    // room-available
+
+    // connecting-with-initiator
+    // connected-with-initiator
+
+    // failed---has reason
+
+    // request-accepted
+    // request-rejected
+
+    if(state == 'room-not-available') {
+        // room no longer exist
+    }
+};
+</pre>
+                        Remember, older "<code><a href="http://www.rtcmulticonnection.org/docs/onstats/">onstats</a></code>" has been removed in v1.8.
+                    </li>
+                    
+                    <li>
+                        Now if you'll invoke "<code>connection.sharePartOfScreen(...)</code>" and a new user will join you; existing part of screen will be auto shared with him.<br /><br />
+                        It means that "<code>sharePartOfScreen</code>" will work with all new/old users.
+                    </li>
+                    
+                    <li>
+                        "<code>connection.donotJoin</code>" added:
+                        <pre class="sh_javascript">
+connection.onstatechange = function (state) {
+    if(state == 'room-not-available') {
+        connection.donotJoin(connection.sessionid);
+    }
+};
+</pre>
+                    </li>
+                    
+                    <li>
+                        You can set <code>connection.DetectRTC.screen.extensionid="your-chrome-extensionid"</code> to make sure inline (newly) installed chrome extension is quickly used for screen capturing instead of prompting user to reload page once to use it.<br /><br />
+                        It means that install the chrome extension and RTCMultiConnection will auto use it. Don't ask your users to reload the page:
+                        <pre class="sh_javascript">
+connection.DetectRTC.screen.extensionid = 'ajhifddimkapgcifgcodmmfdlknahffk';
+</pre>
+                    </li>
+                    
+                    <li>
+                        Fixed: If Chrome starts video-only session; and Firefox joins with only audio. Then both fails to connect; though sendrecv/recvonly/sendonly everything is correctly implemented.
+                    </li>
+                    
+                    <li>
+                        Fixed: "the videos are not square and they look grainy not has sharp as before". Now video is captured & streamed with better quality.
+                    </li>
+                    
+                    <li>
+                        "<code>connection.DetectRTC.hasSpeakers</code>" added.
+                    </li>
+                    
+                    <li>
+                        "<code>connection.resumePartOfScreenSharing()</code>" added.
+                    </li>
+                    
+                    <li>
+                        "<code>event.blobURL</code>" in the <code><a href="http://www.rtcmulticonnection.org/docs/onstream/">onstream</a></code> event is fixed for Firefox.
+                        <pre class="sh_javascript">
+connection.onstream = function(e) {
+    // e.blobURL -- now it is always blob:URI
+};
+</pre>
+                    </li>
+                    
                     <li>
                         <a href="http://www.RTCMultiConnection.org/docs/startRecording/">startRecording</a>/<a href="http://www.RTCMultiConnection.org/docs/stopRecording/">stopRecording</a> updated & fixed.
                         <pre class="sh_javascript">

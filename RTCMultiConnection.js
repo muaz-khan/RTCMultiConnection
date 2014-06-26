@@ -1,4 +1,4 @@
-// Last time updated at June 25, 2014, 08:32:23
+// Last time updated at June 26, 2014, 08:32:23
 
 // Latest file can be found here: https://www.rtcmulticonnection.org/latest.js
 
@@ -14,6 +14,10 @@
 
 /* issues/features need to be fixed & implemented:
 
+-. (to fix canary ipv6 candidates issues): disabled "googIPv6", "googDscp" and "googImprovedWifiBwe"
+
+-. todo: add "enumerateDevices" method. Keep "getMediaDevices" as fallback.
+
 -. "groupId" returned by MediaDeviceInfo object refers to single device with multiple tracks.
 -. need to provide API like this:
 connection.DetectRTC.MediaDevices.forEach(function(device) {
@@ -26,14 +30,6 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 --- device.videoinput (webcam)
 -------- device.videoinput.audiooutput
 });
-
-
--. connection.leaveOnPageUnload added.
--. onstream: event.blobURL for Firefox, fixed.
--. (fixed) renegotiation scenarios.
--. connection.donotJoin added.
--. (fixed) sharePartOfScreen currently works only with existing peers. Newcomers can't see part of screen.
--. resumePartOfScreenSharing added.
 
 -. renegotiation scenarios that fails:
 -. 1) if chrome starts video-only session and firefox joins with only audio
@@ -2756,6 +2752,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 };
 
                 if (isChrome && chromeVersion >= 32 && !isNodeWebkit) {
+                    /*
                     this.optionalArgument.optional.push({
                         googIPv6: true
                     });
@@ -2765,6 +2762,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                     this.optionalArgument.optional.push({
                         googImprovedWifiBwe: true
                     });
+                    */
                 }
 
                 if (!this.preferSCTP) {
@@ -2812,7 +2810,9 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                     candidate: candidate.candidate
                 });
 
-                this.connection.addIceCandidate(iceCandidate);
+                this.connection.addIceCandidate(iceCandidate, function() {}, function() {
+                    error('onIceFailure', arguments, candidate.candidate);
+                });
             },
             createDataChannel: function (channelIdentifier) {
                 if (!this.channels) this.channels = [];
@@ -4188,7 +4188,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
             });
         }
 
-        if (isFirefox || (isChrome && chromeVersion < 28)) {
+        if (isFirefox || (isChrome && chromeVersion >= 28)) {
             iceServers.push({
                 url: 'turn:turn.bistri.com:80?transport=udp',
                 credential: 'homeo',
@@ -4886,7 +4886,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
             customGetUserMediaBar: 'https://www.webrtc-experiment.com/navigator.customGetUserMediaBar.js',
             html2canvas: 'https://www.webrtc-experiment.com/screenshot.js',
             hark: 'https://www.rtcmulticonnection.org/hark.js',
-            firebase: 'https://www.webrtc-experiment.com/firebase.js',
+            firebase: 'https://www.rtcmulticonnection.org/firebase.js',
             firebaseio: 'https://chat.firebaseIO.com/',
             muted: 'https://www.webrtc-experiment.com/images/muted.png'
         };
