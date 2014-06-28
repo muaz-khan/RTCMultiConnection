@@ -1,4 +1,4 @@
-// Last time updated at June 26, 2014, 08:32:23
+// Last time updated at June 28, 2014, 08:32:23
 
 // Latest file can be found here: https://www.rtcmulticonnection.org/latest.js
 
@@ -14,9 +14,9 @@
 
 /* issues/features need to be fixed & implemented:
 
--. (to fix canary ipv6 candidates issues): disabled "googIPv6", "googDscp" and "googImprovedWifiBwe"
+-. connection.processSdp added.
 
--. todo: add "enumerateDevices" method. Keep "getMediaDevices" as fallback.
+-. (to fix canary ipv6 candidates issues): disabled "googIPv6", "googDscp" and "googImprovedWifiBwe"
 
 -. "groupId" returned by MediaDeviceInfo object refers to single device with multiple tracks.
 -. need to provide API like this:
@@ -477,6 +477,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
                         var sObject = {
                             stream: stream,
+                            blobURL: streamedObject.blobURL,
                             userid: connection.userid,
                             streamid: streamid,
                             session: session,
@@ -999,7 +1000,8 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                         streaminfo: streaminfo
                     });
                 },
-                trickleIce: connection.trickleIce
+                trickleIce: connection.trickleIce,
+                processSdp: connection.processSdp
             };
 
             function waitUntilRemoteStreamStartsFlowing(mediaElement, session, numberOfTimes) {
@@ -1081,6 +1083,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 // connection.streams['stream-id'].mute({audio:true})
                 connection.streams[stream.streamid] = connection._getStream({
                     stream: stream,
+                    blobURL: streamedObject.blobURL,
                     userid: _config.userid,
                     streamid: stream.streamid,
                     socket: socket,
@@ -2581,6 +2584,9 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 }, this.onSdpError, this.constraints);
             },
             serializeSdp: function (sdp) {
+                // it is "connection.processSdp"
+                sdp = this.processSdp(sdp);
+                
                 if(isFirefox) return sdp;
                 
                 sdp = this.setBandwidth(sdp);
@@ -2724,7 +2730,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 }
 
                 if (bandwidth.video) {
-                    sdp = sdp.replace(/a=mid:video\r\n/g, 'a=mid:video\r\nb=AS:' + (bandwidth.screen || bandwidth.video) + '\r\n');
+                    sdp = sdp.replace(/a=mid:video\r\n/g, 'a=mid:video\r\nb=AS:' + (this.session.screen ? bandwidth.screen : bandwidth.video) + '\r\n');
                 }
 
                 if (bandwidth.data && !this.preferSCTP) {
@@ -2758,20 +2764,6 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                     }],
                     mandatory: this.optionalArgument.mandatory || {}
                 };
-
-                if (isChrome && chromeVersion >= 32 && !isNodeWebkit) {
-                    /*
-                    this.optionalArgument.optional.push({
-                        googIPv6: true
-                    });
-                    this.optionalArgument.optional.push({
-                        googDscp: true
-                    });
-                    this.optionalArgument.optional.push({
-                        googImprovedWifiBwe: true
-                    });
-                    */
-                }
 
                 if (!this.preferSCTP) {
                     this.optionalArgument.optional.push({
@@ -4281,6 +4273,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 rtcMultiConnection: e.rtcMultiConnection,
                 streamObject: e.streamObject,
                 stream: e.stream,
+                blobURL: e.blobURL,
                 session: e.session,
                 userid: e.userid,
                 streamid: e.streamid,
@@ -4799,7 +4792,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
         
         connection.resumePartOfScreenSharing = function () {
             for (var peer in connection.peers) {
-                connection.peers[peer].pausePartOfScreenSharing = true;
+                connection.peers[peer].pausePartOfScreenSharing = false;
             }
             
             if(connection.partOfScreen) {
@@ -4927,6 +4920,11 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
         
         // auto leave on page unload
         connection.leaveOnPageUnload = true;
+        
+        connection.processSdp = function(sdp) {
+            // process sdp here
+            return sdp;
+        };
 
         // part-of-screen fallback for firefox
         // when { screen: true }

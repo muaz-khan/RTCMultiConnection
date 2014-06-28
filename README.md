@@ -100,6 +100,22 @@ connection.DetectRTC.MediaDevices.forEach(function (device) {
 
 ## Recent Changes?
 
+`connection.processSdp` added. Now you can process SDP for stereo audio or opus/vp8 parameters or [application-level bandwidth management](http://stackoverflow.com/questions/16712224/how-to-control-bandwidth-in-webrtc-video-call/16868123#16868123). 
+
+```javascript
+connection.processSdp = function(sdp) {
+    // process sdp here; e.g.
+    // sdp = changeOpusParameters(sdp);
+    
+    // you must return "sdp" back.
+    return sdp;
+};
+```
+
+This feature gives you full control over SDP-modification. You can even use something like [SdpSerializer](https://github.com/muaz-khan/SdpSerializer) to modify the SDP.
+
+Note: This function will be called by RTCMultiConnection code. It accepts single string-argument where SDP is passed. There is no clue of the type of sdp, though. You MUST return "sdp" back using "return" statement.
+
 `connection.join('sessionid')` fixed. Now, `onNewSession` will NEVER be fired if you're calling "join" method whilst passing "string" as session-id.
 
 ```javascript
