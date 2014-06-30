@@ -6,6 +6,55 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 
 ## Current Version is [v1.8](http://www.rtcmulticonnection.org/changes-log/#v1.8)
 
+## Recent Changes?
+
+A screen capturing extension has been deployed on Google App Store:
+
+* https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk
+
+Previously this extension was useful only with https://www.webrtc-experiment.com/.
+
+But, from today v1.8 updates, RTCMultiConnection can use same extension within any webpage!
+
+It means that you can simply ask your users to install above extension and you can use screen capturing feature in your personal pages.
+
+In simple words, "RTCMultiConnection can use single chrome extension for all domains!".
+
+Note: It is currently causing a few seconds delay which will be fixed in new commits.
+
+`connection.processSdp` added. Now you can process SDP for stereo audio or opus/vp8 parameters or [application-level bandwidth management](http://stackoverflow.com/questions/16712224/how-to-control-bandwidth-in-webrtc-video-call/16868123#16868123). 
+
+```javascript
+connection.processSdp = function(sdp) {
+    // process sdp here; e.g.
+    // sdp = changeOpusParameters(sdp);
+    
+    // you must return "sdp" back.
+    return sdp;
+};
+```
+
+This feature gives you full control over SDP-modification. You can even use something like [SdpSerializer](https://github.com/muaz-khan/SdpSerializer) to modify the SDP.
+
+Note: This function will be called by RTCMultiConnection code. It accepts single string-argument where SDP is passed. There is no clue of the type of sdp, though. You MUST return "sdp" back using "return" statement.
+
+`connection.join('sessionid')` fixed. Now, `onNewSession` will NEVER be fired if you're calling "join" method whilst passing "string" as session-id.
+
+```javascript
+connection.onNewSession = function(session) {
+    // this code isn't called
+    // because "join" method is called with string-argument
+    // you should use "connect" method if you want "onNewSession" to be fired.
+    session.join();
+};
+
+connection.join('session-id');
+```
+
+(to fix canary ipv6 candidates issues): disabled "googIPv6", "googDscp" and "googImprovedWifiBwe"
+
+=
+
 ## Issues?
 
 <ol>
@@ -95,41 +144,6 @@ connection.DetectRTC.MediaDevices.forEach(function (device) {
         Use "googIPv6" when canary is fixed to add both UDP and TCP ipv6 addresses.
     </li>
 </ol>
-
-=
-
-## Recent Changes?
-
-`connection.processSdp` added. Now you can process SDP for stereo audio or opus/vp8 parameters or [application-level bandwidth management](http://stackoverflow.com/questions/16712224/how-to-control-bandwidth-in-webrtc-video-call/16868123#16868123). 
-
-```javascript
-connection.processSdp = function(sdp) {
-    // process sdp here; e.g.
-    // sdp = changeOpusParameters(sdp);
-    
-    // you must return "sdp" back.
-    return sdp;
-};
-```
-
-This feature gives you full control over SDP-modification. You can even use something like [SdpSerializer](https://github.com/muaz-khan/SdpSerializer) to modify the SDP.
-
-Note: This function will be called by RTCMultiConnection code. It accepts single string-argument where SDP is passed. There is no clue of the type of sdp, though. You MUST return "sdp" back using "return" statement.
-
-`connection.join('sessionid')` fixed. Now, `onNewSession` will NEVER be fired if you're calling "join" method whilst passing "string" as session-id.
-
-```javascript
-connection.onNewSession = function(session) {
-    // this code isn't called
-    // because "join" method is called with string-argument
-    // you should use "connect" method if you want "onNewSession" to be fired.
-    session.join();
-};
-
-connection.join('session-id');
-```
-
-(to fix canary ipv6 candidates issues): disabled "googIPv6", "googDscp" and "googImprovedWifiBwe"
 
 =
 

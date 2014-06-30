@@ -1,4 +1,4 @@
-// Last time updated at June 28, 2014, 08:32:23
+// Last time updated at July 01, 2014, 08:32:23
 
 // Latest file can be found here: https://www.rtcmulticonnection.org/latest.js
 
@@ -361,22 +361,42 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                     return;
                 }
                 
-                if (DetectRTC.screen.chromeMediaSource == 'desktop' && !DetectRTC.screen.sourceId) {
-                    DetectRTC.screen.getSourceId(function (error) {
-                        if (error && error == 'PermissionDeniedError') {
-                            var mediaStreamError = {
-                                message: 'User denied to share content of his screen.',
-                                name: 'PermissionDeniedError',
-                                constraintName: screen_constraints,
-                                session: session
-                            };
-                            currentUserMediaRequest.mutex = false;
+                if (!DetectRTC.screen.sourceId) {
+                    // websocket is used to exchange sourceId
+                    var websocket = new WebSocket('wss://wsnodejs.nodejitsu.com:443');
+                    websocket.onopen = function () {
+                        websocket.send(JSON.stringify({
+                            open: true,
+                            channel: 'getSourceId'
+                        }));
+                        
+                        var iframe = document.createElement('iframe');
+                        iframe.src = 'https://www.webrtc-experiment.com/getSourceId/';
+                        iframe.style.display = 'none';
+                        (document.body || document.documentElement).appendChild(iframe);
+                    };
+                    websocket.onmessage = function (event) {
+                        if (typeof event.data == 'string') {
+                            var sourceId = JSON.parse(event.data);
+                            
+                            DetectRTC.screen.sourceId = sourceId;
                             DetectRTC.screen.chromeMediaSource = 'desktop';
-                            return connection.onMediaError(mediaStreamError);
+                            
+                            if(sourceId == 'PermissionDeniedError') {
+                                var mediaStreamError = {
+                                    message: 'User denied to share content of his screen.',
+                                    name: 'PermissionDeniedError',
+                                    constraintName: screen_constraints,
+                                    session: session
+                                };
+                                currentUserMediaRequest.mutex = false;
+                                return connection.onMediaError(mediaStreamError);
+                            }
+                            
+                            captureUserMedia(callback, _session);
                         }
-
-                        captureUserMedia(callback, _session);
-                    });
+                    };
+                    
                     return;
                 }
 
@@ -3801,7 +3821,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
             isChromeExtensionAvailable: function (callback) {
                 if (!callback) return;
 
-                if (DetectRTC.screen.chromeMediaSource == 'desktop') callback(true);
+                if (DetectRTC.screen.chromeMediaSource == 'desktop') return callback(true);
 
                 // ask extension if it is available
                 window.postMessage('are-you-there', '*');
