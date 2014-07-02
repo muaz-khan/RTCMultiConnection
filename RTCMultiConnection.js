@@ -368,7 +368,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                     return;
                 }
 
-                if (!DetectRTC.screen.sourceId) {
+                if (!dontCheckChromExtension && !DetectRTC.screen.sourceId) {
                     window.addEventListener('message', function (event) {
                         if (event.data && event.data.chromeMediaSourceId) {
                             var sourceId = event.data.chromeMediaSourceId;
@@ -389,10 +389,15 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
                             captureUserMedia(callback, _session);
                         }
+                        
+                        if(event.data && event.data.chromeExtensionStatus) {
+                            warn('Screen capturing extension status is:', event.data.chromeExtensionStatus);
+                            DetectRTC.screen.chromeMediaSource = 'screen';
+                            captureUserMedia(callback, _session, true);
+                        }
                     });
 
                     rtcMultiSession.screenFrame.postMessage();
-
                     return;
                 }
 

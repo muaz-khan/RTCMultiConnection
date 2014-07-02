@@ -8,8 +8,6 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 
 ## Recent Changes?
 
-Cross-domain screen capturing latency fixed.
-
 A screen capturing extension has been deployed on Google App Store:
 
 * https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk
