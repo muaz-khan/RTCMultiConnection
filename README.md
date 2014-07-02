@@ -8,6 +8,8 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 
 ## Recent Changes?
 
+Cross-domain screen capturing latency fixed.
+
 A screen capturing extension has been deployed on Google App Store:
 
 * https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk
@@ -18,9 +20,9 @@ But, from today v1.8 updates, RTCMultiConnection can use same extension within a
 
 It means that you can simply ask your users to install above extension and you can use screen capturing feature in your personal pages.
 
-In simple words, "RTCMultiConnection can use single chrome extension for all domains!".
+In simple words, "RTCMultiConnection can use single chrome extension for all domains!". [Quick Simple Demo](https://5ae4c146d4d329adbe1de2aee5b4473a60e72d7d.googledrive.com/host/0B6GWd_dUUTT8cGw2bmpOaHMzbFU/)
 
-Note: It is currently causing a few seconds delay which will be fixed in new commits.
+----
 
 `connection.processSdp` added. Now you can process SDP for stereo audio or opus/vp8 parameters or [application-level bandwidth management](http://stackoverflow.com/questions/16712224/how-to-control-bandwidth-in-webrtc-video-call/16868123#16868123). 
 
