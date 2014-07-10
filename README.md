@@ -8,6 +8,13 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 
 ## Recent Changes?
 
+Many things updated:
+
+1. `connection.refresh` is updated. Now, session-reinitiation works as expected. You simply need to call `connection.leave` to leave a session and rejoin same session or join any other.
+2. `connection.iceProtocols = { tcp: true, udp: true}` added.
+3. STUN/TURN servers updated.
+4. `connection.preventSSLAutoAllowed` is disabled by default.
+
 A screen capturing extension has been deployed on Google App Store:
 
 * https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk
@@ -58,6 +65,26 @@ connection.join('session-id');
 ## Issues?
 
 <ol>
+    <li>
+        onstream event MUST have only {event.session.screen} for screen stream; and vice versa. It must also fixed audio+video+screen and streams-distinguish issues.
+    </li>
+    
+    <li>
+        connection.playRoleOfInitiator must have extra-data as well.
+    </li>
+    
+    <li>
+        Audio/Video recording must support single-file for Firefox.
+    </li>
+    
+    <li>
+        Need to use maxaveragebitrate for audio bandwidth.
+    </li>
+    
+    <li>
+        Provide options to use local chrome extension for screen capturing.
+    </li>
+    
     <li>
         <p>
             "groupId" returned by MediaDeviceInfo object refers to single device with multiple tracks.
