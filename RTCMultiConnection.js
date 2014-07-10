@@ -14,6 +14,10 @@
 
 /* issues/features need to be fixed & implemented:
 
+-. connection.onstream is updated for event.isScreen boolean.
+
+-. todo: sharePartOfScreen must be fixed for "performance" when sharing over all users.
+
 -. todo: connection.playRoleOfInitiator must have extra-data as well.
 
 -. connection.refresh is updated.
@@ -504,6 +508,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                             session: session,
                             isVideo: stream.getVideoTracks().length > 0,
                             isAudio: !stream.getVideoTracks().length && stream.getAudioTracks().length > 0,
+                            isScreen: forcedConstraints == screen_constraints,
                             isInitiator: !!connection.isInitiator
                         };
 
@@ -886,11 +891,28 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                     });
                 },
                 onmessage: onDataChannelMessage,
-                onaddstream: function (stream, session) {
-                    session = session || _config.renegotiate || connection.session;
+                onaddstream: function (stream, _session) {
+                    var session = {};
+                    
+                    if(_session) session = merge(session, _session);
+                    else if(_config.renegotiate) session = merge(session, _config.renegotiate);
+                    else session = merge(session, connection.session);
 
                     // if it is Firefox; then return.
                     if (isData(session)) return;
+                    
+                    if(session.screen && (session.audio || session.video)) {
+                        if(!_config.gotAudioOrVideo) {
+                            // audio/video are fired earlier than screen
+                            _config.gotAudioOrVideo = true;
+                            session.screen = false;
+                        }
+                        else {
+                            // screen stream is always fired later
+                            session.audio = false;
+                            session.video = false;
+                        }
+                    }
 
                     if (_config.streaminfo) {
                         var streaminfo = _config.streaminfo.split('----');
@@ -903,18 +925,18 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
                     var mediaElement = createMediaElement(stream, merge({
                         remote: true
-                    }, session));
+                    }, _session));
                     _config.stream = stream;
 
                     if (!stream.getVideoTracks().length)
                         mediaElement.addEventListener('play', function () {
                             setTimeout(function () {
                                 mediaElement.muted = false;
-                                afterRemoteStreamStartedFlowing(mediaElement, session);
+                                afterRemoteStreamStartedFlowing(mediaElement, session, _session);
                             }, 3000);
                         }, false);
                     else
-                        waitUntilRemoteStreamStartsFlowing(mediaElement, session);
+                        waitUntilRemoteStreamStartsFlowing(mediaElement, session, _session);
 
                     if (connection.setDefaultEventsForMediaElement) {
                         connection.setDefaultEventsForMediaElement(mediaElement, stream.streamid);
@@ -1041,17 +1063,17 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 processSdp: connection.processSdp
             };
 
-            function waitUntilRemoteStreamStartsFlowing(mediaElement, session, numberOfTimes) {
+            function waitUntilRemoteStreamStartsFlowing(mediaElement, session, _session, numberOfTimes) {
                 // chrome for android may have some features missing
                 if (isMobileDevice) {
-                    return afterRemoteStreamStartedFlowing(mediaElement, session);
+                    return afterRemoteStreamStartedFlowing(mediaElement, session, _session);
                 }
 
                 if (!numberOfTimes) numberOfTimes = 0;
                 numberOfTimes++;
 
                 if (!(mediaElement.readyState <= HTMLMediaElement.HAVE_CURRENT_DATA || mediaElement.paused || mediaElement.currentTime <= 0)) {
-                    afterRemoteStreamStartedFlowing(mediaElement, session);
+                    afterRemoteStreamStartedFlowing(mediaElement, session, _session);
                 } else {
                     if (numberOfTimes >= 60) { // wait 60 seconds while video is delivered!
                         socket.send({
@@ -1063,7 +1085,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                     } else
                         setTimeout(function () {
                             log('Waiting for incoming remote stream to be started flowing: ' + numberOfTimes + ' seconds.');
-                            waitUntilRemoteStreamStartsFlowing(mediaElement, session, numberOfTimes);
+                            waitUntilRemoteStreamStartsFlowing(mediaElement, session, _session, numberOfTimes);
                         }, 900);
                 }
             }
@@ -1092,7 +1114,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 }
             }
 
-            function afterRemoteStreamStartedFlowing(mediaElement, session) {
+            function afterRemoteStreamStartedFlowing(mediaElement, _session, session) {
                 var stream = _config.stream;
 
                 stream.onended = function () {
@@ -1114,6 +1136,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
                     isVideo: stream.getVideoTracks().length > 0,
                     isAudio: !stream.getVideoTracks().length && stream.getAudioTracks().length > 0,
+                    isScreen: !!_session.screen,
                     isInitiator: !!_config.isInitiator
                 };
 

@@ -8,6 +8,21 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 
 ## Recent Changes?
 
+`connection.onstream` is updated for `event.isScreen` boolean.
+
+```javascript
+connection.onstream = function(event) {
+    // to check screen stream
+    if(event.isScreen) { }
+    
+    // to check audio-only stream
+    if(event.isAudio) { }
+    
+    // to check audio+video stream
+    if(event.isVideo) { }
+};
+```
+
 Many things updated:
 
 1. `connection.refresh` is updated. Now, session-reinitiation works as expected. You simply need to call `connection.leave` to leave a session and rejoin same session or join any other.
@@ -65,10 +80,6 @@ connection.join('session-id');
 ## Issues?
 
 <ol>
-    <li>
-        onstream event MUST have only {event.session.screen} for screen stream; and vice versa. It must also fixed audio+video+screen and streams-distinguish issues.
-    </li>
-    
     <li>
         connection.playRoleOfInitiator must have extra-data as well.
     </li>
