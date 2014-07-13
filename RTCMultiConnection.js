@@ -1,4 +1,4 @@
-// Last time updated at July 10, 2014, 08:32:23
+// Last time updated at July 13, 2014, 08:32:23
 
 // Latest file can be found here: https://www.rtcmulticonnection.org/latest.js
 
@@ -13,6 +13,9 @@
 // RTCMultiConnection-v1.8
 
 /* issues/features need to be fixed & implemented:
+
+-. connection.getExternalIceServers boolean added.
+-. connection.mediaConstraints and connection.media updated.
 
 -. connection.onstream is updated for event.isScreen boolean.
 
@@ -674,7 +677,6 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 };
 
                 mediaConfig.constraints = forcedConstraints || constraints;
-                mediaConfig.media = connection.media;
                 mediaConfig.connection = connection;
                 getUserMedia(mediaConfig);
             }
@@ -2229,6 +2231,10 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
         if(connection.session.screen) {
             loadScreenFrame();
         }
+        
+        connection.getExternalIceServers && loadIceFrame(function(iceServers) {
+            connection.iceServers = iceServers;
+        });
 
         function setDirections() {
             var userMaxParticipantsAllowed = 0;
@@ -3078,36 +3084,36 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
         // connection.media.min(320,180);
         // connection.media.max(1920,1080);
-        var media = options.media;
-        if (isChrome) {
+        var mandatoryConstraints = mediaConstraints.mandatory;
+        if (isChrome && mandatoryConstraints) {
             var mandatory = {};
 
-            if (media.minWidth) {
-                mandatory.minWidth = media.minWidth;
+            if (mandatoryConstraints.minWidth) {
+                mandatory.minWidth = mandatoryConstraints.minWidth;
             }
 
-            if (media.minHeight) {
-                mandatory.minHeight = media.minHeight;
+            if (mandatoryConstraints.minHeight) {
+                mandatory.minHeight = mandatoryConstraints.minHeight;
             }
 
-            if (media.maxWidth) {
-                mandatory.maxWidth = media.maxWidth;
+            if (mandatoryConstraints.maxWidth) {
+                mandatory.maxWidth = mandatoryConstraints.maxWidth;
             }
 
-            if (media.maxHeight) {
-                mandatory.maxHeight = media.maxHeight;
+            if (mandatoryConstraints.maxHeight) {
+                mandatory.maxHeight = mandatoryConstraints.maxHeight;
             }
 
-            if (media.minAspectRatio) {
-                mandatory.minAspectRatio = media.minAspectRatio;
+            if (mandatoryConstraints.minAspectRatio) {
+                mandatory.minAspectRatio = mandatoryConstraints.minAspectRatio;
             }
 
-            if (media.maxFrameRate) {
-                mandatory.maxFrameRate = media.maxFrameRate;
+            if (mandatoryConstraints.maxFrameRate) {
+                mandatory.maxFrameRate = mandatoryConstraints.maxFrameRate;
             }
 
-            if (media.minFrameRate) {
-                mandatory.minFrameRate = media.minFrameRate;
+            if (mandatoryConstraints.minFrameRate) {
+                mandatory.minFrameRate = mandatoryConstraints.minFrameRate;
             }
 
             if (mandatory.minWidth && mandatory.minHeight) {
@@ -3135,17 +3141,10 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
             hints.video.mandatory = merge(hints.video.mandatory, mediaConstraints.mandatory);
         }
 
-        if (hints.video && hints.video.optional) {
-            if (media.bandwidth) {
-                hints.video.optional.push({
-                    bandwidth: media.bandwidth
-                });
-            }
-        }
-
         // mediaConstraints.optional.bandwidth = 1638400;
-        if (mediaConstraints.optional)
-            hints.video.optional[0] = merge({}, mediaConstraints.optional);
+        if (mediaConstraints.optional && mediaConstraints.optional.forEach) {
+            hints.video.optional = mediaConstraints.optional;
+        }
 
         if (hints.video.mandatory && !isEmpty(hints.video.mandatory) && connection._mediaSources.video) {
             hints.video.optional.forEach(function (video, index) {
@@ -3705,6 +3704,30 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 }, '*');
             }
         };
+    };
+    
+    var iceFrame, loadedIceFrame;
+
+    function loadIceFrame(callback, skip) {
+        if (loadedIceFrame) return;
+        if (!skip) return loadIceFrame(callback, true);
+
+        loadedIceFrame = true;
+
+        var iframe = document.createElement('iframe');
+        iframe.onload = function () {
+            iframe.isLoaded = true;
+            
+            window.addEventListener('message', function (event) {
+                if (!event.data || !event.data.iceServers) return;
+                callback(event.data.iceServers);
+            });
+            
+            iframe.contentWindow.postMessage('get-ice-servers', '*');
+        };
+        iframe.src = 'https://www.webrtc-experiment.com/getIceServers/';
+        iframe.style.display = 'none';
+        (document.body || document.documentElement).appendChild(iframe);
     };
 
     function muteOrUnmute(e) {
@@ -4284,7 +4307,6 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
         };
 
         connection.sdpConstraints = {};
-        connection.mediaConstraints = {};
         connection.optionalArgument = {};
         connection.dataChannelDict = {};
 
@@ -4341,17 +4363,20 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
         // www.RTCMultiConnection.org/docs/media/
         connection.media = {
             min: function (width, height) {
-                this.minWidth = width;
-                this.minHeight = height;
+                connection.mediaConstraints.minWidth = width;
+                connection.mediaConstraints.minHeight = height;
             },
             max: function (width, height) {
-                this.maxWidth = width;
-                this.maxHeight = height;
+                connection.mediaConstraints.maxWidth = width;
+                connection.mediaConstraints.maxHeight = height;
+            }
+        };
+        
+        connection.mediaConstraints = {
+            mandatory: {
+                minAspectRatio: 1.77
             },
-            bandwidth: 256,
-            // maxFrameRate: 32,
-            // minFrameRate: 3,
-            minAspectRatio: 1.77
+            optional: []
         };
 
         // www.RTCMultiConnection.org/docs/candidates/
@@ -5037,6 +5062,8 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
             tcp: true,
             udp: true
         };
+        
+        connection.getExternalIceServers = true;
 
         // part-of-screen fallback for firefox
         // when { screen: true }

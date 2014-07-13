@@ -8,6 +8,54 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 
 ## Recent Changes?
 
+`connection.getExternalIceServers` boolean added. Now, by default, RTCMultiConnection gets TURN/STUN servers from xirsys however you can disable this feature using same boolean object.
+
+```javascript
+connection.getExternalIceServers = false; // disable
+```
+
+`connection.mediaConstraints` and `connection.media` updated. Now it works same like getUserMedia API.
+
+```javascript
+connection.mediaConstraints = {
+    mandatory: {
+        maxWidth: 1280,
+        maxHeight: 720,
+        minAspectRatio: 1.77
+    },
+    optional: []
+};
+```
+
+`connection.media.min` and `connection.media.max` sets min/max width/heigth in the `connection.mediaConstraints.mandatory` object:
+
+```javascript
+connection.min(1280, 720);
+connection.min(1920, 1080);
+
+// it is actually similar like this;
+connection.mediaConstraints = {
+    mandatory: {
+        maxWidth: 1280,
+        maxHeight: 720,
+        maxWidth: 1920,
+        maxHeight: 1080
+    },
+    optional: []
+};
+```
+
+You can use SD video like this:
+
+```javascript
+connection.mediaConstraints = {
+    mandatory: {},
+    optional: []
+};
+```
+
+----
+
 `connection.onstream` is updated for `event.isScreen` boolean.
 
 ```javascript
