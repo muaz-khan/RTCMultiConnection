@@ -8,6 +8,44 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 
 ## Recent Changes?
 
+`connection.session={}` fixed. If `session` is set to empty then initiator will be `recvonly`:
+
+```html
+<script src="RTCMultiConnection.js"></script>
+<button id="openNewSessionButton">Open New Room</button>
+<script>
+var connection = new RTCMultiConnection();
+
+connection.session = {};
+connection.direction = 'one-way';
+
+connection.onNewSession = function(session) {
+    session.join({
+        audio: true,
+        video: true
+    });
+};
+
+connection.connect();
+
+document.querySelector('#openNewSessionButton').onclick = function() {
+    this.disabled = true;
+    connection.open();
+};
+</script>
+```
+
+----
+
+`connection.useCustomChromeExtensionForScreenCapturing` added.
+
+```javascript
+// if you deployed your own chrome extension on Google App Store
+connection.connection.useCustomChromeExtensionForScreenCapturing = true;
+```
+
+----
+
 `connection.getExternalIceServers` boolean added. Now, by default, RTCMultiConnection gets TURN/STUN servers from xirsys however you can disable this feature using same boolean object.
 
 ```javascript

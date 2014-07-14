@@ -1,4 +1,4 @@
-// Last time updated at July 13, 2014, 08:32:23
+// Last time updated at July 14, 2014, 08:32:23
 
 // Latest file can be found here: https://www.rtcmulticonnection.org/latest.js
 
@@ -13,6 +13,14 @@
 // RTCMultiConnection-v1.8
 
 /* issues/features need to be fixed & implemented:
+
+-. connection.session={} fixed. If session is set to empty then initiator will be recvonly.
+
+-. todo-fix: addStream along with OfferToReceive-Audio/Video=false
+
+-. support inactive at initial handshake
+
+-. connection.useCustomChromeExtensionForScreenCapturing added.
 
 -. connection.getExternalIceServers boolean added.
 -. connection.mediaConstraints and connection.media updated.
@@ -367,6 +375,11 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 };
             }
 
+            // for connection.session = {};
+            if(!session.screen && !constraints.audio && !constraints.video) {
+                return callback();
+            }
+
             var screen_constraints = {
                 audio: false,
                 video: {
@@ -382,7 +395,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
             // if screen is prompted
             if (session.screen) {
-                if (!dontCheckChromExtension && !DetectRTC.screen.sourceId) {
+                if (!connection.connection.useCustomChromeExtensionForScreenCapturing && !dontCheckChromExtension && !DetectRTC.screen.sourceId) {
                     window.addEventListener('message', function (event) {
                         if (event.data && event.data.chromeMediaSourceId) {
                             var sourceId = event.data.chromeMediaSourceId;
@@ -416,6 +429,39 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                     }
                     
                     screenFrame.postMessage();
+                    return;
+                }
+                
+                // check if screen capturing extension is installed.
+                if(connection.useCustomChromeExtensionForScreenCapturing && !dontCheckChromExtension && DetectRTC.screen.chromeMediaSource == 'screen' && DetectRTC.screen.extensionid) {
+                    log('checking if chrome extension is installed.');
+                    DetectRTC.screen.getChromeExtensionStatus(DetectRTC.screen.extensionid, function(status) {
+                        if(status == 'installed-enabled') {
+                            DetectRTC.screen.chromeMediaSource = 'desktop';
+                        }
+                        
+                        captureUserMedia(callback, _session, true);
+                        log('chrome extension is installed?', DetectRTC.screen.chromeMediaSource == 'desktop');
+                    });
+                    return;
+                }
+                
+                if (connection.useCustomChromeExtensionForScreenCapturing && DetectRTC.screen.chromeMediaSource == 'desktop' && !DetectRTC.screen.sourceId) {
+                    DetectRTC.screen.getSourceId(function (error) {
+                        if (error && error == 'PermissionDeniedError') {
+                            var mediaStreamError = {
+                                message: 'User denied to share content of his screen.',
+                                name: 'PermissionDeniedError',
+                                constraintName: screen_constraints,
+                                session: session
+                            };
+                            currentUserMediaRequest.mutex = false;
+                            DetectRTC.screen.chromeMediaSource = 'desktop';
+                            return connection.onMediaError(mediaStreamError);
+                        }
+
+                        captureUserMedia(callback, _session);
+                    });
                     return;
                 }
 
@@ -787,6 +833,9 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
         function onNewSession(session) {
             if (connection.skipOnNewSession) return;
+            
+            if(!session.session) session.session = {};
+            if(!session.extra) session.extra = {};
 
             // todo: make sure this works as expected.
             // i.e. "onNewSession" should be fired only for 
@@ -1724,7 +1773,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                     });
                 }
 
-                if (response.answer == 'yes-iam-connected') {
+                if (response.answer == 'yes-iam-connected' && connection.peers[_config.userid]) {
                     connection.peers[_config.userid].connected = true;
                 }
             }
@@ -5064,6 +5113,9 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
         };
         
         connection.getExternalIceServers = true;
+
+        // if you deployed your own extension on Google App Store
+        connection.useCustomChromeExtensionForScreenCapturing = document.domain.indexOf('webrtc-experiment.com') != -1;
 
         // part-of-screen fallback for firefox
         // when { screen: true }
