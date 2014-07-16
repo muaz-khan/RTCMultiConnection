@@ -8,6 +8,14 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 
 ## Recent Changes?
 
+If you linked invalid or 3rd-party extension-id which doesn't have included your domain in the [content-script matches](https://github.com/muaz-khan/WebRTC-Experiment/blob/master/Chrome-Extensions/desktopCapture/manifest.json#L16), then RTCMultiConnection will auto fallback to command-line flag option.
+
+```javascript
+DetectRTC.screen.extensionid = 'invalid-or-3rd-party-extension-id';
+```
+
+----
+
 `connection.session={}` fixed. If `session` is set to empty then initiator will be `recvonly`:
 
 ```html

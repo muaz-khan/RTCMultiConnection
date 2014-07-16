@@ -393,6 +393,10 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
             // if screen is prompted
             if (session.screen) {
+                if(DetectRTC.screen.extensionid != ReservedExtensionID) {
+                    connection.useCustomChromeExtensionForScreenCapturing = true;
+                }
+                
                 if (!connection.useCustomChromeExtensionForScreenCapturing && !dontCheckChromExtension && !DetectRTC.screen.sourceId) {
                     window.addEventListener('message', function (event) {
                         if (event.data && event.data.chromeMediaSourceId) {
@@ -450,8 +454,8 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 }
                 
                 if (connection.useCustomChromeExtensionForScreenCapturing && DetectRTC.screen.chromeMediaSource == 'desktop' && !DetectRTC.screen.sourceId) {
-                    DetectRTC.screen.getSourceId(function (error) {
-                        if (error && error == 'PermissionDeniedError') {
+                    DetectRTC.screen.getSourceId(function (sourceId) {
+                        if (sourceId == 'PermissionDeniedError') {
                             var mediaStreamError = {
                                 message: 'User denied to share content of his screen.',
                                 name: 'PermissionDeniedError',
@@ -462,8 +466,14 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                             DetectRTC.screen.chromeMediaSource = 'desktop';
                             return connection.onMediaError(mediaStreamError);
                         }
+                        
+                        if(sourceId == 'No-Response') {
+                            error('Chrome extension did not responded. Make sure that manifest.json#L16 has valid content-script matches pointing to your URL.');
+                            DetectRTC.screen.chromeMediaSource = 'screen';
+                            return captureUserMedia(callback, _session, true);
+                        }
 
-                        captureUserMedia(callback, _session);
+                        captureUserMedia(callback, _session, true);
                     });
                     return;
                 }
@@ -3742,6 +3752,10 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
     var screenFrame, loadedScreenFrame;
 
     function loadScreenFrame(skip) {
+        if(DetectRTC.screen.extensionid != ReservedExtensionID) {
+            return;
+        }
+        
         if(loadedScreenFrame) return;
         if(!skip) return loadScreenFrame(true);
 
@@ -3998,6 +4012,12 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 if (!callback) throw '"callback" parameter is mandatory.';
                 screenCallback = callback;
                 window.postMessage('get-sourceId', '*');
+                
+                // sometimes content-script mismatched URLs
+                // causes infinite delay.
+                setTimeout(function () {
+                    callback('No-Response');
+                }, 2000);
             },
             isChromeExtensionAvailable: function (callback) {
                 if (!callback) return;
