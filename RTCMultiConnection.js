@@ -1,4 +1,4 @@
-// Last time updated at July 14, 2014, 08:32:23
+// Last time updated at July 16, 2014, 08:32:23
 
 // Latest file can be found here: https://www.rtcmulticonnection.org/latest.js
 
@@ -14,9 +14,7 @@
 
 /* issues/features need to be fixed & implemented:
 
--. connection.session={} fixed. If session is set to empty then initiator will be recvonly.
-
--. todo-fix: addStream along with OfferToReceive-Audio/Video=false
+-. connection.session={} fixed. If session is set to empty object then initiator will be recvonly.
 
 -. support inactive at initial handshake
 
@@ -395,7 +393,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
             // if screen is prompted
             if (session.screen) {
-                if (!connection.connection.useCustomChromeExtensionForScreenCapturing && !dontCheckChromExtension && !DetectRTC.screen.sourceId) {
+                if (!connection.useCustomChromeExtensionForScreenCapturing && !dontCheckChromExtension && !DetectRTC.screen.sourceId) {
                     window.addEventListener('message', function (event) {
                         if (event.data && event.data.chromeMediaSourceId) {
                             var sourceId = event.data.chromeMediaSourceId;
@@ -434,6 +432,11 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 
                 // check if screen capturing extension is installed.
                 if(connection.useCustomChromeExtensionForScreenCapturing && !dontCheckChromExtension && DetectRTC.screen.chromeMediaSource == 'screen' && DetectRTC.screen.extensionid) {
+                    if(DetectRTC.screen.extensionid == ReservedExtensionID && document.domain.indexOf('webrtc-experiment.com') == -1) {
+                        log('Please pass valid extension-id whilst using useCustomChromeExtensionForScreenCapturing boolean.');
+                        return captureUserMedia(callback, _session, true);
+                    }
+                    
                     log('checking if chrome extension is installed.');
                     DetectRTC.screen.getChromeExtensionStatus(DetectRTC.screen.extensionid, function(status) {
                         if(status == 'installed-enabled') {
@@ -2595,7 +2598,18 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
             // check how participant is willing to join
             if (response.offers) {
-                log(toStr(response.offers));
+                if(response.offers.audio && response.offers.video) {
+                    log('target user has both audio/video streams.');
+                }
+                else if(response.offers.audio && !response.offers.video) {
+                    log('target user has only audio stream.');
+                }
+                else if(!response.offers.audio && response.offers.video) {
+                    log('target user has only video stream.');
+                }
+                else {
+                    log('target user has no stream; it seems one-way streaming.');
+                }
 
                 var mandatory = connection.sdpConstraints.mandatory;
                 if (typeof mandatory.OfferToReceiveAudio == 'undefined') {
@@ -2605,7 +2619,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                     connection.sdpConstraints.mandatory.OfferToReceiveVideo = !!response.offers.video;
                 }
 
-                log(toStr(connection.sdpConstraints.mandatory));
+                log('target user\'s SDP has?', toStr(connection.sdpConstraints.mandatory));
             }
 
             rtcMultiSession.requestsFrom[response.userid] = obj;
@@ -2639,11 +2653,11 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
             });
         }
 
-        // www.RTCMultiConnection.org/docs/sendMessage/
+        // www.RTCMultiConnection.org/docs/sendCustomMessage/
         connection.sendCustomMessage = function (message) {
             if (!defaultSocket) {
                 return setTimeout(function () {
-                    connection.sendMessage(message);
+                    connection.sendCustomMessage(message);
                 }, 1000);
             }
 
@@ -3881,6 +3895,8 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
             if (mediaStream.onended) mediaStream.onended();
         }
     }
+    
+    var ReservedExtensionID = 'ajhifddimkapgcifgcodmmfdlknahffk';
 
     // https://github.com/muaz-khan/WebRTC-Experiment/tree/master/DetectRTC
     var DetectRTC = {};
@@ -3977,7 +3993,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
         DetectRTC.screen = {
             chromeMediaSource: 'screen',
-            extensionid: 'ajhifddimkapgcifgcodmmfdlknahffk',
+            extensionid: ReservedExtensionID,
             getSourceId: function (callback) {
                 if (!callback) throw '"callback" parameter is mandatory.';
                 screenCallback = callback;
@@ -4412,12 +4428,19 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
         // www.RTCMultiConnection.org/docs/media/
         connection.media = {
             min: function (width, height) {
-                connection.mediaConstraints.minWidth = width;
-                connection.mediaConstraints.minHeight = height;
+                if(!connection.mediaConstraints.mandatory) {
+                    connection.mediaConstraints.mandatory = {};
+                }
+                connection.mediaConstraints.mandatory.minWidth = width;
+                connection.mediaConstraints.mandatory.minHeight = height;
             },
             max: function (width, height) {
-                connection.mediaConstraints.maxWidth = width;
-                connection.mediaConstraints.maxHeight = height;
+                if(!connection.mediaConstraints.mandatory) {
+                    connection.mediaConstraints.mandatory = {};
+                }
+                
+                connection.mediaConstraints.mandatory.maxWidth = width;
+                connection.mediaConstraints.mandatory.maxHeight = height;
             }
         };
         

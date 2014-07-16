@@ -41,6 +41,8 @@ document.querySelector('#openNewSessionButton').onclick = function() {
 
 ```javascript
 // if you deployed your own chrome extension on Google App Store
+// extension-id is mandatory for next boolean
+DetectRTC.screen.extensionid = 'your-custom-google-app-store-extension-id';
 connection.connection.useCustomChromeExtensionForScreenCapturing = true;
 ```
 
@@ -61,6 +63,14 @@ connection.mediaConstraints = {
         maxHeight: 720,
         minAspectRatio: 1.77
     },
+    optional: []
+};
+
+// to use default constraints
+// it brings same video quality experience 
+// both for local and remote
+connection.mediaConstraints = {
+    mandatory: {},
     optional: []
 };
 ```
@@ -282,6 +292,11 @@ It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licenced</a>, whi
 ## Want to try latest stable version?
 
 ```html
+// recommended link (you can even use version numbers
+// e.g. cdn.webrtc-experiment.com/RTCMultiConnection-v1.8.js
+<script src="//cdn.webrtc-experiment.com/RTCMultiConnection.js"></script>
+
+// or
 <script src="//www.rtcmulticonnection.org/latest.js"></script>
 
 // or
