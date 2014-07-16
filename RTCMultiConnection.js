@@ -4016,7 +4016,9 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
                 // sometimes content-script mismatched URLs
                 // causes infinite delay.
                 setTimeout(function () {
-                    callback('No-Response');
+                    if(!DetectRTC.screen.sourceId) {
+                        callback('No-Response');
+                    }
                 }, 2000);
             },
             isChromeExtensionAvailable: function (callback) {
