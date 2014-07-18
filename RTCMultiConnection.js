@@ -1,94 +1,36 @@
-// Last time updated at July 16, 2014, 08:32:23
+// Last time updated at July 18, 2014, 08:32:23
 
-// Latest file can be found here: https://www.rtcmulticonnection.org/latest.js
+// Latest file can be found here: https://cdn.webrtc-experiment.com/RTCMultiConnection.js
 
 // Muaz Khan         - www.MuazKhan.com
 // MIT License       - www.WebRTC-Experiment.com/licence
 // Documentation     - www.RTCMultiConnection.org/docs
 // FAQ               - www.RTCMultiConnection.org/FAQ
-// v1.8 changes log  - www.RTCMultiConnection.org/changes-log/#v1.8
+// v1.9 changes log  - www.RTCMultiConnection.org/changes-log/#v1.9
 // Demos             - www.WebRTC-Experiment.com/RTCMultiConnection
 
 // _______________________
-// RTCMultiConnection-v1.8
+// RTCMultiConnection-v1.9
 
 /* issues/features need to be fixed & implemented:
 
--. connection.session={} fixed. If session is set to empty object then initiator will be recvonly.
-
--. support inactive at initial handshake
-
--. connection.useCustomChromeExtensionForScreenCapturing added.
-
--. connection.getExternalIceServers boolean added.
--. connection.mediaConstraints and connection.media updated.
-
--. connection.onstream is updated for event.isScreen boolean.
-
--. todo: sharePartOfScreen must be fixed for "performance" when sharing over all users.
-
--. todo: connection.playRoleOfInitiator must have extra-data as well.
-
--. connection.refresh is updated.
-
--. audio+video recording must support single-file for Firefox.
-
--. connection.iceProtocols = { tcp: true, udp: true} added.
-
--. todo: provide options to use local chrome extension for screen capturing.
-
--. onstream event MUST have only {event.session.screen} for screen stream; and vice versa.
-
--. STUN/TURN servers updated.
--. preventSSLAutoAllowed is disabled.
-
--. need to use maxaveragebitrate for audio bandwidth.
--. need to add LAN connectivity support.
--. need to add support for getChromeExtensionStatus for "ajhifddimkapgcifgcodmmfdlknahffk"
-
--. (screen capturing) single google-app-store extension is used for all yours/mine domains :)
--. https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk
-
--. connection.processSdp added.
-
--. (to fix canary ipv6 candidates issues): disabled "googIPv6", "googDscp" and "googImprovedWifiBwe"
-
--. (demos needed) Temasys/EasyRTC plugins for IE/Safari.
-
--. "groupId" returned by MediaDeviceInfo object refers to single device with multiple tracks.
--. need to provide API like this:
-connection.DetectRTC.MediaDevices.forEach(function(device) {
---- device.audioinput (headset's microphone)
--------- device.audioinput.deviceid
-
---- device.audiooutput (headset's speakers);
--------- device.audioinput.audiooutput
-
---- device.videoinput (webcam)
--------- device.videoinput.audiooutput
-});
-
--. renegotiation scenarios that fails:
--. 1) if chrome starts video-only session and firefox joins with only audio
--. 2) if chrome starts with audio-only session and firefox joins with only video
--. 3) if chrome starts only audio and firefox joins with audio+video
--. renegotiation scenarios that works:
--. 1) if chrome starts audio+video and firefox joins with only audio or audio+video
--. 2) if both browsers has similar streams
-
--. todo: add mp3-live streaming support
--. todo: add mozCaptureStreamUntilEnded streaming support.
-
--. todo: Fix "disconnected" which happens often. Need to use WebRTC data channels for dirty workaround whenever possible; currently we're relying on signaling medium.
-
--. todo: check if stream.onended is fired on Firefox.
--. todo: add removeStream workaround for Firefox.
+-. todo: add connection.switchStream(session) to remove old ones, and add new stream(s)
 
 -. todo: add connection.keepStreamsOpened
+-. support inactive at initial handshake
+-. todo: sharePartOfScreen must be fixed for "performance" when sharing over all users.
+-. todo: connection.playRoleOfInitiator must have extra-data as well.
+-. audio+video recording must support single-file for Firefox.
+-. need to use maxaveragebitrate for audio bandwidth.
+-. need to add LAN connectivity support.
+-. (demos needed) Temasys/EasyRTC plugins for IE/Safari.
+-. todo: add mp3-live streaming support
+-. todo: add mozCaptureStreamUntilEnded streaming support.
+-. todo: Fix "disconnected" which happens often. Need to use WebRTC data channels for dirty workaround whenever possible; currently we're relying on signaling medium.
+-. todo: check if stream.onended is fired on Firefox.
+-. todo: add removeStream workaround for Firefox.
 -. todo: auto fallback to part-of-screen option for Firefox.
-
 -. todo-fix: trickleIce & renegotiation fails.
-
 -. "channel" object in the openSignalingChannel shouldn't be mandatory!
 -. JSON parse/stringify options for data transmitted using data-channels; e.g. connection.preferJSON = true;
 -. removeTrack() and addTracks() instead of "stop"
@@ -329,7 +271,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
 
         // www.RTCMultiConnection.org/docs/captureUserMedia/
 
-        function captureUserMedia(callback, _session, dontCheckChromExtension) {
+        function captureUserMedia(callback, _session, dontCheckChromExtension) {            
             // capture user's media resources
             var session = _session || connection.session;
 
@@ -2295,7 +2237,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
         }
         
         connection.getExternalIceServers && loadIceFrame(function(iceServers) {
-            connection.iceServers = iceServers;
+            connection.iceServers = connection.iceServers.concat(iceServers);
         });
 
         function setDirections() {
@@ -3802,7 +3744,7 @@ connection.DetectRTC.MediaDevices.forEach(function(device) {
             
             iframe.contentWindow.postMessage('get-ice-servers', '*');
         };
-        iframe.src = 'https://www.webrtc-experiment.com/getIceServers/';
+        iframe.src = 'https://cdn.webrtc-experiment.com/getIceServers/';
         iframe.style.display = 'none';
         (document.body || document.documentElement).appendChild(iframe);
     };

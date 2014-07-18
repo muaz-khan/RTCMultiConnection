@@ -4,180 +4,11 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 
 =
 
-## Current Version is [v1.8](http://www.rtcmulticonnection.org/changes-log/#v1.8)
+## Current Version is [v1.9](http://www.rtcmulticonnection.org/changes-log/#v1.9)
 
 ## Recent Changes?
 
-If you linked invalid or 3rd-party extension-id which doesn't have included your domain in the [content-script matches](https://github.com/muaz-khan/WebRTC-Experiment/blob/master/Chrome-Extensions/desktopCapture/manifest.json#L16), then RTCMultiConnection will auto fallback to command-line flag option.
-
-```javascript
-DetectRTC.screen.extensionid = 'invalid-or-3rd-party-extension-id';
-```
-
-----
-
-`connection.session={}` fixed. If `session` is set to empty then initiator will be `recvonly`:
-
-```html
-<script src="RTCMultiConnection.js"></script>
-<button id="openNewSessionButton">Open New Room</button>
-<script>
-var connection = new RTCMultiConnection();
-
-connection.session = {};
-connection.direction = 'one-way';
-
-connection.onNewSession = function(session) {
-    session.join({
-        audio: true,
-        video: true
-    });
-};
-
-connection.connect();
-
-document.querySelector('#openNewSessionButton').onclick = function() {
-    this.disabled = true;
-    connection.open();
-};
-</script>
-```
-
-----
-
-`connection.useCustomChromeExtensionForScreenCapturing` added.
-
-```javascript
-// if you deployed your own chrome extension on Google App Store
-// extension-id is mandatory for next boolean
-DetectRTC.screen.extensionid = 'your-custom-google-app-store-extension-id';
-connection.connection.useCustomChromeExtensionForScreenCapturing = true;
-```
-
-----
-
-`connection.getExternalIceServers` boolean added. Now, by default, RTCMultiConnection gets TURN/STUN servers from xirsys however you can disable this feature using same boolean object.
-
-```javascript
-connection.getExternalIceServers = false; // disable
-```
-
-`connection.mediaConstraints` and `connection.media` updated. Now it works same like getUserMedia API.
-
-```javascript
-connection.mediaConstraints = {
-    mandatory: {
-        maxWidth: 1280,
-        maxHeight: 720,
-        minAspectRatio: 1.77
-    },
-    optional: []
-};
-
-// to use default constraints
-// it brings same video quality experience 
-// both for local and remote
-connection.mediaConstraints = {
-    mandatory: {},
-    optional: []
-};
-```
-
-`connection.media.min` and `connection.media.max` sets min/max width/heigth in the `connection.mediaConstraints.mandatory` object:
-
-```javascript
-connection.min(1280, 720);
-connection.min(1920, 1080);
-
-// it is actually similar like this;
-connection.mediaConstraints = {
-    mandatory: {
-        maxWidth: 1280,
-        maxHeight: 720,
-        maxWidth: 1920,
-        maxHeight: 1080
-    },
-    optional: []
-};
-```
-
-You can use SD video like this:
-
-```javascript
-connection.mediaConstraints = {
-    mandatory: {},
-    optional: []
-};
-```
-
-----
-
-`connection.onstream` is updated for `event.isScreen` boolean.
-
-```javascript
-connection.onstream = function(event) {
-    // to check screen stream
-    if(event.isScreen) { }
-    
-    // to check audio-only stream
-    if(event.isAudio) { }
-    
-    // to check audio+video stream
-    if(event.isVideo) { }
-};
-```
-
-Many things updated:
-
-1. `connection.refresh` is updated. Now, session-reinitiation works as expected. You simply need to call `connection.leave` to leave a session and rejoin same session or join any other.
-2. `connection.iceProtocols = { tcp: true, udp: true}` added.
-3. STUN/TURN servers updated.
-4. `connection.preventSSLAutoAllowed` is disabled by default.
-
-A screen capturing extension has been deployed on Google App Store:
-
-* https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk
-
-Previously this extension was useful only with https://www.webrtc-experiment.com/.
-
-But, from today v1.8 updates, RTCMultiConnection can use same extension within any webpage!
-
-It means that you can simply ask your users to install above extension and you can use screen capturing feature in your personal pages.
-
-In simple words, "RTCMultiConnection can use single chrome extension for all domains!". [Quick Simple Demo](https://5ae4c146d4d329adbe1de2aee5b4473a60e72d7d.googledrive.com/host/0B6GWd_dUUTT8cGw2bmpOaHMzbFU/)
-
-----
-
-`connection.processSdp` added. Now you can process SDP for stereo audio or opus/vp8 parameters or [application-level bandwidth management](http://stackoverflow.com/questions/16712224/how-to-control-bandwidth-in-webrtc-video-call/16868123#16868123). 
-
-```javascript
-connection.processSdp = function(sdp) {
-    // process sdp here; e.g.
-    // sdp = changeOpusParameters(sdp);
-    
-    // you must return "sdp" back.
-    return sdp;
-};
-```
-
-This feature gives you full control over SDP-modification. You can even use something like [SdpSerializer](https://github.com/muaz-khan/SdpSerializer) to modify the SDP.
-
-Note: This function will be called by RTCMultiConnection code. It accepts single string-argument where SDP is passed. There is no clue of the type of sdp, though. You MUST return "sdp" back using "return" statement.
-
-`connection.join('sessionid')` fixed. Now, `onNewSession` will NEVER be fired if you're calling "join" method whilst passing "string" as session-id.
-
-```javascript
-connection.onNewSession = function(session) {
-    // this code isn't called
-    // because "join" method is called with string-argument
-    // you should use "connect" method if you want "onNewSession" to be fired.
-    session.join();
-};
-
-connection.join('session-id');
-```
-
-(to fix canary ipv6 candidates issues): disabled "googIPv6", "googDscp" and "googImprovedWifiBwe"
+None.
 
 =
 
@@ -194,10 +25,6 @@ connection.join('session-id');
     
     <li>
         Need to use maxaveragebitrate for audio bandwidth.
-    </li>
-    
-    <li>
-        Provide options to use local chrome extension for screen capturing.
     </li>
     
     <li>
@@ -300,15 +127,15 @@ It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licenced</a>, whi
 ## Want to try latest stable version?
 
 ```html
-// recommended link (you can even use version numbers
-// e.g. cdn.webrtc-experiment.com/RTCMultiConnection-v1.8.js
+// recommended link (you can even use version numbers)
+// e.g. cdn.webrtc-experiment.com/RTCMultiConnection-v1.9.js
 <script src="//cdn.webrtc-experiment.com/RTCMultiConnection.js"></script>
 
 // or
 <script src="//www.rtcmulticonnection.org/latest.js"></script>
 
 // or
-<script src="//www.webrtc-experiment.com/RTCMultiConnection-v1.8.js"></script>
+<script src="//www.webrtc-experiment.com/RTCMultiConnection-v1.9.js"></script>
 ```
 
 =
@@ -317,303 +144,125 @@ It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licenced</a>, whi
 
 <ol>
                     <li>
-                        (to fix canary ipv6 candidates issues): disabled "googIPv6", "googDscp" and "googImprovedWifiBwe"
+                        Screen capturing is improved, and <a href="https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk">single google chrome extension</a> is used to support capturing from all domains!
                     </li>
-                    
                     <li>
-                        "<code>connection.leaveOnPageUnload</code>" added.
+                        <code>connection.processSdp</code> added.
                         <pre class="sh_javascript">
-// if you want to prevent default behaviour
-connection.leaveOnPageUnload = false;
-
-// display a notification box
-window.addEventListener('beforeunload', function () {
-    return 'Are you want to leave?';
-}, false);
-
-// leave here
-window.addEventListener('unload', function () {
-    connection.leave();
-}, false);
-</pre>
-                    </li>
-                    
-                    <li>
-                        <pre class="sh_javascript">
--. renegotiation scenarios that fails:
--. 1) if chrome starts video-only session and firefox joins with only audio
--. 2) if chrome starts with audio-only session and firefox joins with only video
--. 3) if chrome starts only audio and firefox joins with audio+video
--. renegotiation scenarios that works:
--. 1) if chrome starts audio+video and firefox joins with only audio or audio+video
--. 2) if both browsers has similar streams
-</pre>
-                    </li>
-                    
-                    <li>
-                        "<code>connection.onstatechange</code>" added:
-                        <pre class="sh_javascript">
-connection.onstatechange = function (state, reason) {
-    // fetching-usermedia
-    // usermedia-fetched
-
-    // detecting-room-presence
-    // room-not-available
-    // room-available
-
-    // connecting-with-initiator
-    // connected-with-initiator
-
-    // failed---has reason
-
-    // request-accepted
-    // request-rejected
-
-    if(state == 'room-not-available') {
-        // room no longer exist
-    }
+connection.processSdp = function(sdp) {
+    sdp = remove_vp8_codecs(sdp);
+    sdp = prefer_opus (sdp);
+    sdp = use_maxaveragebitrate(sdp);
+    return sdp;
 };
 </pre>
-                        Remember, older "<code><a href="http://www.rtcmulticonnection.org/docs/onstats/">onstats</a></code>" has been removed in v1.8.
                     </li>
                     
                     <li>
-                        Now if you'll invoke "<code>connection.sharePartOfScreen(...)</code>" and a new user will join you; existing part of screen will be auto shared with him.<br /><br />
-                        It means that "<code>sharePartOfScreen</code>" will work with all new/old users.
-                    </li>
-                    
-                    <li>
-                        "<code>connection.donotJoin</code>" added:
+                        <code><a href="http://www.RTCMultiConnection.org/docs/session/">connection.session</a>={}</code> fixed. It allows moderator/initiator to become a listener/viewer i.e. it supports many-to-one scenarios:
                         <pre class="sh_javascript">
-connection.onstatechange = function (state) {
-    if(state == 'room-not-available') {
-        connection.donotJoin(connection.sessionid);
+// for initiator
+connection.<a href="http://www.RTCMultiConnection.org/docs/session/"><code>session</code></a> = {};
+
+// for participants
+connection.<a href="http://www.RTCMultiConnection.org/docs/onNewSession/"><code>onNewSession</code></a> = function(session) {
+    session.<a href="http://www.RTCMultiConnection.org/docs/join/"><code>join</code></a>({
+        audio: true,
+        video: true
+    });
+};
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code><a href="http://www.RTCMultiConnection.org/docs/mediaConstraints/">connection.mediaConstraints</a></code> and <code><a href="http://www.RTCMultiConnection.org/docs/media/">connection.media</a></code> are updated:
+                        <pre class="sh_javascript">
+connection.<a href="http://www.RTCMultiConnection.org/docs/mediaConstraints/"><code>mediaConstraints</code></a> = {
+    mandatory: {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        minAspectRatio: 1.77,
+
+        minFrameRate: 3,
+        maxFrameRate: 64
+    },
+    optional: [
+        bandwidth: 256
+    ]
+};
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code><a href="http://www.RTCMultiConnection.org/docs/onstream/">connection.onstream</a></code> is updated for <code>event.isScreen</code>:
+                        <pre class="sh_javascript">
+connection.<code><a href="http://www.RTCMultiConnection.org/docs/onstream/">onstream</a></code> = function (event) {
+    if(event.isScreen) {
+        // it is screen stream
+    }
+    
+    if(event.isAudio) {
+        // it is audio-only stream
+    }
+    
+    if(event.isVideo) {
+        // it is audio+video stream
     }
 };
 </pre>
                     </li>
                     
                     <li>
-                        You can set <code>connection.DetectRTC.screen.extensionid="your-chrome-extensionid"</code> to make sure inline (newly) installed chrome extension is quickly used for screen capturing instead of prompting user to reload page once to use it.<br /><br />
-                        It means that install the chrome extension and RTCMultiConnection will auto use it. Don't ask your users to reload the page:
+                        <code><a href="http://www.RTCMultiConnection.org/docs/refresh/">connection.refresh</a></code> is updated and session re-initiation is improved.
                         <pre class="sh_javascript">
-connection.DetectRTC.screen.extensionid = 'ajhifddimkapgcifgcodmmfdlknahffk';
-</pre>
-                    </li>
-                    
-                    <li>
-                        Fixed: If Chrome starts video-only session; and Firefox joins with only audio. Then both fails to connect; though sendrecv/recvonly/sendonly everything is correctly implemented.
-                    </li>
-                    
-                    <li>
-                        Fixed: "the videos are not square and they look grainy not has sharp as before". Now video is captured & streamed with better quality.
-                    </li>
-                    
-                    <li>
-                        "<code>connection.DetectRTC.hasSpeakers</code>" added.
-                    </li>
-                    
-                    <li>
-                        "<code>connection.resumePartOfScreenSharing()</code>" added.
-                    </li>
-                    
-                    <li>
-                        "<code>event.blobURL</code>" in the <code><a href="http://www.rtcmulticonnection.org/docs/onstream/">onstream</a></code> event is fixed for Firefox.
-                        <pre class="sh_javascript">
-connection.onstream = function(e) {
-    // e.blobURL -- now it is always blob:URI
+// you simply need to invoke "connection.<code><a href="http://www.RTCMultiConnection.org/docs/leave/">leave</a></code>" to 
+// leave a session so that you can rejoin same session
+connection.<code><a href="http://www.RTCMultiConnection.org/docs/onstatechange/">onstatechange</a></code> = function (state) {
+    if(state == 'connected-with-initiator') {
+        document.getElementById('leave-session').disabled = false;
+    }
+};
+
+document.getElementById('leave-session').onclick = function() {
+    connection.<code><a href="http://www.RTCMultiConnection.org/docs/leave/">leave</a></code>();
 };
 </pre>
                     </li>
                     
                     <li>
-                        <a href="http://www.RTCMultiConnection.org/docs/startRecording/">startRecording</a>/<a href="http://www.RTCMultiConnection.org/docs/stopRecording/">stopRecording</a> updated & fixed.
+                        <code>connection.iceProtocols</code> added.
                         <pre class="sh_javascript">
-// record both audio and video
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>['stream-id'].<a href="http://www.RTCMultiConnection.org/docs/startRecording/">startRecording</a>({
-    audio: true,
-    video: true
-});
-
-// stop both audio and video
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>['stream-id'].<a href="http://www.RTCMultiConnection.org/docs/stopRecording/">stopRecording</a>(function (blob) {
-    // blob.audio  --- audio blob
-    // blob.video  --- video blob
-}, {audio:true, video:true} );
-</pre>
-                    </li>
-                
-                    <li>
-                        "PreRecordedMediaStreamer" is moved to a separate javascript file.
-                        <pre class="sh_javascript">
-https://www.rtcmulticonnection.org/PreRecordedMediaStreamer.js
-</pre>
-                    </li>
-                    
-                    <li>
-                        function "<code>stopTracks</code>" updated.
-                    </li>
-                
-                    <li>
-                        Fixed <code>connection.streams.stop()</code> via <a href="https://github.com/muaz-khan/WebRTC-Experiment/issues/225#issuecomment-46283072">issue #255</a>.
-                    </li>
-                
-                    <li>
-                        Now, you can easily manage external resources/URLs using "<code>connection.resources</code>":
-                        <pre class="sh_javascript">
-connection.resources = {
-    RecordRTC: 'https://www.webrtc-experiment.com/RecordRTC.js',
-    PreRecordedMediaStreamer: 'https://www.rtcmulticonnection.org/PreRecordedMediaStreamer.js',
-    customGetUserMediaBar: 'https://www.webrtc-experiment.com/navigator.customGetUserMediaBar.js',
-    html2canvas: 'https://www.webrtc-experiment.com/screenshot.js',
-    hark: 'https://www.rtcmulticonnection.org/hark.js',
-    firebase: 'https://www.webrtc-experiment.com/firebase.js',
-    firebaseio: 'https://chat.firebaseIO.com/',
-    muted: 'https://www.webrtc-experiment.com/images/muted.png'
+connection.iceProtocols = {
+    tcp: true, // prefer using TCP-candidates
+    udp: true  // prefer using UDP-candidates
 };
 </pre>
                     </li>
-                
+                    
                     <li>
-                        <code>connection.DetectRTC.MediaDevices</code> added:
+                        <code>connection.useCustomChromeExtensionForScreenCapturing</code> added.
                         <pre class="sh_javascript">
-connection.DetectRTC.MediaDevices.forEach(function(device) {
-    // device.deviceId
-    // device.kind == 'audioinput' || 'audiooutput' || 'audio'
-    
-    connection.selectDevices(device.deviceId);
-});
-</pre>
-                    </li>
-                
-                    <li>
-                        Now, <code>hark.js</code> is used instead of <code>SoundMeter.js</code>:
-                        <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/onspeaking/">onspeaking</a> = function() {};
-connection.<a href="http://www.RTCMultiConnection.org/docs/onsilence/">onsilence</a> = function() {};
-</pre>
-                    </li>
-                
-                    <li>
-                        <code>captureUserMediaOnDemand</code> added for <code>connection.open</code> method:
-                        <pre class="sh_javascript">
-// it is "disabled" by default
-// captureUserMediaOnDemand means that "getUserMedia" API for initiator will 
-// be invoked only when required.
-// i.e. when first participant is detected.
+connection.useCustomChromeExtensionForScreenCapturing = true;
 
-// you can enable it by setting it to "true"
-connection.open({
-    captureUserMediaOnDemand: true
-});
-</pre>
-                    </li>
-                
-                    <li>
-                        <code>connection.DetectRTC.screen.getChromeExtensionStatus</code> added.
-                        <pre class="sh_javascript">
-var extensionid = 'ajhifddimkapgcifgcodmmfdlknahffk';
-
-connection.DetectRTC.screen.getChromeExtensionStatus(extensionid, function(status) {
-    if(status == 'installed-enabled') {
-        // chrome extension is installed & enabled.
-    }
-    
-    if(status == 'installed-disabled') {
-        // chrome extension is installed but disabled.
-    }
-    
-    if(status == 'not-installed') {
-        // chrome extension is not installed
-    }
-    
-    if(status == 'not-chrome') {
-        // using non-chrome browser
-    }
-});
+// it is recommended to set chrome extensionid
+// it will auto set above boolean
+connection.DetectRTC.screen.extensionid = 'your-app-store-extensionid';
 </pre>
                     </li>
                     
                     <li>
-                        <code>onMediaCaptured</code> added for <code>connection.open</code> method:
+                        STUN/TURN servers are updated; as well as ICE-servers from XirSys are used:
                         <pre class="sh_javascript">
-connection.open({
-    onMediaCaptured: function() {
-        // initiator enable camera/microphone
-        // you can share "sessionDescription" with other users
-        // and they can quickly join initiator!
-    }
-});
+// to disable XirSys ICE-Servers
+connection.getExternalIceServers = false;
 </pre>
                     </li>
                     
                     <li>
-                        <code>openSignalingChannel</code> is moved to "<code>setDefaults</code>" private function.
-                    </li>
-                
-                    <li>
-                        <code>connection.preventSSLAutoAllowed</code> added. Now RTCMultiConnection focuses more on end-users privacy! You can ask RTCMultiConnection to "always" display "getUserMedia-permission-bar" even if chrome is running on HTTPs i.e. SSL domain:
+                        <code>connection.preventSSLAutoAllowed</code> is disabled.
                         <pre class="sh_javascript">
-// by default "preventSSLAutoAllowed" is true only for "HTTPs" domains
-// you can force it for HTTP domains as well by setting this Boolean in your HTML page.
+// to enable it
 connection.preventSSLAutoAllowed = true;
-</pre>
-                    </li>
-                    
-                    <li>
-                        <code>onScreenCapturingExtensionAvailable</code>  is fired when RTCMultiConnection detects that chrome extension for screen capturing is installed and available:
-                        <pre class="sh_javascript">
-connection.onScreenCapturingExtensionAvailable = function() {
-    btnInlineInstallButton.disabled = true;
-};
-</pre>
-                    </li>
-                    
-                    <li>
-                        Now, <code>connection.<a href="http://www.RTCMultiConnection.org/docs/join/">join</a></code> method allows you force how to join (i.e. with or without streams etc.):
-                        <pre class="sh_javascript">
-// it doesn't matter if incoming stream is audio+video
-// you can join it with only audio or with only video
-// or anonymously i.e. { oneway: true }
-var joinWith = {
-    audio: true
-};
-
-connection.<a href="http://www.RTCMultiConnection.org/docs/join/">join</a>('sessionid', joinWith); // 2nd parameter
-</pre>
-                    </li>
-                    
-                    <li>
-                        Now, <a href="http://www.RTCMultiConnection.org/docs/onNewSession/">onNewSession</a> is fired once for each room. It will NEVER fire multiple times.
-                    </li>
-                    
-                    <li>
-                        <code><a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/desktop-sharing">chrome.desktopCapture.chooseDesktopMedia</a></code> is now preferred for screen capturing; and if extension is not installed or disabled, then RTCMultiConnection will auto fallback to <a href="https://www.webrtc-experiment.com/Pluginfree-Screen-Sharing/">command-line flag oriented screen-capturing API</a>; and if both are not available then it will throw a clear "human readable" exception.<br /><br />
-                        Chrome extension is available <a href="https://www.webrtc-experiment.com/store/capture-screen/">here</a>.
-                    </li>
-                    
-                    <li>
-                        You can use <code>connection.DetectRTC</code> like this:
-                        <pre class="sh_javascript">
-connection.DetectRTC.load(function() {
-    if(connection.DetectRTC.hasMicrophone) { }
-    if(connection.DetectRTC.hasWebcam) { }
-});
-
-connection.DetectRTC.screen.isChromeExtensionAvailable(function(available) {
-    if(available) alert('Chrome screen capturing extension is installed and available.');
-}):
-</pre>
-                    </li>
-                    
-                    <li>
-                        <code>navigator.getUserMedia</code> errors handling in <code>onMediaError</code> event:
-                        <pre class="sh_javascript">
-connection.onMediaError = function(error) {
-    if(error.name == 'PermissionDeniedError') {
-        alert(error.message);
-    }
-};
 </pre>
                     </li>
                 </ol>
@@ -628,6 +277,16 @@ connection.onMediaError = function(error) {
         <th>Changes Logs</th>
     </thead>
     <tbody>
+        <tr>
+            <td>
+                <a href="https://github.com/muaz-khan/WebRTC-Experiment/blob/master/RTCMultiConnection/Library/RTCMultiConnection-v1.9.js">RTCMultiConnection-v1.9.js</a>
+            </td>
+            
+            <td>
+                <a href="http://www.rtcmulticonnection.org/changes-log/#v1.9">Changes Log</a>
+            </td>
+        </tr>
+        
         <tr>
             <td>
                 <a href="https://github.com/muaz-khan/WebRTC-Experiment/blob/master/RTCMultiConnection/Library/RTCMultiConnection-v1.8.js">RTCMultiConnection-v1.8.js</a>
