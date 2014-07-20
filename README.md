@@ -8,7 +8,15 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 
 ## Recent Changes?
 
-None.
+Fixed: `remoteEvent.streamid` and `remoteEvent.isScreen`:
+
+```javascript
+connection.onstream = function(event) {
+    if(event.isScreen) {
+        // it is screen
+    }
+};
+```
 
 =
 
