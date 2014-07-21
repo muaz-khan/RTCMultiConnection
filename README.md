@@ -8,15 +8,180 @@ It is experimental repo for RTCMultiConnection.js which means that every single 
 
 ## Recent Changes?
 
-Fixed: `remoteEvent.streamid` and `remoteEvent.isScreen`:
-
 ```javascript
-connection.onstream = function(event) {
+connection.eject('target-userid');
+
+// check if user is ejected
+// clear rooms-list if user is ejected
+connection.onSessionClosed = function (session) {
+    if (session.isEjected) {
+        warn(event.userid, 'ejected you.');
+    } else warn('Session has been closed.', session);
+
+
+    if (event.isEjected) {
+        roomsList.innerHTML = '';
+        roomsList.style.display = 'block';
+    }
+};
+
+connection.onconnected = function (event) {
+    // var peer = event.peer;
+    // peer.addStream || peer.removeStream || peer.getStats
+    log('Peer connection has been established between you and', event.userid);
+    peer.getStats(function (result) {
+        // many useful statistics here
+    });
+};
+
+connection.onfailed = function (event) {
+    event.peer.renegotiate();
+    // or event.peer.redial();
+    // event.taretuser.browser == 'firefox' || 'chrome'
+};
+
+// http://www.rtcmulticonnection.org/docs/dontCaptureUserMedia/
+connection.dontCaptureUserMedia = true;
+
+// http://www.rtcmulticonnection.org/docs/dontAttachStream/
+connection.dontAttachStream = true;
+```
+
+<ol>
+                    <li>
+                        Fixed: <code>remoteEvent.streamid</code> and <code>remoteEvent.isScreen</code>:
+                        <pre class="sh_javascript">
+connection.<a href="http://www.RTCMultiConnection.org/docs/onstream/"><code>onstream</code></a> = function(event) {
     if(event.isScreen) {
         // it is screen
     }
 };
-```
+</pre>
+                    </li>
+                    
+                    <li>
+                        Screen capturing is improved, and <a href="https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk">single google chrome extension</a> is used to support capturing from all domains!
+                    </li>
+                    <li>
+                        <code>connection.<a href="http://www.RTCMultiConnection.org/docs/processSdp/"><code>processSdp</code></a></code> added.
+                        <pre class="sh_javascript">
+connection.<a href="http://www.RTCMultiConnection.org/docs/processSdp/"><code>processSdp</code></a> = function(sdp) {
+    sdp = remove_vp8_codecs(sdp);
+    sdp = prefer_opus (sdp);
+    sdp = use_maxaveragebitrate(sdp);
+    return sdp;
+};
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code><a href="http://www.RTCMultiConnection.org/docs/session/">connection.session</a>={}</code> fixed. It allows moderator/initiator to become a listener/viewer i.e. it supports many-to-one scenarios:
+                        <pre class="sh_javascript">
+// for initiator
+connection.<a href="http://www.RTCMultiConnection.org/docs/session/"><code>session</code></a> = {};
+
+// for participants
+connection.<a href="http://www.RTCMultiConnection.org/docs/onNewSession/"><code>onNewSession</code></a> = function(session) {
+    session.<a href="http://www.RTCMultiConnection.org/docs/join/"><code>join</code></a>({
+        audio: true,
+        video: true
+    });
+};
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code><a href="http://www.RTCMultiConnection.org/docs/mediaConstraints/">connection.mediaConstraints</a></code> and <code><a href="http://www.RTCMultiConnection.org/docs/media/">connection.media</a></code> are updated:
+                        <pre class="sh_javascript">
+connection.<a href="http://www.RTCMultiConnection.org/docs/mediaConstraints/"><code>mediaConstraints</code></a> = {
+    mandatory: {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        minAspectRatio: 1.77,
+
+        minFrameRate: 3,
+        maxFrameRate: 64
+    },
+    optional: [
+        bandwidth: 256
+    ]
+};
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code><a href="http://www.RTCMultiConnection.org/docs/onstream/">connection.onstream</a></code> is updated for <code>event.isScreen</code>:
+                        <pre class="sh_javascript">
+connection.<code><a href="http://www.RTCMultiConnection.org/docs/onstream/">onstream</a></code> = function (event) {
+    if(event.isScreen) {
+        // it is screen stream
+    }
+    
+    if(event.isAudio) {
+        // it is audio-only stream
+    }
+    
+    if(event.isVideo) {
+        // it is audio+video stream
+    }
+};
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code><a href="http://www.RTCMultiConnection.org/docs/refresh/">connection.refresh</a></code> is updated and session re-initiation is improved.
+                        <pre class="sh_javascript">
+// you simply need to invoke "connection.<code><a href="http://www.RTCMultiConnection.org/docs/leave/">leave</a></code>" to 
+// leave a session so that you can rejoin same session
+connection.<code><a href="http://www.RTCMultiConnection.org/docs/onstatechange/">onstatechange</a></code> = function (state) {
+    if(state == 'connected-with-initiator') {
+        document.getElementById('leave-session').disabled = false;
+    }
+};
+
+document.getElementById('leave-session').onclick = function() {
+    connection.<code><a href="http://www.RTCMultiConnection.org/docs/leave/">leave</a></code>();
+};
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code>connection.iceProtocols</code> added.
+                        <pre class="sh_javascript">
+connection.iceProtocols = {
+    tcp: true, // prefer using TCP-candidates
+    udp: true  // prefer using UDP-candidates
+};
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code>connection.useCustomChromeExtensionForScreenCapturing</code> added.
+                        <pre class="sh_javascript">
+connection.useCustomChromeExtensionForScreenCapturing = true;
+
+// it is recommended to set chrome extensionid
+// it will auto set above boolean
+connection.DetectRTC.screen.extensionid = 'your-app-store-extensionid';
+</pre>
+                    </li>
+                    
+                    <li>
+                        STUN/TURN servers are updated; as well as ICE-servers from XirSys are used:
+                        <pre class="sh_javascript">
+// to disable XirSys ICE-Servers
+connection.getExternalIceServers = false;
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code>connection.preventSSLAutoAllowed</code> is disabled.
+                        <pre class="sh_javascript">
+// to enable it
+connection.preventSSLAutoAllowed = true;
+</pre>
+                    </li>
+                </ol>
 
 =
 
@@ -145,135 +310,6 @@ It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licenced</a>, whi
 // or
 <script src="//www.webrtc-experiment.com/RTCMultiConnection-v1.9.js"></script>
 ```
-
-=
-
-## Experimental features in this build?
-
-<ol>
-                    <li>
-                        Screen capturing is improved, and <a href="https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk">single google chrome extension</a> is used to support capturing from all domains!
-                    </li>
-                    <li>
-                        <code>connection.processSdp</code> added.
-                        <pre class="sh_javascript">
-connection.processSdp = function(sdp) {
-    sdp = remove_vp8_codecs(sdp);
-    sdp = prefer_opus (sdp);
-    sdp = use_maxaveragebitrate(sdp);
-    return sdp;
-};
-</pre>
-                    </li>
-                    
-                    <li>
-                        <code><a href="http://www.RTCMultiConnection.org/docs/session/">connection.session</a>={}</code> fixed. It allows moderator/initiator to become a listener/viewer i.e. it supports many-to-one scenarios:
-                        <pre class="sh_javascript">
-// for initiator
-connection.<a href="http://www.RTCMultiConnection.org/docs/session/"><code>session</code></a> = {};
-
-// for participants
-connection.<a href="http://www.RTCMultiConnection.org/docs/onNewSession/"><code>onNewSession</code></a> = function(session) {
-    session.<a href="http://www.RTCMultiConnection.org/docs/join/"><code>join</code></a>({
-        audio: true,
-        video: true
-    });
-};
-</pre>
-                    </li>
-                    
-                    <li>
-                        <code><a href="http://www.RTCMultiConnection.org/docs/mediaConstraints/">connection.mediaConstraints</a></code> and <code><a href="http://www.RTCMultiConnection.org/docs/media/">connection.media</a></code> are updated:
-                        <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/mediaConstraints/"><code>mediaConstraints</code></a> = {
-    mandatory: {
-        maxWidth: 1920,
-        maxHeight: 1080,
-        minAspectRatio: 1.77,
-
-        minFrameRate: 3,
-        maxFrameRate: 64
-    },
-    optional: [
-        bandwidth: 256
-    ]
-};
-</pre>
-                    </li>
-                    
-                    <li>
-                        <code><a href="http://www.RTCMultiConnection.org/docs/onstream/">connection.onstream</a></code> is updated for <code>event.isScreen</code>:
-                        <pre class="sh_javascript">
-connection.<code><a href="http://www.RTCMultiConnection.org/docs/onstream/">onstream</a></code> = function (event) {
-    if(event.isScreen) {
-        // it is screen stream
-    }
-    
-    if(event.isAudio) {
-        // it is audio-only stream
-    }
-    
-    if(event.isVideo) {
-        // it is audio+video stream
-    }
-};
-</pre>
-                    </li>
-                    
-                    <li>
-                        <code><a href="http://www.RTCMultiConnection.org/docs/refresh/">connection.refresh</a></code> is updated and session re-initiation is improved.
-                        <pre class="sh_javascript">
-// you simply need to invoke "connection.<code><a href="http://www.RTCMultiConnection.org/docs/leave/">leave</a></code>" to 
-// leave a session so that you can rejoin same session
-connection.<code><a href="http://www.RTCMultiConnection.org/docs/onstatechange/">onstatechange</a></code> = function (state) {
-    if(state == 'connected-with-initiator') {
-        document.getElementById('leave-session').disabled = false;
-    }
-};
-
-document.getElementById('leave-session').onclick = function() {
-    connection.<code><a href="http://www.RTCMultiConnection.org/docs/leave/">leave</a></code>();
-};
-</pre>
-                    </li>
-                    
-                    <li>
-                        <code>connection.iceProtocols</code> added.
-                        <pre class="sh_javascript">
-connection.iceProtocols = {
-    tcp: true, // prefer using TCP-candidates
-    udp: true  // prefer using UDP-candidates
-};
-</pre>
-                    </li>
-                    
-                    <li>
-                        <code>connection.useCustomChromeExtensionForScreenCapturing</code> added.
-                        <pre class="sh_javascript">
-connection.useCustomChromeExtensionForScreenCapturing = true;
-
-// it is recommended to set chrome extensionid
-// it will auto set above boolean
-connection.DetectRTC.screen.extensionid = 'your-app-store-extensionid';
-</pre>
-                    </li>
-                    
-                    <li>
-                        STUN/TURN servers are updated; as well as ICE-servers from XirSys are used:
-                        <pre class="sh_javascript">
-// to disable XirSys ICE-Servers
-connection.getExternalIceServers = false;
-</pre>
-                    </li>
-                    
-                    <li>
-                        <code>connection.preventSSLAutoAllowed</code> is disabled.
-                        <pre class="sh_javascript">
-// to enable it
-connection.preventSSLAutoAllowed = true;
-</pre>
-                    </li>
-                </ol>
 
 =
 
