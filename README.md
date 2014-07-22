@@ -1,12 +1,52 @@
 ## [RTCMultiConnection](http://www.rtcmulticonnection.org/) experimental
 
-It is experimental repo for RTCMultiConnection.js which means that every single update will be pushed to this repo until RTCMultiConnection current version gets stable.
+It is experimental repository for RTCMultiConnection.js which means that every single update will be pushed to this repo until RTCMultiConnection current version gets stable.
 
 =
 
 ## Current Version is [v1.9](http://www.rtcmulticonnection.org/changes-log/#v1.9)
 
 ## Recent Changes?
+
+`connection.onstreamid` added. Simply consider it "pre-remote-streamid" which allows you display an indication of the remote stream for better user experiences.
+
+```javascript
+// on getting remote stream's clue
+connection.onstreamid = function (e) {
+    var mediaElement = document.createElement(e.isAudio ? 'audio' : 'video');
+    mediaElement.controls = true;
+    mediaElement.poster = connection.resources.muted;
+    mediaElement.id = e.streamid;
+    document.body.appendChild(mediaElement);
+};
+
+// on getting local or remote media stream
+connection.onstream = function (e) {
+    if (e.type == 'local') {
+        document.body.appendChild(e.mediaElement);
+        return;
+    }
+
+    var mediaElement = document.getElementById(e.streamid);
+    if (!mediaElement) return;
+    mediaElement.src = e.blobURL;
+    mediaElement.play();
+};
+
+// when remote user closed the stream
+connection.onstreamended = function (e) {
+    if (e.type == 'local') {
+        document.body.removeChild(e.mediaElement);
+        return;
+    }
+
+    var mediaElement = document.getElementById(e.streamid);
+    if (!mediaElement) return;
+    mediaElement.parentNode.removeChild(mediaElement);
+};
+```
+
+----
 
 ```javascript
 connection.eject('target-userid');
@@ -15,11 +55,11 @@ connection.eject('target-userid');
 // clear rooms-list if user is ejected
 connection.onSessionClosed = function (session) {
     if (session.isEjected) {
-        warn(event.userid, 'ejected you.');
+        warn(session.userid, 'ejected you.');
     } else warn('Session has been closed.', session);
 
 
-    if (event.isEjected) {
+    if (session.isEjected) {
         roomsList.innerHTML = '';
         roomsList.style.display = 'block';
     }
@@ -29,7 +69,7 @@ connection.onconnected = function (event) {
     // var peer = event.peer;
     // peer.addStream || peer.removeStream || peer.getStats
     log('Peer connection has been established between you and', event.userid);
-    peer.getStats(function (result) {
+    event.peer.getStats(function (result) {
         // many useful statistics here
     });
 };
