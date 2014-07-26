@@ -8,22 +8,48 @@ It is experimental repository for RTCMultiConnection.js which means that every s
 
 ## Recent Changes?
 
-`connection.onstreamid` added. Simply consider it "pre-remote-streamid" which allows you display an indication of the remote stream for better user experiences.
-
-```javascript
+<ol>
+                    <li>
+                        Screen capturing support for Firefox nightly added. You simply need to open "<code>about:config</code>" on Firefox nightly and set "<code>media.getusermedia.screensharing.enabled</code>" to "<code>true</code>".
+                        <pre class="sh_javascript">
+// same for Firefox
+connection.<a href="http://www.RTCMultiConnection.org/docs/session/"><code>session</code></a> = {
+    screen: true,
+    oneway: true
+}
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code>connection.<a href="http://www.RTCMultiConnection.org/docs/dontCaptureUserMedia/"><code>dontCaptureUserMedia</code></a></code> added:
+                        <pre class="sh_javascript">
+connection.<a href="http://www.RTCMultiConnection.org/docs/dontCaptureUserMedia/"><code>dontCaptureUserMedia</code></a> = true;
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code>connection.<a href="http://www.RTCMultiConnection.org/docs/dontAttachStream/"><code>dontAttachStream</code></a></code> updated:
+                        <pre class="sh_javascript">
+connection.<a href="http://www.RTCMultiConnection.org/docs/dontAttachStream/"><code>dontAttachStream</code></a> = true;
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code>connection.onstreamid</code> added:
+                        <pre class="sh_javascript">
 // on getting remote stream's clue
 connection.onstreamid = function (e) {
     var mediaElement = document.createElement(e.isAudio ? 'audio' : 'video');
     mediaElement.controls = true;
     mediaElement.poster = connection.resources.muted;
     mediaElement.id = e.streamid;
-    document.body.appendChild(mediaElement);
+    connection.body.appendChild(mediaElement);
 };
 
 // on getting local or remote media stream
 connection.onstream = function (e) {
     if (e.type == 'local') {
-        document.body.appendChild(e.mediaElement);
+        connection.body.appendChild(e.mediaElement);
         return;
     }
 
@@ -36,7 +62,7 @@ connection.onstream = function (e) {
 // when remote user closed the stream
 connection.onstreamended = function (e) {
     if (e.type == 'local') {
-        document.body.removeChild(e.mediaElement);
+        e.mediaElement.parentNode.removeChild(e.mediaElement);
         return;
     }
 
@@ -44,50 +70,65 @@ connection.onstreamended = function (e) {
     if (!mediaElement) return;
     mediaElement.parentNode.removeChild(mediaElement);
 };
-```
-
-----
-
-```javascript
-connection.eject('target-userid');
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code>connection.peers['target-userid'].getStats</code> added.
+                        <pre class="sh_javascript">
+connection.peers['target-userid'].peer.getStats(function (result) {
+    // many useful statistics here
+});
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code>connection.onconnected</code> added.
+                        <pre class="sh_javascript">
+connection.onconnected = function (event) {
+    log('Peer connection has been established between you and', event.userid);
+    
+    // event.peer.addStream || event.peer.removeStream || event.peer.changeBandwidth
+    // event.peer == connection.peers[event.userid]
+    
+    event.peer.getStats(function (result) {
+        // many useful statistics here
+    });
+};
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code>connection.onfailed</code> added.
+                        <pre class="sh_javascript">
+connection.onfailed = function (event) {
+    event.peer.renegotiate();
+    // or event.peer.redial();
+    // event.targetuser.browser == 'firefox' || 'chrome'
+};
+</pre>
+                    </li>
+                    
+                    <li>
+                        <code>connection.<a href="http://www.RTCMultiConnection.org/docs/eject/"><code>eject</code></a></code> is fixed.
+                        <pre class="sh_javascript">
+connection.<a href="http://www.RTCMultiConnection.org/docs/eject/"><code>eject</code></a>('target-userid');
 
 // check if user is ejected
 // clear rooms-list if user is ejected
-connection.onSessionClosed = function (session) {
+connection.<a href="http://www.RTCMultiConnection.org/docs/onSessionClosed/"><code>onSessionClosed</code></a> = function (session) {
     if (session.isEjected) {
         warn(session.userid, 'ejected you.');
     } else warn('Session has been closed.', session);
-
 
     if (session.isEjected) {
         roomsList.innerHTML = '';
         roomsList.style.display = 'block';
     }
 };
-
-connection.onconnected = function (event) {
-    // var peer = event.peer;
-    // peer.addStream || peer.removeStream || peer.getStats
-    log('Peer connection has been established between you and', event.userid);
-    event.peer.getStats(function (result) {
-        // many useful statistics here
-    });
-};
-
-connection.onfailed = function (event) {
-    event.peer.renegotiate();
-    // or event.peer.redial();
-    // event.taretuser.browser == 'firefox' || 'chrome'
-};
-
-// http://www.rtcmulticonnection.org/docs/dontCaptureUserMedia/
-connection.dontCaptureUserMedia = true;
-
-// http://www.rtcmulticonnection.org/docs/dontAttachStream/
-connection.dontAttachStream = true;
-```
-
-<ol>
+</pre>
+                    </li>
+                    
                     <li>
                         Fixed: <code>remoteEvent.streamid</code> and <code>remoteEvent.isScreen</code>:
                         <pre class="sh_javascript">
@@ -102,6 +143,7 @@ connection.<a href="http://www.RTCMultiConnection.org/docs/onstream/"><code>onst
                     <li>
                         Screen capturing is improved, and <a href="https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk">single google chrome extension</a> is used to support capturing from all domains!
                     </li>
+                    
                     <li>
                         <code>connection.<a href="http://www.RTCMultiConnection.org/docs/processSdp/"><code>processSdp</code></a></code> added.
                         <pre class="sh_javascript">
@@ -196,13 +238,9 @@ connection.iceProtocols = {
                     </li>
                     
                     <li>
-                        <code>connection.useCustomChromeExtensionForScreenCapturing</code> added.
+                        Use custom chrome extension for screen capturing:
                         <pre class="sh_javascript">
-connection.useCustomChromeExtensionForScreenCapturing = true;
-
-// it is recommended to set chrome extensionid
-// it will auto set above boolean
-connection.DetectRTC.screen.extensionid = 'your-app-store-extensionid';
+connection.<code><a href="http://www.rtcmulticonnection.org/docs/DetectRTC/">DetectRTC</a></code>.screen.<code><a href="http://www.rtcmulticonnection.org/docs/DetectRTC/#DetectRTC.screen">extensionid</a></code> = 'your-app-store-extensionid';
 </pre>
                     </li>
                     
@@ -228,10 +266,6 @@ connection.preventSSLAutoAllowed = true;
 ## Issues?
 
 <ol>
-    <li>
-        connection.playRoleOfInitiator must have extra-data as well.
-    </li>
-    
     <li>
         Audio/Video recording must support single-file for Firefox.
     </li>
@@ -267,15 +301,6 @@ connection.DetectRTC.MediaDevices.forEach(function (device) {
     </li>
     
     <li>
-        <p>
-            Dirty workaround for "<code>ice-connection-state==disconnected</code>"
-        </p>
-        <p>
-            Fix "<code>disconnected</code>" which happens often. Need to use WebRTC data channels for dirty workaround whenever possible; currently we're relying on signaling medium.
-        </p>
-    </li>
-    
-    <li>
         "<code>removeStream</code>" shim needed for Firefox.
     </li>
     
@@ -301,10 +326,6 @@ connection.DetectRTC.MediaDevices.forEach(function (device) {
     
     <li>
         "<code>connection.autoRedialOnFailure</code>" still fails with renegotiation scenarios because when renegotiating media, connection state always changes to "disconnected" then it follows connection steps from beginning i.e. `disconnected > new > checking > connected > completed` . Read more <a href="http://muaz-khan.blogspot.com/2014/05/webrtc-tips-tricks.html">here</a>.
-    </li>
-    
-    <li>
-        "<code>connection.onSessionClosed</code>" isn't fired. This should be fired if initiator closes the entire session.
     </li>
     
     <li>
