@@ -1,4 +1,4 @@
-// Last time updated at July 26, 2014, 08:32:23
+// Last time updated at July 28, 2014, 08:32:23
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/RTCMultiConnection.js
 
@@ -13,6 +13,10 @@
 // RTCMultiConnection-v1.9
 
 /* issues/features need to be fixed & implemented:
+
+-. RTCMultiConnection is updated for audio+screen from single getUserMedia request for Firefox Nightly.
+
+-. todo: onFileProgress: if connection gets dropped; re-attempt sharing from last position/chunk.
 
 -. screen capturing support for firefox nightly added.
 -. command-line flag: media.getusermedia.screensharing.enabled
@@ -356,9 +360,17 @@
             if(isFirefox) {
                 warn(Firefox_Screen_Capturing_Warning);
                 screen_constraints.video = merge(screen_constraints.video.mandatory, {
-                    mozMediaSource: 'window',
-                    mediaSource: 'window'
+                    mozMediaSource: 'window', // mozMediaSource is redundant here
+                    mediaSource: 'window' // 'screen' || 'window'
                 });
+                
+                // Firefox is supporting audio+screen from single getUserMedia request
+                // audio+video+screen will become audio+screen for Firefox
+                // because Firefox isn't supporting multi-streams feature
+                if(constraints.audio /* && !session.video */) {
+                    screen_constraints.audio = true;
+                    constraints = {};
+                }
                 
                 delete screen_constraints.video.chromeMediaSource;
             }
@@ -737,7 +749,6 @@
                 return;
             }
             
-            connection.leaveOnPageUnload = false;
             rtcMultiSession.leave();
         };
 
@@ -2002,7 +2013,15 @@
             });
 
             sockets = swap(sockets);
+            
             connection.refresh();
+            
+            webAudioMediaStreamSources.forEach(function(mediaStreamSource) {
+                // if source is connected; then chrome will crash on unload.
+                mediaStreamSource.disconnect();
+            });
+            
+            webAudioMediaStreamSources = [];
         }
 
         // www.RTCMultiConnection.org/docs/remove/
@@ -3060,30 +3079,39 @@
                 this.channels.push(channel);
             },
             addStream: function(stream) {
+                if(!stream.streamid) {
+                    stream.streamid = getRandomString();
+                }
+                
+                log('attaching stream:', stream.streamid);
+                    
+                if(!stream.isScreen) {
+                    stream.isScreen = false;
+                }
+                    
                 this.connection.addStream(stream);
                 this.sendStreamId(stream);
+                this.getStreamInfo();
             },
             attachMediaStreams: function () {
                 var streams = this.attachStreams;
                 for (var i = 0; i < streams.length; i++) {
-                    log('attaching stream:', streams[i].streamid);
                     this.addStream(streams[i]);
                 }
-                this.getStreamInfo();
             },
             getStreamInfo: function () {
                 this.streaminfo = '';
-                var streams = this.attachStreams;
+                var streams = this.connection.getLocalStreams();
                 for (var i = 0; i < streams.length; i++) {
                     if (i == 0) {
                         this.streaminfo = JSON.stringify({
-                            streamid: streams[i].streamid,
-                            isScreen: streams[i].isScreen
+                            streamid: streams[i].streamid || '',
+                            isScreen: streams[i].isScreen || false
                         });
                     } else {
                         this.streaminfo += '----' +  JSON.stringify({
-                            streamid: streams[i].streamid,
-                            isScreen: streams[i].isScreen
+                            streamid: streams[i].streamid || '',
+                            isScreen: streams[i].isScreen || false
                         });
                     }
                 }
@@ -3651,6 +3679,8 @@
             receive: receive
         };
     }
+    
+    var webAudioMediaStreamSources = [];
 
     function convertToAudioStream(mediaStream) {
         if (!mediaStream) throw 'MediaStream is mandatory.';
@@ -3660,13 +3690,15 @@
 
         var destination = context.createMediaStreamDestination();
         mediaStreamSource.connect(destination);
+        
+        webAudioMediaStreamSources.push(mediaStreamSource);
 
         return destination.stream;
     }
 
     var isChrome = !!navigator.webkitGetUserMedia;
     var isFirefox = !!navigator.mozGetUserMedia;
-    var isMobileDevice = navigator.userAgent.match(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i);
+    var isMobileDevice = !!navigator.userAgent.match(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i);
 
     // detect node-webkit
     var isNodeWebkit = window.process && (typeof window.process == 'object') && window.process.versions && window.process.versions['node-webkit'];
@@ -4277,6 +4309,14 @@
             });
 
             firebase.send = function (data) {
+                // a quick dirty workaround to make sure firebase
+                // shouldn't fail for NULL values.
+                for(var prop in data) {
+                    if(typeof data[prop] == 'undefined') {
+                        data[prop] = false;
+                    }
+                }
+                
                 this.push(data);
             };
 

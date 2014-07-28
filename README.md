@@ -10,13 +10,31 @@ It is experimental repository for RTCMultiConnection.js which means that every s
 
 <ol>
                     <li>
+                        RTCMultiConnection is updated for <code>audio+screen</code> from single getUserMedia request for Firefox Nightly. Below snippet is sharing single video stream containing both audio/video tracks; and target browser is joining with only audio. Screen can be viewed on both chrome and Firefox. If you'll share from chrome, then it will be making multiple getUserMedia requests.
+                        <pre class="sh_javascript">
+// audio+video+screen will become audio+screen for Firefox
+// because Firefox isn't supporting multi-streams feature
+
+// initiator from Firefox
+initiator.<a href="http://www.RTCMultiConnection.org/docs/session/"><code>session</code></a> = {
+    screen: true,
+    audio: true
+};
+
+// participant in chrome or Firefox
+participant.<a href="http://www.RTCMultiConnection.org/docs/onNewSession/"><code>onNewSession</code></a> = function(session) {
+    session.join({ audio: true });
+};
+</pre>
+                    </li>
+                    <li>
                         Screen capturing support for Firefox nightly added. You simply need to open "<code>about:config</code>" on Firefox nightly and set "<code>media.getusermedia.screensharing.enabled</code>" to "<code>true</code>".
                         <pre class="sh_javascript">
 // same for Firefox
 connection.<a href="http://www.RTCMultiConnection.org/docs/session/"><code>session</code></a> = {
     screen: true,
     oneway: true
-}
+};
 </pre>
                     </li>
                     
@@ -260,6 +278,7 @@ connection.preventSSLAutoAllowed = true;
 </pre>
                     </li>
                 </ol>
+
 
 =
 
