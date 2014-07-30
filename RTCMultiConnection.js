@@ -1,4 +1,4 @@
-// Last time updated at July 28, 2014, 08:32:23
+// Last time updated at July 30, 2014, 08:32:23
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/RTCMultiConnection.js
 
@@ -13,6 +13,9 @@
 // RTCMultiConnection-v1.9
 
 /* issues/features need to be fixed & implemented:
+
+-. https://bugzilla.mozilla.org/show_bug.cgi?id=1045810
+-. workaround-added: Firefox don't yet support onended for any stream (remote/local)
 
 -. RTCMultiConnection is updated for audio+screen from single getUserMedia request for Firefox Nightly.
 
@@ -1690,7 +1693,7 @@
                             stream = connection.streams[stream];
                             if (stream.userid == userLeft) {
                                 stopTracks(stream);
-                                stream.stream.onended(stream.streamObject);
+                                connection.onstreamended(stream.streamObject);
                             }
                         }
                     }
@@ -3786,6 +3789,12 @@
         mediaElement.controls = true;
         mediaElement.autoplay = !!session.remote;
         mediaElement.muted = session.remote ? false : true;
+        
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=1045810
+        // Firefox don't yet support onended for any stream (remote/local)
+        isFirefox && mediaElement.addEventListener('ended', function() {
+            stream.onended();
+        }, false);
 
         mediaElement.play();
 
@@ -3968,12 +3977,12 @@
         }
 
         if (isFirefox) {
-            // todo-verify: this may cause multiple-invocation of "onstreamended"
+            // Firefox don't yet support onended for any stream (remote/local)
             if (mediaStream.onended) mediaStream.onended();
         }
     }
     
-    var Firefox_Screen_Capturing_Warning = 'Make sure that you are using Firefox Nightly and you enabled: media.getusermedia.screensharing.enabled';
+    var Firefox_Screen_Capturing_Warning = 'Make sure that you are using Firefox Nightly and you enabled: media.getusermedia.screensharing.enabled flag from about:config page';
     var ReservedExtensionID = 'ajhifddimkapgcifgcodmmfdlknahffk';
     
     // if you deployed your own extension on Google App Store
@@ -4117,7 +4126,7 @@
                 // extension notified his presence
                 if (data == 'rtcmulticonnection-extension-loaded') {
                     DetectRTC.screen.chromeMediaSource = 'desktop';
-                    if (DetectRTC.screen && DetectRTC.screen.onScreenCapturingExtensionAvailable) {
+                    if (DetectRTC.screen.onScreenCapturingExtensionAvailable) {
                         DetectRTC.screen.onScreenCapturingExtensionAvailable();
 
                         // make sure that this event isn't fired multiple times

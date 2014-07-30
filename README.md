@@ -10,6 +10,9 @@ It is experimental repository for RTCMultiConnection.js which means that every s
 
 <ol>
                     <li>
+                        Workaround-added: <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1045810">Firefox don't yet support onended for any stream</a> (remote/local)
+                    </li>
+                    <li>
                         RTCMultiConnection is updated for <code>audio+screen</code> from single getUserMedia request for Firefox Nightly. Below snippet is sharing single video stream containing both audio/video tracks; and target browser is joining with only audio. Screen can be viewed on both chrome and Firefox. If you'll share from chrome, then it will be making multiple getUserMedia requests.
                         <pre class="sh_javascript">
 // audio+video+screen will become audio+screen for Firefox
@@ -56,37 +59,12 @@ connection.<a href="http://www.RTCMultiConnection.org/docs/dontAttachStream/"><c
                         <code>connection.onstreamid</code> added:
                         <pre class="sh_javascript">
 // on getting remote stream's clue
-connection.onstreamid = function (e) {
+connection.<a href="http://www.RTCMultiConnection.org/docs/onstreamid/"><code>onstreamid</code></a> = function (e) {
     var mediaElement = document.createElement(e.isAudio ? 'audio' : 'video');
     mediaElement.controls = true;
     mediaElement.poster = connection.resources.muted;
     mediaElement.id = e.streamid;
     connection.body.appendChild(mediaElement);
-};
-
-// on getting local or remote media stream
-connection.onstream = function (e) {
-    if (e.type == 'local') {
-        connection.body.appendChild(e.mediaElement);
-        return;
-    }
-
-    var mediaElement = document.getElementById(e.streamid);
-    if (!mediaElement) return;
-    mediaElement.src = e.blobURL;
-    mediaElement.play();
-};
-
-// when remote user closed the stream
-connection.onstreamended = function (e) {
-    if (e.type == 'local') {
-        e.mediaElement.parentNode.removeChild(e.mediaElement);
-        return;
-    }
-
-    var mediaElement = document.getElementById(e.streamid);
-    if (!mediaElement) return;
-    mediaElement.parentNode.removeChild(mediaElement);
 };
 </pre>
                     </li>
@@ -321,10 +299,6 @@ connection.DetectRTC.MediaDevices.forEach(function (device) {
     
     <li>
         "<code>removeStream</code>" shim needed for Firefox.
-    </li>
-    
-    <li>
-        "<code>stream.onended</code>" should be thoroughly tested for Firefox. <a href="http://www.rtcmulticonnection.org/docs/onstreamended/">onstreamended</a> event must be fired once.
     </li>
     
     <li>
