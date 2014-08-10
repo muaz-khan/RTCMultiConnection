@@ -14,8 +14,12 @@
 
 /* issues/features need to be fixed & implemented:
 
--. todo: add connection.keepStreamsOpened
+-. added: connection.keepStreamsOpened
+-. added: connection.localStreams
+
 -. bug: TextSender is unable to send array as a whole.
+
+-. removed: connection.caniuse.checkIfScreenSharingFlagEnabled
 
 -. webrtc-everywhere/temasys supported added for Safari & IE11.
 -. https://github.com/muaz-khan/PluginRTC
@@ -1704,7 +1708,7 @@
                         for (var stream in connection.streams) {
                             stream = connection.streams[stream];
                             if (stream.userid == userLeft) {
-                                stopTracks(stream);
+                                connection.stopMediaStream(stream);
                                 connection.onstreamended(stream.streamObject);
                             }
                         }
@@ -2082,7 +2086,7 @@
 
             // to stop/remove self streams
             for (var i = 0; i < connection.attachStreams.length; i++) {
-                stopTracks(connection.attachStreams[i]);
+                connection.stopMediaStream(connection.attachStreams[i]);
             }
 
             // to allow capturing of identical streams
@@ -3374,6 +3378,10 @@
 
         function streaming(stream, returnBack, streamid) {
             if (!streamid) streamid = getRandomString();
+            
+            // localStreams object will store stream
+            // until it is removed using native-stop method.
+            connection.localStreams[streamid] = stream;
 
             var video = options.video;
             if (video) {
@@ -4031,30 +4039,6 @@
         }
     }
 
-    function stopTracks(mediaStream) {
-        if (!mediaStream) throw 'MediaStream argument is mandatory.';
-
-        if (typeof mediaStream.getAudioTracks == 'undefined') {
-            if (mediaStream.stop) {
-                mediaStream.stop();
-            }
-            return;
-        }
-
-        if (mediaStream.getAudioTracks().length && mediaStream.getAudioTracks()[0].stop) {
-            mediaStream.getAudioTracks()[0].stop();
-        }
-
-        if (mediaStream.getVideoTracks().length && mediaStream.getVideoTracks()[0].stop) {
-            mediaStream.getVideoTracks()[0].stop();
-        }
-
-        if (isFirefox) {
-            // Firefox don't yet support onended for any stream (remote/local)
-            if (mediaStream.onended) mediaStream.onended();
-        }
-    }
-
     var Firefox_Screen_Capturing_Warning = 'Make sure that you are using Firefox Nightly and you enabled: media.getusermedia.screensharing.enabled flag from about:config page. You also need to add your domain in "media.getusermedia.screensharing.allowed_domains" flag.';
     var ReservedExtensionID = 'ajhifddimkapgcifgcodmmfdlknahffk';
 
@@ -4692,7 +4676,7 @@
                     });
 
                     var stream = self.stream;
-                    if (stream) stopTracks(stream);
+                    if (stream) self.RTCMultiConnection.stopMediaStream(stream);
                 },
                 mute: function(session) {
                     this.muted = true;
@@ -4856,58 +4840,6 @@
 
             // there is no way to check whether "getUserMedia" flag is enabled or not!
             ScreenSharing: DetectRTC.isScreenCapturingSupported,
-            checkIfScreenSharingFlagEnabled: function(callback) {
-                var warning;
-                if (isFirefox) {
-                    warning = 'Screen sharing is NOT supported on Firefox.';
-                    error(warning);
-                    if (callback) callback(false);
-                }
-
-                if (location.protocol !== 'https:') {
-                    warning = 'Screen sharing is NOT supported on ' + location.protocol + ' Try https!';
-                    error(warning);
-                    if (callback) return callback(false);
-                }
-
-                if (chromeVersion < 26) {
-                    warning = 'Screen sharing support is suspicious!';
-                    warn(warning);
-                }
-
-                var screen_constraints = {
-                    video: {
-                        mandatory: {
-                            chromeMediaSource: 'screen'
-                        }
-                    }
-                };
-
-                var invocationInterval = 0,
-                    stop;
-                (function selfInvoker() {
-                    invocationInterval++;
-                    if (!stop) setTimeout(selfInvoker, 10);
-                })();
-
-                navigator.webkitGetUserMedia(screen_constraints, onsuccess, onfailure);
-
-                function onsuccess(stream) {
-                    if (stream.stop) {
-                        stream.stop();
-                    }
-
-                    if (callback) {
-                        callback(true);
-                    }
-                }
-
-                function onfailure() {
-                    stop = true;
-                    if (callback) callback(invocationInterval > 5, warning);
-                }
-            },
-
             RtpDataChannels: DetectRTC.isRtpDataChannelsSupported,
             SctpDataChannels: DetectRTC.isSctpDataChannelsSupported
         };
@@ -5082,6 +5014,7 @@
         };
 
         connection.localStreamids = [];
+        connection.localStreams = {};
 
         // www.RTCMultiConnection.org/docs/onMediaFile/
         connection.onMediaFile = function(e) {
@@ -5382,6 +5315,45 @@
             // event.isScreen || event.isVideo || event.isAudio
             log('got remote streamid', event.streamid, 'from', event.userid);
         };
+        
+        connection.stopMediaStream = function (mediaStream) {
+            if (!mediaStream) throw 'MediaStream argument is mandatory.';
+            
+            if(connection.keepStreamsOpened) {
+                mediaStream.onended();
+                return;
+            }
+            
+            // remove stream from "localStreams" object
+            // when native-stop method invoked.
+            if(connection.localStreams[mediaStream.streamid]) {
+                delete connection.localStreams[mediaStream.streamid];
+            }
+
+            if (typeof mediaStream.getAudioTracks == 'undefined') {
+                if (mediaStream.stop) {
+                    mediaStream.stop();
+                }
+                return;
+            }
+
+            if (mediaStream.getAudioTracks().length) {
+                mediaStream.getAudioTracks().forEach(function(track) {
+                    track.stop();
+                });
+            }
+
+            if (mediaStream.getVideoTracks().length) {
+                mediaStream.getVideoTracks().forEach(function(track) {
+                    track.stop();
+                });
+            }
+
+            if (isFirefox) {
+                // Firefox don't yet support onended for any stream (remote/local)
+                if (mediaStream.onended) mediaStream.onended();
+            }
+        }
 
         connection.Plugin = Plugin;
     }
