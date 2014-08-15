@@ -1,4 +1,4 @@
-// Last time updated at August 10, 2014, 08:32:23
+// Last time updated at August 15, 2014, 08:32:23
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/RTCMultiConnection.js
 
@@ -14,6 +14,13 @@
 
 /* issues/features need to be fixed & implemented:
 
+-. googTemporalLayeredScreencast and googLeakyBucket added for screen capturing.
+
+-. updated: connection.candidates for stun: true and turn: true
+
+-. added: connection.log = false;
+-. added: connection.onlog = function(log) {};
+
 -. added: connection.keepStreamsOpened
 -. added: connection.localStreams
 
@@ -21,52 +28,22 @@
 
 -. removed: connection.caniuse.checkIfScreenSharingFlagEnabled
 
--. webrtc-everywhere/temasys supported added for Safari & IE11.
+-. webrtc-everywhere/temasys support added for Safari & IE11.
 -. https://github.com/muaz-khan/PluginRTC
-
--. FF nightly applied more restrictions for screen capturing:
--. about:config==media.getusermedia.screensharing.allowed_domains=your-domain-should-be-set
--. ref: https://bugzilla.mozilla.org/show_bug.cgi?id=1037424
-
--. https://bugzilla.mozilla.org/show_bug.cgi?id=1045810
--. workaround-added: Firefox don't yet support onended for any stream (remote/local)
-
--. RTCMultiConnection is updated for audio+screen from single getUserMedia request for Firefox Nightly.
 
 -. todo: onFileProgress: if connection gets dropped; re-attempt sharing from last position/chunk.
 
--. screen capturing support for firefox nightly added.
--. command-line flag: media.getusermedia.screensharing.enabled
-
--. connection.onstreamid added.
--. connection.onconnected, connection.ondisconnected, connection.onfailed added.
-
--. connection.eject is fixed. Now, onSessionClosed has "event.isEjected" boolean.
--. (fixed) connection.playRoleOfInitiator must have extra-data as well.
-
--. connection.dontCaptureUserMedia added. Now, connection.dontAttachStream merely prevents attachment of any stream.
--. these are breaking changes for those who are using dontAttachStream in their client-scripts.
-
--. connection.join is improved.
--. fixed: remote.streamid and remote.isScreen
-
 -. todo: add connection.switchStream(session) to remove old ones, and add new stream(s)
 
--. support inactive at initial handshake
+-. support inactive at initial handshake (this can easily be implemented using connection.processSdp)
 -. todo: sharePartOfScreen must be fixed for "performance" when sharing over all users.
--. audio+video recording must support single-file for Firefox.
--. need to use maxaveragebitrate for audio bandwidth.
--. need to add LAN connectivity support.
--. todo: add mp3-live streaming support
--. todo: add mozCaptureStreamUntilEnded streaming support.
--. todo: Fix "disconnected" which happens often. Need to use WebRTC data channels for dirty workaround whenever possible; currently we're relying on signaling medium.
--. todo: check if stream.onended is fired on Firefox.
+-. use MediaStreamRecorder.js for conference recordings
+-. need to use maxaveragebitrate for audio bandwidth
+-. need to add LAN connectivity support
 -. todo: add removeStream workaround for Firefox.
--. todo: auto fallback to part-of-screen option for Firefox.
 -. todo-fix: trickleIce & renegotiation fails.
 -. "channel" object in the openSignalingChannel shouldn't be mandatory!
 -. JSON parse/stringify options for data transmitted using data-channels; e.g. connection.preferJSON = true;
--. removeTrack() and addTracks() instead of "stop"
 -. voice translation using Translator.js
 */
 
@@ -377,7 +354,11 @@
                         maxHeight: 1080,
                         minAspectRatio: 1.77
                     },
-                    optional: []
+                    optional: [{ // non-official Google-only optional constraints
+                        googTemporalLayeredScreencast:true
+                    }, {
+                        googLeakyBucket:true
+                    }]
                 }
             };
 
@@ -975,13 +956,19 @@
                 onicecandidate: function(candidate) {
                     if (!connection.candidates) throw 'ICE candidates are mandatory.';
                     if (!connection.iceProtocols) throw 'At least one must be true; UDP or TCP.';
+                    
+                    var iceCandidates = connection.candidates;
+                    var stun = iceCandidates.reflexive || iceCandidates.stun;
+                    var turn = iceCandidates.relay || iceCandidates.turn;
 
-                    if (!connection.candidates.host && candidate.candidate.indexOf('typ host') != -1) return;
-                    if (!connection.candidates.relay && candidate.candidate.indexOf('typ relay') != -1) return;
-                    if (!connection.candidates.reflexive && candidate.candidate.indexOf('typ srflx') != -1) return;
+                    if (!iceCandidates.host && !!candidate.candidate.match(/a=candidate.*typ host/g)) return;
+                    if (!turn && !!candidate.candidate.match(/a=candidate.*typ relay/g)) return;
+                    if (!stun && !!candidate.candidate.match(/a=candidate.*typ srflx/g)) return;
+                    
+                    var protocol = connection.iceProtocols;
 
-                    if (!connection.iceProtocols.udp && candidate.candidate.indexOf(' udp ') != -1) return;
-                    if (!connection.iceProtocols.tcp && candidate.candidate.indexOf(' tcp ') != -1) return;
+                    if (!protocol.udp && !!protocol.match(/a=candidate.*udp/g)) return;
+                    if (!protocol.tcp && !!protocol.match(/a=candidate.*tcp/g)) return;
 
                     if (!window.selfNPObject) window.selfNPObject = candidate;
 
@@ -2685,7 +2672,7 @@
                 } else if (!response.offers.audio && response.offers.video) {
                     log('target user has only video stream.');
                 } else {
-                    log('target user has no stream; it seems one-way streaming.');
+                    log('target user has no stream; it seems one-way streaming or data-only connection.');
                 }
 
                 var mandatory = connection.sdpConstraints.mandatory;
@@ -3028,9 +3015,7 @@
             setRemoteDescription: function(sessionDescription) {
                 if (!sessionDescription) throw 'Remote session description should NOT be NULL.';
 
-                if (this.connection.iceConnectionState == 'connected' && this.connection.iceGatheringState == 'complete' && this.connection.signalingState == 'stable') {
-                    return;
-                }
+                if(!this.connection) return;
 
                 log('setting remote description', sessionDescription.type, sessionDescription.sdp);
                 this.connection.setRemoteDescription(
@@ -4379,7 +4364,7 @@
                 // a quick dirty workaround to make sure firebase
                 // shouldn't fail for NULL values.
                 for (var prop in data) {
-                    if (typeof data[prop] == 'undefined') {
+                    if (typeof data[prop] == 'undefined' || typeof data[prop] == 'function') {
                         data[prop] = false;
                     }
                 }
@@ -4624,8 +4609,8 @@
         // www.RTCMultiConnection.org/docs/candidates/
         connection.candidates = {
             host: true,
-            relay: true,
-            reflexive: true
+            stun: true,
+            turn: true
         };
 
         // www.RTCMultiConnection.org/docs/attachStreams/
@@ -5265,13 +5250,18 @@
         connection.getExternalIceServers = true;
 
         connection.onfailed = function(event) {
+            if(!event.peer.numOfRetries) event.peer.numOfRetries = 0;
+            event.peer.numOfRetries++;
+            
             if (isFirefox || event.targetuser.browser == 'firefox') {
-                warn('ICE connectivity check is failed. Re-establishing peer connection.');
-                event.peer.redial();
+                error('ICE connectivity check is failed. Re-establishing peer connection.');
+                event.peer.numOfRetries < 2 && event.peer.redial();
             } else {
-                warn('ICE connectivity check is failed. Renegotiating peer connection.');
-                event.peer.renegotiate();
+                error('ICE connectivity check is failed. Renegotiating peer connection.');
+                event.peer.numOfRetries < 2 && event.peer.renegotiate();
             }
+            
+            if(event.peer.numOfRetries >= 2) event.peer.numOfRetries = 0;
         };
 
         connection.onconnected = function(event) {
@@ -5280,7 +5270,7 @@
         };
 
         connection.ondisconnected = function(event) {
-            log('Peer connection seems has been disconnected between you and', event.userid);
+            error('Peer connection seems has been disconnected between you and', event.userid);
 
             if (isEmpty(connection.channels)) return;
             if (!connection.channels[event.userid]) return;

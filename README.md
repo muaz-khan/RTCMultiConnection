@@ -6,6 +6,88 @@ It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licenced</a>, whi
 
 ## Current Version is [v2.0](http://www.rtcmulticonnection.org/changes-log/#v2.0)
 
+## 1. Link The Library
+
+```
+// stable version is v1.9
+https://cdn.webrtc-experiment.com/RTCMultiConnection-v1.9.js
+```
+
+## 2. Common Code
+
+```javascript
+var MODERATOR_CHANNEL_ID = 'ABCDEF'; // channel-id
+var MODERATOR_SESSION_ID = 'XYZ';    // room-id
+var MODERATOR_ID         = 'JKL';    // user-id
+var MODERATOR_SESSION    = {         // media-type
+    audio: true,
+    video: true
+};
+var MODERATOR_EXTRA      = {};       // empty extra-data
+```
+
+## 3. Code for Room Moderator (i.e. Initiator)
+
+```javascript
+var moderator     = new RTCMultiConnection(MODERATOR_CHANNEL_ID);
+moderator.session = MODERATOR_SESSION;
+moderator.userid  = MODERATOR_ID;
+moderator.extra   = MODERATOR_EXTRA;
+moderator.open({
+    dontTransmit: true,
+    sessionid:    MODERATOR_SESSION_ID
+});
+```
+
+## 4. Code for Room Participants
+
+```javascript
+var participants = new RTCMultiConnection(MODERATOR_CHANNEL_ID);
+participants.join({
+    sessionid: MODERATOR_SESSION_ID,
+    userid:    MODERATOR_ID,
+    extra:     MODERATOR_EXTRA,
+    session:   MODERATOR_SESSION
+});
+```
+
+## 5. (optional) Handle how to get streams
+
+```javascript
+// same code can be used for participants
+// (it is optional) 
+moderator.onstreamid = function(event) {
+    // got a clue of incoming remote stream
+    // didn't get remote stream yet
+    
+    var incoming_stream_id = event.streamid;
+    
+    YOUR_PREVIEW_IMAGE.show();
+    
+    // or
+    YOUR_PREVIEW_VIDEO.show();
+};
+
+// same code can be used for participants
+// it is useful
+moderator.onstream = function(event) {
+    // got local or remote stream
+    // if(event.type == 'local')  {}
+    // if(event.type == 'remote') {}
+    
+    document.body.appendChild(event.mediaElement);
+    
+    // or YOUR_VIDEO.src = event.blobURL;
+    // or YOUR_VIDEO.src = URL.createObjectURL(event.stream);
+};
+
+// same code can be used for participants
+// it is useful but optional
+moderator.onstreamended = function(event) {
+    event.mediaElement.parentNode.removeChild(event.mediaElement);
+};
+```
+
 <table style="font-size:18px; font-weight:bold; margin:0; padding:0; margin-left:auto; margin-right:auto; text-align:center;">
     <tr>
         <td>
