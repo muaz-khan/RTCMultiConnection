@@ -1,10 +1,26 @@
-## [RTCMultiConnection.js](http://www.rtcmulticonnection.org/) / WebRTC Library
+## [RTCMultiConnection.js](http://www.rtcmulticonnection.org/) / WebRTC Library  [![npm](https://img.shields.io/npm/v/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection)
 
 RTCMultiConnection is a <a href="https://www.webrtc-experiment.com/">WebRTC</a> JavaScript wrapper library runs top over RTCPeerConnection API to provide multi-session establishment scenarios. It also provides dozens of features as hybrid-less mesh networking model, a reliable presence detection and syncing system; complex renegotiation scenarios; and much more. It provides everything you've in your mind! Just understand the API and you'll enjoy using it! It is simple and its syntax is similar as WebSockets JavaScript API and RTCPeerConnection API.
 
 It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licenced</a>, which means that you can use it in any commercial/non-commercial product, free of cost.
 
 ## Current Version is [v2.0](http://www.rtcmulticonnection.org/changes-log/#v2.0)
+
+NPM package: https://www.npmjs.org/package/rtcmulticonnection
+
+```
+npm install rtcmulticonnection
+```
+
+To use it:
+
+```htm
+<script src="./node_modules/rtcmulticonnection/RTCMultiConnection.js"></script>
+```
+
+There are some other NPM packages regarding RTCMultiConnection:
+
+* https://www.npmjs.org/search?q=RTCMultiConnection
 
 ## 1. Link The Library
 
@@ -92,35 +108,35 @@ moderator.onstreamended = function(event) {
     <tr>
         <td>
             <a href="https://www.webrtc-experiment.com/RTCMultiConnection/" target="_blank">
-                <img src="http://www.rtcmulticonnection.org/img/demo.png" style="display:block; width:99px; height99px;" alt="Demos">
+                <img src="https://www.rtcmulticonnection.org/img/demo.png" style="display:block; width:99px; height99px;" alt="Demos">
                 Demos
             </a>
         </td>
         
         <td>
             <a href="http://www.rtcmulticonnection.org/docs/getting-started/" target="_blank">
-                <img src="http://www.rtcmulticonnection.org/img/getting-started.png" style="display:block; width:99px; height99px;" alt="Getting-Started">
+                <img src="https://www.rtcmulticonnection.org/img/getting-started.png" style="display:block; width:99px; height99px;" alt="Getting-Started">
                 Getting Started
             </a>
         </td>
         
         <td>
             <a href="http://www.rtcmulticonnection.org/docs/" target="_blank">
-                <img src="http://www.rtcmulticonnection.org/img/documentation.png" style="display:block; width:99px; height99px;" alt="Documentation">
+                <img src="https://www.rtcmulticonnection.org/img/documentation.png" style="display:block; width:99px; height99px;" alt="Documentation">
                 Documentation
             </a>
         </td>
         
         <td>
             <a href="http://www.rtcmulticonnection.org/changes-log/" target="_blank">
-                <img src="http://www.rtcmulticonnection.org/img/whats-new.png" style="display:block; width:99px; height99px;" alt="Changes Log">
+                <img src="https://www.rtcmulticonnection.org/img/whats-new.png" style="display:block; width:99px; height99px;" alt="Changes Log">
                 Changes Log
             </a>
         </td>
         
         <td>
             <a href="http://www.rtcmulticonnection.org/FAQ/" target="_blank">
-                <img src="http://www.rtcmulticonnection.org/img/FAQ.png" style="display:block; width:99px; height99px;" alt="FAQ">
+                <img src="https://www.rtcmulticonnection.org/img/FAQ.png" style="display:block; width:99px; height99px;" alt="FAQ">
                 FAQ
             </a>
         </td>

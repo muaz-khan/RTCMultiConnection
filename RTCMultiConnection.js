@@ -1,4 +1,4 @@
-// Last time updated at August 15, 2014, 08:32:23
+// Last time updated at August 16, 2014, 08:32:23
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/RTCMultiConnection.js
 
@@ -13,6 +13,13 @@
 // RTCMultiConnection-v2.0
 
 /* issues/features need to be fixed & implemented:
+
+-. added
+-. 1) connection.streams.stop('screen')
+-. 2) connection.streams.stop({ remote: true, video: true, screen: true })
+
+-. data-channels "send" method improved.
+-. fixed: onStreamEvent.isAudio/onStreamEvent.isVideo seems NULL in mute/unmute cases with only {audio:true} or {video:true}
 
 -. googTemporalLayeredScreencast and googLeakyBucket added for screen capturing.
 
@@ -1540,21 +1547,15 @@
 
                         partOfScreenCapturer();
                     },
-                    getStats: function(callback, interval) {
+                    getConnectionStats: function(callback, interval) {
                         if (!callback) throw 'callback is mandatory.';
 
-                        if (!window.getRTCMultiConnectionStats) {
-                            loadScript(connection.resources.getRTCMultiConnectionStats, invoker);
+                        if (!window.getConnectionStats) {
+                            loadScript(connection.resources.getConnectionStats, invoker);
                         } else invoker();
 
                         function invoker() {
-                            getRTCMultiConnectionStats({
-                                peer: peer.connection,
-                                callback: callback,
-                                interval: interval,
-                                connection: connection,
-                                targetuser: _config.userid
-                            });
+                            peer.connection.getConnectionStats(callback, interval);
                         }
                     }
                 };
@@ -3078,7 +3079,15 @@
                 channel.onopen = function() {
                     channel.push = channel.send;
                     channel.send = function(data) {
-                        if (channel.readyState != 'open') {
+                        if(self.connection.iceConnectionState == 'disconnected') {
+                            return;
+                        }
+                        
+                        if(channel.readyState.search(/connecting|open/g) == -1) {
+                            return;
+                        }
+                        
+                        if (channel.readyState == 'connecting') {
                             numberOfTimes++;
                             return setTimeout(function() {
                                 if (numberOfTimes < 20) {
@@ -4013,8 +4022,11 @@
         // and MUST pass accurate session over "onstreamended" event.
         var fakeObject = merge({}, root.streamObject);
         fakeObject.session = session;
-        fakeObject.isAudio = session.audio && !session.video;
-        fakeObject.isVideo = (!session.audio && session.video) || (session.audio && session.video);
+        
+        fakeObject.isAudio = !!(session.audio && !session.video);
+        fakeObject.isVideo = !!(!!session.video && !root.streamObject.isScreen);
+        fakeObject.isScreen = !!root.streamObject.isScreen;
+        
         if (!!enabled) {
             root.rtcMultiConnection.onmute(fakeObject);
         }
@@ -4487,19 +4499,44 @@
                 }
             },
             stop: function(type) {
-                // connection.streams.stop('local');
                 var _stream;
                 for (var stream in this) {
                     if (stream != 'stop' && stream != 'mute' && stream != 'unmute' && stream != '_private') {
                         _stream = this[stream];
 
                         if (!type) _stream.stop();
-
-                        if (type == 'local' && _stream.type == 'local')
-                            _stream.stop();
-
-                        if (type == 'remote' && _stream.type == 'remote')
-                            _stream.stop();
+                        
+                        else if(typeof type == 'string') {
+                            // connection.streams.stop('screen');
+                            var config = {};
+                            config[type] = true;
+                            _stopStream(_stream, config);
+                        }
+                        else _stopStream(_stream, type);
+                    }
+                }
+                
+                function _stopStream(_stream, config) {
+                    // connection.streams.stop({ screen: true, remote: true });
+                    
+                    if(config.local && _stream.type != 'local') return;
+                    if(config.remote && _stream.type != 'remote') return;
+                        
+                    if (config.screen && !!_stream.streamObject.isScreen) {
+                        _stream.stop();
+                    }
+                    
+                    if (config.audio && !!_stream.streamObject.isAudio) {
+                        _stream.stop();
+                    }
+                    
+                    if (config.video && !!_stream.streamObject.isVideo) {
+                        _stream.stop();
+                    }
+                    
+                    // connection.streams.stop('local');
+                    if(!config.audio && !config.video && !config.screen) {
+                        _stream.stop();
                     }
                 }
             }
@@ -4661,7 +4698,7 @@
                     });
 
                     var stream = self.stream;
-                    if (stream) self.RTCMultiConnection.stopMediaStream(stream);
+                    if (stream) self.rtcMultiConnection.stopMediaStream(stream);
                 },
                 mute: function(session) {
                     this.muted = true;
@@ -5205,7 +5242,7 @@
             firebase: 'https://cdn.webrtc-experiment.com/firebase.js',
             firebaseio: 'https://chat.firebaseIO.com/',
             muted: 'https://cdn.webrtc-experiment.com/images/muted.png',
-            getRTCMultiConnectionStats: 'https://cdn.webrtc-experiment.com/getRTCMultiConnectionStats.js'
+            getConnectionStats: 'https://cdn.webrtc-experiment.com/getConnectionStats.js'
         };
 
         // as @serhanters proposed in #225
@@ -5265,7 +5302,7 @@
         };
 
         connection.onconnected = function(event) {
-            // event.peer.addStream || event.peer.getStats
+            // event.peer.addStream || event.peer.getConnectionStats
             log('Peer connection has been established between you and', event.userid);
         };
 
