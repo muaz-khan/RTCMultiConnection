@@ -1,4 +1,4 @@
-// Last time updated at August 16, 2014, 08:32:23
+// Last time updated at August 17, 2014, 08:32:23
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/RTCMultiConnection.js
 
@@ -14,7 +14,10 @@
 
 /* issues/features need to be fixed & implemented:
 
--. added:
+-. added: connection.disconnect();
+-. it fires: connection.ondisconnected = function(event) { event.isSocketsDisconnected == true; };
+
+-. enhanced:
 -. 1) connection.removeStream('screen') -- remove all screen streams
 -. 2) connection.removeStream('video') -- remove all video streams
 -. 3) connection.removeStream('audio') -- remove all audio streams
@@ -235,6 +238,11 @@
             // your everything is passed over RTCMultiSession constructor!
             rtcMultiSession = new RTCMultiSession(connection, onSignalingReady);
         }
+        
+        connection.disconnect = function() {
+            if(rtcMultiSession) rtcMultiSession.disconnect();
+            rtcMultiSession = null;
+        };
 
         function joinSession(session, joinAs) {
             if (typeof session == 'string') {
@@ -1658,6 +1666,8 @@
             }
 
             function socketResponse(response) {
+                if(isDeletedRTCMultiSession) return;
+                
                 if (response.userid == connection.userid)
                     return;
 
@@ -2248,6 +2258,8 @@
         // to share participation requests; room descriptions; and other stuff.
         var defaultSocket = connection.openSignalingChannel({
             onmessage: function(response) {
+                if(isDeletedRTCMultiSession) return;
+                
                 if (response.userid == connection.userid) return;
 
                 if (response.sessionid && response.userid) {
@@ -2370,6 +2382,12 @@
 
                 if (response.donotJoin && response.messageFor == connection.userid) {
                     log(response.userid, 'is not joining your room.');
+                }
+                
+                // if initiator disconnects sockets, participants should also disconnect
+                if(response.isDisconnectSockets) {
+                    log('Disconnecting your sockets because initiator also disconnected his sockets.');
+                    connection.disconnect();
                 }
             },
             callback: function(socket) {
@@ -2807,6 +2825,48 @@
             connection.captureUserMedia(function() {
                 _accept(e);
             });
+        };
+        
+        var isDeletedRTCMultiSession = false;
+        this.disconnect = function() {
+            this.isOwnerLeaving = true;
+            
+            if(!connection.keepStreamsOpened) {
+                for(var streamid in connection.localStreams) {
+                    connection.localStreams[streamid].stop();
+                }
+                connection.localStreams = {};
+                
+                currentUserMediaRequest = {
+                    streams: [],
+                    mutex: false,
+                    queueRequests: []
+                };
+            }
+            
+            if(connection.isInitiator) {
+                defaultSocket.send({
+                    isDisconnectSockets: true,
+                    userid: connection.userid,
+                    extra: connection.extra
+                });
+            }
+            
+            connection.refresh();
+            
+            defaultSocket = null;
+            isDeletedRTCMultiSession = true;
+            
+            connection.ondisconnected({
+                userid: connection.userid,
+                extra: connection.extra,
+                peer: connection.peers[connection.userid],
+                isSocketsDisconnected: true
+            });
+            
+            delete this;
+            
+            log('Disconnected your sockets, peers, streams and everything except RTCMultiConnection object.');
         };
     }
 
@@ -4641,6 +4701,10 @@
         connection.dataChannelDict = {};
 
         var iceServers = [];
+        
+        iceServers.push({
+            url: 'stun:stunserver.org:3478'
+        });
 
         iceServers.push({
             url: 'stun:stun.l.google.com:19302'
