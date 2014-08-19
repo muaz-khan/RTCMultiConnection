@@ -1,7 +1,7 @@
 {
   "name": "rtcmulticonnection",
   "preferGlobal": true,
-  "version": "2.0.3",
+  "version": "2.0.4",
   "author": {
     "name": "Muaz Khan",
     "email": "muazkh@gmail.com",
@@ -18,20 +18,23 @@
   },
   "keywords": [
     "webrtc",
-    "RTCMultiConnection",
-    "WebRTC-Library",
-    "Library",
-    "JavaScript",
-    "Chrome",
-    "Firefox",
-    "Opera",
-    "IE",
-    "Android",
-    "RTCWeb",
-    "RTCMultiConnection.js",
-    "MultiRTC",
-    "WebRTC-Experiment",
-    "JavaScript-Library"
+    "rtcmulticonnection",
+    "webrtc-library",
+    "library",
+    "javascript",
+    "chrome",
+    "firefox",
+    "opera",
+    "ie",
+    "internet-explorer",
+    "android",
+    "rtcweb",
+    "rtcmulticonnection.js",
+    "multirtc",
+    "webrtc-experiment",
+    "javascript-library",
+    "muaz",
+    "muaz-khan"
   ],
   "analyze": false,
   "license": "MIT",
@@ -41,6 +44,6 @@
     "email": "muazkh@gmail.com"
   },
   "homepage": "https://www.webrtc-experiment.com/RTCMultiConnection/",
-  "_id": "rtcmulticonnection@2.0.3",
+  "_id": "rtcmulticonnection@2.0.4",
   "_from": "rtcmulticonnection@"
 }

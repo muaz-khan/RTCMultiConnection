@@ -172,6 +172,56 @@ moderator.onstreamended = function(event) {
 | **Multi-Broadcasters and Many Viewers** | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/Multi-Broadcasters-and-Many-Viewers.html) | [Source](https://github.com/muaz-khan/WebRTC-Experiment/blob/master/RTCMultiConnection/demos/Multi-Broadcasters-and-Many-Viewers.html) |
 | **Stream Mp3 Live** | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/stream-mp3-live.html) | [Source](https://github.com/muaz-khan/WebRTC-Experiment/blob/master/RTCMultiConnection/demos/stream-mp3-live.html) |
 
+## Auto open/join room? [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/socketio-auto-open-join-room.html)
+
+```javascript
+// Copy and use below code in any RTCMultiConnection based demo
+// You can even use it with DataChannel.js
+// You can even use it with other experiments; simply replace
+// "openSignalingChannel" with:
+// var config = { openSocket: openSignalingChannel };
+
+// via: https://github.com/muaz-khan/WebRTC-Experiment/tree/master/socketio-over-nodejs#how-to-use
+var SIGNALING_SERVER = 'https://webrtc-signaling.nodejitsu.com:443/';
+var mainSocket = io.connect(SIGNALING_SERVER);
+
+connection.openSignalingChannel = function(config) {   
+   config.channel = config.channel || this.channel;
+   
+   mainSocket.emit('new-channel', {
+      channel: config.channel,
+      sender : connection.userid
+   });
+
+   var socket = io.connect(SIGNALING_SERVER + config.channel);
+   socket.channel = config.channel;
+
+   socket.on('connect', function () {
+      if (config.callback) config.callback(socket);
+   });
+
+   socket.send = function (message) {
+        socket.emit('message', {
+            sender: connection.userid,
+            data  : message
+        });
+    };
+
+   socket.on('message', config.onmessage);
+};
+
+// via https://github.com/muaz-khan/WebRTC-Experiment/tree/master/socketio-over-nodejs#presence-detection
+mainSocket.on('presence', function (isChannelPresent) {
+    console.log('is channel present', isChannelPresent);
+    
+    if (!isChannelPresent) 
+        connection.open(connection.channel); // open new room
+    else 
+        connection.join(connection.channel); // join existing room
+});
+mainSocket.emit('presence', connection.channel);
+```
+
 ## Credits
 
 [Muaz Khan](https://github.com/muaz-khan):
