@@ -11,7 +11,9 @@
                 <li><a href="https://www.webrtc-experiment.com/RTCMultiConnection/select-broadcaster-at-runtime.html">Select Broadcaster at runtime</a></li>
                 <li><a href="https://www.webrtc-experiment.com/RTCMultiConnection/OneWay-Screen-TwoWay-Audio.html">OneWay Screen & Two-Way Audio</a></li>
                 <li><a href="https://www.webrtc-experiment.com/RTCMultiConnection/stream-mp3-live.html">Stream Mp3 Live</a></li>
-                <li><a href="https://www.webrtc-experiment.com/RTCMultiConnection/socketio-auto-open-join-room.html">Socket.io auto Open/Join rooms</a></li>
+                <li><a href="https://www.webrtc-experiment.com/RTCMultiConnection/socketio-auto-open-join-room.html">Socket.io auto Open/Join rooms</a></li>                
+                <li><a href="https://www.webrtc-experiment.com/RTCMultiConnection/cropped-screen-sharing.html">Screen Sharing & Cropping</a></li>
+                <li><a href="https://www.webrtc-experiment.com/RTCMultiConnection/RTCMultiConnection.sharePartOfScreen.html">Share Part of Screen without cropping it</a></li>                
                 <li><a href="https://www.webrtc-experiment.com/RTCMultiConnection/getMediaDevices.html">navigator.getMediaDevices / navigator.enumerateDevices / MediaStreamTrack.getSources</a></li>
 				<li><a href="https://www.webrtc-experiment.com/RTCMultiConnection/Renegotiation.html">Renegotiation & Mute/UnMute/Stop</a></li>
 				<li><a href="https://www.webrtc-experiment.com/RTCMultiConnection/videoconferencing.html">Video-Conferencing</a></li>

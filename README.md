@@ -1,10 +1,10 @@
 ## [RTCMultiConnection.js](http://www.rtcmulticonnection.org/) / WebRTC Library  [![npm](https://img.shields.io/npm/v/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection)
 
+Changes log for current version: http://www.rtcmulticonnection.org/changes-log/#v2.0
+
 RTCMultiConnection is a <a href="https://www.webrtc-experiment.com/">WebRTC</a> JavaScript wrapper library runs top over RTCPeerConnection API to provide multi-session establishment scenarios. It also provides dozens of features as hybrid-less mesh networking model, a reliable presence detection and syncing system; complex renegotiation scenarios; and much more. It provides everything you've in your mind! Just understand the API and you'll enjoy using it! It is simple and its syntax is similar as WebSockets JavaScript API and RTCPeerConnection API.
 
 It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licenced</a>, which means that you can use it in any commercial/non-commercial product, free of cost.
-
-## Current Version is [v2.0](http://www.rtcmulticonnection.org/changes-log/#v2.0)
 
 NPM package: https://www.npmjs.org/package/rtcmulticonnection
 
