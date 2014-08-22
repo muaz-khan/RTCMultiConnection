@@ -1,7 +1,7 @@
 {
   "name": "rtcmulticonnection",
   "preferGlobal": true,
-  "version": "2.0.5",
+  "version": "2.0.6",
   "author": {
     "name": "Muaz Khan",
     "email": "muazkh@gmail.com",
@@ -43,7 +43,7 @@
     "url": "https://github.com/muaz-khan/RTCMultiConnection/issues",
     "email": "muazkh@gmail.com"
   },
-  "homepage": "https://www.webrtc-experiment.com/RTCMultiConnection/",
-  "_id": "rtcmulticonnection@2.0.5",
+  "homepage": "http://www.rtcmulticonnection.org/changes-log/#v2.0",
+  "_id": "rtcmulticonnection@2.0.6",
   "_from": "rtcmulticonnection@"
 }

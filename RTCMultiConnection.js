@@ -1,4 +1,4 @@
-// Last time updated at August 21, 2014, 08:32:23
+// Last time updated at August 22, 2014, 08:32:23
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 
@@ -12,16 +12,18 @@
 // Demos         - www.WebRTC-Experiment.com/RTCMultiConnection
 
 // _________________________
-// RTCMultiConnection-v2.0.5
+// RTCMultiConnection-v2.0.6
 
 /* issues/features need to be fixed & implemented:
 
 -. v2.0.* changes log here: http://www.rtcmulticonnection.org/changes-log/#v2.0
 
+-. (fixed): sharePartOfScreen must be fixed for "performance" when sharing over all users.
+-. connection.getExternalIceServers is now "false" by default. ICE-servers from XirSys MUST be optional.
+
 -. JSON parse/stringify options for data transmitted using data-channels; e.g. connection.preferJSON = true;
 -. "channel" object in the openSignalingChannel shouldn't be mandatory!
 -. todo: onFileProgress: if connection gets dropped; re-attempt sharing from last position/chunk.
--. todo: sharePartOfScreen must be fixed for "performance" when sharing over all users.
 -. need to add LAN connectivity support
 -. todo-fix: trickleIce & renegotiation fails.
 -. voice translation using Translator.js
@@ -34,12 +36,12 @@
     // you can always override it!
     // www.RTCMultiConnection.org/docs/channel-id/
     window.RMCDefaultChannel = location.href.replace(/\/|:|#|%|\.|\[|\]/g, '');
-    
+
     // www.RTCMultiConnection.org/docs/constructor/
     window.RTCMultiConnection = function(channel) {
         // an instance of constructor
         var connection = this;
-        
+
         // a reference to RTCMultiSession
         var rtcMultiSession;
 
@@ -777,7 +779,7 @@
                 }, 1000);
                 return;
             }
-            
+
             // to make sure it renegotiates same session
             if (!session) session = merge({
                 oneway: true
@@ -792,7 +794,7 @@
         // www.RTCMultiConnection.org/docs/addStream/
         connection.addStream = function(session, socket) {
             // www.RTCMultiConnection.org/docs/renegotiation/
-            
+
             if (connection.stats.numberOfConnectedUsers <= 0) {
                 // no connections
                 setTimeout(function() {
@@ -837,7 +839,7 @@
                 }, 1000);
                 return;
             }
-            
+
             if (!streamid) streamid = 'all';
             if (!isString(streamid) || streamid.search(/all|audio|video|screen/gi) != -1) {
                 for (var stream in connection.streams) {
@@ -909,11 +911,11 @@
                 }, 1000);
                 return;
             }
-            
+
             connection.removeStream('all');
             connection.addStream(session);
         };
-        
+
         // www.RTCMultiConnection.org/docs/sendCustomMessage/
         connection.sendCustomMessage = function(message) {
             if (!rtcMultiSession || !rtcMultiSession.defaultSocket) {
@@ -1602,22 +1604,7 @@
                     },
                     sharePartOfScreen: function(args) {
                         // www.RTCMultiConnection.org/docs/onpartofscreen/
-
-                        var element = args.element;
                         var that = this;
-
-                        if (!window.html2canvas) {
-                            return loadScript(connection.resources.html2canvas, function() {
-                                that.sharePartOfScreen(args);
-                            });
-                        }
-
-                        if (isString(element)) {
-                            element = document.querySelector(element);
-                            if (!element) element = document.getElementById(element);
-                        }
-                        if (!element) throw 'HTML Element is inaccessible!';
-
                         var lastScreenshot = '';
 
                         function partOfScreenCapturer() {
@@ -1640,11 +1627,10 @@
                                 return setTimeout(partOfScreenCapturer, args.interval || 200);
                             }
 
-                            // html2canvas.js is used to take screenshots
-                            html2canvas(element, {
-                                onrendered: function(canvas) {
-                                    var screenshot = canvas.toDataURL();
-
+                            capturePartOfScreen({
+                                element: args.element,
+                                connection: connection,
+                                callback: function(screenshot) {
                                     if (!connection.channels[that.userid]) {
                                         throw 'No such data channel exists.';
                                     }
@@ -1653,8 +1639,6 @@
                                     if (screenshot != lastScreenshot) {
                                         lastScreenshot = screenshot;
                                         connection.channels[that.userid].send({
-                                            userid: connection.userid,
-                                            extra: connection.extra,
                                             screenshot: screenshot,
                                             isPartOfScreen: true
                                         });
@@ -2449,17 +2433,17 @@
             callback: function(socket) {
                 if (socket) defaultSocket = socket;
                 if (onSignalingReady) onSignalingReady();
-                
+
                 rtcMultiSession.defaultSocket = defaultSocket;
             },
             onopen: function(socket) {
                 if (socket) defaultSocket = socket;
                 if (onSignalingReady) onSignalingReady();
-                
+
                 rtcMultiSession.defaultSocket = defaultSocket;
             }
         });
-        
+
         rtcMultiSession.defaultSocket = defaultSocket;
 
         if (defaultSocket && onSignalingReady) setTimeout(onSignalingReady, 2000);
@@ -4015,11 +3999,11 @@
     function isData(session) {
         return !session.audio && !session.video && !session.screen && session.data;
     }
-    
+
     function isNull(obj) {
         return typeof obj == 'undefined';
     }
-    
+
     function isString(obj) {
         return typeof obj == 'string';
     }
@@ -4133,6 +4117,32 @@
             if (onload) onload();
         };
         document.documentElement.appendChild(script);
+    }
+
+    function capturePartOfScreen(args) {
+        var connection = args.connection;
+        var element = args.element;
+
+        if (!window.html2canvas) {
+            return loadScript(connection.resources.html2canvas, function() {
+                capturePartOfScreen(args);
+            });
+        }
+
+        if (isString(element)) {
+            element = document.querySelector(element);
+            if (!element) element = document.getElementById(element);
+        }
+        if (!element) throw 'HTML DOM Element is not accessible!';
+        
+        // todo: store DOM element somewhere to minimize DOM querying issues
+
+        // html2canvas.js is used to take screenshots
+        html2canvas(element, {
+            onrendered: function(canvas) {
+                args.callback(canvas.toDataURL());
+            }
+        });
     }
 
     var screenFrame, loadedScreenFrame;
@@ -4809,10 +4819,6 @@
         var iceServers = [];
 
         iceServers.push({
-            url: 'stun:turn1.xirsys.com:' + (location.protocol !== 'https:' ? '443' : '80')
-        });
-
-        iceServers.push({
             url: 'stun:stun.l.google.com:19302'
         });
 
@@ -5364,9 +5370,37 @@
         };
 
         connection.sharePartOfScreen = function(args) {
-            for (var peer in connection.peers) {
-                connection.peers[peer].sharePartOfScreen(args);
+            var lastScreenshot = '';
+
+            function partOfScreenCapturer() {
+                // if stopped
+                if (connection.partOfScreen && !connection.partOfScreen.sharing) {
+                    return;
+                }
+
+                capturePartOfScreen({
+                    element: args.element,
+                    connection: connection,
+                    callback: function(screenshot) {
+                        // don't share repeated content
+                        if (screenshot != lastScreenshot) {
+                            lastScreenshot = screenshot;
+
+                            for (var channel in connection.channels) {
+                                connection.channels[channel].send({
+                                    screenshot: screenshot,
+                                    isPartOfScreen: true
+                                });
+                            }
+                        }
+
+                        // "once" can be used to share single screenshot
+                        !args.once && setTimeout(partOfScreenCapturer, args.interval || 200);
+                    }
+                });
             }
+
+            partOfScreenCapturer();
 
             connection.partOfScreen = merge({
                 sharing: true
@@ -5528,7 +5562,8 @@
             udp: true
         };
 
-        connection.getExternalIceServers = true;
+        // get ICE-servers from XirSys
+        connection.getExternalIceServers = false;
 
         connection.onfailed = function(event) {
             if (!event.peer.numOfRetries) event.peer.numOfRetries = 0;
