@@ -12,11 +12,13 @@
 // Demos         - www.WebRTC-Experiment.com/RTCMultiConnection
 
 // _________________________
-// RTCMultiConnection-v2.0.7
+// RTCMultiConnection-v2.0.8
 
 /* issues/features need to be fixed & implemented:
 
 -. v2.0.* changes log here: http://www.rtcmulticonnection.org/changes-log/#v2.0
+
+-. fixed: event.isVideo/event.isAudio for onstream/onhold/onmute/etc.
 
 -. added: connection.preferJSON=true; You can set "false" to send non-Blob types i.e. ArrayBuffer/ArrayBufferView/DataView etc.
 -. remember: it doesn't applies to file sharing. It applies to all other kinds of data.
@@ -535,13 +537,14 @@
                             // to allow re-capturing of the screen
                             DetectRTC.screen.sourceId = null;
                         };
+                        
+                        stream.streamid = streamid;
+                        stream.isScreen = forcedConstraints == screen_constraints;                        
+                        stream.isVideo = forcedConstraints == constraints && (!!constraints.audio || !!constraints.video);
+                        stream.isAudio = forcedConstraints == constraints && !!constraints.audio && !constraints.video;
 
                         var mediaElement = createMediaElement(stream, session);
-
                         mediaElement.muted = true;
-
-                        stream.streamid = streamid;
-                        stream.isScreen = forcedConstraints == screen_constraints;
 
                         var streamedObject = {
                             stream: stream,
@@ -552,9 +555,9 @@
                             userid: connection.userid,
                             extra: connection.extra,
                             session: session,
-                            isVideo: stream.getVideoTracks().length > 0,
-                            isAudio: !stream.getVideoTracks().length && stream.getAudioTracks().length > 0,
-                            isScreen: forcedConstraints == screen_constraints,
+                            isVideo: !!stream.isVideo,
+                            isAudio: !!stream.isAudio,
+                            isScreen: !!stream.isScreen,
                             isInitiator: !!connection.isInitiator
                         };
 
@@ -1123,7 +1126,9 @@
                         var strInfo = JSON.parse(streaminfo[streaminfo.length - 1]);
 
                         stream.streamid = strInfo.streamid;
-                        stream.isScreen = strInfo.isScreen;
+                        stream.isScreen = !!strInfo.isScreen;
+                        stream.isVideo = !!strInfo.isVideo;
+                        stream.isAudio = !!strInfo.isAudio;
 
                         streaminfo.pop();
                         _config.streaminfo = streaminfo.join('----');
@@ -1268,9 +1273,9 @@
                         userid: connection.userid,
                         extra: connection.extra,
                         streamid: stream.streamid,
-                        isScreen: stream.isScreen,
-                        isAudio: stream.getAudioTracks().length && !stream.getVideoTracks().length,
-                        isVideo: !!stream.getVideoTracks().length
+                        isScreen: !!stream.isScreen,
+                        isAudio: !!stream.isAudio,
+                        isVideo: !!stream.isVideo
                     });
                 },
                 rtcMultiConnection: connection
@@ -1350,8 +1355,8 @@
                     extra: _config.extra,
                     userid: _config.userid,
 
-                    isVideo: isPluginRTC ? !!session.video : stream.getVideoTracks().length > 0,
-                    isAudio: isPluginRTC ? !!session.audio && !session.video : !stream.getVideoTracks().length && stream.getAudioTracks().length > 0,
+                    isVideo: isPluginRTC ? !!session.video : !!stream.isVideo,
+                    isAudio: isPluginRTC ? !!session.audio && !session.video : !!stream.isAudio,
                     isScreen: !!stream.isScreen,
                     isInitiator: !!_config.isInitiator
                 };
@@ -2573,7 +2578,7 @@
             var offers = {};
             if (connection.attachStreams.length) {
                 var stream = connection.attachStreams[connection.attachStreams.length - 1];
-                if (stream.getAudioTracks().length) {
+                if (!!stream.getAudioTracks && stream.getAudioTracks().length) {
                     offers.audio = true;
                 }
                 if (stream.getVideoTracks().length) {
@@ -3389,12 +3394,16 @@
                     if (i == 0) {
                         this.streaminfo = JSON.stringify({
                             streamid: streams[i].streamid || '',
-                            isScreen: streams[i].isScreen || false
+                            isScreen: !!streams[i].isScreen,
+                            isAudio: !!streams[i].isAudio,
+                            isVideo: !!streams[i].isVideo
                         });
                     } else {
                         this.streaminfo += '----' + JSON.stringify({
                             streamid: streams[i].streamid || '',
-                            isScreen: streams[i].isScreen || false
+                            isScreen: !!streams[i].isScreen,
+                            isAudio: !!streams[i].isAudio,
+                            isVideo: !!streams[i].isVideo
                         });
                     }
                 }
@@ -4098,12 +4107,7 @@
     // Get HTMLAudioElement/HTMLVideoElement accordingly
 
     function createMediaElement(stream, session) {
-        var isAudio = session.audio && !session.video && !session.screen;
-        if (isChrome && stream.getAudioTracks && stream.getVideoTracks) {
-            isAudio = stream.getAudioTracks().length && !stream.getVideoTracks().length;
-        }
-
-        var mediaElement = document.createElement(isAudio ? 'audio' : 'video');
+        var mediaElement = document.createElement(stream.isAudio ? 'audio' : 'video');
 
         if (isPluginRTC) {
             var body = (document.body || document.documentElement);
@@ -4263,13 +4267,13 @@
 
         // enable/disable audio/video tracks
 
-        if (session.audio) {
+        if (session.audio && !!stream.getAudioTracks) {
             var audioTracks = stream.getAudioTracks()[0];
             if (audioTracks)
                 audioTracks.enabled = !enabled;
         }
 
-        if (session.video) {
+        if (session.video && !!stream.getVideoTracks) {
             var videoTracks = stream.getVideoTracks()[0];
             if (videoTracks)
                 videoTracks.enabled = !enabled;
@@ -4302,8 +4306,8 @@
         var fakeObject = merge({}, root.streamObject);
         fakeObject.session = session;
 
-        fakeObject.isAudio = !!(session.audio && !session.video);
-        fakeObject.isVideo = !!(!!session.video && !root.streamObject.isScreen);
+        fakeObject.isAudio = !!root.streamObject.isAudio;
+        fakeObject.isVideo = !!root.streamObject.isVideo;
         fakeObject.isScreen = !!root.streamObject.isScreen;
 
         if (!!enabled) {
@@ -5666,7 +5670,7 @@
                 delete connection.localStreams[mediaStream.streamid];
             }
 
-            if (isNull(mediaStream.getAudioTracks)) {
+            if (!mediaStream.getAudioTracks) {
                 if (mediaStream.stop) {
                     mediaStream.stop();
                 }
