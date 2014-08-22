@@ -12,16 +12,15 @@
 // Demos         - www.WebRTC-Experiment.com/RTCMultiConnection
 
 // _________________________
-// RTCMultiConnection-v2.0.6
+// RTCMultiConnection-v2.0.7
 
 /* issues/features need to be fixed & implemented:
 
 -. v2.0.* changes log here: http://www.rtcmulticonnection.org/changes-log/#v2.0
 
--. (fixed): sharePartOfScreen must be fixed for "performance" when sharing over all users.
--. connection.getExternalIceServers is now "false" by default. ICE-servers from XirSys MUST be optional.
+-. added: connection.preferJSON=true; You can set "false" to send non-Blob types i.e. ArrayBuffer/ArrayBufferView/DataView etc.
+-. remember: it doesn't applies to file sharing. It applies to all other kinds of data.
 
--. JSON parse/stringify options for data transmitted using data-channels; e.g. connection.preferJSON = true;
 -. "channel" object in the openSignalingChannel shouldn't be mandatory!
 -. todo: onFileProgress: if connection gets dropped; re-attempt sharing from last position/chunk.
 -. need to add LAN connectivity support
@@ -940,10 +939,6 @@
         var textReceiver = new TextReceiver(connection);
 
         function onDataChannelMessage(e) {
-            if (!e) return;
-
-            e = JSON.parse(e);
-
             if (e.data.checkingPresence && connection.channels[e.userid]) {
                 connection.channels[e.userid].send({
                     presenceDetected: true
@@ -1088,7 +1083,23 @@
                         })
                     });
                 },
-                onmessage: onDataChannelMessage,
+                onmessage: function(data) {
+                    if (!data) return;
+
+                    if (data instanceof ArrayBuffer) {
+                        if (!connection.preferJSON) {
+                            connection.onmessage({
+                                data: data,
+                                userid: _config.userid,
+                                extra: _config.extra
+                            });
+                        }
+                        return;
+                    } else {
+                        data = JSON.parse(data);
+                        onDataChannelMessage(data);
+                    }
+                },
                 onaddstream: function(stream, session) {
                     session = session || _config.renegotiate || connection.session;
 
@@ -2660,11 +2671,13 @@
 
         // send file/data or text message
         this.send = function(message, _channel) {
-            message = JSON.stringify({
-                extra: connection.extra,
-                userid: connection.userid,
-                data: message
-            });
+            if (connection.preferJSON || (message.type && message.type == 'file')) {
+                message = JSON.stringify({
+                    extra: connection.extra,
+                    userid: connection.userid,
+                    data: message
+                });
+            }
 
             if (_channel) {
                 if (_channel.readyState == 'open') {
@@ -3259,7 +3272,7 @@
                 if (!this.channels) this.channels = [];
 
                 // protocol: 'text/chat', preset: true, stream: 16
-                // maxRetransmits:0 && ordered:false
+                // maxRetransmits:0 && ordered:false && outOfOrderAllowed: false
                 var dataChannelDict = {};
 
                 if (this.dataChannelDict) dataChannelDict = this.dataChannelDict;
@@ -3286,6 +3299,15 @@
             },
             setChannelEvents: function(channel) {
                 var self = this;
+
+                if (!this.rtcMultiConnection.preferJSON) {
+                    channel.binaryType = 'arraybuffer';
+                }
+
+                if (this.dataChannelDict.binaryType) {
+                    channel.binaryType = this.dataChannelDict.binaryType;
+                }
+
                 channel.onmessage = function(event) {
                     self.onmessage(event.data);
                 };
@@ -3295,6 +3317,10 @@
                     channel.push = channel.send;
                     channel.send = function(data) {
                         if (self.connection.iceConnectionState == 'disconnected') {
+                            return;
+                        }
+
+                        if (channel.readyState.search(/closing|closed/g) != -1) {
                             return;
                         }
 
@@ -3856,6 +3882,10 @@
         send: function(config) {
             var connection = config.connection;
 
+            if (!connection.preferJSON) {
+                return config.channel.send(config.text, config._channel);
+            }
+
             var channel = config.channel,
                 _channel = config._channel,
                 initialText = config.text,
@@ -4134,7 +4164,7 @@
             if (!element) element = document.getElementById(element);
         }
         if (!element) throw 'HTML DOM Element is not accessible!';
-        
+
         // todo: store DOM element somewhere to minimize DOM querying issues
 
         // html2canvas.js is used to take screenshots
@@ -5662,6 +5692,9 @@
         }
 
         connection.waitUntilRemoteStreamStartsFlowing = null; // NULL == true
+
+        // by default, all SCTP messages are JSON-stringified
+        connection.preferJSON = true;
 
         connection.Plugin = Plugin;
     }
