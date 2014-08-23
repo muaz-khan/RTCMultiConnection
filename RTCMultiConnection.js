@@ -1,4 +1,4 @@
-// Last time updated at August 22, 2014, 08:32:23
+// Last time updated at August 23, 2014, 08:32:23
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 
@@ -12,11 +12,14 @@
 // Demos         - www.WebRTC-Experiment.com/RTCMultiConnection
 
 // _________________________
-// RTCMultiConnection-v2.0.8
+// RTCMultiConnection-v2.0.9
 
 /* issues/features need to be fixed & implemented:
 
 -. v2.0.* changes log here: http://www.rtcmulticonnection.org/changes-log/#v2.0
+
+-. #266 fixed (IE11-support): https://github.com/muaz-khan/WebRTC-Experiment/issues/266
+-. connection.UA updated for boolean(s) "is****" eg connection.UA.isChrome etc.
 
 -. fixed: event.isVideo/event.isAudio for onstream/onhold/onmute/etc.
 
@@ -505,6 +508,8 @@
 
                 var mediaConfig = {
                     onsuccess: function(stream, returnBack, idInstance, streamid) {
+                        if (!streamid) streamid = getRandomString();
+
                         connection.onstatechange('usermedia-fetched');
 
                         if (isRemoveVideoTracks) {
@@ -537,11 +542,13 @@
                             // to allow re-capturing of the screen
                             DetectRTC.screen.sourceId = null;
                         };
-                        
-                        stream.streamid = streamid;
-                        stream.isScreen = forcedConstraints == screen_constraints;                        
-                        stream.isVideo = forcedConstraints == constraints && (!!constraints.audio || !!constraints.video);
-                        stream.isAudio = forcedConstraints == constraints && !!constraints.audio && !constraints.video;
+
+                        if (!isIE) {
+                            stream.streamid = streamid;
+                            stream.isScreen = forcedConstraints == screen_constraints;
+                            stream.isVideo = forcedConstraints == constraints && (!!constraints.audio || !!constraints.video);
+                            stream.isAudio = forcedConstraints == constraints && !!constraints.audio && !constraints.video;
+                        }
 
                         var mediaElement = createMediaElement(stream, session);
                         mediaElement.muted = true;
@@ -1125,10 +1132,12 @@
                         var streaminfo = _config.streaminfo.split('----');
                         var strInfo = JSON.parse(streaminfo[streaminfo.length - 1]);
 
-                        stream.streamid = strInfo.streamid;
-                        stream.isScreen = !!strInfo.isScreen;
-                        stream.isVideo = !!strInfo.isVideo;
-                        stream.isAudio = !!strInfo.isAudio;
+                        if (!isIE) {
+                            stream.streamid = strInfo.streamid;
+                            stream.isScreen = !!strInfo.isScreen;
+                            stream.isVideo = !!strInfo.isVideo;
+                            stream.isAudio = !!strInfo.isAudio;
+                        }
 
                         streaminfo.pop();
                         _config.streaminfo = streaminfo.join('----');
@@ -3366,15 +3375,13 @@
                 this.channels.push(channel);
             },
             addStream: function(stream) {
-                if (!stream.streamid) {
+                if (!stream.streamid && !isIE) {
                     stream.streamid = getRandomString();
                 }
 
-                log('attaching stream:', stream.streamid, isPluginRTC ? stream : toStr(stream));
+                // todo: maybe need to add isAudio/isVideo/isScreen if missing?
 
-                if (!stream.isScreen) {
-                    stream.isScreen = false;
-                }
+                log('attaching stream:', stream.streamid, isPluginRTC ? stream : toStr(stream));
 
                 this.connection.addStream(stream);
 
@@ -4035,6 +4042,11 @@
         chromeVersion = parseInt(navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./)[2], 10);
     }
 
+    var firefoxVersion = 50;
+    if (isFirefox && window.navigator.userAgent.match(/Firefox\/(.*)/)[1]) {
+        firefoxVersion = parseInt(window.navigator.userAgent.match(/Firefox\/(.*)/)[1], 10);
+    }
+
     function isData(session) {
         return !session.audio && !session.video && !session.screen && session.data;
     }
@@ -4112,6 +4124,11 @@
         if (isPluginRTC) {
             var body = (document.body || document.documentElement);
             body.insertBefore(mediaElement, body.firstChild);
+
+            setTimeout(function() {
+                Plugin.attachMediaStream(mediaElement, stream)
+            }, 1000);
+
             return Plugin.attachMediaStream(mediaElement, stream);
         }
 
@@ -4888,14 +4905,14 @@
 
         // www.RTCMultiConnection.org/docs/UA/
         connection.UA = {
-            Firefox: isFirefox,
-            Chrome: isChrome,
-            Mobile: isMobileDevice,
-            Version: chromeVersion,
-            NodeWebkit: isNodeWebkit,
-            Safari: isSafari,
-            InternetExplorer: isIE,
-            Opera: isOpera
+            isFirefox: isFirefox,
+            isChrome: isChrome,
+            isMobileDevice: isMobileDevice,
+            version: isChrome ? chromeVersion : firefoxVersion,
+            isNodeWebkit: isNodeWebkit,
+            isSafari: isSafari,
+            isIE: isIE,
+            isOpera: isOpera
         };
 
         // file queue: to store previous file objects in memory;
