@@ -12,11 +12,24 @@
 // Demos         - www.WebRTC-Experiment.com/RTCMultiConnection
 
 // _________________________
-// RTCMultiConnection-v2.0.9
+// RTCMultiConnection-v2.1.0
 
 /* issues/features need to be fixed & implemented:
 
 -. v2.0.* changes log here: http://www.rtcmulticonnection.org/changes-log/#v2.0
+
+-. Breaking changes for "connection.onstatechange". Now an "object" is passed over "onstatechange"
+-. connection.onstatechange = function(state) { state.userid || state.extra || state.name || state.reason };
+
+-. added:   connection.privileges = {
+                canStopRemoteStream: true, // user can stop remote streams
+                canMuteRemoteStream: true  // user can mute remote streams
+            };
+-. it fires "onstatechange" event i.e. state.name == "mute-request-denied" || "stop-request-denied"
+
+-. connection.streams.mute updated:
+-. connection.streams.mute({ isAudio: true, remote: true });   // mute all remote audio-only streams.
+-. connection.streams.unmute({ isScreen: true, local: true }); // unmute all local screen streams.
 
 -. #266 fixed (IE11-support): https://github.com/muaz-khan/WebRTC-Experiment/issues/266
 -. connection.UA updated for boolean(s) "is****" eg connection.UA.isChrome etc.
@@ -262,8 +275,13 @@
             if (!session || !session.userid || !session.sessionid) {
                 error('missing arguments', arguments);
 
-                var error = 'invalid data passed over "join" method';
-                connection.onstatechange('failed', error);
+                var error = 'Invalid data passed over "connection.join" method.';
+                connection.onstatechange({
+                    userid: 'browser',
+                    extra: {},
+                    name: 'Unexpected data detected.',
+                    reason: error
+                });
 
                 throw error;
             }
@@ -480,9 +498,14 @@
                 } : callback);
             } else _captureUserMedia(constraints, callback, session.audio && !session.video);
 
-            connection.onstatechange('fetching-usermedia');
-
             function _captureUserMedia(forcedConstraints, forcedCallback, isRemoveVideoTracks, dontPreventSSLAutoAllowed) {
+                connection.onstatechange({
+                    userid: 'browser',
+                    extra: {},
+                    name: 'fetching-usermedia',
+                    reason: 'About to capture user-media with constants: ' + toStr(forcedConstraints)
+                });
+
 
                 if (connection.preventSSLAutoAllowed && !dontPreventSSLAutoAllowed && isChrome) {
                     // if navigator.customGetUserMediaBar.js is missing
@@ -510,7 +533,12 @@
                     onsuccess: function(stream, returnBack, idInstance, streamid) {
                         if (!streamid) streamid = getRandomString();
 
-                        connection.onstatechange('usermedia-fetched');
+                        connection.onstatechange({
+                            userid: 'browser',
+                            extra: {},
+                            name: 'usermedia-fetched',
+                            reason: 'Captured user media using constants: ' + toStr(forcedConstraints)
+                        });
 
                         if (isRemoveVideoTracks) {
                             stream = convertToAudioStream(stream);
@@ -565,18 +593,7 @@
                             isVideo: !!stream.isVideo,
                             isAudio: !!stream.isAudio,
                             isScreen: !!stream.isScreen,
-                            isInitiator: !!connection.isInitiator
-                        };
-
-                        var sObject = {
-                            stream: stream,
-                            blobURL: streamedObject.blobURL,
-                            userid: connection.userid,
-                            streamid: streamid,
-                            session: session,
-                            type: 'local',
-                            streamObject: streamedObject,
-                            mediaElement: mediaElement,
+                            isInitiator: !!connection.isInitiator,
                             rtcMultiConnection: connection
                         };
 
@@ -585,7 +602,7 @@
                         }
                         isFirstSession = false;
 
-                        connection.streams[streamid] = connection._getStream(sObject);
+                        connection.streams[streamid] = connection._getStream(streamedObject);
 
                         if (!returnBack) {
                             connection.onstream(streamedObject);
@@ -876,17 +893,17 @@
 
                 function _detachStream(_stream, config) {
                     // connection.removeStream({screen:true});
-                    if (config.screen && !!_stream.streamObject.isScreen) {
+                    if (config.screen && !!_stream.isScreen) {
                         connection.detachStreams.push(_stream.streamid);
                     }
 
                     // connection.removeStream({audio:true});
-                    if (config.audio && !!_stream.streamObject.isAudio) {
+                    if (config.audio && !!_stream.isAudio) {
                         connection.detachStreams.push(_stream.streamid);
                     }
 
                     // connection.removeStream({video:true});
-                    if (config.video && !!_stream.streamObject.isVideo) {
+                    if (config.video && !!_stream.isVideo) {
                         connection.detachStreams.push(_stream.streamid);
                     }
 
@@ -1202,7 +1219,12 @@
                     }
 
                     if (!connection.isInitiator && peer.connection && peer.connection.iceConnectionState == 'connected' && peer.connection.iceGatheringState == 'complete' && peer.connection.signalingState == 'stable' && connection.stats.numberOfConnectedUsers == 1) {
-                        connection.onstatechange('connected-with-initiator');
+                        connection.onstatechange({
+                            userid: _config.userid,
+                            extra: _config.extra,
+                            name: 'connected-with-initiator',
+                            reason: 'ICE connection state seems connected; gathering state is completed; and signaling state is stable.'
+                        });
                     }
 
                     if (connection.peers[_config.userid] && connection.peers[_config.userid].oniceconnectionstatechange) {
@@ -1248,7 +1270,7 @@
                             for (var stream in connection.streams) {
                                 stream = connection.streams[stream];
                                 if (stream.userid == _config.userid && stream.type == 'remote') {
-                                    connection.onstreamended(stream.streamObject);
+                                    connection.onstreamended(stream);
                                 }
                             }
                         }
@@ -1367,23 +1389,14 @@
                     isVideo: isPluginRTC ? !!session.video : !!stream.isVideo,
                     isAudio: isPluginRTC ? !!session.audio && !session.video : !!stream.isAudio,
                     isScreen: !!stream.isScreen,
-                    isInitiator: !!_config.isInitiator
+                    isInitiator: !!_config.isInitiator,
+
+                    rtcMultiConnection: connection,
+                    socket: socket
                 };
 
                 // connection.streams['stream-id'].mute({audio:true})
-                connection.streams[stream.streamid] = connection._getStream({
-                    stream: stream,
-                    blobURL: streamedObject.blobURL,
-                    userid: _config.userid,
-                    streamid: stream.streamid,
-                    socket: socket,
-                    type: 'remote',
-                    streamObject: streamedObject,
-                    mediaElement: mediaElement,
-                    rtcMultiConnection: connection,
-                    session: session || connection.session
-                });
-
+                connection.streams[stream.streamid] = connection._getStream(streamedObject);
                 connection.onstream(streamedObject);
 
                 onSessionOpened();
@@ -1498,11 +1511,11 @@
 
                                 if (stream.userid == connection.userid && stream.type == 'local') {
                                     this.peer.connection.removeStream(stream.stream);
-                                    connection.onstreamended(stream.streamObject);
+                                    connection.onstreamended(stream);
                                 }
 
                                 if (stream.type == 'remote' && stream.userid == this.userid) {
-                                    connection.onstreamended(stream.streamObject);
+                                    connection.onstreamended(stream);
                                 }
                             }
                         }
@@ -1591,13 +1604,13 @@
                                     if (isHold)
                                         connection.onhold(merge({
                                             kind: kind
-                                        }, stream.streamObject));
+                                        }, stream));
 
                                     // www.RTCMultiConnection.org/docs/onunhold/
                                     if (!isHold)
                                         connection.onunhold(merge({
                                             kind: kind
-                                        }, stream.streamObject));
+                                        }, stream));
                                 }
                             }
                         }
@@ -1611,7 +1624,7 @@
                                 stream = connection.streams[stream];
 
                                 if (stream.userid == this.userid && stream.type == 'remote') {
-                                    connection.onstreamended(stream.streamObject);
+                                    connection.onstreamended(stream);
                                 }
                             }
                         }
@@ -1770,6 +1783,16 @@
 
                 if (response.mute || response.unmute) {
                     if (response.promptMuteUnmute) {
+                        if (!connection.privileges.canMuteRemoteStream) {
+                            connection.onstatechange({
+                                userid: response.userid,
+                                extra: response.extra,
+                                name: 'mute-request-denied',
+                                reason: response.userid + ' tried to mute your stream; however "privileges.canMuteRemoteStream" is "false".'
+                            });
+                            return;
+                        }
+
                         if (connection.streams[response.streamid]) {
                             if (response.mute && !connection.streams[response.streamid].muted) {
                                 connection.streams[response.streamid].mute(response.session);
@@ -1781,14 +1804,16 @@
                     } else {
                         var streamObject = {};
                         if (connection.streams[response.streamid]) {
-                            streamObject = connection.streams[response.streamid].streamObject;
+                            streamObject = connection.streams[response.streamid];
                         }
 
                         var session = response.session;
                         var fakeObject = merge({}, streamObject);
                         fakeObject.session = session;
-                        fakeObject.isAudio = session.audio && !session.video;
-                        fakeObject.isVideo = (!session.audio && session.video) || (session.audio && session.video);
+
+                        fakeObject.isAudio = !!fakeObject.session.audio && !fakeObject.session.video;
+                        fakeObject.isVideo = !!fakeObject.session.video;
+                        fakeObject.isScreen = !!fakeObject.session.screen;
 
                         if (response.mute) connection.onmute(fakeObject || response);
                         if (response.unmute) connection.onunmute(fakeObject || response);
@@ -1806,14 +1831,21 @@
                 // to stop local stream
                 if (response.stopped) {
                     if (connection.streams[response.streamid]) {
-                        connection.onstreamended(connection.streams[response.streamid].streamObject);
+                        connection.onstreamended(connection.streams[response.streamid]);
                     }
                 }
 
                 // to stop remote stream
                 if (response.promptStreamStop /* && !connection.isInitiator */ ) {
-                    // var forceToStopRemoteStream = true;
-                    // connection.streams['remote-stream-id'].stop( forceToStopRemoteStream );
+                    if (!connection.privileges.canStopRemoteStream) {
+                        connection.onstatechange({
+                            userid: response.userid,
+                            extra: response.extra,
+                            name: 'stop-request-denied',
+                            reason: response.userid + ' tried to stop your stream; however "privileges.canStopRemoteStream" is "false".'
+                        });
+                        return;
+                    }
                     warn('Remote stream has been manually stopped!');
                     if (connection.streams[response.streamid]) {
                         connection.streams[response.streamid].stop();
@@ -1829,7 +1861,7 @@
                             stream = connection.streams[stream];
                             if (stream.userid == userLeft) {
                                 connection.stopMediaStream(stream);
-                                connection.onstreamended(stream.streamObject);
+                                connection.onstreamended(stream);
                             }
                         }
                     }
@@ -2187,7 +2219,7 @@
             for (var stream in connection.streams) {
                 stream = connection.streams[stream];
                 if (stream.userid == userid) {
-                    connection.onstreamended(stream.streamObject);
+                    connection.onstreamended(stream);
                     delete connection.streams[stream];
                 }
             }
@@ -2250,7 +2282,7 @@
             // to make sure remote streams are also removed!
             for (var stream in connection.streams) {
                 if (connection._skip.indexOf(stream) == -1) {
-                    connection.onstreamended(connection.streams[stream].streamObject);
+                    connection.onstreamended(connection.streams[stream]);
                     delete connection.streams[stream];
                 }
             }
@@ -2353,11 +2385,21 @@
                 }
 
                 if (response.acceptedRequestOf == connection.userid) {
-                    connection.onstatechange('request-accepted');
+                    connection.onstatechange({
+                        userid: response.userid,
+                        extra: response.extra,
+                        name: 'request-accepted',
+                        reason: response.userid + ' accepted your participation request.'
+                    });
                 }
 
                 if (response.rejectedRequestOf == connection.userid) {
-                    connection.onstatechange('request-rejected');
+                    connection.onstatechange({
+                        userid: response.userid,
+                        extra: response.extra,
+                        name: 'request-rejected',
+                        reason: response.userid + ' rejected your participation request.'
+                    });
                 }
 
                 if (response.customMessage) {
@@ -2371,8 +2413,8 @@
                                 stream = connection.streams[stream];
                                 if (stream.type == 'local') {
                                     connection.detachStreams.push(stream.streamid);
-                                    connection.onstreamended(stream.streamObject);
-                                } else connection.onstreamended(stream.streamObject);
+                                    connection.onstreamended(stream);
+                                } else connection.onstreamended(stream);
                             }
                         }
 
@@ -2437,9 +2479,14 @@
                     }
 
                     if (response.presenceState == 'available') {
-                        log('initiator is available');
                         rtcMultiSession.presenceState = 'available';
-                        connection.onstatechange('room-available');
+
+                        connection.onstatechange({
+                            userid: 'browser',
+                            extra: {},
+                            name: 'room-available',
+                            reason: 'Initiator is available and room is active.'
+                        });
 
                         joinSession(response._config);
                     }
@@ -2599,7 +2646,13 @@
                 log(toStr(offers));
             } else log('Seems data-only connection.');
 
-            connection.onstatechange('connecting-with-initiator');
+            connection.onstatechange({
+                userid: _config.userid,
+                extra: {},
+                name: 'connecting-with-initiator',
+                reason: 'Checking presence of the initiator; and the room.'
+            });
+
             defaultSocket.send({
                 participant: true,
                 userid: connection.userid,
@@ -2628,7 +2681,13 @@
             participants = {};
 
             rtcMultiSession.presenceState = 'checking';
-            connection.onstatechange('detecting-room-presence');
+
+            connection.onstatechange({
+                userid: _config.userid,
+                extra: _config.extra || {},
+                name: 'detecting-room-presence',
+                reason: 'Checking presence of the room.'
+            });
 
             function contactInitiator() {
                 defaultSocket.send({
@@ -2652,8 +2711,13 @@
                     contactInitiator();
                     setTimeout(function() {
                         if (rtcMultiSession.presenceState == 'checking') {
-                            warn('Unable to reach initiator. Waiting for someone to open the room.');
-                            connection.onstatechange('room-not-available', 'Unable to reach session initiator.');
+                            connection.onstatechange({
+                                userid: _config.userid,
+                                extra: _config.extra || {},
+                                name: 'room-not-available',
+                                reason: 'Initiator seems absent. Waiting for someone to open the room.'
+                            });
+
                             connection.isAcceptNewSession = true;
                             setTimeout(checker, 2000);
                         }
@@ -4284,20 +4348,20 @@
 
         // enable/disable audio/video tracks
 
-        if (session.audio && !!stream.getAudioTracks) {
+        if (root.type == 'local' && session.audio && !!stream.getAudioTracks) {
             var audioTracks = stream.getAudioTracks()[0];
             if (audioTracks)
                 audioTracks.enabled = !enabled;
         }
 
-        if (session.video && !!stream.getVideoTracks) {
+        if (root.type == 'local' && (session.video || session.screen) && !!stream.getVideoTracks) {
             var videoTracks = stream.getVideoTracks()[0];
             if (videoTracks)
                 videoTracks.enabled = !enabled;
         }
 
         root.sockets.forEach(function(socket) {
-            if (root.type == 'local')
+            if (root.type == 'local') {
                 socket.send({
                     userid: root.rtcMultiConnection.userid,
                     streamid: root.streamid,
@@ -4305,8 +4369,9 @@
                     unmute: !enabled,
                     session: session
                 });
+            }
 
-            if (root.type == 'remote')
+            if (root.type == 'remote') {
                 socket.send({
                     userid: root.rtcMultiConnection.userid,
                     promptMuteUnmute: true,
@@ -4315,17 +4380,20 @@
                     unmute: !enabled,
                     session: session
                 });
+            }
         });
+
+        if (root.type == 'remote') return;
 
         // According to issue #135, onmute/onumute must be fired for self
         // "fakeObject" is used because we need to keep session for renegotiated streams; 
-        // and MUST pass accurate session over "onstreamended" event.
-        var fakeObject = merge({}, root.streamObject);
+        // and MUST pass exact session over onstreamended/onmute/onhold/etc. events.
+        var fakeObject = merge({}, root);
         fakeObject.session = session;
 
-        fakeObject.isAudio = !!root.streamObject.isAudio;
-        fakeObject.isVideo = !!root.streamObject.isVideo;
-        fakeObject.isScreen = !!root.streamObject.isScreen;
+        fakeObject.isAudio = !!fakeObject.session.audio && !fakeObject.session.video;
+        fakeObject.isVideo = !!fakeObject.session.video;
+        fakeObject.isScreen = !!fakeObject.session.screen;
 
         if (!!enabled) {
             root.rtcMultiConnection.onmute(fakeObject);
@@ -4793,6 +4861,27 @@
                 this._private(session, false);
             },
             _private: function(session, enabled) {
+                if (session && !isString(session)) {
+                    for (var stream in this) {
+                        if (connection._skip.indexOf(stream) == -1) {
+                            _muteOrUnMute(this[stream], session, enabled);
+                        }
+                    }
+
+                    function _muteOrUnMute(stream, session, isMute) {
+                        if (session.local && stream.type != 'local') return;
+                        if (session.remote && stream.type != 'remote') return;
+
+                        if (session.isScreen && !stream.isScreen) return;
+                        if (session.isAudio && !stream.isAudio) return;
+                        if (session.isVideo && !stream.isVideo) return;
+
+                        if (isMute) stream.mute(session);
+                        else stream.unmute(session);
+                    }
+                    return;
+                }
+
                 // implementation from #68
                 for (var stream in this) {
                     if (connection._skip.indexOf(stream) == -1) {
@@ -4823,15 +4912,15 @@
                     if (config.local && _stream.type != 'local') return;
                     if (config.remote && _stream.type != 'remote') return;
 
-                    if (config.screen && !!_stream.streamObject.isScreen) {
+                    if (config.screen && !!_stream.isScreen) {
                         _stream.stop();
                     }
 
-                    if (config.audio && !!_stream.streamObject.isAudio) {
+                    if (config.audio && !!_stream.isAudio) {
                         _stream.stop();
                     }
 
-                    if (config.video && !!_stream.streamObject.isVideo) {
+                    if (config.video && !!_stream.isVideo) {
                         _stream.stop();
                     }
 
@@ -4964,157 +5053,163 @@
         // 'many-to-many' / 'one-to-many' / 'one-to-one' / 'one-way'
         connection.direction = 'many-to-many';
 
-        connection._getStream = function(e) {
-            return {
-                rtcMultiConnection: e.rtcMultiConnection,
-                streamObject: e.streamObject,
-                stream: e.stream,
-                blobURL: e.blobURL,
-                session: e.session,
-                userid: e.userid,
-                streamid: e.streamid,
-                sockets: e.socket ? [e.socket] : [],
-                type: e.type,
-                mediaElement: e.mediaElement,
-                stop: function(forceToStopRemoteStream) {
-                    var self = this;
+        connection._getStream = function(event) {
+            var resultingObject = merge({
+                sockets: event.socket ? [event.socket] : []
+            }, event);
 
-                    self.sockets.forEach(function(socket) {
-                        if (self.type == 'local') {
-                            socket.send({
-                                userid: self.rtcMultiConnection.userid,
-                                extra: self.rtcMultiConnection.extra,
-                                streamid: self.streamid,
-                                stopped: true
-                            });
-                        }
+            resultingObject.stop = function() {
+                var self = this;
 
-                        if (self.type == 'remote' && !!forceToStopRemoteStream) {
-                            socket.send({
-                                userid: self.rtcMultiConnection.userid,
-                                promptStreamStop: true,
-                                streamid: self.streamid
-                            });
-                        }
-                    });
-
-                    var stream = self.stream;
-                    if (stream) self.rtcMultiConnection.stopMediaStream(stream);
-                },
-                mute: function(session) {
-                    this.muted = true;
-                    this._private(session, true);
-                },
-                unmute: function(session) {
-                    this.muted = false;
-                    this._private(session, false);
-                },
-                _private: function(session, enabled) {
-                    muteOrUnmute({
-                        root: this,
-                        session: session,
-                        enabled: enabled,
-                        stream: this.stream
-                    });
-                },
-                startRecording: function(session) {
-                    var self = this;
-
-                    if (!session) {
-                        session = {
-                            audio: true,
-                            video: true
-                        };
-                    }
-
-                    if (isString(session)) {
-                        session = {
-                            audio: session == 'audio',
-                            video: session == 'video'
-                        };
-                    }
-
-                    if (!window.RecordRTC) {
-                        return loadScript(self.rtcMultiConnection.resources.RecordRTC, function() {
-                            self.startRecording(session);
+                self.sockets.forEach(function(socket) {
+                    if (self.type == 'local') {
+                        socket.send({
+                            userid: self.rtcMultiConnection.userid,
+                            extra: self.rtcMultiConnection.extra,
+                            streamid: self.streamid,
+                            stopped: true
                         });
                     }
 
-                    self.videoRecorder = self.audioRecorder = null;
-
-                    log('startRecording session', session);
-
-                    if (isFirefox) {
-                        // firefox supports both audio/video recording in single webm file
-                        if (session.video) {
-                            self.videoRecorder = RecordRTC(self.stream, {
-                                type: 'video'
-                            });
-                        } else if (session.audio) {
-                            self.audioRecorder = RecordRTC(self.stream, {
-                                type: 'audio'
-                            });
-                        }
-                    } else if (isChrome) {
-                        // chrome supports recording in two separate files: WAV and WebM
-                        if (session.video) {
-                            self.videoRecorder = RecordRTC(self.stream, {
-                                type: 'video'
-                            });
-                        }
-
-                        if (session.audio) {
-                            self.audioRecorder = RecordRTC(self.stream, {
-                                type: 'audio'
-                            });
-                        }
-                    }
-
-                    if (self.audioRecorder) {
-                        self.audioRecorder.startRecording();
-                    }
-
-                    if (self.videoRecorder) self.videoRecorder.startRecording();
-                },
-                stopRecording: function(callback, session) {
-                    if (!session) {
-                        session = {
-                            audio: true,
-                            video: true
-                        };
-                    }
-
-                    if (isString(session)) {
-                        session = {
-                            audio: session == 'audio',
-                            video: session == 'video'
-                        };
-                    }
-
-                    var self = this;
-
-                    if (session.audio && self.audioRecorder) {
-                        self.audioRecorder.stopRecording(function() {
-                            if (session.video && self.videoRecorder) {
-                                self.videoRecorder.stopRecording(function() {
-                                    callback({
-                                        audio: self.audioRecorder.getBlob(),
-                                        video: self.videoRecorder.getBlob()
-                                    });
-                                });
-                            } else callback({
-                                audio: self.audioRecorder.getBlob()
-                            });
+                    if (self.type == 'remote') {
+                        socket.send({
+                            userid: self.rtcMultiConnection.userid,
+                            promptStreamStop: true,
+                            streamid: self.streamid
                         });
-                    } else if (session.video && self.videoRecorder) {
-                        self.videoRecorder.stopRecording(function() {
-                            callback({
-                                video: self.videoRecorder.getBlob()
-                            });
+                    }
+                });
+
+                if(self.type == 'remote') return;
+                
+                var stream = self.stream;
+                if (stream) self.rtcMultiConnection.stopMediaStream(stream);
+            };
+
+            resultingObject.mute = function(session) {
+                this.muted = true;
+                this._private(session, true);
+            };
+
+            resultingObject.unmute = function(session) {
+                this.muted = false;
+                this._private(session, false);
+            };
+
+            resultingObject._private = function(session, enabled) {
+                muteOrUnmute({
+                    root: this,
+                    session: session,
+                    enabled: enabled,
+                    stream: this.stream
+                });
+            };
+
+            resultingObject.startRecording = function(session) {
+                var self = this;
+
+                if (!session) {
+                    session = {
+                        audio: true,
+                        video: true
+                    };
+                }
+
+                if (isString(session)) {
+                    session = {
+                        audio: session == 'audio',
+                        video: session == 'video'
+                    };
+                }
+
+                if (!window.RecordRTC) {
+                    return loadScript(self.rtcMultiConnection.resources.RecordRTC, function() {
+                        self.startRecording(session);
+                    });
+                }
+
+                log('started recording session', session);
+
+                self.videoRecorder = self.audioRecorder = null;
+
+                if (isFirefox) {
+                    // firefox supports both audio/video recording in single webm file
+                    if (session.video) {
+                        self.videoRecorder = RecordRTC(self.stream, {
+                            type: 'video'
+                        });
+                    } else if (session.audio) {
+                        self.audioRecorder = RecordRTC(self.stream, {
+                            type: 'audio'
+                        });
+                    }
+                } else if (isChrome) {
+                    // chrome supports recording in two separate files: WAV and WebM
+                    if (session.video) {
+                        self.videoRecorder = RecordRTC(self.stream, {
+                            type: 'video'
+                        });
+                    }
+
+                    if (session.audio) {
+                        self.audioRecorder = RecordRTC(self.stream, {
+                            type: 'audio'
                         });
                     }
                 }
+
+                if (self.audioRecorder) {
+                    self.audioRecorder.startRecording();
+                }
+
+                if (self.videoRecorder) self.videoRecorder.startRecording();
             };
+
+            resultingObject.stopRecording = function(session) {
+                if (!session) {
+                    session = {
+                        audio: true,
+                        video: true
+                    };
+                }
+
+                if (isString(session)) {
+                    session = {
+                        audio: session == 'audio',
+                        video: session == 'video'
+                    };
+                }
+
+                log('stopped recording session', session);
+
+                var self = this;
+
+                if (session.audio && self.audioRecorder) {
+                    self.audioRecorder.stopRecording(function() {
+                        if (session.video && self.videoRecorder) {
+                            self.videoRecorder.stopRecording(function() {
+                                callback({
+                                    audio: self.audioRecorder.getBlob(),
+                                    video: self.videoRecorder.getBlob()
+                                });
+                            });
+                        } else callback({
+                            audio: self.audioRecorder.getBlob()
+                        });
+                    });
+                } else if (session.video && self.videoRecorder) {
+                    self.videoRecorder.stopRecording(function() {
+                        callback({
+                            video: self.videoRecorder.getBlob()
+                        });
+                    });
+                }
+            };
+
+            // redundant: kept only for backward compatibility
+            resultingObject.streamObject = resultingObject;
+
+            return resultingObject;
         };
 
         // new RTCMultiConnection().set({properties}).connect()
@@ -5175,7 +5270,7 @@
             for (var stream in connection.streams) {
                 stream = connection.streams[stream];
                 if (stream.userid == userid && stream.stream && stream.stream.getVideoTracks && stream.stream.getVideoTracks().length) {
-                    var video = stream.streamObject.mediaElement;
+                    var video = stream.mediaElement;
                     var canvas = document.createElement('canvas');
                     canvas.width = video.videoWidth || video.clientWidth;
                     canvas.height = video.videoHeight || video.clientHeight;
@@ -5250,8 +5345,8 @@
                     stream = this.streams[stream];
                     if (stream.type == 'local') {
                         this.detachStreams.push(stream.streamid);
-                        this.onstreamended(stream.streamObject);
-                    } else this.onstreamended(stream.streamObject);
+                        this.onstreamended(stream);
+                    } else this.onstreamended(stream);
                 }
             }
 
@@ -5581,23 +5676,8 @@
             OfferToReceiveVideo: true
         };
 
-        connection.onstatechange = function(state, reason) {
-            // fetching-usermedia
-            // usermedia-fetched
-
-            // detecting-room-presence
-            // room-not-available
-            // room-available
-
-            // connecting-with-initiator
-            // connected-with-initiator
-
-            // failed---has reason
-
-            // request-accepted
-            // request-rejected
-
-            log('onstatechange:', state, reason ? ':- ' + reason : '');
+        connection.onstatechange = function(state) {
+            log('on:state:change (' + state.userid + '):', state.name + ':', state.reason || '');
         };
 
         // auto leave on page unload
@@ -5660,7 +5740,7 @@
                 for (var stream in connection.streams) {
                     stream = connection.streams[stream];
                     if (stream.userid == event.userid && stream.type == 'remote') {
-                        connection.onstreamended(stream.streamObject);
+                        connection.onstreamended(stream);
                     }
                 }
 
@@ -5714,8 +5794,13 @@
 
         connection.waitUntilRemoteStreamStartsFlowing = null; // NULL == true
 
-        // by default, all SCTP messages are JSON-stringified
+        // by default, all SCTP messages are JSON-stringify
         connection.preferJSON = true;
+
+        connection.privileges = {
+            canStopRemoteStream: true, // user can stop remote streams
+            canMuteRemoteStream: true  // user can mute remote streams
+        };
 
         connection.Plugin = Plugin;
     }
