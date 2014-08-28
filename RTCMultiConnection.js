@@ -1,4 +1,4 @@
-// Last time updated at August 23, 2014, 08:32:23
+// Last time updated at August 28, 2014, 08:32:23
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 
@@ -12,32 +12,22 @@
 // Demos         - www.WebRTC-Experiment.com/RTCMultiConnection
 
 // _________________________
-// RTCMultiConnection-v2.1.0
+// RTCMultiConnection-v2.1.1
 
 /* issues/features need to be fixed & implemented:
 
 -. v2.0.* changes log here: http://www.rtcmulticonnection.org/changes-log/#v2.0
 
--. Breaking changes for "connection.onstatechange". Now an "object" is passed over "onstatechange"
--. connection.onstatechange = function(state) { state.userid || state.extra || state.name || state.reason };
+-. added: "selectFirst" and "selectAll" over "connection.streams"
+---. var videoStream = connection.streams.selectFirst({ isVideo: true, local: true });
+---. var allRemoteStreams = connection.streams.selectAll({ remote: true });
+---. connection.streams.selectAll({ userid: 'someone' }).forEach(function(stream) { connection.stopMediaStream(stream.stream); });
+---. "selectFirst" method allows you get first stream of specific kind or userid.
+---. "selectAll" method allows you get array-of-streams of specific kind or userid.
 
--. added:   connection.privileges = {
-                canStopRemoteStream: true, // user can stop remote streams
-                canMuteRemoteStream: true  // user can mute remote streams
-            };
--. it fires "onstatechange" event i.e. state.name == "mute-request-denied" || "stop-request-denied"
-
--. connection.streams.mute updated:
--. connection.streams.mute({ isAudio: true, remote: true });   // mute all remote audio-only streams.
--. connection.streams.unmute({ isScreen: true, local: true }); // unmute all local screen streams.
-
--. #266 fixed (IE11-support): https://github.com/muaz-khan/WebRTC-Experiment/issues/266
--. connection.UA updated for boolean(s) "is****" eg connection.UA.isChrome etc.
-
--. fixed: event.isVideo/event.isAudio for onstream/onhold/onmute/etc.
-
--. added: connection.preferJSON=true; You can set "false" to send non-Blob types i.e. ArrayBuffer/ArrayBufferView/DataView etc.
--. remember: it doesn't applies to file sharing. It applies to all other kinds of data.
+-. todo-fix: second screen prompt & sdp failure. (addStream or switchStream)
+-. todo: verify keepStreamsOpened keeps only local streams.
+-. todo-fix: session re-initiation fails in Firefox.
 
 -. "channel" object in the openSignalingChannel shouldn't be mandatory!
 -. todo: onFileProgress: if connection gets dropped; re-attempt sharing from last position/chunk.
@@ -737,13 +727,13 @@
 
                         if (session.screen) {
                             if (isFirefox) {
-                                error('Firefox has not yet released their screen capturing modules. Still work in progress! Please try chrome for now!');
+                                error(Firefox_Screen_Capturing_Warning);
                             } else if (location.protocol !== 'https:') {
                                 if (!isNodeWebkit && (location.protocol == 'file:' || location.protocol == 'http:')) {
                                     error('You cannot use HTTP or file protocol for screen capturing. You must either use HTTPs or chrome extension page or Node-Webkit page.');
                                 }
                             } else {
-                                error('Unable to detect actual issue. Maybe "deprecated" screen capturing flag was not set using command line or maybe you clicked "No" button or maybe chrome extension returned invalid "sourceId".');
+                                error('Unable to detect actual issue. Maybe "deprecated" screen capturing flag was not set using command line or maybe you clicked "No" button or maybe chrome extension returned invalid "sourceId". Please install chrome-extension: http://bit.ly/webrtc-screen-extension');
                             }
                         }
 
@@ -869,7 +859,7 @@
             if (!streamid) streamid = 'all';
             if (!isString(streamid) || streamid.search(/all|audio|video|screen/gi) != -1) {
                 for (var stream in connection.streams) {
-                    if (stream != 'stop' && stream != 'mute' && stream != 'unmute' && stream != '_private' && connection.streams[stream].type == 'local') {
+                    if (connection._skip.indexOf(stream) == -1) {
                         _stream = connection.streams[stream];
 
                         if (streamid == 'all') _detachStream(_stream, {
@@ -912,18 +902,34 @@
                         connection.detachStreams.push(_stream.streamid);
                     }
 
-                    log('removing stream', _stream.streamid);
-                    _stream.stream.onended();
+                    if(connection.detachStreams.indexOf(_stream.streamid) != -1) {
+                        log('removing stream', _stream.streamid);
+                        connection.onstreamended(_stream);
+                        
+                        if(config.stop) {
+                            connection.stopMediaStream(_stream.stream);
+                        }
+                    }                    
                 }
                 return;
             }
 
+            var stream = connection.streams[stream.streamid];
+            
             // detach pre-attached streams
-            if (!connection.streams[streamid]) return warn('No such stream exists. Stream-id:', streamid);
-
+            if (!stream) return warn('No such stream exists. Stream-id:', streamid);
+            
             // www.RTCMultiConnection.org/docs/detachStreams/
-            connection.detachStreams.push(streamid);
-            if (!dontRenegotiate && connection.detachStreams.length) {
+            connection.detachStreams.push(stream.streamid);
+            
+            log('removing stream', stream.streamid);
+            connection.onstreamended(stream);
+            
+            if(config.stop) {
+                connection.stopMediaStream(stream.stream);
+            }
+            
+            if (!dontRenegotiate) {
                 connection.renegotiate();
             }
         };
@@ -1186,8 +1192,15 @@
                     }
                 },
 
-                onremovestream: function(event) {
-                    warn('onremovestream', event);
+                onremovestream: function(stream) {
+                    if(stream && stream.streamid) {
+                        stream = connection.streams[stream.streamid];
+                        if(stream) {
+                            log('on:stream:ended via on:remove:stream', stream);
+                            connection.onstreamended(stream);
+                        }
+                    }
+                    else log('on:remove:stream', stream);
                 },
 
                 onclose: function(e) {
@@ -1398,6 +1411,8 @@
                 // connection.streams['stream-id'].mute({audio:true})
                 connection.streams[stream.streamid] = connection._getStream(streamedObject);
                 connection.onstream(streamedObject);
+                
+                log('on:add:stream', streamedObject);
 
                 onSessionOpened();
 
@@ -1698,7 +1713,8 @@
                         } else invoker();
 
                         function invoker() {
-                            peer.connection.getConnectionStats(callback, interval);
+                            RTCPeerConnection.prototype.getConnectionStats = window.getConnectionStats;
+                            peer.connection && peer.connection.getConnectionStats(callback, interval);
                         }
                     }
                 };
@@ -2092,6 +2108,7 @@
                             socket: socket,
                             streaminfo: streaminfo
                         });
+                        connection.detachStreams = [];
                     });
                 }
             }
@@ -4850,7 +4867,7 @@
             sharePartOfScreen: function() {}
         };
 
-        connection._skip = ['stop', 'mute', 'unmute', '_private'];
+        connection._skip = ['stop', 'mute', 'unmute', '_private', '_selectStreams', 'selectFirst', 'selectAll'];
 
         // www.RTCMultiConnection.org/docs/streams/
         connection.streams = {
@@ -4892,7 +4909,7 @@
             stop: function(type) {
                 var _stream;
                 for (var stream in this) {
-                    if (stream != 'stop' && stream != 'mute' && stream != 'unmute' && stream != '_private') {
+                    if (connection._skip.indexOf(stream) == -1) {
                         _stream = this[stream];
 
                         if (!type) _stream.stop();
@@ -4929,6 +4946,41 @@
                         _stream.stop();
                     }
                 }
+            },
+            selectFirst: function(args) {
+                return this._selectStreams(args, false);
+            },
+            selectAll: function(args) {
+                return this._selectStreams(args, true);
+            },
+            _selectStreams: function(args, all) {
+                if(!args || isString(args) || isEmpty(args)) throw 'Invalid arguments.';
+                if(!args.local && !args.remote) {
+                    args.local = args.remote = true;
+                }
+                if(!args.isAudio && !args.isVideo && !args.isScreen) {
+                    args.isAudio = args.isVideo = args.isScreen = true;
+                }
+                
+                var selectedStreams = [];
+                for (var stream in this) {
+                    if (connection._skip.indexOf(stream) == -1 && ((args.local && this[stream].type == 'local') || (args.remote && this[stream].type == 'remote') || (args.userid && this[stream].userid == args.userid))) {
+                        stream = this[stream];
+                        if(args.isVideo && stream.isVideo) {
+                            selectedStreams.push(stream);
+                        }
+                        
+                        if(args.isAudio && stream.isAudio) {
+                            selectedStreams.push(stream);
+                        }
+                        
+                        if(args.isScreen && stream.isScreen) {
+                            selectedStreams.push(stream);
+                        }
+                    }
+                }
+                
+                return !!all ? selectedStreams : selectedStreams[0];
             }
         };
 
@@ -5694,7 +5746,7 @@
         };
 
         // get ICE-servers from XirSys
-        connection.getExternalIceServers = false;
+        connection.getExternalIceServers = isChrome;
 
         connection.onfailed = function(event) {
             if (!event.peer.numOfRetries) event.peer.numOfRetries = 0;
