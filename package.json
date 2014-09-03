@@ -1,7 +1,7 @@
 {
   "name": "rtcmulticonnection",
   "preferGlobal": true,
-  "version": "2.1.1",
+  "version": "2.1.2",
   "author": {
     "name": "Muaz Khan",
     "email": "muazkh@gmail.com",
@@ -40,10 +40,10 @@
   "license": "MIT",
   "readmeFilename": "README.md",
   "bugs": {
-    "url": "https://github.com/muaz-khan/RTCMultiConnection/issues",
+    "url": "https://github.com/muaz-khan/RTCMultiConnection/wiki",
     "email": "muazkh@gmail.com"
   },
   "homepage": "http://www.rtcmulticonnection.org/changes-log/#v2.0",
-  "_id": "rtcmulticonnection@2.1.1",
+  "_id": "rtcmulticonnection@2.1.2",
   "_from": "rtcmulticonnection@"
 }
