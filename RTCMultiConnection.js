@@ -1,4 +1,4 @@
-// Last time updated at Sep 03, 2014, 08:32:23
+// Last time updated at Sep 07, 2014, 08:32:23
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 
@@ -12,11 +12,20 @@
 // Demos         - www.WebRTC-Experiment.com/RTCMultiConnection
 
 // _________________________
-// RTCMultiConnection-v2.1.2
+// RTCMultiConnection-v2.1.4
 
 /* issues/features need to be fixed & implemented:
 
 -. v2.0.* changes-log here: http://www.rtcmulticonnection.org/changes-log/#v2.0
+
+-. Note: recent updates may affect IE/Safari for data sharing.
+
+-. Screen negotiations fixed. Screen can be renegotiated many times.
+-. preferJSON is removed. Now data is "always" sent as ArrayBuffer.
+-. connection.candidates has been fixed.
+-. FileSender/FileReceiver/FileConveter has been removed.
+-. FileBufferReader added. https://github.com/muaz-khan/FileBufferReader
+-. onFileStart/onFileProgress/onFileEnd: now having "userid" and "extra" objects.
 
 -. when "muted" stream is negotiated; it fires "onmute" event as soon as as remote stream is received.
 -. autoReDialOnFailure is "true" by default.
@@ -185,14 +194,18 @@
 
             // File or Blob object MUST have "type" and "size" properties
             if (!isNull(data.size) && !isNull(data.type)) {
-                // to send multiple files concurrently!
-                // file of any size; maximum length: 1GB
-                FileSender.send({
-                    file: data,
-                    channel: rtcMultiSession,
-                    _channel: _channel,
-                    connection: connection
-                });
+                if(!rtcMultiSession.fileBufferReader) {
+                    rtcMultiSession.fileBufferReader = initFileBufferReader(connection);
+                }
+                
+                var extra = merge({userid: connection.userid}, connection.extra);
+                
+                rtcMultiSession.fileBufferReader.readAsArrayBuffer(data, function(uuid) {
+                    rtcMultiSession.fileBufferReader.getNextChunk(uuid, function(nextChunk, isLastChunk, extra) {
+                        if(_channel) _channel.send(nextChunk);
+                        else rtcMultiSession.send(nextChunk);
+                    });
+                }, extra);
             } else {
                 // to allow longest string messages
                 // and largest data objects
@@ -390,8 +403,13 @@
                 }
 
                 if (isChrome && !useCustomChromeExtensionForScreenCapturing && !dontCheckChromExtension && !DetectRTC.screen.sourceId) {
-                    window.addEventListener('message', function(event) {
+                    window.addEventListener('message', onIFrameCallback);
+                    
+                    function onIFrameCallback(event) {
                         if (event.data && event.data.chromeMediaSourceId) {
+                            // this event listener is no more needed
+                            window.removeEventListener('message', onIFrameCallback);
+                    
                             var sourceId = event.data.chromeMediaSourceId;
 
                             DetectRTC.screen.sourceId = sourceId;
@@ -416,7 +434,7 @@
                             DetectRTC.screen.chromeMediaSource = 'screen';
                             captureUserMedia(callback, _session, true);
                         }
-                    });
+                    }
 
                     if (!screenFrame) {
                         loadScreenFrame();
@@ -531,6 +549,25 @@
 
                         connection.localStreamids.push(streamid);
                         stream.onended = function() {
+                            if(!streamedObject.mediaElement.parentNode && document.getElementById(stream.streamid)) {
+                                streamedObject.mediaElement = document.getElementById(stream.streamid);
+                            }
+                            
+                            /*
+                            if(connection.localStreamids[stream.streamid]) {
+                                delete connection.localStreamids[stream.streamid];
+                            }
+                            
+                            if(connection.streams[stream.streamid]) {
+                                delete connection.streams[stream.streamid];
+                            }
+                            
+                            if(connection.attachStreams[connection.attachStreams.length] && connection.attachStreams[connection.attachStreams.length] == stream) {
+                                delete connection.attachStreams[connection.attachStreams.length];
+                                connection.attachStreams = swap(connection.attachStreams);
+                            }
+                            */
+                            
                             connection.onstreamended(streamedObject);
 
                             // make sure that SSRC are removed from the sdp
@@ -977,7 +1014,15 @@
     };
 
     function RTCMultiSession(connection, callbackForSignalingReady) {
-        var fileReceiver = new FileReceiver(connection);
+        var socketObjects = {};
+        var sockets = [];
+        var rtcMultiSession = this;
+        var participants = {};
+        
+        if(!rtcMultiSession.fileBufferReader) {
+            rtcMultiSession.fileBufferReader = initFileBufferReader(connection);
+        }
+        
         var textReceiver = new TextReceiver(connection);
 
         function onDataChannelMessage(e) {
@@ -995,8 +1040,6 @@
 
             if (e.data.type === 'text') {
                 textReceiver.receive(e.data, e.userid, e.extra);
-            } else if (!isNull(e.data.maxChunks)) {
-                fileReceiver.receive(e.data);
             } else {
                 if (connection.autoTranslateText) {
                     e.original = e.data;
@@ -1046,13 +1089,6 @@
 
             connection.join(session);
         }
-
-        var socketObjects = {};
-        var sockets = [];
-
-        var rtcMultiSession = this;
-
-        var participants = {};
 
         function updateSocketForLocalStreams(socket) {
             for (var i = 0; i < connection.localStreamids.length; i++) {
@@ -1114,8 +1150,12 @@
                     if (!connection.iceProtocols) throw 'At least one must be true; UDP or TCP.';
 
                     var iceCandidates = connection.candidates;
-                    var stun = iceCandidates.reflexive || iceCandidates.stun;
-                    var turn = iceCandidates.relay || iceCandidates.turn;
+                    
+                    var stun = iceCandidates.stun;
+                    var turn = iceCandidates.turn;
+                    
+                    if(!isNull(iceCandidates.reflexive)) stun = iceCandidates.reflexive;
+                    if(!isNull(iceCandidates.relay)) turn = iceCandidates.relay;
 
                     if (!iceCandidates.host && !!candidate.candidate.match(/a=candidate.*typ host/g)) return;
                     if (!turn && !!candidate.candidate.match(/a=candidate.*typ relay/g)) return;
@@ -1138,19 +1178,39 @@
                 },
                 onmessage: function(data) {
                     if (!data) return;
+                    
+                    var abToStr = ab2str(data);
+                    if(abToStr.indexOf('"userid":') != -1) {
+                        abToStr = JSON.parse(abToStr);
+                        onDataChannelMessage(abToStr);
+                    }
+                    else if (data instanceof ArrayBuffer || data instanceof DataView) {
+                        var fileBufferReader = rtcMultiSession.fileBufferReader;
+                        fileBufferReader.convertToObject(data, function(chunk) {
+                            if(chunk.maxChunks || chunk.readyForNextChunk) {
+                                // if target peer requested next chunk
+                                if(chunk.readyForNextChunk) {
+                                    fileBufferReader.getNextChunk(chunk.uuid, function(nextChunk, isLastChunk, extra) {
+                                        rtcMultiSession.send(nextChunk);
+                                    });
+                                    return;
+                                }
 
-                    if (data instanceof ArrayBuffer) {
-                        if (!connection.preferJSON) {
+                                // if chunk is received
+                                fileBufferReader.addChunk(chunk, function(promptNextChunk) {
+                                    // request next chunk
+                                    rtcMultiSession.send(promptNextChunk);
+                                });
+                                return;
+                            }
+                            
                             connection.onmessage({
-                                data: data,
+                                data: chunk,
                                 userid: _config.userid,
                                 extra: _config.extra
                             });
-                        }
+                        });
                         return;
-                    } else {
-                        data = JSON.parse(data);
-                        onDataChannelMessage(data);
                     }
                 },
                 onaddstream: function(stream, session) {
@@ -1399,6 +1459,10 @@
                 var stream = args.stream;
 
                 stream.onended = function() {
+                    if(!streamedObject.mediaElement.parentNode && document.getElementById(stream.streamid)) {
+                        streamedObject.mediaElement = document.getElementById(stream.streamid);
+                    }
+                    
                     connection.onstreamended(streamedObject);
                 };
 
@@ -2777,8 +2841,8 @@
 
         // send file/data or text message
         this.send = function(message, _channel) {
-            if (connection.preferJSON || (message.type && message.type == 'file')) {
-                message = JSON.stringify({
+            if (!(message instanceof ArrayBuffer || message instanceof DataView)) {
+                message = str2ab({
                     extra: connection.extra,
                     userid: connection.userid,
                     data: message
@@ -2830,6 +2894,7 @@
 
             function addStream(_peer) {
                 var socket = _peer.socket;
+                
                 if (!socket) {
                     warn(_peer, 'doesn\'t has socket.');
                     return;
@@ -3085,6 +3150,13 @@
                 sdp = this.processSdp(sdp);
 
                 if (isFirefox) return sdp;
+                
+                if(false && this.renegotiate) {
+                    sdp = sdp.replace(/a=rtpmap:.* rtx.*\r\n/gi, '');
+                    sdp = sdp.replace(/a=fmtp:.* apt=.*\r\n/gi, '');
+                    sdp = sdp.replace(/a=rtcp-fb.*\r\n/gi, '');
+                    sdp = sdp.replace(/a=candidate:.*\r\n/gi, '');
+                }
 
                 if (this.session.inactive && !this.holdMLine) {
                     this.hold = true;
@@ -3400,10 +3472,8 @@
             },
             setChannelEvents: function(channel) {
                 var self = this;
-
-                if (!this.rtcMultiConnection.preferJSON) {
-                    channel.binaryType = 'arraybuffer';
-                }
+                
+                channel.binaryType = 'arraybuffer';
 
                 if (this.dataChannelDict.binaryType) {
                     channel.binaryType = this.dataChannelDict.binaryType;
@@ -3750,182 +3820,7 @@
             });
         }
     }
-
-    var FileSender = {
-        send: function(config) {
-            var connection = config.connection;
-            var channel = config.channel;
-            var privateChannel = config._channel;
-            var file = config.file;
-
-            if (!config.file) {
-                error('You must select a file or pass Blob.');
-                return;
-            }
-
-            // max chunk sending limit on chrome is 64k
-            // max chunk receiving limit on firefox is 16k
-            var packetSize = (!!navigator.mozGetUserMedia || connection.preferSCTP) ? 15 * 1000 : 1 * 1000;
-
-            if (connection.chunkSize) {
-                packetSize = connection.chunkSize;
-            }
-
-            var textToTransfer = '';
-            var numberOfPackets = 0;
-            var packets = 0;
-
-            file.uuid = getRandomString();
-
-            function processInWebWorker() {
-                var blob = URL.createObjectURL(new Blob(['function readFile(_file) {postMessage(new FileReaderSync().readAsDataURL(_file));};this.onmessage =  function (e) {readFile(e.data);}'], {
-                    type: 'application/javascript'
-                }));
-
-                var worker = new Worker(blob);
-                URL.revokeObjectURL(blob);
-                return worker;
-            }
-
-            if (!!window.Worker && !isMobileDevice) {
-                var webWorker = processInWebWorker();
-
-                webWorker.onmessage = function(event) {
-                    onReadAsDataURL(event.data);
-                };
-
-                webWorker.postMessage(file);
-            } else {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    onReadAsDataURL(e.target.result);
-                };
-                reader.readAsDataURL(file);
-            }
-
-            function onReadAsDataURL(dataURL, text) {
-                var data = {
-                    type: 'file',
-                    uuid: file.uuid,
-                    maxChunks: numberOfPackets,
-                    currentPosition: numberOfPackets - packets,
-                    name: file.name,
-                    fileType: file.type,
-                    size: file.size,
-
-                    userid: connection.userid,
-                    extra: connection.extra
-                };
-
-                if (dataURL) {
-                    text = dataURL;
-                    numberOfPackets = packets = data.packets = parseInt(text.length / packetSize);
-
-                    file.maxChunks = data.maxChunks = numberOfPackets;
-                    data.currentPosition = numberOfPackets - packets;
-
-                    file.userid = connection.userid;
-                    file.extra = connection.extra;
-                    file.sending = true;
-                    connection.onFileStart(file);
-                }
-
-                connection.onFileProgress({
-                    remaining: packets--,
-                    length: numberOfPackets,
-                    sent: numberOfPackets - packets,
-
-                    maxChunks: numberOfPackets,
-                    uuid: file.uuid,
-                    currentPosition: numberOfPackets - packets,
-
-                    sending: true
-                }, file.uuid);
-
-                if (text.length > packetSize) data.message = text.slice(0, packetSize);
-                else {
-                    data.message = text;
-                    data.last = true;
-                    data.name = file.name;
-
-                    file.url = URL.createObjectURL(file);
-                    file.userid = connection.userid;
-                    file.extra = connection.extra;
-                    file.sending = true;
-                    connection.onFileEnd(file);
-                }
-
-                channel.send(data, privateChannel);
-
-                textToTransfer = text.slice(data.message.length);
-                if (textToTransfer.length) {
-                    setTimeout(function() {
-                        onReadAsDataURL(null, textToTransfer);
-                    }, connection.chunkInterval || 100);
-                }
-            }
-        }
-    };
-
-    function FileReceiver(connection) {
-        var content = {},
-            packets = {},
-            numberOfPackets = {};
-
-        function receive(data) {
-            var uuid = data.uuid;
-
-            if (!isNull(data.packets)) {
-                numberOfPackets[uuid] = packets[uuid] = parseInt(data.packets);
-                data.sending = false;
-                connection.onFileStart(data);
-            }
-
-            connection.onFileProgress({
-                remaining: packets[uuid] --,
-                length: numberOfPackets[uuid],
-                received: numberOfPackets[uuid] - packets[uuid],
-
-                maxChunks: numberOfPackets[uuid],
-                uuid: uuid,
-                currentPosition: numberOfPackets[uuid] - packets[uuid],
-
-                sending: false
-            }, uuid);
-
-            if (!content[uuid]) content[uuid] = [];
-
-            content[uuid].push(data.message);
-
-            if (data.last) {
-                var dataURL = content[uuid].join('');
-
-                FileConverter.DataURLToBlob(dataURL, data.fileType, function(blob) {
-                    blob.uuid = uuid;
-                    blob.name = data.name;
-                    blob.type = data.fileType;
-
-                    blob.url = (window.URL || window.webkitURL).createObjectURL(blob);
-
-                    blob.sending = false;
-                    blob.userid = data.userid || connection.userid;
-                    blob.extra = data.extra || connection.extra;
-                    connection.onFileEnd(blob);
-
-                    if (connection.autoSaveToDisk) {
-                        FileSaver.SaveToDisk(blob.url, data.name);
-                    }
-
-                    delete content[uuid];
-                });
-            }
-        }
-
-        return {
-            receive: receive
-        };
-    }
-
+    
     var FileSaver = {
         SaveToDisk: function(fileUrl, fileName) {
             var hyperlink = document.createElement('a');
@@ -3945,49 +3840,11 @@
         }
     };
 
-    var FileConverter = {
-        DataURLToBlob: function(dataURL, fileType, callback) {
-
-            function processInWebWorker() {
-                var blob = URL.createObjectURL(new Blob(['function getBlob(_dataURL, _fileType) {var binary = atob(_dataURL.substr(_dataURL.indexOf(",") + 1)),i = binary.length,view = new Uint8Array(i);while (i--) {view[i] = binary.charCodeAt(i);};postMessage(new Blob([view], {type: _fileType}));};this.onmessage =  function (e) {var data = JSON.parse(e.data); getBlob(data.dataURL, data.fileType);}'], {
-                    type: 'application/javascript'
-                }));
-
-                var worker = new Worker(blob);
-                URL.revokeObjectURL(blob);
-                return worker;
-            }
-
-            if (!!window.Worker && !isMobileDevice) {
-                var webWorker = processInWebWorker();
-
-                webWorker.onmessage = function(event) {
-                    callback(event.data);
-                };
-
-                webWorker.postMessage(JSON.stringify({
-                    dataURL: dataURL,
-                    fileType: fileType
-                }));
-            } else {
-                var binary = atob(dataURL.substr(dataURL.indexOf(',') + 1)),
-                    i = binary.length,
-                    view = new Uint8Array(i);
-
-                while (i--) {
-                    view[i] = binary.charCodeAt(i);
-                }
-
-                callback(new Blob([view]));
-            }
-        }
-    };
-
     var TextSender = {
         send: function(config) {
             var connection = config.connection;
 
-            if (!connection.preferJSON) {
+            if (config.text instanceof ArrayBuffer || config.text instanceof DataView) {
                 return config.channel.send(config.text, config._channel);
             }
 
@@ -4165,6 +4022,28 @@
         }
         return length == 0;
     }
+    
+    // this method converts array-buffer into string
+    function ab2str(buf) {
+        var result = '';
+        try {
+            result = String.fromCharCode.apply(null, new Uint16Array(buf));
+        }
+        catch(e) {}
+        return result;
+    }
+
+    // this method converts string into array-buffer
+    function str2ab(str) {
+        if(!isString(str)) str = JSON.stringify(str);
+        
+        var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
+        var bufView = new Uint16Array(buf);
+        for (var i = 0, strLen = str.length; i < strLen; i++) {
+            bufView[i] = str.charCodeAt(i);
+        }
+        return buf;
+    }
 
     function swap(arr) {
         var swapped = [],
@@ -4225,6 +4104,7 @@
 
     function createMediaElement(stream, session) {
         var mediaElement = document.createElement(stream.isAudio ? 'audio' : 'video');
+        mediaElement.id = stream.streamid;
 
         if (isPluginRTC) {
             var body = (document.body || document.documentElement);
@@ -4309,6 +4189,34 @@
             }
         });
     }
+    
+    function initFileBufferReader(connection) {
+        if(!window.FileBufferReader) {
+            loadScript(connection.resources.FileBufferReader, function() {
+                initFileBufferReader(connection);
+            });
+            return;
+        }
+        
+        function _private(chunk) {
+            chunk.userid = chunk.extra.userid;
+            return chunk;
+        }
+        
+        var fileBufferReader = new FileBufferReader();
+        fileBufferReader.onProgress = function(chunk) {
+            connection.onFileProgress(_private(chunk));
+        };
+        
+        fileBufferReader.onBegin = function(file) {
+            connection.onFileStart(_private(file));
+        };
+        
+        fileBufferReader.onEnd = function(file) {
+            connection.onFileEnd(_private(file));
+        };
+        return fileBufferReader;
+    }
 
     var screenFrame, loadedScreenFrame;
 
@@ -4356,10 +4264,15 @@
         iframe.onload = function() {
             iframe.isLoaded = true;
 
-            window.addEventListener('message', function(event) {
+            window.addEventListener('message', iFrameLoaderCallback);
+            
+            function iFrameLoaderCallback(event) {
                 if (!event.data || !event.data.iceServers) return;
                 callback(event.data.iceServers);
-            });
+                
+                // this event listener is no more needed
+                window.removeEventListener('message', iFrameLoaderCallback);
+            }
 
             iframe.contentWindow.postMessage('get-ice-servers', '*');
         };
@@ -4779,12 +4692,9 @@
         connection.chunkSize = isFirefox || chromeVersion >= 32 ? 13 * 1000 : 1000; // 1000 chars for RTP and 13000 chars for SCTP
 
         // www.RTCMultiConnection.org/docs/fakeDataChannels/
-        connection.fakeDataChannels = true;
+        connection.fakeDataChannels = false;
 
         connection.waitUntilRemoteStreamStartsFlowing = null; // NULL == true
-
-        // by default, all SCTP messages are JSON-stringify
-        connection.preferJSON = true;
 
         // auto leave on page unload
         connection.leaveOnPageUnload = true;
@@ -4849,8 +4759,9 @@
         // www.RTCMultiConnection.org/docs/autoTranslateText/
         connection.autoTranslateText = false;
 
-        // please use your own API key; if possible
-        connection.googKey = 'AIzaSyCUmCjvKRb-kOYrnoL2xaXb8I-_JJeKpf0';
+        // please use your own Google Translate API key
+        // Google Translate is a paid service.
+        connection.googKey = 'AIzaSyCgB5hmFY74WYB-EoWkhr9cAGr6TiTHrEE';
 
         connection.localStreamids = [];
         connection.localStreams = {};
@@ -4908,7 +4819,8 @@
             firebase: 'https://cdn.webrtc-experiment.com/firebase.js',
             firebaseio: 'https://chat.firebaseIO.com/',
             muted: 'https://cdn.webrtc-experiment.com/images/muted.png',
-            getConnectionStats: 'https://cdn.webrtc-experiment.com/getConnectionStats.js'
+            getConnectionStats: 'https://cdn.webrtc-experiment.com/getConnectionStats.js',
+            FileBufferReader: 'https://cdn.webrtc-experiment.com/FileBufferReader-experimental.js'
         };
 
         // www.RTCMultiConnection.org/docs/body/
@@ -5012,8 +4924,12 @@
         connection.onstreamended = function(e) {
             log('onstreamended:', e);
 
-            if (!e.mediaElement) return warn('Event.mediaElement is undefined', e);
-            if (!e.mediaElement.parentNode) return warn('Event.mediElement.parentNode is null.', e);
+            if (!e.mediaElement) {
+                return warn('Event.mediaElement is undefined', e);
+            }
+            if (!e.mediaElement.parentNode) {
+                return warn('Event.mediElement.parentNode is null.', e);
+            }
 
             e.mediaElement.parentNode.removeChild(e.mediaElement);
         };
@@ -5052,7 +4968,7 @@
             log('onleave', toStr(e));
         };
 
-        connection.token = getRandomString();
+        connection.token = getRandomString;
 
         connection.peers[connection.userid] = {
             drop: function() {
@@ -5605,7 +5521,7 @@
             mediaElement.onvolumechange = function() {
                 if (!volumeChangeEventFired) {
                     volumeChangeEventFired = true;
-                    setTimeout(function() {
+                    connection.streams[streamid] && setTimeout(function() {
                         var root = connection.streams[streamid];
                         connection.streams[streamid].sockets.forEach(function(socket) {
                             socket.send({

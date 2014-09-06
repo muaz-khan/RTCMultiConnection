@@ -2,7 +2,10 @@
 
 ## WebRTC Library  [![npm](https://img.shields.io/npm/v/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection)
 
-Quick-Demo for newbies: <a href="http://jsfiddle.net/c46de0L8/">http://jsfiddle.net/c46de0L8/</a>
+Quick-Demos for newbies: 
+
+1. <a href="http://jsfiddle.net/zar6fg60/">http://jsfiddle.net/zar6fg60/</a> (simplest)
+2. <a href="http://jsfiddle.net/c46de0L8/">http://jsfiddle.net/c46de0L8/</a> (simple)
 
 Changes log for current version: http://www.rtcmulticonnection.org/changes-log/#v2.0
 
@@ -28,7 +31,7 @@ There are some other NPM packages regarding RTCMultiConnection:
 
 ```
 // latest file
-https://cdn.webrtc-experiment.com/RTCMultiConnection-v2.1.2.js
+https://cdn.webrtc-experiment.com/RTCMultiConnection-v2.1.4.js
 
 // or a little bit more stable version: (v1.9)
 https://cdn.webrtc-experiment.com/RTCMultiConnection.js
@@ -107,6 +110,22 @@ moderator.onstream = function(event) {
 moderator.onstreamended = function(event) {
     event.mediaElement.parentNode.removeChild(event.mediaElement);
 };
+```
+
+## [Simplest Demo](http://jsfiddle.net/zar6fg60/)
+
+```html
+<hr /><button id="openRoom">Open Room</button>
+      <button id="joinRoom">Join Room</button><hr />
+<script src="https://cdn.webrtc-experiment.com/RTCMultiConnection.js"> </script>
+<script>
+document.getElementById('openRoom').onclick = function() {
+    new RTCMultiConnection().open();
+};
+document.getElementById('joinRoom').onclick = function() {
+    new RTCMultiConnection().connect();
+};
+</script>
 ```
 
 <table style="font-size:18px; font-weight:bold; margin:0; padding:0; margin-left:auto; margin-right:auto; text-align:center;">
