@@ -1,4 +1,4 @@
-// Last time updated at Sep 07, 2014, 08:32:23
+// Last time updated at Sep 08, 2014, 08:32:23
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 
@@ -12,39 +12,11 @@
 // Demos         - www.WebRTC-Experiment.com/RTCMultiConnection
 
 // _________________________
-// RTCMultiConnection-v2.1.4
+// RTCMultiConnection-v2.1.5
 
 /* issues/features need to be fixed & implemented:
 
 -. v2.0.* changes-log here: http://www.rtcmulticonnection.org/changes-log/#v2.0
-
--. Note: recent updates may affect IE/Safari for data sharing.
-
--. Screen negotiations fixed. Screen can be renegotiated many times.
--. preferJSON is removed. Now data is "always" sent as ArrayBuffer.
--. connection.candidates has been fixed.
--. FileSender/FileReceiver/FileConveter has been removed.
--. FileBufferReader added. https://github.com/muaz-khan/FileBufferReader
--. onFileStart/onFileProgress/onFileEnd: now having "userid" and "extra" objects.
-
--. when "muted" stream is negotiated; it fires "onmute" event as soon as as remote stream is received.
--. autoReDialOnFailure is "true" by default.
--. fakeDataChannels is now "true" by default.
--. (unconfirmed) playRoleOfBroadcaster fixed. Now initiation control can be transferred to many users without closing the session.
--. fixed: selectDevices
--. added: connection.enumerateDevices and connection.getMediaDevices
--. added: connection.changeBandwidth
-
--. added: connection.streams.remove
-
--. added: "selectFirst" and "selectAll" over "connection.streams"
----. var videoStream = connection.streams.selectFirst({ isVideo: true, local: true });
----. var allRemoteStreams = connection.streams.selectAll({ remote: true });
----. connection.streams.selectAll({ userid: 'someone' }).forEach(function(stream) { connection.stopMediaStream(stream.stream); });
----. "selectFirst" method allows you get first stream of specific kind or userid.
----. "selectAll" method allows you get array-of-streams of specific kind or userid.
-
--. connection.streams.stop({userid: 'remote-userid', screen: true});
 */
 
 (function() {
@@ -194,15 +166,20 @@
 
             // File or Blob object MUST have "type" and "size" properties
             if (!isNull(data.size) && !isNull(data.type)) {
-                if(!rtcMultiSession.fileBufferReader) {
-                    rtcMultiSession.fileBufferReader = initFileBufferReader(connection);
+                if (!rtcMultiSession.fileBufferReader) {
+                    initFileBufferReader(connection, function(fbr) {
+                        rtcMultiSession.fileBufferReader = fbr;
+                    });
+                    return;
                 }
-                
-                var extra = merge({userid: connection.userid}, connection.extra);
-                
+
+                var extra = merge({
+                    userid: connection.userid
+                }, data.extra || connection.extra);
+
                 rtcMultiSession.fileBufferReader.readAsArrayBuffer(data, function(uuid) {
                     rtcMultiSession.fileBufferReader.getNextChunk(uuid, function(nextChunk, isLastChunk, extra) {
-                        if(_channel) _channel.send(nextChunk);
+                        if (_channel) _channel.send(nextChunk);
                         else rtcMultiSession.send(nextChunk);
                     });
                 }, extra);
@@ -404,12 +381,12 @@
 
                 if (isChrome && !useCustomChromeExtensionForScreenCapturing && !dontCheckChromExtension && !DetectRTC.screen.sourceId) {
                     window.addEventListener('message', onIFrameCallback);
-                    
+
                     function onIFrameCallback(event) {
                         if (event.data && event.data.chromeMediaSourceId) {
                             // this event listener is no more needed
                             window.removeEventListener('message', onIFrameCallback);
-                    
+
                             var sourceId = event.data.chromeMediaSourceId;
 
                             DetectRTC.screen.sourceId = sourceId;
@@ -549,10 +526,10 @@
 
                         connection.localStreamids.push(streamid);
                         stream.onended = function() {
-                            if(!streamedObject.mediaElement.parentNode && document.getElementById(stream.streamid)) {
+                            if (!streamedObject.mediaElement.parentNode && document.getElementById(stream.streamid)) {
                                 streamedObject.mediaElement = document.getElementById(stream.streamid);
                             }
-                            
+
                             /*
                             if(connection.localStreamids[stream.streamid]) {
                                 delete connection.localStreamids[stream.streamid];
@@ -567,7 +544,7 @@
                                 connection.attachStreams = swap(connection.attachStreams);
                             }
                             */
-                            
+
                             connection.onstreamended(streamedObject);
 
                             // make sure that SSRC are removed from the sdp
@@ -802,8 +779,8 @@
 
         // www.RTCMultiConnection.org/docs/leave/
         connection.leave = function(userid) {
-            if(!rtcMultiSession) return;
-            
+            if (!rtcMultiSession) return;
+
             isFirstSession = true;
 
             if (userid) {
@@ -927,9 +904,9 @@
                 }
 
                 function _detachStream(_stream, config) {
-                    if(config.local && _stream.type != 'local') return;
-                    if(config.remote && _stream.type != 'remote') return;
-                    
+                    if (config.local && _stream.type != 'local') return;
+                    if (config.remote && _stream.type != 'remote') return;
+
                     // connection.removeStream({screen:true});
                     if (config.screen && !!_stream.isScreen) {
                         connection.detachStreams.push(_stream.streamid);
@@ -1018,11 +995,13 @@
         var sockets = [];
         var rtcMultiSession = this;
         var participants = {};
-        
-        if(!rtcMultiSession.fileBufferReader) {
-            rtcMultiSession.fileBufferReader = initFileBufferReader(connection);
+
+        if (!rtcMultiSession.fileBufferReader) {
+            initFileBufferReader(connection, function(fbr) {
+                rtcMultiSession.fileBufferReader = fbr;
+            });
         }
-        
+
         var textReceiver = new TextReceiver(connection);
 
         function onDataChannelMessage(e) {
@@ -1150,12 +1129,12 @@
                     if (!connection.iceProtocols) throw 'At least one must be true; UDP or TCP.';
 
                     var iceCandidates = connection.candidates;
-                    
+
                     var stun = iceCandidates.stun;
                     var turn = iceCandidates.turn;
-                    
-                    if(!isNull(iceCandidates.reflexive)) stun = iceCandidates.reflexive;
-                    if(!isNull(iceCandidates.relay)) turn = iceCandidates.relay;
+
+                    if (!isNull(iceCandidates.reflexive)) stun = iceCandidates.reflexive;
+                    if (!isNull(iceCandidates.relay)) turn = iceCandidates.relay;
 
                     if (!iceCandidates.host && !!candidate.candidate.match(/a=candidate.*typ host/g)) return;
                     if (!turn && !!candidate.candidate.match(/a=candidate.*typ relay/g)) return;
@@ -1178,18 +1157,27 @@
                 },
                 onmessage: function(data) {
                     if (!data) return;
-                    
+
                     var abToStr = ab2str(data);
-                    if(abToStr.indexOf('"userid":') != -1) {
+                    if (abToStr.indexOf('"userid":') != -1) {
                         abToStr = JSON.parse(abToStr);
                         onDataChannelMessage(abToStr);
-                    }
-                    else if (data instanceof ArrayBuffer || data instanceof DataView) {
+                    } else if (data instanceof ArrayBuffer || data instanceof DataView) {
+                        if (!rtcMultiSession.fileBufferReader) {
+                            var that = this;
+                            initFileBufferReader(connection, function(fbr) {
+                                rtcMultiSession.fileBufferReader = fbr;
+                                that.onmessage(data);
+                            });
+                            return;
+                        }
+
                         var fileBufferReader = rtcMultiSession.fileBufferReader;
+
                         fileBufferReader.convertToObject(data, function(chunk) {
-                            if(chunk.maxChunks || chunk.readyForNextChunk) {
+                            if (chunk.maxChunks || chunk.readyForNextChunk) {
                                 // if target peer requested next chunk
-                                if(chunk.readyForNextChunk) {
+                                if (chunk.readyForNextChunk) {
                                     fileBufferReader.getNextChunk(chunk.uuid, function(nextChunk, isLastChunk, extra) {
                                         rtcMultiSession.send(nextChunk);
                                     });
@@ -1203,7 +1191,7 @@
                                 });
                                 return;
                             }
-                            
+
                             connection.onmessage({
                                 data: chunk,
                                 userid: _config.userid,
@@ -1459,10 +1447,10 @@
                 var stream = args.stream;
 
                 stream.onended = function() {
-                    if(!streamedObject.mediaElement.parentNode && document.getElementById(stream.streamid)) {
+                    if (!streamedObject.mediaElement.parentNode && document.getElementById(stream.streamid)) {
                         streamedObject.mediaElement = document.getElementById(stream.streamid);
                     }
-                    
+
                     connection.onstreamended(streamedObject);
                 };
 
@@ -2894,7 +2882,7 @@
 
             function addStream(_peer) {
                 var socket = _peer.socket;
-                
+
                 if (!socket) {
                     warn(_peer, 'doesn\'t has socket.');
                     return;
@@ -3150,8 +3138,8 @@
                 sdp = this.processSdp(sdp);
 
                 if (isFirefox) return sdp;
-                
-                if(false && this.renegotiate) {
+
+                if (false && this.renegotiate) {
                     sdp = sdp.replace(/a=rtpmap:.* rtx.*\r\n/gi, '');
                     sdp = sdp.replace(/a=fmtp:.* apt=.*\r\n/gi, '');
                     sdp = sdp.replace(/a=rtcp-fb.*\r\n/gi, '');
@@ -3472,7 +3460,7 @@
             },
             setChannelEvents: function(channel) {
                 var self = this;
-                
+
                 channel.binaryType = 'arraybuffer';
 
                 if (this.dataChannelDict.binaryType) {
@@ -3820,7 +3808,7 @@
             });
         }
     }
-    
+
     var FileSaver = {
         SaveToDisk: function(fileUrl, fileName) {
             var hyperlink = document.createElement('a');
@@ -4022,21 +4010,20 @@
         }
         return length == 0;
     }
-    
+
     // this method converts array-buffer into string
     function ab2str(buf) {
         var result = '';
         try {
             result = String.fromCharCode.apply(null, new Uint16Array(buf));
-        }
-        catch(e) {}
+        } catch (e) {}
         return result;
     }
 
     // this method converts string into array-buffer
     function str2ab(str) {
-        if(!isString(str)) str = JSON.stringify(str);
-        
+        if (!isString(str)) str = JSON.stringify(str);
+
         var buf = new ArrayBuffer(str.length * 2); // 2 bytes for each char
         var bufView = new Uint16Array(buf);
         for (var i = 0, strLen = str.length; i < strLen; i++) {
@@ -4189,33 +4176,34 @@
             }
         });
     }
-    
-    function initFileBufferReader(connection) {
-        if(!window.FileBufferReader) {
+
+    function initFileBufferReader(connection, callback) {
+        if (!window.FileBufferReader) {
             loadScript(connection.resources.FileBufferReader, function() {
-                initFileBufferReader(connection);
+                initFileBufferReader(connection, callback);
             });
             return;
         }
-        
+
         function _private(chunk) {
             chunk.userid = chunk.extra.userid;
             return chunk;
         }
-        
+
         var fileBufferReader = new FileBufferReader();
         fileBufferReader.onProgress = function(chunk) {
             connection.onFileProgress(_private(chunk));
         };
-        
+
         fileBufferReader.onBegin = function(file) {
             connection.onFileStart(_private(file));
         };
-        
+
         fileBufferReader.onEnd = function(file) {
             connection.onFileEnd(_private(file));
         };
-        return fileBufferReader;
+
+        callback(fileBufferReader);
     }
 
     var screenFrame, loadedScreenFrame;
@@ -4265,11 +4253,11 @@
             iframe.isLoaded = true;
 
             window.addEventListener('message', iFrameLoaderCallback);
-            
+
             function iFrameLoaderCallback(event) {
                 if (!event.data || !event.data.iceServers) return;
                 callback(event.data.iceServers);
-                
+
                 // this event listener is no more needed
                 window.removeEventListener('message', iFrameLoaderCallback);
             }
@@ -4614,7 +4602,7 @@
             }
         });
     }
-    
+
     attachEventListener = function(video, type, listener, useCapture) {
         video.addEventListener(type, listener, useCapture);
     };
@@ -4632,7 +4620,7 @@
     if (!isEmpty(Plugin)) window.onPluginRTCInitialized(Plugin);
 
     // if IE or Safari
-    if(isPluginRTC) {
+    if (isPluginRTC) {
         loadScript('//cdn.webrtc-experiment.com/Plugin.EveryWhere.js');
         // loadScript('//cdn.webrtc-experiment.com/Plugin.Temasys.js');
     }
@@ -4820,7 +4808,7 @@
             firebaseio: 'https://chat.firebaseIO.com/',
             muted: 'https://cdn.webrtc-experiment.com/images/muted.png',
             getConnectionStats: 'https://cdn.webrtc-experiment.com/getConnectionStats.js',
-            FileBufferReader: 'https://cdn.webrtc-experiment.com/FileBufferReader-experimental.js'
+            FileBufferReader: 'https://cdn.webrtc-experiment.com/FileBufferReader.js'
         };
 
         // www.RTCMultiConnection.org/docs/body/

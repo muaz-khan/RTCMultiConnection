@@ -31,7 +31,7 @@ There are some other NPM packages regarding RTCMultiConnection:
 
 ```
 // latest file
-https://cdn.webrtc-experiment.com/RTCMultiConnection-v2.1.4.js
+https://cdn.webrtc-experiment.com/RTCMultiConnection-v2.1.5.js
 
 // or a little bit more stable version: (v1.9)
 https://cdn.webrtc-experiment.com/RTCMultiConnection.js
