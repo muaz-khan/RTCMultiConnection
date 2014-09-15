@@ -1,6 +1,7 @@
-// Last time updated at Sep 13, 2014, 08:32:23
+// Last time updated at Sep 14, 2014, 08:32:23
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
+// Another simple demo: http://jsfiddle.net/zar6fg60/
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/RTCMultiConnection.js
 
@@ -12,12 +13,16 @@
 // Demos         - www.WebRTC-Experiment.com/RTCMultiConnection
 
 // _________________________
-// RTCMultiConnection-v2.1.6
+// RTCMultiConnection-v2.1.7
 
 /* issues/features need to be fixed & implemented:
 
 -. v2.0.* changes-log here: http://www.rtcmulticonnection.org/changes-log/#v2.0
 -. trello: https://trello.com/b/8bhi1G6n/rtcmulticonnection
+
+-. renegotiation fixed. It was a bug in 2.*.* < 2.1.7
+-. connection.rtcConfiguration={iceTransports:'relay',iceServers:iceServersArray} added.
+-. stopRecording "callback" fixed.
 
 -. Now "onstreamended" is fired merely "once" for each stream.
 -. {audio:true,video:true} are forced for Android. All media-constraints skipped.
@@ -1148,8 +1153,8 @@
 
                     var protocol = connection.iceProtocols;
 
-                    if (!protocol.udp && !!candidate.candidate.match(/a=candidate.*udp/g)) return;
-                    if (!protocol.tcp && !!candidate.candidate.match(/a=candidate.*tcp/g)) return;
+                    if (!protocol.udp && !!candidate.candidate.match(/a=candidate.* udp/g)) return;
+                    if (!protocol.tcp && !!candidate.candidate.match(/a=candidate.* tcp/g)) return;
 
                     if (!window.selfNPObject) window.selfNPObject = candidate;
 
@@ -1370,6 +1375,7 @@
 
                 attachStreams: connection.dontAttachStream ? [] : connection.attachStreams,
                 iceServers: connection.iceServers,
+                rtcConfiguration: connection.rtcConfiguration,
                 bandwidth: connection.bandwidth,
                 sdpConstraints: connection.sdpConstraints,
                 optionalArgument: connection.optionalArgument,
@@ -3145,11 +3151,11 @@
 
                 if (isFirefox) return sdp;
 
-                if (false && this.renegotiate) {
-                    sdp = sdp.replace(/a=rtpmap:.* rtx.*\r\n/gi, '');
-                    sdp = sdp.replace(/a=fmtp:.* apt=.*\r\n/gi, '');
-                    sdp = sdp.replace(/a=rtcp-fb.*\r\n/gi, '');
-                    sdp = sdp.replace(/a=candidate:.*\r\n/gi, '');
+                if (this.renegotiate) {
+                    // sdp = sdp.replace(/a=rtpmap:.* rtx.*\r\n/gi, '');
+                    // sdp = sdp.replace(/a=fmtp:.* apt=.*\r\n/gi, '');
+                    // sdp = sdp.replace(/a=rtcp-fb.*\r\n/gi, '');
+                    // sdp = sdp.replace(/a=candidate:.*\r\n/gi, '');
                 }
 
                 if (this.session.inactive && !this.holdMLine) {
@@ -3219,7 +3225,7 @@
                     }
                 }
 
-                if (!this.hold && sdp) {
+                if (!this.hold && this.session.inactive) {
                     // transport.cc&l=852 - http://goo.gl/0FxxqG
                     // dtlstransport.h&l=234 - http://goo.gl/7E4sYF
                     // http://tools.ietf.org/html/rfc4340
@@ -3233,11 +3239,9 @@
                         sdp = sdp.replace(/a=setup:actpass|a=setup:passive|a=setup:holdconn/g, 'a=setup:active');
                     }
 
-                    if (this.session.inactive) {
-                        // whilst doing handshake, either media lines were "inactive"
-                        // or no media lines were present
-                        sdp = sdp.replace(/a=inactive/g, 'a=sendrecv');
-                    }
+                    // whilst doing handshake, either media lines were "inactive"
+                    // or no media lines were present
+                    sdp = sdp.replace(/a=inactive/g, 'a=sendrecv');
                 }
                 // this.session.inactive = false;
                 return sdp;
@@ -3383,12 +3387,29 @@
                 log('optional-argument', toStr(this.optionalArgument.optional));
 
                 if (!isNull(this.iceServers)) {
+                    var iceCandidates = this.rtcMultiConnection.candidates;
+
+                    var stun = iceCandidates.stun;
+                    var turn = iceCandidates.turn;
+                    var host = iceCandidates.host;
+
+                    if (!isNull(iceCandidates.reflexive)) stun = iceCandidates.reflexive;
+                    if (!isNull(iceCandidates.relay)) turn = iceCandidates.relay;
+
+                    if(!host && !stun && turn) {
+                        this.rtcConfiguration.iceTransports = 'relay';
+                    }
+                    else if(!host && !stun && !turn) {
+                        this.rtcConfiguration.iceTransports = 'none';
+                    }
+                    
                     this.iceServers = {
-                        iceServers: this.iceServers
+                        iceServers: this.iceServers,
+                        iceTransports: this.rtcConfiguration.iceTransports
                     };
                 } else this.iceServers = null;
 
-                log('ice-servers', toStr(this.iceServers.iceServers));
+                log('rtc-configuration', toStr(this.iceServers));
             },
             onSdpError: function(e) {
                 var message = toStr(e);
@@ -4646,8 +4667,8 @@
 
     // if IE or Safari
     if (isPluginRTC) {
-        loadScript('//cdn.webrtc-experiment.com/Plugin.EveryWhere.js');
-        // loadScript('//cdn.webrtc-experiment.com/Plugin.Temasys.js');
+        loadScript('https://cdn.webrtc-experiment.com/Plugin.EveryWhere.js');
+        // loadScript('https://cdn.webrtc-experiment.com/Plugin.Temasys.js');
     }
 
     function setDefaults(connection) {
@@ -5196,6 +5217,12 @@
         });
 
         connection.iceServers = iceServers;
+        
+        connection.rtcConfiguration = {
+            iceServers: connection.iceServers,
+            iceTransports: 'all', // none || relay || all - ref: http://goo.gl/40I39K
+            peerIdentity: false
+        };
 
         // www.RTCMultiConnection.org/docs/media/
         connection.media = {
@@ -5325,7 +5352,7 @@
                 if (self.videoRecorder) self.videoRecorder.startRecording();
             };
 
-            resultingObject.stopRecording = function(session) {
+            resultingObject.stopRecording = function(callback, session) {
                 if (!session) {
                     session = {
                         audio: true,
