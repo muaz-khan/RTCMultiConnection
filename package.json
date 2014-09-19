@@ -1,7 +1,7 @@
 {
   "name": "rtcmulticonnection",
   "preferGlobal": true,
-  "version": "2.1.7",
+  "version": "2.1.8",
   "author": {
     "name": "Muaz Khan",
     "email": "muazkh@gmail.com",
@@ -44,6 +44,5 @@
     "email": "muazkh@gmail.com"
   },
   "homepage": "http://www.rtcmulticonnection.org/changes-log/#v2.0",
-  "_id": "rtcmulticonnection@2.1.7",
   "_from": "rtcmulticonnection@"
 }
