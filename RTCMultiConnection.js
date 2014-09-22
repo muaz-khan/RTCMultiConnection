@@ -1,4 +1,4 @@
-// Last time updated at Sep 20, 2014, 08:32:23
+// Last time updated at Sep 22, 2014, 08:32:23
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -13,33 +13,16 @@
 // Demos         - www.WebRTC-Experiment.com/RTCMultiConnection
 
 // _________________________
-// RTCMultiConnection-v2.1.9
+// RTCMultiConnection-v2.2.0
 
 /* issues/features need to be fixed & implemented:
 
 -. v2.0.* changes-log here: http://www.rtcmulticonnection.org/changes-log/#v2.0
--. trello: https://trello.com/b/8bhi1G6n/rtcmulticonnection
+-. trello: https://trello.com/b/8bhi1G6n/rtcmulticonnection 
 
--. fixed: session={data:true} must not having audio/video media lines
--. Ref: https://trello.com/c/yk2BSREE/62-session-data-true-must-not-having-audio-video-media-lines
-
--. onleave is "merely" fired once for each user
-
--. sync:false added for "connection.streams['streamid'].mute" method. 
--. Ref: https://trello.com/c/zAr3yFXg/60-sync-false-added-for-mute-method
-
--. updated: connection.mediaConstraints = { video: videoConstraints, audio: audioConstraints };
--. Ref: https://trello.com/c/BHDoAb93/59-connection-mediaconstraints-is-prioritized-over-connection-session
-
--. "onstreamended" fixed. Ref: https://trello.com/c/7MpMLJgY/58-onstreamended-fixed
-
--. renegotiation fixed. It was a bug in 2.*.* < 2.1.7
--. connection.rtcConfiguration={iceTransports:'relay',iceServers:iceServersArray} added.
--. stopRecording "callback" fixed.
-
--. Now "onstreamended" is fired merely "once" for each stream.
--. {audio:true,video:true} are forced for Android. All media-constraints skipped.
--. Firefox screen capturing is HTTPs-only.
+-. Bug-Fixed: Now, MediaStream is removed from "attachStreams" array when stopped.
+-. Bug-Fixed: Now, OfferToReceiveAudio/OfferToReceiveVideo are "NOT" forced to be false even for data-only connections. Because it affects renegotiation scenarios.
+-. onMediaCaptured event.
 */
 
 (function() {
@@ -556,11 +539,16 @@
                             if (streamedObject.mediaElement && !streamedObject.mediaElement.parentNode && document.getElementById(stream.streamid)) {
                                 streamedObject.mediaElement = document.getElementById(stream.streamid);
                             }
+                            
+                            // when a stream is stopped; it must be removed from "attachStreams" array
+                            connection.attachStreams.forEach(function(_stream, index) {
+                                if(_stream == stream) {
+                                    delete connection.attachStreams[index];
+                                    connection.attachStreams = swap(connection.attachStreams);
+                                }
+                            });
 
                             onStreamEndedHandler(streamedObject, connection);
-
-                            // make sure that SSRC are removed from the sdp
-                            // todo(test): what if removeStream itself invokes "stop" method?
 
                             if (connection.streams[streamid]) {
                                 connection.removeStream(streamid);
@@ -830,13 +818,8 @@
                 return;
             }
 
-            // to make sure it renegotiates same session
-            if (!session) session = merge({
-                oneway: true // todo: is it necessary to make it one-way?
-            }, connection.session);
-
             rtcMultiSession.addStream({
-                renegotiate: session,
+                renegotiate: session || connection.session,
                 stream: stream
             });
         };
@@ -1792,6 +1775,13 @@
                             RTCPeerConnection.prototype.getConnectionStats = window.getConnectionStats;
                             peer.connection && peer.connection.getConnectionStats(callback, interval);
                         }
+                    },
+                    takeSnapshot: function(callback) {
+                        takeSnapshot({
+                            userid: this.userid,
+                            connection: connection,
+                            callback: callback
+                        });
                     }
                 };
             }
@@ -2728,16 +2718,6 @@
                 userid: _config.userid
             });
 
-            var mandatory = connection.sdpConstraints.mandatory;
-            if (isNull(mandatory.OfferToReceiveAudio)) {
-                connection.sdpConstraints.mandatory.OfferToReceiveAudio = !!connection.session.audio;
-            }
-            if (isNull(mandatory.OfferToReceiveVideo)) {
-                connection.sdpConstraints.mandatory.OfferToReceiveVideo = !!connection.session.video || !!connection.session.screen;
-            }
-
-            log('sdpConstraints.mandatory', toStr(connection.sdpConstraints.mandatory));
-
             var offers = {};
             if (connection.attachStreams.length) {
                 var stream = connection.attachStreams[connection.attachStreams.length - 1];
@@ -3369,11 +3349,6 @@
                         OfferToReceiveVideo: !!this.session.video || !!this.session.screen
                     }
                 };
-                
-                if(isData(this.session)) {
-                    this.constraints.mandatory.OfferToReceiveAudio = false;
-                    this.constraints.mandatory.OfferToReceiveVideo = false;
-                }
 
                 if (this.constraints.mandatory) {
                     log('sdp-mandatory-constraints', toStr(this.constraints.mandatory));
@@ -4198,12 +4173,40 @@
         onStreamEndedHandlerFiredFor[streamedObject.streamid] = streamedObject;
         connection.onstreamended(streamedObject);
     }
-    
+
     var onLeaveHandlerFiredFor = {};
+
     function onLeaveHandler(event, connection) {
-        if(onLeaveHandlerFiredFor[event.userid]) return;
+        if (onLeaveHandlerFiredFor[event.userid]) return;
         onLeaveHandlerFiredFor[event.userid] = event;
         connection.onleave(event);
+    }
+
+    function takeSnapshot(args) {
+        var userid = args.userid;
+        var connection = args.connection;
+
+        function _takeSnapshot(video) {
+            var canvas = document.createElement('canvas');
+            canvas.width = video.videoWidth || video.clientWidth;
+            canvas.height = video.videoHeight || video.clientHeight;
+
+            var context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            connection.snapshots[userid] = canvas.toDataURL('image/png');
+            args.callback && args.callback(connection.snapshots[userid]);
+        }
+
+        if (args.mediaElement) return _takeSnapshot(args.mediaElement);
+
+        for (var stream in connection.streams) {
+            stream = connection.streams[stream];
+            if (stream.userid == userid && stream.stream && stream.stream.getVideoTracks && stream.stream.getVideoTracks().length) {
+                _takeSnapshot(stream.mediaElement);
+                continue;
+            }
+        }
     }
 
     function invokeMediaCaptured(connection) {
@@ -5462,6 +5465,15 @@
                 }
             };
 
+            resultingObject.takeSnapshot = function(callback) {
+                takeSnapshot({
+                    mediaElement: this.mediaElement,
+                    userid: this.userid,
+                    connection: connection,
+                    callback: callback
+                });
+            };
+
             // redundant: kept only for backward compatibility
             resultingObject.streamObject = resultingObject;
 
@@ -5498,22 +5510,11 @@
 
         // www.RTCMultiConnection.org/docs/takeSnapshot/
         connection.takeSnapshot = function(userid, callback) {
-            for (var stream in connection.streams) {
-                stream = connection.streams[stream];
-                if (stream.userid == userid && stream.stream && stream.stream.getVideoTracks && stream.stream.getVideoTracks().length) {
-                    var video = stream.mediaElement;
-                    var canvas = document.createElement('canvas');
-                    canvas.width = video.videoWidth || video.clientWidth;
-                    canvas.height = video.videoHeight || video.clientHeight;
-
-                    var context = canvas.getContext('2d');
-                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                    connection.snapshots[userid] = canvas.toDataURL();
-                    callback && callback(connection.snapshots[userid]);
-                    continue;
-                }
-            }
+            takeSnapshot({
+                userid: userid,
+                connection: connection,
+                callback: callback
+            });
         };
 
         connection.saveToDisk = function(blob, fileName) {
