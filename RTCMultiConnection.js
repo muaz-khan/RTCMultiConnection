@@ -5944,7 +5944,7 @@
                 (mediaStream.getAudioTracks || mediaStream.getVideoTracks) && (
                     mediaStream.getAudioTracks().length || mediaStream.getVideoTracks().length
                 ) && (
-                    (mediaStream.getAudioTracks()[0] && !mediaStream.getAudioTracks()[0].stop) || (mediaStream.getVideoTracks()[0] && !mediaStream.getVideoTracks()[0].stop)
+                    (mediaStream.getAudioTracks()[0] && mediaStream.getAudioTracks()[0].stop) || (mediaStream.getVideoTracks()[0] && mediaStream.getVideoTracks()[0].stop)
                 )
             );
 
