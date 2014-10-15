@@ -5939,6 +5939,9 @@
         connection.stopMediaStream = function(mediaStream) {
             if (!mediaStream) throw 'MediaStream argument is mandatory.';
 
+            // Latest firefox does support mediaStream.getAudioTrack but doesn't support stop on MediaStreamTrack
+            var checkForMediaStreamTrackStop = Boolean(mediaStream.getAudioTracks && mediaStream.getAudioTracks().length && !mediaStream.getAudioTracks()[0].stop);
+
             if (connection.keepStreamsOpened) {
                 mediaStream.onended();
                 return;
@@ -5950,7 +5953,7 @@
                 delete connection.localStreams[mediaStream.streamid];
             }
 
-            if (!mediaStream.getAudioTracks) {
+            if (!mediaStream.getAudioTracks || checkForMediaStreamTrackStop) {
                 if (mediaStream.stop) {
                     mediaStream.stop();
                 }
