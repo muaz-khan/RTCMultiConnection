@@ -5940,7 +5940,14 @@
             if (!mediaStream) throw 'MediaStream argument is mandatory.';
 
             // Latest firefox does support mediaStream.getAudioTrack but doesn't support stop on MediaStreamTrack
-            var checkForMediaStreamTrackStop = Boolean(mediaStream.getAudioTracks && mediaStream.getAudioTracks().length && mediaStream.getAudioTracks()[0].stop);
+            var checkForMediaStreamTrackStop = Boolean(
+                (mediaStream.getAudioTracks || mediaStream.getVideoTracks) && (
+                    mediaStream.getAudioTracks().length || mediaStream.getVideoTracks().length
+                ) && (
+                    (mediaStream.getAudioTracks()[0] && !mediaStream.getAudioTracks()[0].stop) || (mediaStream.getVideoTracks()[0] && !mediaStream.getVideoTracks()[0].stop)
+                )
+            );
+
 
             if (connection.keepStreamsOpened) {
                 mediaStream.onended();
