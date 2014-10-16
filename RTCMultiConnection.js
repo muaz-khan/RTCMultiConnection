@@ -1,4 +1,4 @@
-// Last time updated at Oct 11, 2014, 08:32:23
+// Last time updated at Oct 16, 2014, 08:32:23
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -25,6 +25,9 @@
 --. connection.stats.numberOfSessions is removed; use connection.numberOfSessions instead.
 --. connection.stats.numberOfConnectedUsers is removed; use connection.numberOfConnectedUsers instead.
 --. connection.getStats and connection.stats are removed.
+
+--. screen capturing improved & some bugs fixed.
+--. connection.stopMediaStream improved.
 */
 
 (function() {
@@ -147,10 +150,6 @@
 
         // www.RTCMultiConnection.org/docs/send/
         connection.send = function(data, _channel) {
-            if (!connection.enableFileSharing) {
-                throw '"enableFileSharing" boolean MUST be "true" to support file sharing.';
-            }
-
             if (connection.numberOfConnectedUsers <= 0) {
                 // no connections
                 setTimeout(function() {
@@ -178,6 +177,10 @@
 
             // File or Blob object MUST have "type" and "size" properties
             if (!isNull(data.size) && !isNull(data.type)) {
+                if (!connection.enableFileSharing) {
+                    throw '"enableFileSharing" boolean MUST be "true" to support file sharing.';
+                }
+
                 if (!rtcMultiSession.fileBufferReader) {
                     initFileBufferReader(connection, function(fbr) {
                         rtcMultiSession.fileBufferReader = fbr;
@@ -4549,7 +4552,7 @@
                 callback && callback();
                 return;
             }
-            
+
             navigator.getMediaDevices(function(devices) {
                 DetectRTC.MediaDevices = [];
                 devices.forEach(function(device) {
@@ -4608,17 +4611,22 @@
             extensionid: ReservedExtensionID,
             getSourceId: function(callback) {
                 if (!callback) throw '"callback" parameter is mandatory.';
-                screenCallback = callback;
-                window.postMessage('get-sourceId', '*');
 
-                // sometimes content-script mismatched URLs
-                // causes infinite delay.
-                setTimeout(function() {
-                    if (!DetectRTC.screen.sourceId) {
-                        DetectRTC.screen.chromeMediaSource = 'screen';
-                        callback('No-Response');
+                // make sure that chrome extension is installed.
+                if (!!DetectRTC.screen.status) {
+                    onstatus(DetectRTC.screen.status);
+                } else DetectRTC.screen.getChromeExtensionStatus(onstatus);
+
+                function onstatus(status) {
+                    if (status == 'installed-enabled') {
+                        screenCallback = callback;
+                        window.postMessage('get-sourceId', '*');
+                        return;
                     }
-                }, 5000);
+
+                    DetectRTC.screen.chromeMediaSource = 'screen';
+                    callback('No-Response'); // chrome extension isn't available
+                }
             },
             onMessageCallback: function(data) {
                 if (!(isString(data) || !!data.sourceId)) return;
@@ -4650,7 +4658,12 @@
                 }
             },
             getChromeExtensionStatus: function(extensionid, callback) {
-                if (isFirefox) return callback('not-chrome');
+                function _callback(status) {
+                    DetectRTC.screen.status = status;
+                    callback(status);
+                }
+
+                if (isFirefox) return _callback('not-chrome');
 
                 if (arguments.length != 2) {
                     callback = extensionid;
@@ -4664,14 +4677,14 @@
                     window.postMessage('are-you-there', '*');
                     setTimeout(function() {
                         if (DetectRTC.screen.chromeMediaSource == 'screen') {
-                            callback(
+                            _callback(
                                 DetectRTC.screen.chromeMediaSource == 'desktop' ? 'installed-enabled' : 'installed-disabled' /* if chrome extension isn't permitted for current domain, then it will be installed-disabled all the time even if extension is enabled. */
                             );
-                        } else callback('installed-enabled');
+                        } else _callback('installed-enabled');
                     }, 2000);
                 };
                 image.onerror = function() {
-                    callback('not-installed');
+                    _callback('not-installed');
                 };
             }
         };
@@ -4875,7 +4888,7 @@
 
         // www.RTCMultiConnection.org/docs/snapshots/
         connection.snapshots = {};
-        
+
         // www.WebRTC-Experiment.com/demos/MediaStreamTrack.getSources.html
         connection._mediaSources = {};
 
@@ -5939,18 +5952,8 @@
         connection.stopMediaStream = function(mediaStream) {
             if (!mediaStream) throw 'MediaStream argument is mandatory.';
 
-            // Latest firefox does support mediaStream.getAudioTrack but doesn't support stop on MediaStreamTrack
-            var checkForMediaStreamTrackStop = Boolean(
-                (mediaStream.getAudioTracks || mediaStream.getVideoTracks) && (
-                    mediaStream.getAudioTracks().length || mediaStream.getVideoTracks().length
-                ) && (
-                    (mediaStream.getAudioTracks()[0] && mediaStream.getAudioTracks()[0].stop) || (mediaStream.getVideoTracks()[0] && mediaStream.getVideoTracks()[0].stop)
-                )
-            );
-
-
             if (connection.keepStreamsOpened) {
-                mediaStream.onended();
+                if (mediaStream.onended) mediaStream.onended();
                 return;
             }
 
@@ -5960,28 +5963,36 @@
                 delete connection.localStreams[mediaStream.streamid];
             }
 
-            if (!mediaStream.getAudioTracks || !checkForMediaStreamTrackStop) {
+            if (isFirefox) {
+                // Firefox don't yet support onended for any stream (remote/local)
+                if (mediaStream.onended) mediaStream.onended();
+            }
+
+            // Latest firefox does support mediaStream.getAudioTrack but doesn't support stop on MediaStreamTrack
+            var checkForMediaStreamTrackStop = Boolean(
+                (mediaStream.getAudioTracks || mediaStream.getVideoTracks) && (
+                    (mediaStream.getAudioTracks()[0] && !mediaStream.getAudioTracks()[0].stop) ||
+                    (mediaStream.getVideoTracks()[0] && !mediaStream.getVideoTracks()[0].stop)
+                )
+            );
+
+            if (!mediaStream.getAudioTracks || checkForMediaStreamTrackStop) {
                 if (mediaStream.stop) {
                     mediaStream.stop();
                 }
                 return;
             }
 
-            if (mediaStream.getAudioTracks().length) {
+            if (mediaStream.getAudioTracks().length && mediaStream.getAudioTracks()[0].stop) {
                 mediaStream.getAudioTracks().forEach(function(track) {
                     track.stop();
                 });
             }
 
-            if (mediaStream.getVideoTracks().length) {
+            if (mediaStream.getVideoTracks().length && mediaStream.getVideoTracks()[0].stop) {
                 mediaStream.getVideoTracks().forEach(function(track) {
                     track.stop();
                 });
-            }
-
-            if (isFirefox) {
-                // Firefox don't yet support onended for any stream (remote/local)
-                if (mediaStream.onended) mediaStream.onended();
             }
         };
 
