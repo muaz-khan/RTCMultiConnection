@@ -2,6 +2,7 @@
 ### 2.0 (its latest work-in-progress release)
 #### Bug Fixes
 * "connection.DetectRTC.screen.getChromeExtensionStatus" fixed.
+
     ```
     document.getElementById('add-screen').onclick = function() {
         connection.DetectRTC.screen.extensionid = 'your-own-extension-id';
@@ -19,6 +20,7 @@
 * "[onstreamended](http://www.rtcmulticonnection.org/docs/onstreamended/)" fixed. [Ref](https://github.com/muaz-khan/RTCMultiConnection/issues/7)
 * Renegotiation fixed. It was a bug in 2.*.* < 2.1.7
 * [stopRecording](http://www.rtcmulticonnection.org/docs/stopRecording/) "callback" fixed.
+
     ```
     connection.streams['streamid'].stopRecording(function(blobs) {
         // blobs.video
@@ -57,6 +59,7 @@
         event.isScreen
     };
     ```
+    
 #### Features
 * Latest updates: https://github.com/muaz-khan/RTCMultiConnection/commits/master
 * v2.2.1 breaking updates:
