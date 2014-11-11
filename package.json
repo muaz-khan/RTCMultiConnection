@@ -44,5 +44,10 @@
     "email": "muazkh@gmail.com"
   },
   "homepage": "http://www.rtcmulticonnection.org/changes-log/#v2.0",
-  "_from": "rtcmulticonnection@"
+  "_from": "rtcmulticonnection@",
+  "devDependencies": {
+    "grunt": "^0.4.0",
+    "grunt-contrib-jshint": "^0.10.0",
+    "load-grunt-tasks": "^0.4.0"
+  }
 }
