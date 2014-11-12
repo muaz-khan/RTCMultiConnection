@@ -1,9 +1,25 @@
 <a name="v2.0"></a>
 ### 2.0 (its latest work-in-progress release)
+
+```
+// install latest package
+npm install rtcmulticonnection
+
+// use latest file (v2.*.*)
+<script src="./node_modules/rtcmulticonnection/RTCMultiConnection.js"></script>
+
+// or instead of installing NPM package,
+// directly link the file:
+<script src="//cdn.webrtc-experiment.com/RTCMultiConnection.js"></script>
+
+// or
+<script src="//cdn.webrtc-experiment.com/RTCMultiConnection-v2.2.1.js"></script>
+```
+
 #### Bug Fixes
 * "connection.DetectRTC.screen.getChromeExtensionStatus" fixed.
     
-    ```
+    ```javascript
     document.getElementById('add-screen').onclick = function() {
         connection.DetectRTC.screen.extensionid = 'your-own-extension-id';
         connection.DetectRTC.screen.getChromeExtensionStatus(function(status) {
@@ -22,7 +38,7 @@
 * Renegotiation fixed. It was a bug in 2.*.* < 2.1.7
 * [stopRecording](http://www.rtcmulticonnection.org/docs/stopRecording/) "callback" fixed.
     
-    ```
+    ```javascript
     connection.streams['streamid'].stopRecording(function(blobs) {
         // blobs.video
     }, { video: true });
@@ -30,7 +46,7 @@
     ```
 * Screen negotiations fixed. Screen can be renegotiated many times.
     
-    ```
+    ```javascript
     connection.addStream({
         screen: true,
         oneway: true
@@ -40,7 +56,7 @@
 * "connection.[candidates](http://www.rtcmulticonnection.org/docs/candidates/)" has been fixed.
 * connection.[selectDevices](http://www.rtcmulticonnection.org/docs/selectDevices/) is fixed.
     
-    ```
+    ```javascript
     connection.selectDevices('audioinput-deviceid', 'videooutput-deviceid');
     
     ```
@@ -48,7 +64,7 @@
 * Duplicate "enumerateDevices" listing fixed.
 * **connection.sharePartOfScreen** fixed for sharing screen over multi-users:
     
-    ```
+    ```javascript
     connection.sharePartOfScreen({
         element: 'body', // element to share
         interval: 500    // how after take screenshots
@@ -57,13 +73,13 @@
     ```
 * Fixed: TextSender is unable to send array.
     
-    ```
+    ```javascript
     connection.send([1, 2, 3, 4, 5]);
     
     ```
 * Fixed: onStreamEvent.isAudio/onStreamEvent.isVideo seems NULL in mute/unmute cases with only {audio:true} or {video:true}
     
-    ```
+    ```javascript
     connection.onmute = function(event) {
         event.isAudio
         event.isVideo
@@ -83,7 +99,7 @@
 * 2nd invocation of "createDataChannel" is disabled.
 * "connection.enableFileSharing" added.
     
-    ```
+    ```javascript
     // to disable file sharing
     connection.enableFileSharing = false;
     
@@ -93,7 +109,7 @@
 * "[onleave](http://www.rtcmulticonnection.org/docs/onleave/)" is "merely" fired once for each user.
 * "**sync:false**" added for "**connection.streams['streamid'].mute**" method.
     
-    ```
+    ```javascript
     connection.streams.selectFirst({ local:true }).mute({
         video: true,
         sync: false // mute video locally--only
@@ -108,7 +124,7 @@
     ```
 * "connection.[mediaConstraints](http://www.rtcmulticonnection.org/docs/mediaConstraints/)" updated.
     
-    ```
+    ```javascript
     connection.mediaConstraints = {
         video: {
             mandatory: {},
@@ -123,7 +139,7 @@
     ```
 * "**connection.rtcConfiguration**" added:
     
-    ```
+    ```javascript
     connection.rtcConfiguration = {
         iceTransports: 'relay',
         iceServers: [iceServersArray]
@@ -139,7 +155,7 @@
 * onFileStart/onFileProgress/onFileEnd: now having "userid" and "extra" objects.
 * When "muted" stream is negotiated; it fires "onmute" event as soon as as remote stream is received.
     
-    ```
+    ```javascript
     var firstLocalStream = connection.streams.selectFirst({
         local: true
     });
@@ -155,7 +171,7 @@
 * Now, "**autoReDialOnFailure**" is "true" by default.
 * "**connection.enumerateDevices**" and "**connection.getMediaDevices**" added.
     
-    ```
+    ```javascript
     // to iterate over all available media devices
     connection.enumerateDevices(function(devices) {
         devices.forEach(function(device) {
@@ -169,7 +185,7 @@
     ```
 * "connection.changeBandwidth" added.
     
-    ```
+    ```javascript
     connection.changeBandwidth({
         audio: 30,
         video: 64
@@ -178,7 +194,7 @@
     ```
 * "connection.streams.remove" added.
     
-    ```
+    ```javascript
     // fire "onstreamended" for all screen streams
     connection.streams.remove({
         isScreen: true
@@ -198,7 +214,7 @@
     ```
 * "connection.streams.selectFirst" and "connection.streams.selectAll" added.
     
-    ```
+    ```javascript
     // first  local stream
     var firstLocalStream = connection.streams.selectFirst({
         local: true
@@ -217,7 +233,7 @@
     ```
 * "connection.streams.stop" improved.
     
-    ```
+    ```javascript
     // stop a user's all screen streams
     connection.streams.stop({
         userid: 'remote-userid',
@@ -227,7 +243,7 @@
     ```
 * "**connection.privileges.canStopRemoteStream**" and "**connection.privileges.canMuteRemoteStream**" added:
     
-    ```
+    ```javascript
     // set it "true" if you want to allow user to stop/mute remote stream
     connection.privileges = {
         canStopRemoteStream: true, // user can stop remote streams
@@ -249,7 +265,7 @@
     ```
 * Breaking changes for "connection.onstatechange". Now an "object" is passed over "onstatechange"
     
-    ```
+    ```javascript
     connection.onstatechange = function(state) {
         // state.userid == 'target-userid' || 'browser'
         // state.extra  == 'target-user-extra-data' || {}
@@ -263,7 +279,7 @@
     ```
 * "connection.[streams](http://www.rtcmulticonnection.org/docs/streams/).mute" updated:
     
-    ```
+    ```javascript
     // mute all remote audio-only streams.
     connection.streams.mute({
         isAudio: true,
@@ -279,7 +295,7 @@
     ```
 * ""connection.UA"" updated for "**is\*****":
     
-    ```
+    ```javascript
     connection.UA.isChrome
     connection.UA.isFirefox
     connection.UA.isIE
@@ -291,7 +307,7 @@
     ```
 * **connection.preferJSON=true** added. You can set "**false**" to send non-Blob types i.e. **ArrayBuffer/ArrayBufferView/DataView** etc.
     
-    ```
+    ```javascript
     // Remember: it doesn't applies to file sharing.
     // it applies to all other kinds of data.
     connection.preferJSON = false;
@@ -330,14 +346,14 @@
     ```
 * **connection.getExternalIceServers** is now "**false**" by default. If you want to use XirSys based ICE-Servers in your application, you MUST set it "**true**":
     
-    ```
+    ```javascript
     // if you want to use XirSys-based STUN/TURN servers
     connection.getExternalIceServers = true;
     
     ```
 * Now, "**[sendCustomMessage](http://www.rtcmulticonnection.org/docs/sendCustomMessage/)**", "**[addStream](http://www.rtcmulticonnection.org/docs/addStream/)**", "**switchStream**", "**[renegotiate](http://www.rtcmulticonnection.org/docs/renegotiate/)**" and "**[removeStream](http://www.rtcmulticonnection.org/docs/removeStream/)**" can be called even if there is no user connected.
     
-    ```
+    ```javascript
     var connection = new RTCMultiConnection();
     
     // quickly after initializing constructor
@@ -356,7 +372,7 @@
     ```
 * Added support for initial "inactive" sessions. You can setup audio/video connection however streams will be "inactive":
     
-    ```
+    ```javascript
     // streams are on-hold:
     connection.session = {
         inactive: true,
@@ -370,13 +386,13 @@
     ```
 * Added **connection.waitUntilRemoteStreamStartsFlowing**. It allows you override default Wait-Until-Remote-Stream-starts-flowing behaviour.
     
-    ```
+    ```javascript
     connection.waitUntilRemoteStreamStartsFlowing = false;
     
     ```
 * Added: **connection.switchStream**. It will remove all old local streams and add new stream.
     
-    ```
+    ```javascript
     // remove all old streams and add screen in oneway.
     connection.switchStream({
         screen: true,
@@ -386,7 +402,7 @@
     ```
 * Added **connection.disconnect**:
     
-    ```
+    ```javascript
     // it means that:
     // 1) close all sockets
     // 2) close all peers
@@ -403,7 +419,7 @@
     ```
 * Updated: connection.**[removeStream](http://www.rtcmulticonnection.org/docs/removeStream/)**:
     
-    ```
+    ```javascript
     // remove all screen streams.
     // you can use "remove all video streams" by passing "video"
     // or "remove all audio streams" by passing "audio"
@@ -420,7 +436,7 @@
     ```
 * Updated: connection.**[streams](http://www.rtcmulticonnection.org/docs/streams/)**.stop:
     
-    ```
+    ```javascript
     // stop any single stream: audio or video or screen
     connection.streams.stop('screen');
     
@@ -434,14 +450,14 @@
     ```
 * Data-channels "send" method improved.
     
-    ```
+    ```javascript
     connection.send('longest-test' || big_array || blob || file);
     
     ```
 * **googTemporalLayeredScreencast** and **googLeakyBucket** added for screen capturing.
 * Updated **connection.candidates**:
     
-    ```
+    ```javascript
     connection.candidates = {
         stun: true, // NEW property since v2.0
         turn: true, // NEW property since v2.0
@@ -451,7 +467,7 @@
     ```
 * Added **connection.localStreams**. All local streams are always kept in this object even if session is closed. Look at above section i.e. **keepStreamsOpened**.
     
-    ```
+    ```javascript
     var stream = connection.localStreams['streamid'];
     
     // or
@@ -467,7 +483,7 @@
     ```
 * Added **connection.log** and **connection.onlog**. It allows you display logs in UI instead of in the console.
     
-    ```
+    ```javascript
     // if you want to disable logs
     connection.log = false;
     
@@ -480,7 +496,7 @@
     ```
 * Added **connection.keepStreamsOpened**. It allows you keep MediaStream active even if entire session is closed. It is useful in session-reinitiation scenarios.
     
-    ```
+    ```javascript
     connection.keepStreamsOpened = true;
     
     ```
@@ -489,10 +505,21 @@
 
 <a name="v1.9"></a>
 ### 1.9 (2014-08-10)
+
+```
+<script src="//cdn.webrtc-experiment.com/RTCMultiConnection.js"></script>
+
+// or
+<script src="//cdn.webrtc-experiment.com/RTCMultiConnection-v1.9.js"></script>
+
+// or
+<script src="//www.rtcmulticonnection.org/latest.js"></script>
+```
+
 #### Bug Fixes
 * **connection.[eject](http://www.rtcmulticonnection.org/docs/eject/)** is fixed.
     
-    ```
+    ```javascript
     connection.eject('target-userid');
     
     // check if user is ejected
@@ -511,7 +538,7 @@
     ```
 * Fixed: **remoteEvent.streamid** and **remoteEvent.isScreen**:
     
-    ```
+    ```javascript
     connection.onstream = function(event) {
         if(event.isScreen) {
             // it is screen
@@ -521,7 +548,7 @@
     ```
 * **[connection.session](http://www.rtcmulticonnection.org/docs/session/)={}** fixed. It allows moderator/initiator to become a listener/viewer i.e. it supports many-to-one scenarios:
     
-    ```
+    ```javascript
     // for initiator
     connection.session = {};
     
@@ -538,7 +565,7 @@
 * Workaround-added: [Firefox don't yet support onended for any stream](https://bugzilla.mozilla.org/show_bug.cgi?id=1045810) (remote/local)
 * RTCMultiConnection is updated for **audio+screen** from single getUserMedia request for Firefox Nightly. Below snippet is sharing single video stream containing both audio/video tracks; and target browser is joining with only audio. Screen can be viewed on both chrome and Firefox. If you'll share from chrome, then it will be making multiple getUserMedia requests.
     
-    ``` 
+    ```javascript
     // audio+video+screen will become audio+screen for Firefox
     // because Firefox isn't supporting multi-streams feature
     
@@ -556,7 +583,7 @@
     ```
 * Screen capturing support for Firefox nightly added. You simply need to open "**about:config**" on Firefox nightly and set "**media.getusermedia.screensharing.enabled**" to "**true**".
     
-    ```
+    ```javascript
     // same for Firefox
     connection.session = {
         screen: true,
@@ -566,19 +593,19 @@
     ```
 * **connection.[dontCaptureUserMedia](http://www.rtcmulticonnection.org/docs/dontCaptureUserMedia/)** added:
     
-    ```
+    ```javascript
     connection.dontCaptureUserMedia = true;
     
     ```
 * connection.**[dontAttachStream](http://www.rtcmulticonnection.org/docs/dontAttachStream/)** updated:
     
-    ```
+    ```javascript
     connection.dontAttachStream = true;
     
     ```
 * **connection.onstreamid** added:
     
-    ```
+    ```javascript
     // on getting remote stream's clue
     connection.onstreamid = function (e) {
         var mediaElement = document.createElement(e.isAudio ? 'audio' : 'video');
@@ -591,7 +618,7 @@
     ```
 * **connection.peers['target-userid'].getStats** added.
     
-    ```
+    ```javascript
     connection.peers['target-userid'].peer.getStats(function (result) {
         // many useful statistics here
     });
@@ -599,7 +626,7 @@
     ```
 * **connection.onconnected** added.
     
-    ```
+    ```javascript
     connection.onconnected = function (event) {
         log('Peer connection has been established between you and', event.userid);
         
@@ -614,7 +641,7 @@
     ```
 * **connection.onfailed** added.
     
-    ```
+    ```javascript
     connection.onfailed = function (event) {
         event.peer.renegotiate();
         // or event.peer.redial();
@@ -625,7 +652,7 @@
 * Screen capturing is improved, and [single google chrome extension](https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk) is used to support capturing from all domains!
 * **connection.[processSdp](http://www.rtcmulticonnection.org/docs/processSdp/)** added.
     
-    ```
+    ```javascript
     connection.processSdp = function(sdp) {
         sdp = remove_vp8_codecs(sdp);
         sdp = prefer_opus (sdp);
@@ -636,7 +663,7 @@
     ```
 * **[connection.mediaConstraints](http://www.rtcmulticonnection.org/docs/mediaConstraints/)** and **[connection.media](http://www.rtcmulticonnection.org/docs/media/)** are updated:
     
-    ```
+    ```javascript
     connection.mediaConstraints = {
         mandatory: {
             maxWidth: 1920,
@@ -654,7 +681,7 @@
     ```
 * **[connection.onstream](http://www.rtcmulticonnection.org/docs/onstream/)** is updated for **event.isScreen**:
     
-    ```
+    ```javascript
     connection.onstream = function (event) {
         if(event.isScreen) {
             // it is screen stream
@@ -672,7 +699,7 @@
     ```
 * **[connection.refresh](http://www.rtcmulticonnection.org/docs/refresh/)** is updated and session re-initiation is improved.
     
-    ```
+    ```javascript
     // you simply need to invoke "connection.leave" to 
     // leave a session so that you can rejoin same session
     connection.onstatechange = function (state) {
@@ -688,7 +715,7 @@
     ```
 * **connection.iceProtocols** added.
     
-    ```
+    ```javascript
     connection.iceProtocols = {
         tcp: true, // prefer using TCP-candidates
         udp: true  // prefer using UDP-candidates
@@ -697,20 +724,20 @@
     ```
 * Use custom chrome extension for screen capturing:
     
-    ```
+    ```javascript
     connection.DetectRTC.screen.extensionid = 'your-app-store-extensionid';
     
     ```
 * STUN/TURN servers are updated; as well as ICE-servers from XirSys are used:
     
-    ```
+    ```javascript
     // to disable XirSys ICE-Servers
     connection.getExternalIceServers = false;
     
     ```
 * **connection.preventSSLAutoAllowed** is disabled.
     
-    ```
+    ```javascript
     // to enable it
     connection.preventSSLAutoAllowed = true;
     
@@ -718,12 +745,17 @@
 
 <a name="v1.8"></a>
 ### 1.8 (2014-06-28)
+
+```
+<script src="//cdn.webrtc-experiment.com/RTCMultiConnection-v1.8.js"></script>
+```
+
 #### Bug Fixes
 * Fixed: If Chrome starts video-only session; and Firefox joins with only audio. Then both fails to connect; though sendrecv/recvonly/sendonly everything is correctly implemented.
 * Fixed: "the videos are not square and they look grainy not has sharp as before". Now video is captured & streamed with better quality.
 * [startRecording](http://www.rtcmulticonnection.org/docs/startRecording/)/[stopRecording](http://www.rtcmulticonnection.org/docs/stopRecording/) updated & fixed.
     
-    ```
+    ```javascript
     // record both audio and video
     connection.streams['stream-id'].startRecording({
         audio: true,
@@ -741,8 +773,8 @@
 #### Features
 * (to fix canary ipv6 candidates issues): disabled "googIPv6", "googDscp" and "googImprovedWifiBwe"
 * "**connection.leaveOnPageUnload**" added.
-    
-    ```
+
+    ```javascript
     // if you want to prevent/override/bypass default behaviour
     connection.leaveOnPageUnload = false;
     
@@ -768,7 +800,7 @@
 
 * "connection.[onstatechange](http://www.rtcmulticonnection.org/docs/onstatechange/)" added:
     
-    ```
+    ```javascript
     connection.onstatechange = function (state, reason) {
         // fetching-usermedia
         // usermedia-fetched
@@ -797,7 +829,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     It means that "**[sharePartOfScreen](http://www.rtcmulticonnection.org/docs/sharePartOfScreen/)**" will work with all new/old users.
 * "**connection.donotJoin**" added:
     
-    ```
+    ```javascript
     connection.onstatechange = function (state) {
         if(state == 'room-not-available') {
             connection.donotJoin(connection.sessionid);
@@ -809,7 +841,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
 
     It means that install the chrome extension and RTCMultiConnection will auto use it. Don't ask your users to reload the page:
     
-    ```
+    ```javascript
     connection.DetectRTC.screen.extensionid = 'ajhifddimkapgcifgcodmmfdlknahffk';
     
     ```
@@ -817,7 +849,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
 * "connection.[resumePartOfScreenSharing()](http://www.rtcmulticonnection.org/docs/resumePartOfScreenSharing/)" added.
 * "**event.blobURL**" in the [onstream](http://www.rtcmulticonnection.org/docs/onstream/) event is fixed for Firefox.
     
-    ```
+    ```javascript
     connection.onstream = function(e) {
         // e.blobURL -- now it is always blob:URI
     };
@@ -828,7 +860,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
 * function "**stopTracks**" updated.
 * Now, you can easily manage external resources/URLs using "**connection.resources**":
     
-    ```
+    ```javascript
     connection.resources = {
         RecordRTC: 'https://www.webrtc-experiment.com/RecordRTC.js',
         PreRecordedMediaStreamer: 'https://www.rtcmulticonnection.org/PreRecordedMediaStreamer.js',
@@ -843,7 +875,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * **[connection.DetectRTC.MediaDevices](http://www.rtcmulticonnection.org/docs/DetectRTC/)** added:
     
-    ```
+    ```javascript
     // to iterate over all available media devices
     connection.getDevices(function() {
         connection.DetectRTC.MediaDevices.forEach(function(device) {
@@ -857,14 +889,14 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * Now, **hark.js** is used instead of **SoundMeter.js**:
     
-    ```
+    ```javascript
     connection.onspeaking = function() {};
     connection.onsilence = function() {};
     
     ```
 * **captureUserMediaOnDemand** added for **connection.open** method:
     
-    ```
+    ```javascript
     // it is "disabled" by default
     // captureUserMediaOnDemand means that "getUserMedia" API for initiator will 
     // be invoked only when required.
@@ -878,7 +910,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * **connection.DetectRTC.screen.getChromeExtensionStatus** added.
     
-    ```
+    ```javascript
     var extensionid = 'ajhifddimkapgcifgcodmmfdlknahffk';
     
     connection.DetectRTC.screen.getChromeExtensionStatus(extensionid, function(status) {
@@ -902,7 +934,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * **onMediaCaptured** added for **connection.open** method:
     
-    ```
+    ```javascript
     connection.open({
         onMediaCaptured: function() {
             // initiator enable camera/microphone
@@ -915,7 +947,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
 * **openSignalingChannel** is moved to "**setDefaults**" private function.
 * **connection.preventSSLAutoAllowed added**. Now RTCMultiConnection focuses more on end-users privacy! You can ask RTCMultiConnection to "always" display "getUserMedia-permission-bar" even if chrome is running on HTTPs i.e. SSL domain:
     
-    ```
+    ```javascript
     // by default "preventSSLAutoAllowed" is true only for "HTTPs" domains
     // you can force it for HTTP domains as well by setting this Boolean in your HTML page.
     connection.preventSSLAutoAllowed = true;
@@ -923,7 +955,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * **onScreenCapturingExtensionAvailable** is fired when RTCMultiConnection detects that chrome extension for screen capturing is installed and available:
     
-    ```
+    ```javascript
     connection.onScreenCapturingExtensionAvailable = function() {
         btnInlineInstallButton.disabled = true;
     };
@@ -931,7 +963,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * Now, **[connection.join](http://www.rtcmulticonnection.org/docs/join/)** method allows you force how to join (i.e. with or without streams etc.):
     
-    ```
+    ```javascript
     // it doesn't matter if incoming stream is audio+video
     // you can join it with only audio or with only video
     // or anonymously i.e. { oneway: true }
@@ -948,7 +980,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     Chrome extension is available [here](https://www.webrtc-experiment.com/store/capture-screen/).
 * You can use **connection.DetectRTC** like this:
     
-    ```
+    ```javascript
     connection.DetectRTC.load(function() {
         if(connection.DetectRTC.hasMicrophone) { }
         if(connection.DetectRTC.hasWebcam) { }
@@ -961,7 +993,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * **navigator.getUserMedia** errors handling in **onMediaError** event:
     
-    ```
+    ```javascript
     connection.onMediaError = function(error) {
         if(error.name == 'PermissionDeniedError') {
             alert(error.message);
@@ -972,13 +1004,19 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
 
 <a name="v1.7"></a>
 ### 1.7 (2014-05-14)
+
+```
+v1.7 focused on reliable API invocation, reliable concurrent users connectivity, and more. A few other features were added in this build like part of screen streaming, pre-recorded media streaming, ice-trickling booleans, and obviously DetectRTC!
+<script src="//cdn.webrtc-experiment.com/RTCMultiConnection-v1.7.js"></script>
+```
+
 #### Bug Fixes
 * Session re-initiation has been fixed. You can leave/rejoin many times.
 * Mute/UnMute and "onstreamended" among multiple users, issues fixed.
 #### Features
 * **connection.trickleIce** added. Useful if you're using XHR/SIP/XMPP for signaling. [XHR Demo](https://github.com/muaz-khan/XHR-Signaling)
     
-    ```
+    ```javascript
     // to ask RTCMultiConnection to wait until all ICE candidates
     // are gathered; and all ice are merged in the SDP
     // you JUST need to share that SDP "only"!
@@ -987,7 +1025,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * You can use "**connection.DetectRTC**" to [detect](https://github.com/muaz-khan/WebRTC-Experiment/blob/master/DetectRTC) WebRTC features!
     
-    ```
+    ```javascript
     if(connection.DetectRTC.isWebRTCSupported) {}
     if(connection.DetectRTC.hasMicrophone) {}
     if(connection.DetectRTC.hasWebcam) {}
@@ -998,7 +1036,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     * if system doesn't have any webcam attached; RTCMultiConnection will skip "**{video:true}**" and prompt only "**{audio: true}**"
 * Previously "connection.renegotiatedSessions" was an array; now it is object.
     
-    ```
+    ```javascript
     // sometimes you try to manually fetch media streams
     // sometimes you allow a user to enable webcam ... but don't renegotiate quickly..
     // you may want to ask other user to invoke "renegotiate" function
@@ -1024,7 +1062,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * Now, using default camera resolutions instead of using minWidth/minHeight and maxWidth/maxHeight. You can [easily override](http://www.rtcmulticonnection.org/docs/mediaConstraints/) those values:
     
-    ```
+    ```javascript
     connection.mediaConstraints.mandatory = {
         minWidth: 1280,
         maxWidth: 1280,
@@ -1039,7 +1077,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
 * Now, auto injecting **VoiceActivityDetection:true** for chrome to make sure **c=IN** is always present; otherwise **b=AS** will fail.
 * **connection.dontOverrideSession** added:
     
-    ```
+    ```javascript
     // dont-override-session allows you force RTCMultiConnection
     // to not override default session of participants;
     // by default, session is always overridden and set to the session coming from initiator!
@@ -1048,7 +1086,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * connection.askToShareParticipants and connection.shareParticipants added. Useful in [multi-broadcasters and many viewers scenarios](https://www.webrtc-experiment.com/RTCMultiConnection/Multi-Broadcasters-and-Many-Viewers.html)!
     
-    ```
+    ```javascript
     connection.onstream = function (e) {
         if (e.type == 'remote' && role == 'Anonymous Viewer') {
             // because "viewer" joined room as "oneway:true"
@@ -1073,7 +1111,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
 * **connection.join('sessionid')** has been improved.
 * Now you can pass "sessionid" over "join" method!
     
-    ```
+    ```javascript
     // make sure that room is created!
     // otherwise this "join" method will fail to join the room!
     // "join" method NEVER waits for onNewSession!!
@@ -1084,7 +1122,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
 * [Admin/Guest features](http://www.rtcmulticonnection.org/docs/admin-guest/) has been removed. You should use v1.6 or earlier to use admin/guest features.
 * **screen:300kbps** added in **connection.[bandwidth](http://www.rtcmulticonnection.org/docs/bandwidth/)**:
     
-    ```
+    ```javascript
     // by default
     connection.bandwidth = {
         screen: 300
@@ -1097,7 +1135,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * Now, you can check **connection.[stats](http://www.rtcmulticonnection.org/docs/stats/).numberOfSessions** in a specific channel:
     
-    ```
+    ```javascript
     alert( connection.stats.numberOfSessions );
     
     // You can even access all sessions using this object-like array:
@@ -1122,7 +1160,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
 * Now, "streamid" is synced among all users! You can mute/unmute or stop single stream-id and it will affect among all connected users!
 * **autoReDialOnFailure** added. You can force RTCMultiConnection to auto redial if peer connection is dropped unexpectedly or failed out of any exception!
     
-    ```
+    ```javascript
     // by default, it is "false"
     // it is false because workaround that is used to capture connections' failures
     // affects renegotiation scenarios!
@@ -1131,14 +1169,14 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * You can override [setDefaultEventsForMediaElement](http://www.rtcmulticonnection.org/docs/setDefaultEventsForMediaElement/) to prevent default mute/unmute handlers on media elements.
     
-    ```
+    ```javascript
     // by default it captures "onplay", "onpause" and "onvolumechange" events for all media elements
     connection.setDefaultEventsForMediaElement = false;
     
     ```
 * **onpartofscreenstopped** and **onpartofscreenpaused** added:
     
-    ```
+    ```javascript
     // invoked when you "manually" stopped part-of-screen sharing!
     connection.onpartofscreenstopped = function() {};
     
@@ -1148,7 +1186,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * Now, you can call **sharePartOfScreen**, **pausePartOfScreenSharing** and **stopPartOfScreenSharing** for all users:
     
-    ```
+    ```javascript
     connection.sharePartOfScreen({
         element: '#div-id', // querySelector or HTMLElement
         interval: 1000      // milliseconds
@@ -1160,7 +1198,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * **hold/unhold** of individual media lines implemented:
     
-    ```
+    ```javascript
     // hold only your audio
     connection.peers['target-userid'].hold('audio');
     connection.onhold = function(track) {
@@ -1183,13 +1221,13 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
 * When you mute/unmute; video-controls are synced among all users! Volume is also synced!
 * **window.skipRTCMultiConnectionLogs** is replaced with **connection.skipLogs** method:
     
-    ```
+    ```javascript
     connection.skipLogs();
     
     ```
 * Part of screen sharing has been implemented:
     
-    ```
+    ```javascript
     // to share a DIV or region of screen with a specific user
     connection.peers['target-userid'].sharePartOfScreen({
         element: 'body', // querySelector or HTMLElement
@@ -1213,7 +1251,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     * [join](http://www.rtcmulticonnection.org/docs/join/) method can be used to join that "sessionDescription" anytime without connecting to signaling channel!
     * <span style="color:blue">For initiator</span>:
         
-        ```
+        ```javascript
         var initiator = new RTCMultiConnection();
         
         // you can pass object instead of string!
@@ -1226,7 +1264,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
         ```
     * <span style="color:blue">For participant</span>:
         
-        ```
+        ```javascript
         var participant = new RTCMultiConnection();
 
         websocket.onmessage = function(event) {
@@ -1237,14 +1275,14 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
         ```
 * Now, [removeStream](http://www.rtcmulticonnection.org/docs/removeStream/) method quickly removes streams and auto renegotiates. You can also call [removeStream](http://www.rtcmulticonnection.org/docs/removeStream/) over [peers](http://www.rtcmulticonnection.org/docs/peers/) object:
     
-    ```
+    ```javascript
     connection.peers['target-userid'].removeStream( 'stream-id' );
     
     ```
 * Now, [onRequest](http://www.rtcmulticonnection.org/docs/onRequest/) is fired only for [session-initiator](http://www.rtcmulticonnection.org/docs/session-initiator/).
 * "[shareMediaFile](http://www.rtcmulticonnection.org/docs/shareMediaFile/)" and "[onMediaFile](http://www.rtcmulticonnection.org/docs/onMediaFile/)" added. (i.e. pre-recorded media support added):
     
-    ```
+    ```javascript
     // select WebM file to share as pre-recorded media!
     document.querySelector('input[type=file]').onchange = function() {
         connection.shareMediaFile( this.files[0] );
@@ -1266,7 +1304,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
 * Now, "[getDevices](http://www.rtcmulticonnection.org/docs/getDevices/)" method skips duplicate devices and returns array of unique audio/video devices.
 * Now, "[onFileStart](http://www.rtcmulticonnection.org/docs/onFileStart/)", "[onFileProgress](http://www.rtcmulticonnection.org/docs/onFileProgress/)" and "[onFileEnd](http://www.rtcmulticonnection.org/docs/onFileEnd/)" has remote user's ID, "sending" object and "[extra](http://www.rtcmulticonnection.org/docs/extra/)" object:
     
-    ```
+    ```javascript
     // file sending or receiving instance is started.
     connection.onFileStart = function(file) {
         // file.userid  ---- userid of the file sender
@@ -1294,7 +1332,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * "[onstream](http://www.rtcmulticonnection.org/docs/onstream/)" has two new objects:
     
-    ```
+    ```javascript
     connection.onstream = function(e) {
         // e.isVideo ---- if it is a  Video stream
         // e.isAudio ---- if it is an Audio stream
@@ -1305,7 +1343,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
 * Now, when renegotiating media streams, v1.7 checks to verify if remote stream is delivered to end-user; if delivery fails, v1.7 auto tries renegotiation again.
 * Now, "isAcceptNewSession" is shifted to root-level. Using this feature, you can allow single user to join multiple rooms from the same [channel](http://www.rtcmulticonnection.org/docs/channel-id/):
     
-    ```
+    ```javascript
     connection.onstream = function(event) {
         if(event.type == 'remote') {
             // set "isAcceptNewSession=true" so this user can get and join new session i.e. room
@@ -1317,7 +1355,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
     ```
 * Now, "[session](http://www.rtcmulticonnection.org/docs/session/)" object is always passed over "[onstreamended](http://www.rtcmulticonnection.org/docs/onstreamended/)" event; so, you can check which stream is stopped: screen or audio/video:
     
-    ```
+    ```javascript
     connection.onstreamended = function(event) {
         if(event.session.screen) { }                        // if screen stream is stopped.
         if(event.session.audio && !event.session.video) { } // if audio stream is stopped.
@@ -1330,7 +1368,7 @@ Remember, older "[onstats](http://www.rtcmulticonnection.org/docs/onstats/)" eve
 * v1.6 and earlier releases has a bug for renegotiated streams. When you try to stop renegotiated stream; it is removed only from 1st participant; not from all participants. This issue has been fixed in v1.7.
 * "**forceToStopRemoteStream**" added.
     
-    ```
+    ```javascript
     var forceToStopRemoteStream = true;
     connection.streams['remote-stream-id'].stop( forceToStopRemoteStream );
     
@@ -1345,13 +1383,18 @@ This feature was disabled since v1.4 however now enabled by passing a single boo
 
 <a name="v1.6"></a>
 ### 1.6 (2014-01-29)
+
+```
+<script src="//cdn.webrtc-experiment.com/RTCMultiConnection-v1.6.js"></script>
+```
+
 #### Bug Fixes
 * [Bug #152](https://github.com/muaz-khan/WebRTC-Experiment/issues/152) fixed.
 #### Features
 * Now v1.6 is capable to auto-redial if connection is dropped by any mean. (This feature is disabled because it was affecting renegotiation process).
 * Now you can join as audio-only, video-only or screen-only stream both on chrome and firefox:
     
-    ```
+    ```javascript
     // original session is "audio-only" stream
     connection.session = { audio: true };
     connection.onNewSession = function(session) {
@@ -1361,7 +1404,7 @@ This feature was disabled since v1.4 however now enabled by passing a single boo
     
     ```
     
-    ```
+    ```javascript
     // original session is "audio+video" stream
     connection.session = { audio: true, video: true };
     connection.onNewSession = function(session) {
@@ -1372,7 +1415,7 @@ This feature was disabled since v1.4 however now enabled by passing a single boo
     ```
 * "[fakeDataChannels](http://www.rtcmulticonnection.org/docs/fakeDataChannels/)" added. Using "[fakeDataChannels](http://www.rtcmulticonnection.org/docs/fakeDataChannels/)" object you can setup fake data connection while you're sharing audio/video/screen. You can do text-chat; share files; etc. without using WebRTC data channels.
     
-    ```
+    ```javascript
     // audio+video and fake data connection
     connection.fakeDataChannels = true;
     connection.session = { audio: true, video: true };
@@ -1384,7 +1427,7 @@ This feature was disabled since v1.4 however now enabled by passing a single boo
     ```
 * "[UA](http://www.rtcmulticonnection.org/docs/UA/)" object added. It returns whether browser is chrome; firefox or mobile device:
     
-    ```
+    ```javascript
     var isFirefox = connection.UA.Firefox;
     var isChrome = connection.UA.Chrome;
     var isMobileDevice = connection.UA.Mobile;
@@ -1392,7 +1435,7 @@ This feature was disabled since v1.4 however now enabled by passing a single boo
     ```
 * Now you can [renegotiate](http://www.rtcmulticonnection.org/docs/renegotiation/) data-connection in your existing audio/video/screen session!
     
-    ```
+    ```javascript
     connection.addStream({
         data: true
     });
@@ -1400,14 +1443,14 @@ This feature was disabled since v1.4 however now enabled by passing a single boo
     ```
 * [Pull #152](https://github.com/muaz-khan/WebRTC-Experiment/issues/152) merged for "[token](http://www.rtcmulticonnection.org/docs/token/)" method:
     
-    ```
+    ```javascript
     var randomString = connection.token();
     connection.userid = connection.token();
     
     ```
 * "[autoTranslateText](http://www.rtcmulticonnection.org/docs/autoTranslateText/)" method added:
     
-    ```
+    ```javascript
     // all incoming text messages will be converted in this language
     // by default, it is "en-US"
     connection.language = 'ja'; // prefer Japanese
@@ -1428,7 +1471,7 @@ This feature was disabled since v1.4 however now enabled by passing a single boo
     ```
 * "session.join" method added. Remember, it is "<span style="color:red">session</span>.join"; it isn't "<span style="color:red">connection</span>.join"!
     
-    ```
+    ```javascript
     connection.onNewSession = function(session) {
         session.join();                           // join session as it is!
         session.join({audio: true});              // join session while allowing only audio
@@ -1441,7 +1484,7 @@ This feature was disabled since v1.4 however now enabled by passing a single boo
 * Now, [MRecordRTC](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/RecordRTC/MRecordRTC) is used for [audio/video recording](http://www.rtcmulticonnection.org/docs/startRecording/)!
 * "[saveToDisk](http://www.rtcmulticonnection.org/docs/saveToDisk/)" method added. You can invoke save-as dialog like this:
     
-    ```
+    ```javascript
     // "fileName" is optional
     connection.saveToDisk(fileURL, fileName);
     
@@ -1454,7 +1497,7 @@ This feature was disabled since v1.4 however now enabled by passing a single boo
     ```
 * If you're recording both audio and video; then "[stopRecording](http://www.rtcmulticonnection.org/docs/stopRecording/)" will return both blobs in the single callback; where 1st parameter value will be audio-blob; and 2nd parameter value will be video-blob:
     
-    ```
+    ```javascript
     // stop both audio/video streams
     connection.streams['stream-id'].stopRecording(function (audioBlob, videoBlob) {
         // POST both audio/video "Blobs" to PHP/other server using single FormData/XHR2
@@ -1463,7 +1506,7 @@ This feature was disabled since v1.4 however now enabled by passing a single boo
     ```
 * "[onhold](http://www.rtcmulticonnection.org/docs/onhold/)" and "[onunhold](http://www.rtcmulticonnection.org/docs/onunhold/)" events added:
     
-    ```
+    ```javascript
     // to hold call; same like skype!
     connection.peers['user-id'].hold();
     connection.onhold = function(e) {
@@ -1479,7 +1522,7 @@ This feature was disabled since v1.4 however now enabled by passing a single boo
     ```
 * Many method has been added in "[peers](http://www.rtcmulticonnection.org/docs/peers/)" object.
     
-    ```
+    ```javascript
     // renegotiate while adding external media streams
     connection.peers['user-id'].renegotiate(Custom_MediaStream);
     
@@ -1515,7 +1558,7 @@ This feature was disabled since v1.4 however now enabled by passing a single boo
     * "hold" and "unhold" works same like skype!
 * "[renegotiate](http://www.rtcmulticonnection.org/docs/renegotiate/)" method added.
     
-    ```
+    ```javascript
     // renegotiate with/without media streams!
     connection.renegotiate(Custom_MediaStream);
     
@@ -1527,14 +1570,14 @@ This feature was disabled since v1.4 however now enabled by passing a single boo
     In multi-user connectivity scenarios; it is suggested to try "[peers](http://www.rtcmulticonnection.org/docs/peers/)" object to renegotiate/retry/redial connections. See next section for more details.
 * "[refresh](http://www.rtcmulticonnection.org/docs/refresh/)" method added.
     
-    ```
+    ```javascript
     connection.refresh();
     
     ```
 Using "[refresh](http://www.rtcmulticonnection.org/docs/refresh/)" method; you can refresh/reload the RTCMultiConnection object!
 * "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method added.
     
-    ```
+    ```javascript
     connection.remove('user-id');
     
     ```
@@ -1543,7 +1586,7 @@ Using "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method; you can
 * "[preferSCTP](http://www.rtcmulticonnection.org/docs/preferSCTP/)" is now enabled by default.
 * "[chunkSize](http://www.rtcmulticonnection.org/docs/chunkSize/)" added. You can set 64k chunk-size for chrome-to-chrome SCTP-data streaming!
     
-    ```
+    ```javascript
     // for chrome-to-chrome data streaming only!
     connection.chunkSize = 64 * 1000;
     
@@ -1559,13 +1602,18 @@ Using "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method; you can
 
 <a name="v1.5"></a>
 ### 1.5 (2013-12-31)
+
+```
+<script src="//cdn.webrtc-experiment.com/RTCMultiConnection-v1.5.js"></script>
+```
+
 #### Bug Fixes
 * [mute](http://www.rtcmulticonnection.org/docs/mute/)/[unmute](http://www.rtcmulticonnection.org/docs/unmute/) and "[stop](http://www.rtcmulticonnection.org/docs/stop/)" fixed both for chrome and firefox.
 * Echo issue; i.e. self-sound playback fixed.
 #### Features
 * You can get list of devices using "[getDevices](http://www.rtcmulticonnection.org/docs/getDevices/)" method and prefer any single or two audio/video devices using "[selectDevices](http://www.rtcmulticonnection.org/docs/selectDevices/)" method.
     
-    ```
+    ```javascript
         // get list of devices
         connection.getDevices(function(devices){
             for (var device in devices) {
@@ -1582,7 +1630,7 @@ Using "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method; you can
     ```
 * "[onspeaking](http://www.rtcmulticonnection.org/docs/onspeaking/)" and "[onsilence](http://www.rtcmulticonnection.org/docs/onsilence/)" added.
     
-    ```
+    ```javascript
     connection.onspeaking = function (e) {
         // e.streamid, e.userid, e.stream, etc.
         e.mediaElement.style.border = '1px solid red';
@@ -1596,7 +1644,7 @@ Using "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method; you can
     ```
 * "[connection.streams.stop](http://www.rtcmulticonnection.org/docs/stop/)" added to stop all local/remote streams.
     
-    ```
+    ```javascript
     // stop all local media streams
     connection.streams.stop('local');
     
@@ -1609,7 +1657,7 @@ Using "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method; you can
     ```
 * [onmute](http://www.rtcmulticonnection.org/docs/onmute/)/[onunmute](http://www.rtcmulticonnection.org/docs/onunmute/) auto displays "poster" if not overridden! (both on chrome and firefox)
     
-    ```
+    ```javascript
     connection.onmute = function(e) {
         e.mediaElement.setAttribute('poster', 
                                     'www.webrtc-experiment.com/images/muted.png');
@@ -1625,7 +1673,7 @@ Using "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method; you can
 * Default file progress-bar implemented.
 * You can manage videos and "progress-bar" container element by setting "[connection.body](http://www.rtcmulticonnection.org/docs/body/)".
     
-    ```
+    ```javascript
     <div class="container"></div>
     connection.body = document.querySelector('.container');
     
@@ -1635,7 +1683,7 @@ Using "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method; you can
 * Now, only [session-initiator](http://www.rtcmulticonnection.org/docs/session-initiator/) can [eject](http://www.rtcmulticonnection.org/docs/eject/) a user.
 * [takeSnapshot](http://www.rtcmulticonnection.org/docs/takeSnapshot/)/[snapshots](http://www.rtcmulticonnection.org/docs/snapshots/) added:
     
-    ```
+    ```javascript
     // iterate over all snapshots/
     for(var snapshot in connection.snapshots) {
         snapshot = connection.snapshots[snapshot];
@@ -1649,16 +1697,16 @@ Using "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method; you can
         image.src = snapshot;
     });
     
-    ```
+    ```javascript
 * [Session initiator](http://www.rtcmulticonnection.org/docs/session-initiator/) can now [stop](http://www.rtcmulticonnection.org/docs/stop/) remote media streams. It works same like [eject](http://www.rtcmulticonnection.org/docs/eject/) method:
     
-    ```
+    ```javascript
     connection.streams['remote-stream-id'].stop();
     
     ```
 * [reject](http://www.rtcmulticonnection.org/docs/reject/) method added. Now, you can reject any request in [onRequest](http://www.rtcmulticonnection.org/docs/onRequest/) event.:
     
-    ```
+    ```javascript
     connection.onRequest = function (request) {
         connection.reject(request);
     };
@@ -1677,7 +1725,7 @@ Using "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method; you can
     ```
 * [getStats](http://www.rtcmulticonnection.org/docs/getStats/) and [stats](http://www.rtcmulticonnection.org/docs/stats/) added.
     
-    ```
+    ```javascript
     connection.getStats(function(stat) {
         // stat.numberOfConnectedUsers
     });
@@ -1689,11 +1737,11 @@ Using "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method; you can
     // you can directly access "numberOfConnectedUsers" later like this:
     console.log(connection.stats.numberOfConnectedUsers);
     
-    ```
+    ```javascript
 * [caniuse](http://www.rtcmulticonnection.org/docs/caniuse/) added.
 
     
-    ```
+    ```javascript
     console.log( connection.caniuse.RTCPeerConnection );
     console.log( connection.caniuse.getUserMedia );
     console.log( connection.caniuse.AudioContext );
@@ -1716,13 +1764,13 @@ Using "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method; you can
     ```
 * "[drop](http://www.rtcmulticonnection.org/docs/drop/)" added. Using [drop](http://www.rtcmulticonnection.org/docs/drop/) method; you can drop the call, same like skype! This method will detach all "local" media streams from both sides.
     
-    ```
+    ```javascript
     connection.drop();
     
     ```
 * "[ondrop](http://www.rtcmulticonnection.org/docs/ondrop/)" event added. It is fired if other user drops the call.
     
-    ```
+    ```javascript
     // "ondrop" is fired; if media-connection is droppped by other user
     connection.ondrop = function() { };
     
@@ -1733,19 +1781,19 @@ Using "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method; you can
     * Ask [session-participants](http://www.rtcmulticonnection.org/docs/session-participant/) to attach audio stream; even if it is oneway stream coming from [session-initiator](http://www.rtcmulticonnection.org/docs/session-initiator/).
     * There are unlimited scenarios; that can be accomplished using [sendCustomMessage](http://www.rtcmulticonnection.org/docs/sendCustomMessage/) method; just imagine and go ahead and use it!
     
-    ```
+    ```javascript
     connection.sendCustomMessage(any_kind_of_data |or| string_message);
     
     ```
 * "[onCustomMessage](http://www.rtcmulticonnection.org/docs/onCustomMessage/)" event added. Custom messages can be received using [onCustomMessage](http://www.rtcmulticonnection.org/docs/onCustomMessage/) event.
     
-    ```
+    ```javascript
     connection.onCustomMessage = function(message) { };    
     
     ```
-* "stopRecording" now returns both audio/video blobs in the single "callback"!
+* "[stopRecording](http://www.rtcmulticonnection.org/docs/stopRecording/)" now returns both audio/video blobs in the single "callback"!
     
-    ```
+    ```javascript
     // stop single audio stream
     connection.streams['stream-id'].stopRecording(function (blob) {
         // POST "Blob" to PHP/other server using FormData/XHR2
@@ -1765,16 +1813,21 @@ Using "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method; you can
 
 <a name="v1.4"></a>
 ### 1.4 (2013-06-06)
+
+```
+<script src="//cdn.webrtc-experiment.com/RTCMultiConnection-v1.4.js"></script>
+```
+
 #### Features
-* Multiple concurrent files transmission / see [commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/a0f9b72654b3ba7c5232968d9850e35fb770bbbb#RTCMultiConnection)
+* Multiple concurrent files transmission / [(a0f9b72)](https://github.com/muaz-khan/WebRTC-Experiment/commit/a0f9b72654b3ba7c5232968d9850e35fb770bbbb#RTCMultiConnection)
 * Advance renegotiation
-* Admin/Guest features; useful in realtime chatting rooms where direct invitation is mandatory / see [commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/572ac336357b8530d779529e109197ea7b8f6f8e#RTCMultiConnection)
-* Multi-streams attachment i.e. audio+video+data+screen / see [commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/075eaa978399a2309b664164e875187ec7b6444a#RTCMultiConnection)
+* Admin/Guest features; useful in realtime chatting rooms where direct invitation is mandatory / [(572ac33)](https://github.com/muaz-khan/WebRTC-Experiment/commit/572ac336357b8530d779529e109197ea7b8f6f8e#RTCMultiConnection)
+* Multi-streams attachment i.e. audio+video+data+screen / [(075eaa9)](https://github.com/muaz-khan/WebRTC-Experiment/commit/075eaa978399a2309b664164e875187ec7b6444a#RTCMultiConnection)
 * Mute/UnMute/Stop of individual, all at once; all remote or all local streams
 * onstreamended added; a better method comparing "onleave"
 * maxParticipantsAllowed added
-* media/sdp constraints / see [commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/8d76c0cb5be4d8df17c6603220c091b8ea2ff0f6#RTCMultiConnection)
-* Session re-initiation / see [commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/a0f9b72654b3ba7c5232968d9850e35fb770bbbb#RTCMultiConnection)
+* media/sdp constraints / [(8d76c0c)](https://github.com/muaz-khan/WebRTC-Experiment/commit/8d76c0cb5be4d8df17c6603220c091b8ea2ff0f6#RTCMultiConnection)
+* Session re-initiation / [(a0f9b72)](https://github.com/muaz-khan/WebRTC-Experiment/commit/a0f9b72654b3ba7c5232968d9850e35fb770bbbb#RTCMultiConnection)
 * removeStream added to allow removal of existing media streams
 * disableDtlsSrtp added to fix renegotiation process which fails on chrome when DTLS/SRTP enabled
 * autoSaveToDisk added to allow customization of file-sharing
@@ -1792,34 +1845,49 @@ Using "[remove](http://www.rtcmulticonnection.org/docs/remove/)" method; you can
 
 <a name="v1.3"></a>
 ### 1.3 (2013-05-19)
+
+```
+<script src="//cdn.webrtc-experiment.com/RTCMultiConnection-v1.3.js"></script>
+```
+
 #### Features
-* Syntax changed; a few breaking changes comparing v1.2 / [see commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/ac368557ce857dad1fbcf70aa58813d50cec6047#RTCMultiConnection)
+* Syntax changed; a few breaking changes comparing v1.2 / [(ac36855)](https://github.com/muaz-khan/WebRTC-Experiment/commit/ac368557ce857dad1fbcf70aa58813d50cec6047#RTCMultiConnection)
 * Simple renegotiation
 * Mute/UnMute of individual streams
 * Auto-session establishment feature removed
-* Application specific bandwidth (b=AS) / see [commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/6df6a5507268c84b91fe8445f0b9ef1f5781b687#RTCMultiConnection) and [commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/b38a22834593cfc02893d320500dfb609f519580#RTCMultiConnection)
+* Application specific bandwidth (b=AS) / [(6df6a55)](https://github.com/muaz-khan/WebRTC-Experiment/commit/6df6a5507268c84b91fe8445f0b9ef1f5781b687#RTCMultiConnection) and [(b38a228)](https://github.com/muaz-khan/WebRTC-Experiment/commit/b38a22834593cfc02893d320500dfb609f519580#RTCMultiConnection)
 * Direct Messages
-* New TURN format added / see [commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/c0688f9eabfee4113150f3d362f2b3a2aa5c2895#RTCMultiConnection) / [IETF Draft](http://tools.ietf.org/html/draft-uberti-rtcweb-turn-rest-00)
-* Compatible to [socket.io over node.js](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/socketio-over-nodejs) / see [commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/b2e7789bcb79a4248090081750e26c984a76d0b0#RTCMultiConnection)
+* New TURN format added / [(c0688f9)](https://github.com/muaz-khan/WebRTC-Experiment/commit/c0688f9eabfee4113150f3d362f2b3a2aa5c2895#RTCMultiConnection) / [IETF Draft](http://tools.ietf.org/html/draft-uberti-rtcweb-turn-rest-00)
+* Compatible to [socket.io over node.js](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/socketio-over-nodejs) / [(b2e7789)](https://github.com/muaz-khan/WebRTC-Experiment/commit/b2e7789bcb79a4248090081750e26c984a76d0b0#RTCMultiConnection)
 
 <a name="v1.2"></a>
 ### 1.2 (2013-04-20)
+
+```
+<script src="//cdn.webrtc-experiment.com/RTCMultiConnection-v1.2.js"></script>
+```
+
 #### Features
 * Multi-session establishment
 * Auto-session establishment
 * Manual-session establishment
 * A little bit clear session/direction values e.g. 
   > connection.session=<span style="color:red;">'audio + video and data'</span>
-* Users ejection, rejection and presence detection / [see commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/305dd27af73c9219183f78120e8ebbb8443efb1e#RTCMultiConnection)
-* Keep session active all the time; event if initiator leaves / [see commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/bd8ae0f5529e7a3900ef5ccac61f1364390be6b3#RTCMultiConnection)
+* Users ejection, rejection and presence detection / [(305dd27)](https://github.com/muaz-khan/WebRTC-Experiment/commit/305dd27af73c9219183f78120e8ebbb8443efb1e#RTCMultiConnection)
+* Keep session active all the time; event if initiator leaves / [(bd8ae0f)](https://github.com/muaz-khan/WebRTC-Experiment/commit/bd8ae0f5529e7a3900ef5ccac61f1364390be6b3#RTCMultiConnection)
 * Custom data i.e. extra data transmission
-* Audio-only streaming fixed / [see commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/a4a6c3589e341617767213703683f1dba6c7548e#RTCMultiConnection)
+* Audio-only streaming fixed / [(a4a6c35)](https://github.com/muaz-khan/WebRTC-Experiment/commit/a4a6c3589e341617767213703683f1dba6c7548e#RTCMultiConnection)
 * Custom Handlers for server i.e. <span style="color:red;">transmitRoomOnce</span> 
 
 <a name="v1.1"></a>
 ### 1.1 (2013-03-25)
+
+```
+<script src="//cdn.webrtc-experiment.com/RTCMultiConnection-v1.1.js"></script>
+```
+
 #### Features
-* Multiple sessions & directions / [see commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/017431280099e892744a6300ea866e7324f5e4c2#RTCMultiConnection)
+* Multiple sessions & directions / [(0174312)](https://github.com/muaz-khan/WebRTC-Experiment/commit/017431280099e892744a6300ea866e7324f5e4c2#RTCMultiConnection)
 * File, data and text sharing (of any size & length)
 * Chrome/Firefox interoperability
-* Firefox's [new DataChannel](https://github.com/muaz-khan/WebRTC-Experiment/wiki/WebRTC-DataChannel-and-Firefox#points) syntax implemented / [see commit](https://github.com/muaz-khan/WebRTC-Experiment/commit/7bad719345814c7f832fad59abf31642e096b276#RTCMultiConnection)
+* Firefox's [new DataChannel](https://github.com/muaz-khan/WebRTC-Experiment/wiki/WebRTC-DataChannel-and-Firefox#points) syntax implemented / [(7bad719)](https://github.com/muaz-khan/WebRTC-Experiment/commit/7bad719345814c7f832fad59abf31642e096b276#RTCMultiConnection)
