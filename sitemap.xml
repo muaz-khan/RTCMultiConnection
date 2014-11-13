@@ -1,0 +1,762 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset
+        xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+            http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+	<url>
+        <loc>http://www.rtcmulticonnection.org/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/FAQ/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/changes-log/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+	
+	<url>
+        <loc>http://www.rtcmulticonnection.org/+/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+	
+	<url>
+        <loc>http://www.rtcmulticonnection.org/+/all-in-one/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+	
+	<url>
+        <loc>http://www.rtcmulticonnection.org/+/mute-unmute-close-leave-eject/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/accept/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/addStream/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/admin-guest/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/attachStreams/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/autoCloseEntireSession/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/autoSaveToDisk/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/bandwidth/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/body/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/candidates/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/captureUserMedia/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/channel-id/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/channels/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/close/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/connect/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/constructor/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/detachStreams/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/devices/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/direction/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/disableDtlsSrtp/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/dontAttachStream/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/eject/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/extra/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/fileQueue/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/firebase/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/getDevices/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/getStats/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/getting-started/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/interval/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/join/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/leave/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/maxParticipantsAllowed/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/media/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/mediaConstraints/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/mute/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onAdmin/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onclose/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onerror/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onFileEnd/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onFileProgress/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onFileStart/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onGuest/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onleave/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onMediaError/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onmessage/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onmute/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onNewSession/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onopen/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onRequest/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onsilence/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onspeaking/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onstats/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onstream/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onstreamended/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onunmute/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/open/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/openSignalingChannel/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/peers/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/preferSCTP/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/reject/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/removeStream/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/renegotiation/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/request/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/sdpConstraints/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/selectDevices/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/send/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/session/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/sessionid/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/session-initiator/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/session-participant/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/skipRTCMultiConnectionLogs/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/snapshots/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/startRecording/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/stats/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/stop/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/stopRecording/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/streams/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/takeSnapshot/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/transmitRoomOnce/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/unmute/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/userid/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/userType/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/caniuse/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/iceServers/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/drop/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/ondrop/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/sendCustomMessage/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onCustomMessage/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+	
+	<url>
+        <loc>http://www.rtcmulticonnection.org/docs/remove/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+	
+	<url>
+        <loc>http://www.rtcmulticonnection.org/docs/refresh/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+	
+	<url>
+        <loc>http://www.rtcmulticonnection.org/docs/chunkSize/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/renegotiate/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onhold/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onunhold/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/saveToDisk/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/autoTranslateText/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/language/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/Translator/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/token/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/UA/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/fakeDataChannels/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onMediaFile/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/shareMediaFile/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+    
+    <url>
+        <loc>http://www.rtcmulticonnection.org/docs/onpartofscreen/</loc>
+        <lastmod>2014-04-03T06:02:10+00:00</lastmod>
+        <changefreq>always</changefreq>
+        <priority>1.00</priority>
+    </url>
+</urlset>

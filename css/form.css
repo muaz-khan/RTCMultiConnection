@@ -1,0 +1,472 @@
+/****Form****/
+
+#form {
+	position: relative;
+	padding-top: 6px;
+}
+
+#form * {
+	z-index: 5;
+}
+
+#form .form_spinner {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	overflow: hidden;
+	width: 0;
+	height: 0;
+	z-index: 10;
+	background: #fff;
+	transition: 0.5s ease;
+    -o-transition: 0.5s ease;
+    -webkit-transition: 0.5s ease;
+}
+
+#form.processing .form_spinner {
+	width: 100%;
+	left: 0;
+	top: 0;
+	height: 100%;
+}
+
+.form_spinner img {
+	width: 30px;
+	height: 30px;
+	left: 50%;
+	margin-left: -15px;
+	top: 50%;
+	margin-top: -15px;
+	position: absolute;
+	content: '';
+}
+
+
+#form input {
+	width: 100%;
+	height: 33px;
+	float:left;
+	box-sizing: border-box;
+	-webkit-appearance: none;
+	-moz-box-sizing: border-box; /*Firefox 1-3*/
+	-webkit-box-sizing: border-box; /* Safari */
+	border: 1px solid #d3cdcd;
+    color: #615f5f;
+    padding: 6px 24px 7px;
+    font: 300 14px/20px 'Open Sans', sans-serif;
+}
+
+
+#form textarea {
+	width: 100%;
+	height: 191px;
+	background: #fff;
+	position: relative;
+	resize:none;
+	overflow: hidden;
+	box-sizing: border-box;
+	-webkit-appearance: none;
+	-moz-box-sizing: border-box; /*Firefox 1-3*/
+	-webkit-box-sizing: border-box; /* Safari */
+	float:left;
+	margin: 0;
+	color: #615f5f;
+    font: 300 14px/20px 'Open Sans', sans-serif;
+	border: 1px solid #d3cdcd;
+    padding: 17px 24px 7px;
+}
+
+
+
+#form ._placeholder {
+	transition: 0.5s ease;
+	-o-transition: 0.5s ease;
+	-webkit-transition: 0.5s ease;
+	color: #615f5f;
+    font: 300 14px/20px 'Open Sans', sans-serif;
+	border: 1px solid transparent;
+    padding: 6px 24px 7px;
+	height: 33px !important;
+	width: 100% !important;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box; /*Firefox 1-3*/
+	-webkit-box-sizing: border-box; /* Safari */
+	position: absolute;
+	right: 0;
+	top: 0;
+	left: 0;
+	cursor: text !important;
+	display: block;
+}
+
+#form ._placeholder.hidden {
+	display: none;
+}
+
+#form ._placeholder.focused {
+	opacity: 0.3;
+}
+
+
+#form .message ._placeholder {
+	height: 100% !important;
+	padding-top: 17px;
+}
+
+#form label {
+	position:relative;
+	display: block;
+	min-height: 59px;
+	float: left;
+	width: 337px;
+	clear: left;
+}
+
+#form label+label {
+}
+
+#form label.message {
+	width: 100%;
+	position: relative;
+	margin-left: 0;
+	position: relative;
+	top: 1px;
+}
+
+
+
+
+#form .error-message, #form .empty-message {
+	color: #E02A05;
+	font-size: 11px;
+	line-height:14px;
+	width:auto;
+	position: absolute;
+	z-index: 995;
+	top: 10px;
+	opacity: 0;
+	right: 5px;
+	float:left;
+	transition: 0.5s ease;
+	-o-transition: 0.5s ease;
+	-webkit-transition: 0.5s ease;
+}
+
+/*#form .message .error-message, #form .message .empty-message {
+	bottom: -16px;
+}*/
+
+
+
+
+#form .invalid .error-message, #form .empty .empty-message {
+	opacity: 1;
+}
+
+.btns {
+	font-size: 0;
+	line-height: 0;
+	padding-top: 29px;
+	text-align: right;
+}
+
+.btns .btn {
+	margin-top: 0;	
+	padding: 1px 30px 4px;
+}
+
+.btns .btn + .btn {
+	margin-left: 13px;
+}
+
+.phone {
+	position: relative;
+}
+
+.success_wrapper {
+	position: relative;
+}
+
+.message br {
+	height: 0;
+	line-height: 0;
+}
+
+
+.file {
+	margin-top: 9px;
+	min-height: 0 !important;
+}
+
+.file ._placeholder {
+	display: none !important;
+}
+
+.file input {
+
+}
+
+
+
+.file .wrapper {
+	height: 44px;
+	display: block;
+	overflow: hidden;
+	margin-left: 107px;
+	position: relative;
+	z-index: 999;
+	border: 1px solid #d8d8d8;
+}
+
+.input-group-btn {
+	display: block;
+	float: left;
+	position: absolute;
+	left: 0;
+	top: 6px;
+}
+
+.form-control  {
+	float: right;
+}
+
+.bootstrap-filestyle  {
+	overflow: hidden;
+	padding-left: 107px;
+}
+
+#form label.btn {
+	min-height: 0;
+	cursor: pointer;
+	float: none;
+	display: inline-block;
+	width: auto;
+	margin-top: 0;
+}
+
+
+span.lab {
+	position: absolute;
+	top: -25px;
+	left: 0;
+}
+
+.file .lab {
+	top: -26px;
+}
+
+@media only screen and (max-width: 1199px) {
+#form label {
+	float: none !important;	
+	width: 100%;
+	margin-left: 0 !important;
+}
+
+#form .success-message {
+	width: 100% !important;
+}
+
+
+}
+
+
+@media only screen and (max-width: 995px) {
+
+#form {
+}
+
+#form .success-message {
+	border-color: #000;
+}
+
+
+#form input, #form textarea {
+	border-color: #000;
+}
+
+
+#form .success-message {
+	width: 100%;
+}
+
+.btns {
+	padding-right: 0;
+}
+
+#form label.email {
+	width: 100%;
+	margin: 0;
+}
+
+.map figure {
+	float: left !important;
+	margin-right: 0px !important;
+}
+
+#form input, #form textarea, #form .success-message {
+/*	border: 1px solid #3a5363;
+*/}
+
+}
+
+@media only screen and (max-width: 767px) {
+
+#form {
+	padding-top: 40px;
+}
+
+
+.map figure {
+	width: 100% !important;
+	float: none !important;
+	display: block !important;
+	margin-right: 0px !important;
+}
+  .btns {
+		padding-bottom: 0;  
+  }
+  
+  #form textarea {
+		height: 300px !important; 
+  }
+
+   #form {
+ }
+
+ #form {
+ 	margin-bottom: 40px;
+ }
+  
+}
+@media only screen and (max-width: 479px) {
+
+  #form textarea {
+		height: 200px !important;  
+  }
+}
+
+
+
+button.close {
+  -webkit-appearance: none;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+}
+.modal-open {
+  overflow: hidden;
+}
+.modal {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1050 !important;
+  display: none;
+  overflow: auto;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  outline: 0;
+}
+.modal.fade .modal-dialog {
+  -webkit-transition: -webkit-transform .3s ease-out;
+     -moz-transition:    -moz-transform .3s ease-out;
+       -o-transition:      -o-transform .3s ease-out;
+          transition:         transform .3s ease-out;
+  -webkit-transform: translate(0, -25%);
+      -ms-transform: translate(0, -25%);
+          transform: translate(0, -25%);
+}
+.modal.in .modal-dialog {
+  -webkit-transform: translate(0, 0);
+      -ms-transform: translate(0, 0);
+          transform: translate(0, 0);
+}
+.modal-dialog {
+  position: relative;
+  width: auto;
+  margin: 10px;
+}
+.modal-content {
+  position: relative;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #999;
+  border: 1px solid rgba(0, 0, 0, .2);
+  border-radius: 6px;
+  outline: none;
+  -webkit-box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
+          box-shadow: 0 3px 9px rgba(0, 0, 0, .5);
+}
+
+.modal-content h4 {
+	padding-top: 0;
+	font-size: 30px;
+	line-height: 30px;
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1040 !important;
+  background-color: #000;
+}
+.modal-backdrop.fade {
+  filter: alpha(opacity=0);
+  opacity: 0;
+}
+.modal-backdrop.in {
+  filter: alpha(opacity=50);
+  opacity: .5;
+}
+.modal-header {
+  min-height: 16.42857143px;
+  padding: 15px;
+  border-bottom: 1px solid #e5e5e5;
+}
+.modal-header .close {
+  margin-top: -2px;
+  float: right;
+}
+.modal-title {
+  margin: 0;
+  line-height: 1.42857143;
+}
+.modal-body {
+  position: relative;
+  padding: 20px;
+}
+.modal-footer {
+  padding: 19px 20px 20px;
+  margin-top: 15px;
+  text-align: right;
+  border-top: 1px solid #e5e5e5;
+}
+.modal-footer .btn + .btn {
+  margin-bottom: 0;
+  margin-left: 5px;
+}
+.modal-footer .btn-group .btn + .btn {
+  margin-left: -1px;
+}
+.modal-footer .btn-block + .btn-block {
+  margin-left: 0;
+}
+@media (min-width: 768px) {
+  .modal-dialog {
+    width: 600px;
+    margin: 30px auto;
+  }
+  .modal-content {
+    -webkit-box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, .5);
+  }
+  .modal-sm {
+    width: 300px;
+  }
+}

@@ -1,0 +1,102 @@
+audio, video {
+                -moz-transition: all 1s ease;
+                -ms-transition: all 1s ease;
+                
+                -o-transition: all 1s ease;
+                -webkit-transition: all 1s ease;
+                transition: all 1s ease;
+                vertical-align: top;
+            }
+
+            input {
+                border: 1px solid #d9d9d9;
+                border-radius: 1px;
+                font-size: 2em;
+                margin: .2em;
+                width: 20%;
+            }
+
+            select {
+                border: 1px solid #d9d9d9;
+                border-radius: 1px;
+                margin-left: 1em;
+                margin-right: -12px;
+                padding: 1.1em;
+                vertical-align: 6px;
+            }
+
+            .button {
+                font-size: 102%;
+                height: 47px;
+                margin-top: 7px;
+				vertical-align:top;
+            }
+
+            p { padding: 1em; }
+
+            #chat-output div, #file-progress div {
+                border: 1px solid black;
+                border-bottom: 0;
+                padding: .1em .4em;
+            }
+
+            #chat-output, #file-progress {
+                margin: 0 0 0 .4em;
+                max-height: 12em;
+                overflow: auto;
+            }
+
+            .data-box input {
+                border: 1px solid black;
+                font-family: inherit;
+                font-size: 1em;
+                margin: .1em .3em;
+                outline: none;
+                padding: .1em .2em;
+                width: 97%;
+            }
+			
+			.demo {
+				padding: 2em;
+				margin-top: 2em;
+				border-radius: 1em;
+				border: 11px solid gray;
+				box-shadow: 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black;
+				margin: 2em 13%;
+				width: 70%
+			}
+			
+			.demo td {
+				vertical-align: top;
+			}
+			
+			.video-container {
+        display: inline-block;
+        border: 2px solid black;
+        padding: .1em;
+        border-radius: 0.2em;
+        margin: 2em .2em;
+        background: white;
+        vertical-align: top;
+    }
+
+    .video-container h2 {
+        border: 0;
+        border-top: 1px solid black;
+        margin: 0;
+        text-align: center;
+        display: block;
+    }
+			
+.eject {
+        background-position: center center !important;
+        background-repeat: no-repeat !important;
+        background-image: url('https://www.webrtc-experiment.com/images/eject.png') !important;
+        width: 30px;
+        height: 30px;
+        position: absolute;
+        z-index: 200;
+        margin: .2em;
+        border-color: white;
+        border-radius: 0;
+    }

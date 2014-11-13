@@ -1,0 +1,118 @@
+﻿<!DOCTYPE html>
+<html id="home" lang="en">
+
+<head>
+    <title>"RTCMultiConnection.autoCloseEntireSession" boolean</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
+    <meta name="author" content="Muaz Khan">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    
+    <link rel="stylesheet" href="//www.rtcmulticonnection.org/style.css">
+	
+    <style>
+            p { padding: .8em; }
+
+            li {
+                border-bottom: 1px solid rgb(189, 189, 189);
+                border-left: 1px solid rgb(189, 189, 189);
+                padding: .5em;
+            }
+			
+			.image-container {
+				text-align:center;
+				margin: 2em 0;
+			}
+			
+			.image-parent {
+				margin: 0 2em;
+				border: 2px solid black;
+				border-radius: 5px;
+			}
+			
+			.image-parent img {
+				width: 100%;
+			}
+			
+			li pre {
+				margin: 0;
+			}
+        </style>
+    <!-- for HTML5 el styling -->
+    <script>
+        document.createElement('article');
+        document.createElement('footer');
+    </script>
+	
+	<script type="text/javascript" src="//www.rtcmulticonnection.org/syntax/sh_main.min.js"></script>
+    <script type="text/javascript" src="//www.rtcmulticonnection.org/syntax/sh_javascript.min.js"></script>
+    <script type="text/javascript" src="//www.rtcmulticonnection.org/syntax/sh_html.min.js"></script>
+    <link type="text/css" rel="stylesheet" href="//www.rtcmulticonnection.org/syntax/sh_style.css">
+</head>
+
+<body onload="sh_highlightDocument();">
+    <article>
+        <a href="http://www.RTCMultiConnection.org/docs/" style="border-bottom: 1px solid #2844FA; font-size: 1.2em; position: absolute; text-decoration: none;right:0;top:0;">RTCMultiConnection Docs</a>
+
+        <h1 style="display: block;text-align: center;">
+            <a href="http://www.RTCMultiConnection.org/">RTCMultiConnection</a> API Reference /<br />
+            "<a href="http://www.RTCMultiConnection.org/docs/autoCloseEntireSession/"><code>autoCloseEntireSession</code></a>" boolean
+        </h1>
+		
+        <div class="github-stargazers"></div>
+        
+        <blockquote class="inline">
+            "<a href="http://www.RTCMultiConnection.org/docs/autoCloseEntireSession/"><code>autoCloseEntireSession</code></a>" can be used to force closing the entire session when initiator leaves. <br /><br />
+            
+            By default; <a href="http://www.RTCMultiConnection.org/docs/autoCloseEntireSession/"><code>autoCloseEntireSession</code></a> is "<code>false</code>". It means that when <a href="http://www.RTCMultiConnection.org/docs/session-initiator/">initiator</a> leaves; first <a href="http://www.RTCMultiConnection.org/docs/session-participant/">participant</a> will be given the role of conference owner.
+        </blockquote>
+        
+        <section class="experiment">
+            <h2>How to use?</h2>
+            <pre class="sh_javascript">
+connection.<a href="http://www.RTCMultiConnection.org/docs/autoCloseEntireSession/"><code>autoCloseEntireSession</code></a> = true;
+</pre>
+        </section>
+        
+        <section class="experiment">
+            <h2>
+                <a href="http://www.RTCMultiConnection.org/docs/leaveOnPageUnload/"><code>leaveOnPageUnload</code></a> == false?
+            </h2>
+            
+            <p style="margin-top:0;">
+                Make sure that <a href="http://www.RTCMultiConnection.org/docs/leaveOnPageUnload/"><code>leaveOnPageUnload</code></a> is <code>true</code>, otherwise <a href="http://www.RTCMultiConnection.org/docs/autoCloseEntireSession/"><code>autoCloseEntireSession</code></a> will fail to work.
+            </p>
+            
+            <pre class="sh_javascript">
+connection.<a href="http://www.RTCMultiConnection.org/docs/leaveOnPageUnload/"><code>leaveOnPageUnload</code></a> = true;
+connection.<a href="http://www.RTCMultiConnection.org/docs/autoCloseEntireSession/"><code>autoCloseEntireSession</code></a> = true;
+</pre>
+        </section>
+        
+        <br />
+        <section style="border: 1px solid rgb(189, 189, 189); margin: 1em 3em; border-radius: .2em;">
+                <h2 id="feedback" style="padding: .2em .4em; border-bottom: 1px solid rgb(189, 189, 189);">Want to ask a Question?</h2>
+                <div>
+                    <textarea id="message" style="height: 8em; margin: .2em; width: 98%; border: 1px solid rgb(189, 189, 189); outline: none; resize: vertical;" placeholder="Feel free to ask any question regarding RTCMultiConnection.js!"></textarea>
+                </div>
+                <button id="send-message" style="font-size: 1em;">Ask a Question</button><small style="margin-left:1em;">You can include your email for private conversation!</small>
+            </section>
+            
+            <section class="experiment own-widgets latest-commits">
+                <h2 class="header" id="updates" style="color: red; padding-bottom: .1em;"><a href="https://github.com/muaz-khan/WebRTC-Experiment/commits/master" target="_blank">Latest Updates</a></h2>
+                <div id="github-commits"></div>
+            </section>
+    </article>
+    <a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/RTCMultiConnection" class="fork-left"></a>
+	
+        <footer>
+            <a href="https://www.webrtc-experiment.com/" target="_blank">WebRTC Experiments!</a> and 
+            <a href="http://www.RTCMultiConnection.org/docs/" target="_blank">RTCMultiConnection.js</a> ©
+            <a href="mailto:muazkh@gmail.com" target="_blank">Muaz Khan</a>:
+            <a href="https://twitter.com/WebRTCWeb" target="_blank">@WebRTCWeb</a>
+        </footer>
+    <script src="//www.rtcmulticonnection.org/commits.js"> </script>
+</body>
+</html>
