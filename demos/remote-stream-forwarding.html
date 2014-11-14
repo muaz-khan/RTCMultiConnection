@@ -146,7 +146,6 @@
 
                     // http://www.rtcmulticonnection.org/docs/session/
                     mainConnection.session = {
-                        audio: true,
                         video: true
                     };
                     // http://www.rtcmulticonnection.org/docs/direction/
@@ -179,12 +178,7 @@
 
                     // http://www.rtcmulticonnection.org/docs/onstream/
                     mainConnection.onstream = function(e) {
-                        if(mainConnection.UA.isChrome) {
-                            // chrome doesn't yet permits remote audio forwarding
-                            // https://code.google.com/p/webrtc/issues/detail?id=2192#c15
-                            var stream = new webkitMediaStream( e.stream.getVideoTracks() );
-                            dummyConnection.attachStreams.push(stream);
-                        }
+                        dummyConnection.attachStreams.push(e.stream);
                         videosContainer.appendChild(e.mediaElement);
                         document.querySelector('#forward-main-session').disabled = false;
                     };

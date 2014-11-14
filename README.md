@@ -1,4 +1,4 @@
-<a href="https://github.com/muaz-khan/RTCMultiConnection"><img src="https://www.rtcmulticonnection.org/images/logo.png" /></a> / <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki Pages</a> / <a href="http://www.rtcmulticonnection.org/docs/">Documentation</a> / <a href="http://www.rtcmulticonnection.org/FAQ/">FAQ</a>
+<a href="https://github.com/muaz-khan/RTCMultiConnection"><img src="https://www.rtcmulticonnection.org/images/logo.png" /></a> / <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki Pages</a> / <a href="http://www.rtcmulticonnection.org/docs/">Documentation</a> / <a href="http://www.rtcmulticonnection.org/FAQ/">FAQ</a> / <a href="http://www.rtcmulticonnection.org/changes-log/">Changes Log</a>
 
 ## WebRTC Library  [![npm](https://img.shields.io/npm/v/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection)
 
