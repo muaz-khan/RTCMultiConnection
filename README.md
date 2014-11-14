@@ -13,6 +13,8 @@ RTCMultiConnection is a <a href="https://www.webrtc-experiment.com/">WebRTC</a> 
 
 It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licenced</a>, which means that you can use it in any commercial/non-commercial product, free of cost.
 
+## Upgrade? Please check [list of breaking changes](https://github.com/muaz-khan/RTCMultiConnection/wiki/Breaking-Changes)
+
 ```
 bower install rtcmulticonnection
 
@@ -215,6 +217,8 @@ document.getElementById('joinRoom').onclick = function() {
 | takeSnapshot i.e. Take Snapshot of Local/Remote streams | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/takeSnapshot.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/takeSnapshot.html) |
 | Audio/Video/Screen sharing and recording | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/audio-video-screen-sharing-recording.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/audio-video-screen-sharing-recording.html) |
 | Broadcast Multiple-Cameras | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/Broadcast-Multiple-Cameras.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Broadcast-Multiple-Cameras.html) |
+| Remote Stream Forwarding | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/remote-stream-forwarding.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/remote-stream-forwarding.html) |
+| WebRTC Scalable Broadcast | Socketio/Nodejs | [Source](https://github.com/muaz-khan/WebRTC-Scalable-Broadcast) |
 
 ## Credits
 

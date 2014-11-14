@@ -94,7 +94,7 @@
             <div class="github-stargazers"></div>
             
             <blockquote class="inner" style="text-align: center;">
-                Chrome is <a href="https://code.google.com/p/webrtc/issues/detail?id=2192#c15">still not supporting</a> remote audio forwarding. It will forward only remote <strong>video</strong> stream.
+                Chrome is <a href="https://code.google.com/p/webrtc/issues/detail?id=2192#c15">still not supporting</a> remote audio forwarding. It will forward only remote <strong>video</strong> stream. There is another demo: <a href="https://github.com/muaz-khan/WebRTC-Scalable-Broadcast">WebRTC Scalable Broadcast</a> which can broadcast video/screen over unlimited users!
             </blockquote>
         
             <section class="experiment">
@@ -151,9 +151,23 @@
                     };
                     // http://www.rtcmulticonnection.org/docs/direction/
                     mainConnection.direction = 'one-way';
+                    
+                    mainConnection.onNewSession = function(session) {
+                        mainConnection.sdpConstraints.mandatory = {
+                            OfferToReceiveVideo: true
+                        };
+                        mainConnection.join(session);
+                    };
 
                     // http://www.rtcmulticonnection.org/docs/constructor/
                     var dummyConnection = new RTCMultiConnection('dummy-connection');
+                    
+                    dummyConnection.onNewSession = function(session) {
+                        dummyConnection.sdpConstraints.mandatory = {
+                            OfferToReceiveVideo: true
+                        };
+                        dummyConnection.join(session);
+                    };
 
                     // http://www.rtcmulticonnection.org/docs/direction/
                     dummyConnection.direction = 'one-way';
@@ -165,7 +179,7 @@
 
                     // http://www.rtcmulticonnection.org/docs/onstream/
                     mainConnection.onstream = function(e) {
-                        if(mainConnection.UA.Chrome) {
+                        if(mainConnection.UA.isChrome) {
                             // chrome doesn't yet permits remote audio forwarding
                             // https://code.google.com/p/webrtc/issues/detail?id=2192#c15
                             var stream = new webkitMediaStream( e.stream.getVideoTracks() );
@@ -197,6 +211,10 @@
 
                     document.querySelector('#open-main-session').onclick = function() {
                         this.disabled = true;
+                        
+                        mainConnection.sdpConstraints.mandatory = {
+                            OfferToReceiveVideo: false
+                        };
 
                         // http://www.rtcmulticonnection.org/docs/open/
                         mainConnection.open();
@@ -204,11 +222,13 @@
 
                     document.querySelector('#forward-main-session').onclick = function() {
                         this.disabled = true;
+                        
+                        dummyConnection.sdpConstraints.mandatory = {
+                            OfferToReceiveVideo: false
+                        };
 
                         // http://www.rtcmulticonnection.org/docs/open/
-                        dummyConnection.open({
-                            captureUserMediaOnDemand: false
-                        });
+                        dummyConnection.open();
                     };
                 </script>
             </section>
