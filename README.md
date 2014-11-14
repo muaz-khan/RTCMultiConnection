@@ -14,6 +14,9 @@ RTCMultiConnection is a <a href="https://www.webrtc-experiment.com/">WebRTC</a> 
 It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licenced</a>, which means that you can use it in any commercial/non-commercial product, free of cost.
 
 ```
+bower install rtcmulticonnection
+
+# or NPM!
 npm install rtcmulticonnection
 ```
 
