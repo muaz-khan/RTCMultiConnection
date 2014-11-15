@@ -4062,87 +4062,95 @@ connection.rtcConfiguration
             hints.audio.mandatory = merge(hints.audio.mandatory, audioMandatoryConstraints);
         }
 
-        // connection.media.min(320,180);
-        // connection.media.max(1920,1080);
-        var videoMandatoryConstraints = videoConstraints.mandatory;
-        if (videoMandatoryConstraints) {
-            var mandatory = {};
+        if (hints.video !== false) {
+            // connection.media.min(320,180);
+            // connection.media.max(1920,1080);
+            var videoMandatoryConstraints = videoConstraints.mandatory;
+            if (videoMandatoryConstraints) {
+                var mandatory = {};
 
-            if (videoMandatoryConstraints.minWidth) {
-                mandatory.minWidth = videoMandatoryConstraints.minWidth;
-            }
-
-            if (videoMandatoryConstraints.minHeight) {
-                mandatory.minHeight = videoMandatoryConstraints.minHeight;
-            }
-
-            if (videoMandatoryConstraints.maxWidth) {
-                mandatory.maxWidth = videoMandatoryConstraints.maxWidth;
-            }
-
-            if (videoMandatoryConstraints.maxHeight) {
-                mandatory.maxHeight = videoMandatoryConstraints.maxHeight;
-            }
-
-            if (videoMandatoryConstraints.minAspectRatio) {
-                mandatory.minAspectRatio = videoMandatoryConstraints.minAspectRatio;
-            }
-
-            if (videoMandatoryConstraints.maxFrameRate) {
-                mandatory.maxFrameRate = videoMandatoryConstraints.maxFrameRate;
-            }
-
-            if (videoMandatoryConstraints.minFrameRate) {
-                mandatory.minFrameRate = videoMandatoryConstraints.minFrameRate;
-            }
-
-            if (mandatory.minWidth && mandatory.minHeight) {
-                // http://goo.gl/IZVYsj
-                var allowed = ['1920:1080', '1280:720', '960:720', '640:360', '640:480', '320:240', '320:180'];
-
-                if (allowed.indexOf(mandatory.minWidth + ':' + mandatory.minHeight) === -1 ||
-                    allowed.indexOf(mandatory.maxWidth + ':' + mandatory.maxHeight) === -1) {
-                    error('The min/max width/height constraints you passed "seems" NOT supported.', toStr(mandatory));
+                if (videoMandatoryConstraints.minWidth) {
+                    mandatory.minWidth = videoMandatoryConstraints.minWidth;
                 }
 
-                if (mandatory.minWidth > mandatory.maxWidth || mandatory.minHeight > mandatory.maxHeight) {
-                    error('Minimum value must not exceed maximum value.', toStr(mandatory));
+                if (videoMandatoryConstraints.minHeight) {
+                    mandatory.minHeight = videoMandatoryConstraints.minHeight;
                 }
 
-                if (mandatory.minWidth >= 1280 && mandatory.minHeight >= 720) {
-                    warn('Enjoy HD video! min/' + mandatory.minWidth + ':' + mandatory.minHeight + ', max/' + mandatory.maxWidth + ':' + mandatory.maxHeight);
+                if (videoMandatoryConstraints.maxWidth) {
+                    mandatory.maxWidth = videoMandatoryConstraints.maxWidth;
                 }
+
+                if (videoMandatoryConstraints.maxHeight) {
+                    mandatory.maxHeight = videoMandatoryConstraints.maxHeight;
+                }
+
+                if (videoMandatoryConstraints.minAspectRatio) {
+                    mandatory.minAspectRatio = videoMandatoryConstraints.minAspectRatio;
+                }
+
+                if (videoMandatoryConstraints.maxFrameRate) {
+                    mandatory.maxFrameRate = videoMandatoryConstraints.maxFrameRate;
+                }
+
+                if (videoMandatoryConstraints.minFrameRate) {
+                    mandatory.minFrameRate = videoMandatoryConstraints.minFrameRate;
+                }
+
+                if (mandatory.minWidth && mandatory.minHeight) {
+                    // http://goo.gl/IZVYsj
+                    var allowed = ['1920:1080', '1280:720', '960:720', '640:360', '640:480', '320:240', '320:180'];
+
+                    if (allowed.indexOf(mandatory.minWidth + ':' + mandatory.minHeight) === -1 ||
+                        allowed.indexOf(mandatory.maxWidth + ':' + mandatory.maxHeight) === -1) {
+                        error('The min/max width/height constraints you passed "seems" NOT supported.', toStr(mandatory));
+                    }
+
+                    if (mandatory.minWidth > mandatory.maxWidth || mandatory.minHeight > mandatory.maxHeight) {
+                        error('Minimum value must not exceed maximum value.', toStr(mandatory));
+                    }
+
+                    if (mandatory.minWidth >= 1280 && mandatory.minHeight >= 720) {
+                        warn('Enjoy HD video! min/' + mandatory.minWidth + ':' + mandatory.minHeight + ', max/' + mandatory.maxWidth + ':' + mandatory.maxHeight);
+                    }
+                }
+
+                hints.video.mandatory = merge(hints.video.mandatory, mandatory);
             }
 
-            hints.video.mandatory = merge(hints.video.mandatory, mandatory);
-        }
+            if (videoMandatoryConstraints) {
+                hints.video.mandatory = merge(hints.video.mandatory, videoMandatoryConstraints);
+            }
 
-        if (videoMandatoryConstraints) {
-            hints.video.mandatory = merge(hints.video.mandatory, videoMandatoryConstraints);
-        }
+            // videoConstraints.optional = [{prop:true}];
+            if (videoConstraints.optional && videoConstraints.optional instanceof Array && videoConstraints.optional.length) {
+                hints.video.optional = hints.video.optional ? hints.video.optional.concat(videoConstraints.optional) : videoConstraints.optional;
+            }
 
-        // videoConstraints.optional = [{prop:true}];
-        if (videoConstraints.optional && videoConstraints.optional instanceof Array && videoConstraints.optional.length) {
-            hints.video.optional = hints.video.optional ? hints.video.optional.concat(videoConstraints.optional) : videoConstraints.optional;
+            if (hints.video.mandatory && !isEmpty(hints.video.mandatory) && connection._mediaSources.video) {
+                hints.video.optional.forEach(function(video, index) {
+                    if (video.sourceId === connection._mediaSources.video) {
+                        delete hints.video.optional[index];
+                    }
+                });
+
+                hints.video.optional = swap(hints.video.optional);
+
+                hints.video.optional.push({
+                    sourceId: connection._mediaSources.video
+                });
+            }
+
+            if (hints.video && !hints.video.mozMediaSource && hints.video.optional && hints.video.mandatory) {
+                if (!hints.video.optional.length && isEmpty(hints.video.mandatory)) {
+                    hints.video = true;
+                }
+            }
         }
 
         // audioConstraints.optional = [{prop:true}];
         if (audioConstraints.optional && audioConstraints.optional instanceof Array && audioConstraints.optional.length) {
             hints.audio.optional = hints.audio.optional ? hints.audio.optional.concat(audioConstraints.optional) : audioConstraints.optional;
-        }
-
-        if (hints.video.mandatory && !isEmpty(hints.video.mandatory) && connection._mediaSources.video) {
-            hints.video.optional.forEach(function(video, index) {
-                if (video.sourceId === connection._mediaSources.video) {
-                    delete hints.video.optional[index];
-                }
-            });
-
-            hints.video.optional = swap(hints.video.optional);
-
-            hints.video.optional.push({
-                sourceId: connection._mediaSources.video
-            });
         }
 
         if (hints.audio.mandatory && !isEmpty(hints.audio.mandatory) && connection._mediaSources.audio) {
@@ -4157,12 +4165,6 @@ connection.rtcConfiguration
             hints.audio.optional.push({
                 sourceId: connection._mediaSources.audio
             });
-        }
-
-        if (hints.video && !hints.video.mozMediaSource && hints.video.optional && hints.video.mandatory) {
-            if (!hints.video.optional.length && isEmpty(hints.video.mandatory)) {
-                hints.video = true;
-            }
         }
 
         if (isMobileDevice) {
