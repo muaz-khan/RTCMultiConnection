@@ -42,12 +42,12 @@
   "homepage": "http://www.rtcmulticonnection.org/",
   "_from": "rtcmulticonnection@",
   "devDependencies": {
-    "grunt": ">=0.4.5",
-    "grunt-cli": ">=0.1.9",
-    "grunt-contrib-csslint": ">=0.3.1",
-    "grunt-contrib-jshint": "^0.10.0",
-    "grunt-contrib-uglify": "0.2.0",
-    "grunt-htmlhint": ">=0.4.1",
-    "grunt-jsbeautifier": ">=0.2.7"
+    "grunt": "latest",
+    "grunt-cli": "latest",
+    "grunt-contrib-csslint": "latest",
+    "grunt-contrib-jshint": "latest",
+    "grunt-contrib-uglify": "latest",
+    "grunt-htmlhint": "latest",
+    "grunt-jsbeautifier": "latest"
   }
 }
