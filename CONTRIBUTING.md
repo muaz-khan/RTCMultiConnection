@@ -7,7 +7,14 @@
 
 # Rules to Contribute
 
-Todo. Need two options:
+```
+git clone https://github.com/muaz-khan/RTCMultiConnection.git
 
-1. `.travis.yml`
-2. `grunt-contrib-jshint`, 'jshint' etc. to auto verify each pull request.
+npm install
+
+# modify files
+
+grunt
+
+# make a pull request
+```
