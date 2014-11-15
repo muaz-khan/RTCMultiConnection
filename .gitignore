@@ -1,7 +1,5 @@
-
-# Sublime Text
-*.sublime-project
-*.sublime-workspace
-
 # Node
 node_modules
+
+# bower
+bower_components
