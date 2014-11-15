@@ -1,8 +1,8 @@
 language: javascript
 install: npm install
 before_script:
-  - npm install -g grunt-cli
-  - npm uninstall grunt
+  - npm install grunt-cli
+  - npm install grunt
   - grunt
 matrix:
   fast_finish: true
