@@ -1,10 +1,8 @@
-language: node_js
-node_js:
-  - "0.8"
-  - "0.10"
+language: javascript
+install: npm install
 before_script:
   - npm install -g grunt-cli
-install:
-  - npm install
-git:
-  submodules: false
+  - npm uninstall grunt
+  - grunt
+matrix:
+  fast_finish: true
