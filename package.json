@@ -45,6 +45,7 @@
     "grunt": "latest",
     "grunt-cli": "latest",
     "load-grunt-tasks": "latest",
+    "grunt-contrib-concat": "latest",
     "grunt-contrib-csslint": "latest",
     "grunt-contrib-jshint": "latest",
     "grunt-contrib-uglify": "latest",

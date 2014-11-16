@@ -11,6 +11,29 @@ module.exports = function(grunt) {
     grunt.initConfig({
         // make node configurations available
         pkg: grunt.file.readJSON('package.json'),
+        concat: {
+            options: {
+                stripBanners: true,
+                separator: ''
+            },
+            dist: {
+                src: [
+                    'dev/head.js',
+                    'dev/RTCMultiConnection.js',
+                    'dev/RTCMultiSession.js',
+                    'dev/getUserMdia.js',
+                    'dev/PeerConnection.js',
+                    'dev/FileSaver.js',
+                    'dev/TextReceiver.js',
+                    'dev/TextSender.js',
+                    'dev/globals.js',
+                    'dev/DetectRTC.js',
+                    'dev/setDefaults.js',
+                    'dev/tail.js'
+                ],
+                dest: 'RTCMultiConnection.js',
+            },
+        },
         htmlhint: {
             html1: {
                 src: [
@@ -98,5 +121,5 @@ module.exports = function(grunt) {
 
     // set default tasks to run when grunt is called without parameters
     // http://gruntjs.com/api/grunt.task
-    grunt.registerTask('default', ['jsbeautifier', 'htmlhint', 'jshint', 'uglify']);
+    grunt.registerTask('default', ['concat', 'jsbeautifier', 'htmlhint', 'jshint', 'uglify']);
 };

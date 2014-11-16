@@ -1,3 +1,7 @@
+<a href="https://github.com/muaz-khan/RTCMultiConnection"><img src="http://www.rtcmulticonnection.org/images/logo.png" /></a> / <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki Pages</a> / <a href="http://www.rtcmulticonnection.org/docs/">Documentation</a> / <a href="http://www.rtcmulticonnection.org/FAQ/">FAQ</a> / <a href="https://www.webrtc-experiment.com/RTCMultiConnection/">Demos</a> / <a href="http://www.rtcmulticonnection.org/changes-log/">Changes Log</a>
+
+[![npm](https://img.shields.io/npm/v/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![Build Status: Linux](https://travis-ci.org/muaz-khan/RTCMultiConnection.png?branch=master)](https://travis-ci.org/muaz-khan/RTCMultiConnection)
+
 # Contributors
 
 1. [Muaz Khan](https://github.com/muaz-khan)
@@ -8,13 +12,21 @@
 # Rules to Contribute
 
 ```
-git clone https://github.com/muaz-khan/RTCMultiConnection.git
+git clone --depth=50 --branch=master git://github.com/muaz-khan/RTCMultiConnection.git muaz-khan/RTCMultiConnection
 
+# install all dependencies
 npm install
 
-# modify files
+# install grunt for code style verifications
+npm install grunt-cli
+npm install grunt
 
-grunt
+# verify your changes
+npm test  # or "grunt"
 
-# make a pull request
+# Success? Make a pull request!
 ```
+
+## License
+
+[RTCMultiConnection](https://github.com/muaz-khan/RTCMultiConnection) is released under [MIT licence](https://github.com/muaz-khan/RTCMultiConnection/blob/master/LICENSE.md) . Copyright (c) [Muaz Khan](http://www.MuazKhan.com/).
