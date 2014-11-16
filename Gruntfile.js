@@ -21,7 +21,7 @@ module.exports = function(grunt) {
                     'dev/head.js',
                     'dev/RTCMultiConnection.js',
                     'dev/RTCMultiSession.js',
-                    'dev/getUserMdia.js',
+                    'dev/getUserMedia.js',
                     'dev/PeerConnection.js',
                     'dev/FileSaver.js',
                     'dev/TextReceiver.js',
