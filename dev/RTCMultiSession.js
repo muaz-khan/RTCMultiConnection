@@ -1472,7 +1472,7 @@ function RTCMultiSession(connection, callbackForSignalingReady) {
         }
 
         for (var streamid in connection.streams) {
-            var stream = connection.streams[stream];
+            var stream = connection.streams[streamid];
             if (stream.userid === userid) {
                 onStreamEndedHandler(stream, connection);
                 delete connection.streams[streamid];
