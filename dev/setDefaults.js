@@ -403,13 +403,13 @@ function setDefaults(connection) {
                     return;
                 }
 
-                if (session.isScreen && !stream.isScreen) {
+                if (session.screen && !stream.isScreen) {
                     return;
                 }
-                if (session.isAudio && !stream.isAudio) {
+                if (session.audio && !stream.isAudio) {
                     return;
                 }
-                if (session.isVideo && !stream.isVideo) {
+                if (session.video && !stream.isVideo) {
                     return;
                 }
 
