@@ -11,35 +11,35 @@ Quick-Demos for newbies:
     <tr>
         <td>
             <a href="https://www.webrtc-experiment.com/RTCMultiConnection/" target="_blank">
-                <img src="https://www.rtcmulticonnection.org/img/demo.png" style="display:block; width:99px; height99px;" alt="Demos">
+                <img src="http://www.rtcmulticonnection.org/img/demo.png" style="display:block; width:99px; height99px;" alt="Demos">
                 Demos
             </a>
         </td>
         
         <td>
             <a href="http://www.rtcmulticonnection.org/docs/getting-started/" target="_blank">
-                <img src="https://www.rtcmulticonnection.org/img/getting-started.png" style="display:block; width:99px; height99px;" alt="Getting-Started">
+                <img src="http://www.rtcmulticonnection.org/img/getting-started.png" style="display:block; width:99px; height99px;" alt="Getting-Started">
                 Getting Started
             </a>
         </td>
         
         <td>
             <a href="http://www.rtcmulticonnection.org/docs/" target="_blank">
-                <img src="https://www.rtcmulticonnection.org/img/documentation.png" style="display:block; width:99px; height99px;" alt="Documentation">
+                <img src="http://www.rtcmulticonnection.org/img/documentation.png" style="display:block; width:99px; height99px;" alt="Documentation">
                 Documentation
             </a>
         </td>
         
         <td>
             <a href="http://www.rtcmulticonnection.org/changes-log/" target="_blank">
-                <img src="https://www.rtcmulticonnection.org/img/whats-new.png" style="display:block; width:99px; height99px;" alt="Changes Log">
+                <img src="http://www.rtcmulticonnection.org/img/whats-new.png" style="display:block; width:99px; height99px;" alt="Changes Log">
                 Changes Log
             </a>
         </td>
         
         <td>
             <a href="http://www.rtcmulticonnection.org/FAQ/" target="_blank">
-                <img src="https://www.rtcmulticonnection.org/img/FAQ.png" style="display:block; width:99px; height99px;" alt="FAQ">
+                <img src="http://www.rtcmulticonnection.org/img/FAQ.png" style="display:block; width:99px; height99px;" alt="FAQ">
                 FAQ
             </a>
         </td>
@@ -224,4 +224,4 @@ document.getElementById('joinRoom').onclick = function() {
 
 ## License
 
-[RTCMultiConnection](https://github.com/muaz-khan/RTCMultiConnection) is released under [MIT licence](https://www.webrtc-experiment.com/licence/) . Copyright (c) [Muaz Khan](http://www.MuazKhan.com/).
+[RTCMultiConnection](https://github.com/muaz-khan/RTCMultiConnection) is released under [MIT licence](https://github.com/muaz-khan/RTCMultiConnection/blob/master/LICENSE.md) . Copyright (c) [Muaz Khan](http://www.MuazKhan.com/).

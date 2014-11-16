@@ -1,4 +1,4 @@
-// Last time updated at Nov 15, 2014, 08:32:23
+// Last time updated at Nov 16, 2014, 08:32:23
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -25,8 +25,9 @@
 --. fixed: audio-only stream & crash.
 --. added: connection.attachExternalStream(MediaStream, isScreen);
 --. connection.candidates={relay:true} fixed. (a=candidate is removed).
+--. connection.numberOfConnectedUsers is fixed.
 
-connection.rtcConfiguration
+--. connection.rtcConfiguration
 */
 
 'use strict';
@@ -2480,8 +2481,6 @@ connection.rtcConfiguration
         // if a user leaves
 
         function clearSession() {
-            connection.numberOfConnectedUsers--;
-
             var alertMessage = {
                 left: true,
                 extra: connection.extra || {},
@@ -4585,6 +4584,8 @@ connection.rtcConfiguration
         }
         onLeaveHandlerFiredFor[event.userid] = event;
         connection.onleave(event);
+
+        connection.numberOfConnectedUsers--;
     }
 
     function takeSnapshot(args) {
