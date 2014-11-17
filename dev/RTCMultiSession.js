@@ -1471,11 +1471,11 @@ function RTCMultiSession(connection, callbackForSignalingReady) {
             delete participants[userid];
         }
 
-        for (var stream in connection.streams) {
-            stream = connection.streams[stream];
+        for (var streamid in connection.streams) {
+            var stream = connection.streams[streamid];
             if (stream.userid === userid) {
                 onStreamEndedHandler(stream, connection);
-                delete connection.streams[stream];
+                delete connection.streams[streamid];
             }
         }
 
