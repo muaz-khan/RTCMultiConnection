@@ -1,4 +1,4 @@
-// Last time updated at Nov 16, 2014, 08:32:23
+// Last time updated at Nov 17, 2014, 08:32:23
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -4425,12 +4425,7 @@
     }
 
     function isEmpty(session) {
-        var length = 0;
-        for (var s in session) {
-            s = s;
-            length++;
-        }
-        return length === 0;
+        return (session && !JSON.stringify(session).split(',').length) || !session;
     }
 
     // this method converts array-buffer into string
@@ -4510,13 +4505,7 @@
     }
 
     function getLength(obj) {
-        var length = 0;
-        for (var o in obj) {
-            if (o) {
-                length++;
-            }
-        }
-        return length;
+        return obj ? JSON.stringify(obj).split(',').length : 0;
     }
 
     // Get HTMLAudioElement/HTMLVideoElement accordingly
@@ -4720,6 +4709,7 @@
         if (loadedScreenFrame) {
             return;
         }
+
         if (!skip) {
             return loadScreenFrame(true);
         }
@@ -5575,13 +5565,13 @@
                         return;
                     }
 
-                    if (session.isScreen && !stream.isScreen) {
+                    if (session.screen && !stream.isScreen) {
                         return;
                     }
-                    if (session.isAudio && !stream.isAudio) {
+                    if (session.audio && !stream.isAudio) {
                         return;
                     }
-                    if (session.isVideo && !stream.isVideo) {
+                    if (session.video && !stream.isVideo) {
                         return;
                     }
 
@@ -5860,12 +5850,10 @@
                 this._private(session, false);
             };
 
-            function muteOrUnmuteLocally(session, isPause, mediaElement) {
+            function muteOrUnmuteLocally(isPause, mediaElement) {
                 if (!mediaElement) {
                     return;
                 }
-
-                session = session;
 
                 var lastPauseState = mediaElement.onpause;
                 var lastPlayState = mediaElement.onplay;
@@ -5883,7 +5871,7 @@
 
             resultingObject._private = function(session, enabled) {
                 if (session && !isNull(session.sync) && session.sync === false) {
-                    muteOrUnmuteLocally(session, enabled, this.mediaElement);
+                    muteOrUnmuteLocally(enabled, this.mediaElement);
                     return;
                 }
 

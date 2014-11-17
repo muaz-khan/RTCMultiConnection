@@ -75,12 +75,7 @@ function isString(obj) {
 }
 
 function isEmpty(session) {
-    var length = 0;
-    for (var s in session) {
-        s = s;
-        length++;
-    }
-    return length === 0;
+    return (session && !JSON.stringify(session).split(',').length) || !session;
 }
 
 // this method converts array-buffer into string
@@ -160,13 +155,7 @@ function toStr(obj) {
 }
 
 function getLength(obj) {
-    var length = 0;
-    for (var o in obj) {
-        if (o) {
-            length++;
-        }
-    }
-    return length;
+    return obj ? JSON.stringify(obj).split(',').length : 0;
 }
 
 // Get HTMLAudioElement/HTMLVideoElement accordingly
@@ -370,6 +359,7 @@ function loadScreenFrame(skip) {
     if (loadedScreenFrame) {
         return;
     }
+    
     if (!skip) {
         return loadScreenFrame(true);
     }

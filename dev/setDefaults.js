@@ -688,12 +688,10 @@ function setDefaults(connection) {
             this._private(session, false);
         };
 
-        function muteOrUnmuteLocally(session, isPause, mediaElement) {
+        function muteOrUnmuteLocally(isPause, mediaElement) {
             if (!mediaElement) {
                 return;
             }
-
-            session = session;
 
             var lastPauseState = mediaElement.onpause;
             var lastPlayState = mediaElement.onplay;
@@ -711,7 +709,7 @@ function setDefaults(connection) {
 
         resultingObject._private = function(session, enabled) {
             if (session && !isNull(session.sync) && session.sync === false) {
-                muteOrUnmuteLocally(session, enabled, this.mediaElement);
+                muteOrUnmuteLocally(enabled, this.mediaElement);
                 return;
             }
 
