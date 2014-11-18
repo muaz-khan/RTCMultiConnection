@@ -479,7 +479,7 @@ function RTCMultiSession(connection, callbackForSignalingReady) {
 
         function waitUntilRemoteStreamStartsFlowing(args) {
             // chrome for android may have some features missing
-            if (isMobileDevice || isPluginRTC || (isNull(connection.waitUntilRemoteStreamStartsFlowing) || !connection.waitUntilRemoteStreamStartsFlowing)) {
+            if (isMobileDevice || isPluginRTC || (!isNull(connection.waitUntilRemoteStreamStartsFlowing) && connection.waitUntilRemoteStreamStartsFlowing === false)) {
                 return afterRemoteStreamStartedFlowing(args);
             }
 

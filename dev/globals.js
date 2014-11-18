@@ -75,7 +75,11 @@ function isString(obj) {
 }
 
 function isEmpty(session) {
-    return (session && !JSON.stringify(session).split(',').length) || !session;
+    var stringified = JSON.stringify(session);
+    if (stringified === '{}' || !stringified.split(',').length) {
+        return true;
+    }
+    return false;
 }
 
 // this method converts array-buffer into string
@@ -155,7 +159,15 @@ function toStr(obj) {
 }
 
 function getLength(obj) {
-    return obj ? JSON.stringify(obj).split(',').length : 0;
+    if (typeof obj !== 'object') {
+        throw 'Invalid data-type: ' + (typeof obj) + '; expected: object';
+    }
+
+    var stringified = JSON.stringify(obj);
+    if (stringified === '{}' || !stringified.split(',').length) {
+        return 0;
+    }
+    return stringified.split(',').length;
 }
 
 // Get HTMLAudioElement/HTMLVideoElement accordingly
@@ -359,7 +371,7 @@ function loadScreenFrame(skip) {
     if (loadedScreenFrame) {
         return;
     }
-    
+
     if (!skip) {
         return loadScreenFrame(true);
     }

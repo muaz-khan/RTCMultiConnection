@@ -159,7 +159,7 @@ function PeerConnection() {
         },
         init: function() {
             this.setConstraints();
-            this.connection = new RTCPeerConnection(this.iceServers, this.optionalArgument);
+            this.connection = new RTCPeerConnection(this.rtcConfiguration, this.optionalArgument);
 
             if (this.session.data) {
                 log('invoked: createDataChannel');
@@ -286,13 +286,7 @@ function PeerConnection() {
                 }
             };
 
-            if (this.constraints.mandatory) {
-                log('sdp-mandatory-constraints', toStr(this.constraints.mandatory));
-            }
-
-            if (this.constraints.optional) {
-                log('sdp-optional-constraints', toStr(this.constraints.optional));
-            }
+            log('sdp-constraints', toStr(this.constraints));
 
             this.optionalArgument = {
                 optional: this.optionalArgument.optional || [],
@@ -307,7 +301,7 @@ function PeerConnection() {
 
             log('optional-argument', toStr(this.optionalArgument));
 
-            if (!isNull(this.iceServers)) {
+            if (!isNull(this.rtcConfiguration) && !isNull(this.iceServers)) {
                 var iceCandidates = this.rtcMultiConnection.candidates;
 
                 var stun = iceCandidates.stun;
@@ -327,15 +321,15 @@ function PeerConnection() {
                     this.rtcConfiguration.iceTransports = 'none';
                 }
 
-                this.iceServers = {
+                this.rtcConfiguration = {
                     iceServers: this.iceServers,
                     iceTransports: this.rtcConfiguration.iceTransports
                 };
             } else {
-                this.iceServers = null;
+                this.rtcConfiguration = null;
             }
 
-            log('rtc-configuration', toStr(this.iceServers));
+            log('rtc-configuration', toStr(this.rtcConfiguration));
         },
         onSdpError: function(e) {
             var message = toStr(e);

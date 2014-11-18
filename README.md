@@ -1,4 +1,4 @@
-<a href="https://github.com/muaz-khan/RTCMultiConnection"><img src="http://www.rtcmulticonnection.org/images/logo.png" /></a> / <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki Pages</a> / <a href="http://www.rtcmulticonnection.org/docs/">Documentation</a> / <a href="http://www.rtcmulticonnection.org/FAQ/">FAQ</a> / <a href="https://www.webrtc-experiment.com/RTCMultiConnection/">Demos</a> / <a href="http://www.rtcmulticonnection.org/changes-log/">Changes Log</a>
+<a href="https://github.com/muaz-khan/RTCMultiConnection"><img src="https://i.imgur.com/MFfRBSM.png" /></a> / <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki Pages</a> / <a href="http://www.rtcmulticonnection.org/docs/">Documentation</a> / <a href="http://www.rtcmulticonnection.org/FAQ/">FAQ</a> / <a href="https://www.webrtc-experiment.com/RTCMultiConnection/">Demos</a> / <a href="http://www.rtcmulticonnection.org/changes-log/">Changes Log</a>
 
 ## WebRTC Library  [![npm](https://img.shields.io/npm/v/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![Build Status: Linux](https://travis-ci.org/muaz-khan/RTCMultiConnection.png?branch=master)](https://travis-ci.org/muaz-khan/RTCMultiConnection)
 
@@ -11,35 +11,35 @@ Quick-Demos for newbies:
     <tr>
         <td>
             <a href="https://www.webrtc-experiment.com/RTCMultiConnection/" target="_blank">
-                <img src="http://www.rtcmulticonnection.org/img/demo.png" style="display:block; width:99px; height99px;" alt="Demos">
+                <img src="https://i.imgur.com/Fz1Pff6.png" style="display:block; width:99px; height99px;" alt="Demos">
                 Demos
             </a>
         </td>
         
         <td>
             <a href="http://www.rtcmulticonnection.org/docs/getting-started/" target="_blank">
-                <img src="http://www.rtcmulticonnection.org/img/getting-started.png" style="display:block; width:99px; height99px;" alt="Getting-Started">
+                <img src="https://i.imgur.com/v3YdSC6.png" style="display:block; width:99px; height99px;" alt="Getting-Started">
                 Getting Started
             </a>
         </td>
         
         <td>
             <a href="http://www.rtcmulticonnection.org/docs/" target="_blank">
-                <img src="http://www.rtcmulticonnection.org/img/documentation.png" style="display:block; width:99px; height99px;" alt="Documentation">
+                <img src="https://i.imgur.com/mtu6091.png" style="display:block; width:99px; height99px;" alt="Documentation">
                 Documentation
             </a>
         </td>
         
         <td>
             <a href="http://www.rtcmulticonnection.org/changes-log/" target="_blank">
-                <img src="http://www.rtcmulticonnection.org/img/whats-new.png" style="display:block; width:99px; height99px;" alt="Changes Log">
+                <img src="https://i.imgur.com/zHngv8r.png" style="display:block; width:99px; height99px;" alt="Changes Log">
                 Changes Log
             </a>
         </td>
         
         <td>
             <a href="http://www.rtcmulticonnection.org/FAQ/" target="_blank">
-                <img src="http://www.rtcmulticonnection.org/img/FAQ.png" style="display:block; width:99px; height99px;" alt="FAQ">
+                <img src="https://i.imgur.com/Zeqlfv2.png" style="display:block; width:99px; height99px;" alt="FAQ">
                 FAQ
             </a>
         </td>

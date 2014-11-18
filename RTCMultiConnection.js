@@ -1,4 +1,4 @@
-// Last time updated at Nov 17, 2014, 08:32:23
+// Last time updated at Nov 18, 2014, 08:32:23
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -887,7 +887,7 @@
 
             var screenConstraints = {
                 video: {
-                    chromeMediaSource: 'fake'
+                    chromeMediaSource: 'external-stream'
                 }
             };
             var forcedConstraints = isScreen ? screenConstraints : constraints;
@@ -1551,7 +1551,7 @@
 
             function waitUntilRemoteStreamStartsFlowing(args) {
                 // chrome for android may have some features missing
-                if (isMobileDevice || isPluginRTC || (isNull(connection.waitUntilRemoteStreamStartsFlowing) || !connection.waitUntilRemoteStreamStartsFlowing)) {
+                if (isMobileDevice || isPluginRTC || (!isNull(connection.waitUntilRemoteStreamStartsFlowing) && connection.waitUntilRemoteStreamStartsFlowing === false)) {
                     return afterRemoteStreamStartedFlowing(args);
                 }
 
@@ -2543,11 +2543,11 @@
                 delete participants[userid];
             }
 
-            for (var stream in connection.streams) {
-                stream = connection.streams[stream];
+            for (var streamid in connection.streams) {
+                var stream = connection.streams[streamid];
                 if (stream.userid === userid) {
                     onStreamEndedHandler(stream, connection);
-                    delete connection.streams[stream];
+                    delete connection.streams[streamid];
                 }
             }
 
@@ -3793,7 +3793,7 @@
             },
             init: function() {
                 this.setConstraints();
-                this.connection = new RTCPeerConnection(this.iceServers, this.optionalArgument);
+                this.connection = new RTCPeerConnection(this.rtcConfiguration, this.optionalArgument);
 
                 if (this.session.data) {
                     log('invoked: createDataChannel');
@@ -3920,13 +3920,7 @@
                     }
                 };
 
-                if (this.constraints.mandatory) {
-                    log('sdp-mandatory-constraints', toStr(this.constraints.mandatory));
-                }
-
-                if (this.constraints.optional) {
-                    log('sdp-optional-constraints', toStr(this.constraints.optional));
-                }
+                log('sdp-constraints', toStr(this.constraints));
 
                 this.optionalArgument = {
                     optional: this.optionalArgument.optional || [],
@@ -3941,7 +3935,7 @@
 
                 log('optional-argument', toStr(this.optionalArgument));
 
-                if (!isNull(this.iceServers)) {
+                if (!isNull(this.rtcConfiguration) && !isNull(this.iceServers)) {
                     var iceCandidates = this.rtcMultiConnection.candidates;
 
                     var stun = iceCandidates.stun;
@@ -3961,15 +3955,15 @@
                         this.rtcConfiguration.iceTransports = 'none';
                     }
 
-                    this.iceServers = {
+                    this.rtcConfiguration = {
                         iceServers: this.iceServers,
                         iceTransports: this.rtcConfiguration.iceTransports
                     };
                 } else {
-                    this.iceServers = null;
+                    this.rtcConfiguration = null;
                 }
 
-                log('rtc-configuration', toStr(this.iceServers));
+                log('rtc-configuration', toStr(this.rtcConfiguration));
             },
             onSdpError: function(e) {
                 var message = toStr(e);
@@ -4425,7 +4419,11 @@
     }
 
     function isEmpty(session) {
-        return (session && !JSON.stringify(session).split(',').length) || !session;
+        var stringified = JSON.stringify(session);
+        if (stringified === '{}' || !stringified.split(',').length) {
+            return true;
+        }
+        return false;
     }
 
     // this method converts array-buffer into string
@@ -4505,7 +4503,15 @@
     }
 
     function getLength(obj) {
-        return obj ? JSON.stringify(obj).split(',').length : 0;
+        if (typeof obj !== 'object') {
+            throw 'Invalid data-type: ' + (typeof obj) + '; expected: object';
+        }
+
+        var stringified = JSON.stringify(obj);
+        if (stringified === '{}' || !stringified.split(',').length) {
+            return 0;
+        }
+        return stringified.split(',').length;
     }
 
     // Get HTMLAudioElement/HTMLVideoElement accordingly

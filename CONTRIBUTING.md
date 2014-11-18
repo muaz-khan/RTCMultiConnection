@@ -1,13 +1,14 @@
-<a href="https://github.com/muaz-khan/RTCMultiConnection"><img src="http://www.rtcmulticonnection.org/images/logo.png" /></a> / <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki Pages</a> / <a href="http://www.rtcmulticonnection.org/docs/">Documentation</a> / <a href="http://www.rtcmulticonnection.org/FAQ/">FAQ</a> / <a href="https://www.webrtc-experiment.com/RTCMultiConnection/">Demos</a> / <a href="http://www.rtcmulticonnection.org/changes-log/">Changes Log</a>
+<a href="https://github.com/muaz-khan/RTCMultiConnection"><img src="https://i.imgur.com/MFfRBSM.png" /></a> / <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki Pages</a> / <a href="http://www.rtcmulticonnection.org/docs/">Documentation</a> / <a href="http://www.rtcmulticonnection.org/FAQ/">FAQ</a> / <a href="https://www.webrtc-experiment.com/RTCMultiConnection/">Demos</a> / <a href="http://www.rtcmulticonnection.org/changes-log/">Changes Log</a>
 
 [![npm](https://img.shields.io/npm/v/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![Build Status: Linux](https://travis-ci.org/muaz-khan/RTCMultiConnection.png?branch=master)](https://travis-ci.org/muaz-khan/RTCMultiConnection)
 
 # Contributors
 
 1. [Muaz Khan](https://github.com/muaz-khan)
-2. [Yuri](https://github.com/Yuripetusko)
-3. [Alexey Kucherenko](https://github.com/killmenot)
-4. +Your Name
+2. [Alexey Kucherenko](https://github.com/killmenot)
+3. [Yuri](https://github.com/Yuripetusko)
+4. [Dmitry](https://github.com/Reptoh)
+5. +Your Name
 
 # Rules to Contribute
 

@@ -852,7 +852,7 @@ window.RTCMultiConnection = function(channel) {
 
         var screenConstraints = {
             video: {
-                chromeMediaSource: 'fake'
+                chromeMediaSource: 'external-stream'
             }
         };
         var forcedConstraints = isScreen ? screenConstraints : constraints;
