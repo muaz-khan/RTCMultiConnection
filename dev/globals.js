@@ -149,7 +149,7 @@ if (isChrome || isFirefox || isSafari) {
 function toStr(obj) {
     return JSON.stringify(obj, function(key, value) {
         key = key;
-        if (value && value.sdp) {
+        if (value && value.sdp && value.sdp.type) {
             log(value.sdp.type, '\t', value.sdp.sdp);
             return '';
         } else {
@@ -237,6 +237,19 @@ function takeSnapshot(args) {
     var userid = args.userid;
     var connection = args.connection;
 
+    function dataURItoBlob(dataURI, dataTYPE) {
+        var binary = atob(dataURI.split(',')[1]),
+            array = [];
+
+        for (var i = 0; i < binary.length; i++) {
+            array.push(binary.charCodeAt(i));
+        }
+
+        return new Blob([new Uint8Array(array)], {
+            type: dataTYPE
+        });
+    }
+
     function _takeSnapshot(video) {
         var canvas = document.createElement('canvas');
         canvas.width = video.videoWidth || video.clientWidth;
@@ -250,7 +263,9 @@ function takeSnapshot(args) {
         if (!args.callback) {
             return;
         }
-        args.callback(connection.snapshots[userid]);
+
+        var blob = dataURItoBlob(connection.snapshots[userid], 'image/png');
+        args.callback(connection.snapshots[userid], blob);
     }
 
     if (args.mediaElement) {
