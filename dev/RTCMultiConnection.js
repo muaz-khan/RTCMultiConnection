@@ -719,6 +719,10 @@ window.RTCMultiConnection = function(channel) {
 
             // to allow re-capturing of the screen
             DetectRTC.screen.sourceId = null;
+
+            if (harker) {
+                harker.stop();
+            }
         };
 
         if (!isIE) {
@@ -772,11 +776,14 @@ window.RTCMultiConnection = function(channel) {
             forcedCallback(stream, streamedObject);
         }
 
+        var harker;
         if (connection.onspeaking) {
             initHark({
                 stream: stream,
                 streamedObject: streamedObject,
                 connection: connection
+            }, function(_harker) {
+                harker = _harker;
             });
         }
     }

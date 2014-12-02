@@ -1,4 +1,4 @@
-// Last time updated at Nov 28, 2014, 08:32:23
+// Last time updated at Dec 02, 2014, 08:32:23
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
 // Latest file can be found here: https://cdn.webrtc-experiment.com/RTCMultiConnection.js
@@ -755,6 +755,10 @@ NEW/Breaking changes:
 
                 // to allow re-capturing of the screen
                 DetectRTC.screen.sourceId = null;
+
+                if (harker) {
+                    harker.stop();
+                }
             };
 
             if (!isIE) {
@@ -808,11 +812,14 @@ NEW/Breaking changes:
                 forcedCallback(stream, streamedObject);
             }
 
+            var harker;
             if (connection.onspeaking) {
                 initHark({
                     stream: stream,
                     streamedObject: streamedObject,
                     connection: connection
+                }, function(_harker) {
+                    harker = _harker;
                 });
             }
         }
@@ -2580,12 +2587,16 @@ NEW/Breaking changes:
             }
         }
 
-        var socketRespones = [];
+        var peerNegotiationHandler = {};
 
-        function peerNegotiationHandler(_config) {
+        function handlePeersNegotiation(_config) {
             var socket = connection.socket;
+            socket.send2 = function(message) {
+                message.channel = _config.channel;
+                socket.send(message);
+            };
 
-            socketRespones.push(socketResponse);
+            peerNegotiationHandler[_config.channel] = socketResponse;
 
             var isCreateOffer = _config.isCreateOffer,
                 peer;
@@ -2644,7 +2655,7 @@ NEW/Breaking changes:
                         return;
                     }
 
-                    socket.send({
+                    socket.send2({
                         candidate: JSON.stringify({
                             candidate: candidate.candidate,
                             sdpMid: candidate.sdpMid,
@@ -2863,7 +2874,7 @@ NEW/Breaking changes:
                         if (connection.peers[_config.userid].peer.connection.iceConnectionState === 'disconnected' && !_config.redialing) {
                             _config.redialing = true;
                             warn('Peer connection is closed.', toStr(connection.peers[_config.userid].peer.connection), 'ReDialing..');
-                            connection.peers[_config.userid].socket.send({
+                            connection.peers[_config.userid].socket.send2({
                                 redial: true
                             });
 
@@ -2904,7 +2915,7 @@ NEW/Breaking changes:
                         return;
                     }
 
-                    socket.send({
+                    socket.send2({
                         streamid: stream.streamid,
                         isScreen: !!stream.isScreen,
                         isAudio: !!stream.isAudio,
@@ -2931,7 +2942,7 @@ NEW/Breaking changes:
                 }
 
                 if (args.numberOfTimes >= 60) { // wait 60 seconds while video is delivered!
-                    return socket.send({
+                    return socket.send2({
                         failedToReceiveRemoteVideo: true,
                         streamid: args.stream.streamid
                     });
@@ -2952,7 +2963,7 @@ NEW/Breaking changes:
                 if (!connection.session.data) {
                     var fakeChannel = {
                         send: function(data) {
-                            socket.send({
+                            socket.send2({
                                 fakeData: data
                             });
                         },
@@ -2980,6 +2991,10 @@ NEW/Breaking changes:
                     }
 
                     onStreamEndedHandler(streamedObject, connection);
+
+                    if (harker) {
+                        harker.stop();
+                    }
                 };
 
                 var streamedObject = {
@@ -3023,21 +3038,24 @@ NEW/Breaking changes:
 
                 onSessionOpened();
 
+                var harker;
                 if (connection.onspeaking) {
                     initHark({
                         stream: stream,
                         streamedObject: streamedObject,
                         connection: connection
+                    }, function(_harker) {
+                        harker = _harker;
                     });
                 }
             }
 
             function onChannelOpened(channel) {
-                _config.channel = channel;
+                _config.datachannel = channel;
 
                 // connection.channels['user-id'].send(data);
                 connection.channels[_config.userid] = {
-                    channel: _config.channel,
+                    channel: _config.datachannel,
                     send: function(data) {
                         connection.send(data, this.channel);
                     }
@@ -3112,7 +3130,7 @@ NEW/Breaking changes:
                         this.peer.bandwidth = bandwidth;
 
                         // ask remote user to synchronize bandwidth
-                        this.socket.send({
+                        this.socket.send2({
                             changeBandwidth: true,
                             bandwidth: bandwidth
                         });
@@ -3120,7 +3138,7 @@ NEW/Breaking changes:
                     sendCustomMessage: function(message) {
                         // connection.peers['user-id'].sendCustomMessage();
 
-                        this.socket.send({
+                        this.socket.send2({
                             customMessage: true,
                             message: message
                         });
@@ -3151,7 +3169,7 @@ NEW/Breaking changes:
                             return;
                         }
 
-                        this.socket.send({
+                        this.socket.send2({
                             drop: true
                         });
                     },
@@ -3159,7 +3177,7 @@ NEW/Breaking changes:
                         // connection.peers['user-id'].hold();
 
                         if (peer.prevCreateType === 'answer') {
-                            this.socket.send({
+                            this.socket.send2({
                                 unhold: true,
                                 holdMLine: holdMLine || 'both',
                                 takeAction: true
@@ -3167,7 +3185,7 @@ NEW/Breaking changes:
                             return;
                         }
 
-                        this.socket.send({
+                        this.socket.send2({
                             hold: true,
                             holdMLine: holdMLine || 'both'
                         });
@@ -3184,7 +3202,7 @@ NEW/Breaking changes:
                         // connection.peers['user-id'].unhold();
 
                         if (peer.prevCreateType === 'answer') {
-                            this.socket.send({
+                            this.socket.send2({
                                 unhold: true,
                                 holdMLine: holdMLine || 'both',
                                 takeAction: true
@@ -3192,7 +3210,7 @@ NEW/Breaking changes:
                             return;
                         }
 
-                        this.socket.send({
+                        this.socket.send2({
                             unhold: true,
                             holdMLine: holdMLine || 'both'
                         });
@@ -3254,7 +3272,7 @@ NEW/Breaking changes:
 
                         log('ReDialing...');
 
-                        socket.send({
+                        socket.send2({
                             recreatePeer: true
                         });
 
@@ -3385,16 +3403,6 @@ NEW/Breaking changes:
             }
 
             updateSocketForLocalStreams(socket);
-
-            if (!socket.__push) {
-                socket.__push = socket.send;
-                socket.send = function(message) {
-                    message.userid = message.userid || connection.userid;
-                    message.extra = message.extra || connection.extra || {};
-
-                    socket.__push(message);
-                };
-            }
 
             function socketResponse(response) {
                 if (isSignalingHandlerDeleted) {
@@ -3559,12 +3567,9 @@ NEW/Breaking changes:
                         entireSessionClosed: !!response.closeEntireSession
                     }, connection);
 
-                    socketRespones.forEach(function(_socketResponse, index) {
-                        if (_socketResponse === socketResponse) {
-                            delete socketRespones[index];
-                        }
-                    });
-                    socketRespones = swap(socketRespones);
+                    if (peerNegotiationHandler[_config.channel]) {
+                        delete peerNegotiationHandler[_config.channel];
+                    }
                 }
 
                 if (response.changeBandwidth) {
@@ -3625,7 +3630,7 @@ NEW/Breaking changes:
                     connection.peers[response.userid].peer.hold = !!response.hold;
                     connection.peers[response.userid].peer.holdMLine = response.holdMLine;
 
-                    socket.send({
+                    socket.send2({
                         isRenegotiate: true
                     });
 
@@ -3646,7 +3651,7 @@ NEW/Breaking changes:
                 }
 
                 // sometimes we don't need to renegotiate e.g. when peers are disconnected
-                // or if it is firefox
+                // or if it is Firefox
                 if (response.recreatePeer) {
                     peer = new RTCPeerConnectionHandler();
                 }
@@ -3669,7 +3674,7 @@ NEW/Breaking changes:
                         if (connection.peers[response.userid].peer.connection.iceConnectionState === 'disconnected' && !_config.redialing) {
                             _config.redialing = true;
 
-                            warn('Peer connection is closed.', toStr(connection.peers[response.userid].peer.connection), 'ReDialing..');
+                            warn('Peer connection is closed. ReDialing..');
                             connection.peers[response.userid].redial();
                         }
                     }
@@ -3803,7 +3808,7 @@ NEW/Breaking changes:
         }
 
         function sendsdp(e) {
-            e.socket.send({
+            e.socket.send2({
                 sdp: JSON.stringify({
                     sdp: e.sdp.sdp,
                     type: e.sdp.type
@@ -3830,7 +3835,7 @@ NEW/Breaking changes:
             }
 
             var newChannel = connection.token();
-            peerNegotiationHandler({
+            handlePeersNegotiation({
                 channel: newChannel,
                 extra: response.userData ? response.userData.extra : response.extra,
                 userid: response.userData ? response.userData.userid : response.userid
@@ -3867,7 +3872,7 @@ NEW/Breaking changes:
                     }
                     if (firstPeer) {
                         // shift initiation control to another user
-                        firstPeer.socket.send({
+                        firstPeer.socket.send2({
                             isPlayRoleOfInitiator: true,
                             messageFor: firstPeer.userid,
                             userid: connection.userid,
@@ -4033,16 +4038,16 @@ NEW/Breaking changes:
         // to share participation requests; room descriptions; and other stuff.
         connection.socket = connection.openSignalingChannel({
             onmessage: function(response) {
-                socketRespones.forEach(function(socketResponse) {
-                    socketResponse(response);
-                });
-
-                if (isSignalingHandlerDeleted) {
-                    return;
+                if (peerNegotiationHandler[response.channel]) {
+                    return peerNegotiationHandler[response.channel](response);
                 }
 
                 // if message is sent by same user
                 if (response.userid === connection.userid) {
+                    return;
+                }
+
+                if (isSignalingHandlerDeleted) {
                     return;
                 }
 
@@ -4355,7 +4360,7 @@ NEW/Breaking changes:
             connection.isAcceptNewSession = false;
 
             var channel = getRandomString();
-            peerNegotiationHandler({
+            handlePeersNegotiation({
                 channel: channel,
                 extra: _config.extra || {},
                 userid: _config.userid
@@ -4643,7 +4648,7 @@ NEW/Breaking changes:
 
             log('accepting request from', e.userid);
             participants[e.userid] = e.userid;
-            peerNegotiationHandler({
+            handlePeersNegotiation({
                 isCreateOffer: true,
                 userid: e.userid,
                 channel: e.channel,
@@ -5291,7 +5296,7 @@ NEW/Breaking changes:
         window.addEventListener(eventName, eventHandler, false);
     }
 
-    function initHark(args) {
+    function initHark(args, callback) {
         if (!window.hark) {
             loadScript(args.connection.resources.hark, function() {
                 initHark(args);
@@ -5300,32 +5305,30 @@ NEW/Breaking changes:
         }
 
         var connection = args.connection;
-        var streamedObject = args.streamedObject;
-        var stream = args.stream;
 
-        var options = {};
-        var speechEvents = window.hark(stream, options);
-
-        speechEvents.on('speaking', function() {
-            if (connection.onspeaking) {
-                connection.onspeaking(streamedObject);
-            }
-        });
-
-        speechEvents.on('stopped_speaking', function() {
-            if (connection.onsilence) {
-                connection.onsilence(streamedObject);
-            }
-        });
-
-        speechEvents.on('volume_change', function(volume, threshold) {
-            if (connection.onvolumechange) {
+        callback(window.hark(args.stream, {
+            onspeaking: function() {
+                if (!connection.onspeaking) {
+                    return;
+                }
+                connection.onspeaking(args.streamedObject);
+            },
+            onsilence: function() {
+                if (!connection.onsilence) {
+                    return;
+                }
+                connection.onsilence(args.streamedObject);
+            },
+            onvolumechange: function(volume, threshold) {
+                if (!connection.onvolumechange) {
+                    return;
+                }
                 connection.onvolumechange(merge({
                     volume: volume,
                     threshold: threshold
-                }, streamedObject));
+                }, args.streamedObject));
             }
-        });
+        }));
     }
 
     window.attachEventListener = function(video, type, listener, useCapture) {

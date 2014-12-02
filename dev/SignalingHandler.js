@@ -102,12 +102,16 @@ function SignalingHandler(connection, callbackForSignalingReady) {
         }
     }
 
-    var socketRespones = [];
+    var peerNegotiationHandler = {};
 
-    function peerNegotiationHandler(_config) {
+    function handlePeersNegotiation(_config) {
         var socket = connection.socket;
+        socket.send2 = function(message) {
+            message.channel = _config.channel;
+            socket.send(message);
+        };
 
-        socketRespones.push(socketResponse);
+        peerNegotiationHandler[_config.channel] = socketResponse;
 
         var isCreateOffer = _config.isCreateOffer,
             peer;
@@ -166,7 +170,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                     return;
                 }
 
-                socket.send({
+                socket.send2({
                     candidate: JSON.stringify({
                         candidate: candidate.candidate,
                         sdpMid: candidate.sdpMid,
@@ -385,7 +389,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                     if (connection.peers[_config.userid].peer.connection.iceConnectionState === 'disconnected' && !_config.redialing) {
                         _config.redialing = true;
                         warn('Peer connection is closed.', toStr(connection.peers[_config.userid].peer.connection), 'ReDialing..');
-                        connection.peers[_config.userid].socket.send({
+                        connection.peers[_config.userid].socket.send2({
                             redial: true
                         });
 
@@ -426,7 +430,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                     return;
                 }
 
-                socket.send({
+                socket.send2({
                     streamid: stream.streamid,
                     isScreen: !!stream.isScreen,
                     isAudio: !!stream.isAudio,
@@ -453,7 +457,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
             }
 
             if (args.numberOfTimes >= 60) { // wait 60 seconds while video is delivered!
-                return socket.send({
+                return socket.send2({
                     failedToReceiveRemoteVideo: true,
                     streamid: args.stream.streamid
                 });
@@ -474,7 +478,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
             if (!connection.session.data) {
                 var fakeChannel = {
                     send: function(data) {
-                        socket.send({
+                        socket.send2({
                             fakeData: data
                         });
                     },
@@ -502,6 +506,10 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                 }
 
                 onStreamEndedHandler(streamedObject, connection);
+
+                if (harker) {
+                    harker.stop();
+                }
             };
 
             var streamedObject = {
@@ -545,21 +553,24 @@ function SignalingHandler(connection, callbackForSignalingReady) {
 
             onSessionOpened();
 
+            var harker;
             if (connection.onspeaking) {
                 initHark({
                     stream: stream,
                     streamedObject: streamedObject,
                     connection: connection
+                }, function(_harker) {
+                    harker = _harker;
                 });
             }
         }
 
         function onChannelOpened(channel) {
-            _config.channel = channel;
+            _config.datachannel = channel;
 
             // connection.channels['user-id'].send(data);
             connection.channels[_config.userid] = {
-                channel: _config.channel,
+                channel: _config.datachannel,
                 send: function(data) {
                     connection.send(data, this.channel);
                 }
@@ -634,7 +645,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                     this.peer.bandwidth = bandwidth;
 
                     // ask remote user to synchronize bandwidth
-                    this.socket.send({
+                    this.socket.send2({
                         changeBandwidth: true,
                         bandwidth: bandwidth
                     });
@@ -642,7 +653,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                 sendCustomMessage: function(message) {
                     // connection.peers['user-id'].sendCustomMessage();
 
-                    this.socket.send({
+                    this.socket.send2({
                         customMessage: true,
                         message: message
                     });
@@ -673,7 +684,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                         return;
                     }
 
-                    this.socket.send({
+                    this.socket.send2({
                         drop: true
                     });
                 },
@@ -681,7 +692,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                     // connection.peers['user-id'].hold();
 
                     if (peer.prevCreateType === 'answer') {
-                        this.socket.send({
+                        this.socket.send2({
                             unhold: true,
                             holdMLine: holdMLine || 'both',
                             takeAction: true
@@ -689,7 +700,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                         return;
                     }
 
-                    this.socket.send({
+                    this.socket.send2({
                         hold: true,
                         holdMLine: holdMLine || 'both'
                     });
@@ -706,7 +717,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                     // connection.peers['user-id'].unhold();
 
                     if (peer.prevCreateType === 'answer') {
-                        this.socket.send({
+                        this.socket.send2({
                             unhold: true,
                             holdMLine: holdMLine || 'both',
                             takeAction: true
@@ -714,7 +725,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                         return;
                     }
 
-                    this.socket.send({
+                    this.socket.send2({
                         unhold: true,
                         holdMLine: holdMLine || 'both'
                     });
@@ -776,7 +787,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
 
                     log('ReDialing...');
 
-                    socket.send({
+                    socket.send2({
                         recreatePeer: true
                     });
 
@@ -907,16 +918,6 @@ function SignalingHandler(connection, callbackForSignalingReady) {
         }
 
         updateSocketForLocalStreams(socket);
-
-        if (!socket.__push) {
-            socket.__push = socket.send;
-            socket.send = function(message) {
-                message.userid = message.userid || connection.userid;
-                message.extra = message.extra || connection.extra || {};
-
-                socket.__push(message);
-            };
-        }
 
         function socketResponse(response) {
             if (isSignalingHandlerDeleted) {
@@ -1081,12 +1082,9 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                     entireSessionClosed: !!response.closeEntireSession
                 }, connection);
 
-                socketRespones.forEach(function(_socketResponse, index) {
-                    if (_socketResponse === socketResponse) {
-                        delete socketRespones[index];
-                    }
-                });
-                socketRespones = swap(socketRespones);
+                if (peerNegotiationHandler[_config.channel]) {
+                    delete peerNegotiationHandler[_config.channel];
+                }
             }
 
             if (response.changeBandwidth) {
@@ -1147,7 +1145,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                 connection.peers[response.userid].peer.hold = !!response.hold;
                 connection.peers[response.userid].peer.holdMLine = response.holdMLine;
 
-                socket.send({
+                socket.send2({
                     isRenegotiate: true
                 });
 
@@ -1168,7 +1166,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
             }
 
             // sometimes we don't need to renegotiate e.g. when peers are disconnected
-            // or if it is firefox
+            // or if it is Firefox
             if (response.recreatePeer) {
                 peer = new RTCPeerConnectionHandler();
             }
@@ -1191,7 +1189,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                     if (connection.peers[response.userid].peer.connection.iceConnectionState === 'disconnected' && !_config.redialing) {
                         _config.redialing = true;
 
-                        warn('Peer connection is closed.', toStr(connection.peers[response.userid].peer.connection), 'ReDialing..');
+                        warn('Peer connection is closed. ReDialing..');
                         connection.peers[response.userid].redial();
                     }
                 }
@@ -1325,7 +1323,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
     }
 
     function sendsdp(e) {
-        e.socket.send({
+        e.socket.send2({
             sdp: JSON.stringify({
                 sdp: e.sdp.sdp,
                 type: e.sdp.type
@@ -1352,7 +1350,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
         }
 
         var newChannel = connection.token();
-        peerNegotiationHandler({
+        handlePeersNegotiation({
             channel: newChannel,
             extra: response.userData ? response.userData.extra : response.extra,
             userid: response.userData ? response.userData.userid : response.userid
@@ -1389,7 +1387,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                 }
                 if (firstPeer) {
                     // shift initiation control to another user
-                    firstPeer.socket.send({
+                    firstPeer.socket.send2({
                         isPlayRoleOfInitiator: true,
                         messageFor: firstPeer.userid,
                         userid: connection.userid,
@@ -1555,16 +1553,16 @@ function SignalingHandler(connection, callbackForSignalingReady) {
     // to share participation requests; room descriptions; and other stuff.
     connection.socket = connection.openSignalingChannel({
         onmessage: function(response) {
-            socketRespones.forEach(function(socketResponse) {
-                socketResponse(response);
-            });
-
-            if (isSignalingHandlerDeleted) {
-                return;
+            if (peerNegotiationHandler[response.channel]) {
+                return peerNegotiationHandler[response.channel](response);
             }
 
             // if message is sent by same user
             if (response.userid === connection.userid) {
+                return;
+            }
+
+            if (isSignalingHandlerDeleted) {
                 return;
             }
 
@@ -1877,7 +1875,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
         connection.isAcceptNewSession = false;
 
         var channel = getRandomString();
-        peerNegotiationHandler({
+        handlePeersNegotiation({
             channel: channel,
             extra: _config.extra || {},
             userid: _config.userid
@@ -2165,7 +2163,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
 
         log('accepting request from', e.userid);
         participants[e.userid] = e.userid;
-        peerNegotiationHandler({
+        handlePeersNegotiation({
             isCreateOffer: true,
             userid: e.userid,
             channel: e.channel,

@@ -572,7 +572,7 @@ function listenEventHandler(eventName, eventHandler) {
     window.addEventListener(eventName, eventHandler, false);
 }
 
-function initHark(args) {
+function initHark(args, callback) {
     if (!window.hark) {
         loadScript(args.connection.resources.hark, function() {
             initHark(args);
@@ -581,32 +581,30 @@ function initHark(args) {
     }
 
     var connection = args.connection;
-    var streamedObject = args.streamedObject;
-    var stream = args.stream;
 
-    var options = {};
-    var speechEvents = window.hark(stream, options);
-
-    speechEvents.on('speaking', function() {
-        if (connection.onspeaking) {
-            connection.onspeaking(streamedObject);
-        }
-    });
-
-    speechEvents.on('stopped_speaking', function() {
-        if (connection.onsilence) {
-            connection.onsilence(streamedObject);
-        }
-    });
-
-    speechEvents.on('volume_change', function(volume, threshold) {
-        if (connection.onvolumechange) {
+    callback(window.hark(args.stream, {
+        onspeaking: function() {
+            if (!connection.onspeaking) {
+                return;
+            }
+            connection.onspeaking(args.streamedObject);
+        },
+        onsilence: function() {
+            if (!connection.onsilence) {
+                return;
+            }
+            connection.onsilence(args.streamedObject);
+        },
+        onvolumechange: function(volume, threshold) {
+            if (!connection.onvolumechange) {
+                return;
+            }
             connection.onvolumechange(merge({
                 volume: volume,
                 threshold: threshold
-            }, streamedObject));
+            }, args.streamedObject));
         }
-    });
+    }));
 }
 
 window.attachEventListener = function(video, type, listener, useCapture) {
