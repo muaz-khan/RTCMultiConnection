@@ -704,7 +704,7 @@ window.RTCMultiConnection = function(channel) {
             var _stream = connection.streams[streamid];
             if (_stream && _stream.sockets.length) {
                 _stream.sockets.forEach(function(socket) {
-                    socket.send({
+                    socket.send2({
                         streamid: _stream.streamid,
                         stopped: true
                     });
@@ -1445,9 +1445,12 @@ window.RTCMultiConnection = function(channel) {
                 if (session.screen && !stream.isScreen) {
                     return;
                 }
+
+                // stream.getAudioTracks().length ?
                 if (session.audio && !stream.isAudio) {
                     return;
                 }
+
                 if (session.video && !stream.isVideo) {
                     return;
                 }
@@ -1693,14 +1696,14 @@ window.RTCMultiConnection = function(channel) {
 
             self.sockets.forEach(function(socket) {
                 if (self.type === 'local') {
-                    socket.send({
+                    socket.send2({
                         streamid: self.streamid,
                         stopped: true
                     });
                 }
 
                 if (self.type === 'remote') {
-                    socket.send({
+                    socket.send2({
                         promptStreamStop: true,
                         streamid: self.streamid
                     });
@@ -2054,7 +2057,7 @@ window.RTCMultiConnection = function(channel) {
             setTimeout(function() {
                 var root = connection.streams[streamid];
                 connection.streams[streamid].sockets.forEach(function(socket) {
-                    socket.send({
+                    socket.send2({
                         streamid: root.streamid,
                         isVolumeChanged: true,
                         volume: mediaElement.volume

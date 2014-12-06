@@ -508,6 +508,14 @@ function RTCPeerConnectionHandler() {
         },
         attachMediaStreams: function() {
             var streams = this.attachStreams;
+
+            if (isFirefox) {
+                if (streams[0]) {
+                    this.addStream(streams[0]);
+                }
+                return;
+            }
+
             for (var i = 0; i < streams.length; i++) {
                 this.addStream(streams[i]);
             }

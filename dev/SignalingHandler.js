@@ -791,6 +791,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                         recreatePeer: true
                     });
 
+                    peerConfig.attachStreams = connection.attachStreams;
                     peer = new RTCPeerConnectionHandler();
                     peer.create('offer', peerConfig);
                 },
@@ -1168,6 +1169,10 @@ function SignalingHandler(connection, callbackForSignalingReady) {
             // sometimes we don't need to renegotiate e.g. when peers are disconnected
             // or if it is Firefox
             if (response.recreatePeer) {
+                if (peer && peer.connection) {
+                    peer.connection.close();
+                }
+                peerConfig.attachStreams = connection.attachStreams;
                 peer = new RTCPeerConnectionHandler();
             }
 
@@ -1208,6 +1213,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                 peerConfig.session = connection.session;
 
                 if (!peer) {
+                    peerConfig.attachStreams = connection.attachStreams;
                     peer = new RTCPeerConnectionHandler();
                 }
 
@@ -1310,7 +1316,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
 
 
     function detachMediaStream(labels, peer) {
-        if (!labels) {
+        if (!labels || isFirefox) {
             return;
         }
 
@@ -2085,6 +2091,14 @@ function SignalingHandler(connection, callbackForSignalingReady) {
             // because Firefox has no support of renegotiation yet;
             // so both chrome and firefox should redial instead of renegotiate!
             if (isFirefox || _peer.userinfo.browser === 'firefox') {
+                if (connection.attachStreams[0] && connection.attachStreams[0] !== e.stream) {
+                    connection.stopMediaStream(connection.attachStreams[0]);
+                }
+
+                connection.attachStreams = [e.stream].concat(connection.attachStreams);
+                if (_peer.connection) {
+                    _peer.connection.close();
+                }
                 return _peer.redial();
             }
 

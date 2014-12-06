@@ -500,7 +500,7 @@ function muteOrUnmute(e) {
 
     root.sockets.forEach(function(socket) {
         if (root.type === 'local') {
-            socket.send({
+            socket.send2({
                 streamid: root.streamid,
                 mute: !!enabled,
                 unmute: !enabled,
@@ -509,7 +509,7 @@ function muteOrUnmute(e) {
         }
 
         if (root.type === 'remote') {
-            socket.send({
+            socket.send2({
                 promptMuteUnmute: true,
                 streamid: root.streamid,
                 mute: !!enabled,

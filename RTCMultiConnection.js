@@ -1,4 +1,4 @@
-// Last time updated at Dec 02, 2014, 08:32:23
+// Last time updated at Dec 06, 2014, 08:32:23
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
 // Latest file can be found here: https://cdn.webrtc-experiment.com/RTCMultiConnection.js
@@ -24,6 +24,7 @@
 
 --. connection.rtcConfiguration
 --. takeSnapshot now returns "blob" as second argument.
+--. Renegotiation is fixed for Firefox. Removing old stream and using new one.
 
 NEW/Breaking changes:
 --. RTCMultiSession is renamed to "SignalingHandler"
@@ -740,7 +741,7 @@ NEW/Breaking changes:
                 var _stream = connection.streams[streamid];
                 if (_stream && _stream.sockets.length) {
                     _stream.sockets.forEach(function(socket) {
-                        socket.send({
+                        socket.send2({
                             streamid: _stream.streamid,
                             stopped: true
                         });
@@ -1481,9 +1482,12 @@ NEW/Breaking changes:
                     if (session.screen && !stream.isScreen) {
                         return;
                     }
+
+                    // stream.getAudioTracks().length ?
                     if (session.audio && !stream.isAudio) {
                         return;
                     }
+
                     if (session.video && !stream.isVideo) {
                         return;
                     }
@@ -1729,14 +1733,14 @@ NEW/Breaking changes:
 
                 self.sockets.forEach(function(socket) {
                     if (self.type === 'local') {
-                        socket.send({
+                        socket.send2({
                             streamid: self.streamid,
                             stopped: true
                         });
                     }
 
                     if (self.type === 'remote') {
-                        socket.send({
+                        socket.send2({
                             promptStreamStop: true,
                             streamid: self.streamid
                         });
@@ -2090,7 +2094,7 @@ NEW/Breaking changes:
                 setTimeout(function() {
                     var root = connection.streams[streamid];
                     connection.streams[streamid].sockets.forEach(function(socket) {
-                        socket.send({
+                        socket.send2({
                             streamid: root.streamid,
                             isVolumeChanged: true,
                             volume: mediaElement.volume
@@ -3276,6 +3280,7 @@ NEW/Breaking changes:
                             recreatePeer: true
                         });
 
+                        peerConfig.attachStreams = connection.attachStreams;
                         peer = new RTCPeerConnectionHandler();
                         peer.create('offer', peerConfig);
                     },
@@ -3653,6 +3658,10 @@ NEW/Breaking changes:
                 // sometimes we don't need to renegotiate e.g. when peers are disconnected
                 // or if it is Firefox
                 if (response.recreatePeer) {
+                    if (peer && peer.connection) {
+                        peer.connection.close();
+                    }
+                    peerConfig.attachStreams = connection.attachStreams;
                     peer = new RTCPeerConnectionHandler();
                 }
 
@@ -3693,6 +3702,7 @@ NEW/Breaking changes:
                     peerConfig.session = connection.session;
 
                     if (!peer) {
+                        peerConfig.attachStreams = connection.attachStreams;
                         peer = new RTCPeerConnectionHandler();
                     }
 
@@ -3795,7 +3805,7 @@ NEW/Breaking changes:
 
 
         function detachMediaStream(labels, peer) {
-            if (!labels) {
+            if (!labels || isFirefox) {
                 return;
             }
 
@@ -4570,6 +4580,14 @@ NEW/Breaking changes:
                 // because Firefox has no support of renegotiation yet;
                 // so both chrome and firefox should redial instead of renegotiate!
                 if (isFirefox || _peer.userinfo.browser === 'firefox') {
+                    if (connection.attachStreams[0] && connection.attachStreams[0] !== e.stream) {
+                        connection.stopMediaStream(connection.attachStreams[0]);
+                    }
+
+                    connection.attachStreams = [e.stream].concat(connection.attachStreams);
+                    if (_peer.connection) {
+                        _peer.connection.close();
+                    }
                     return _peer.redial();
                 }
 
@@ -5224,7 +5242,7 @@ NEW/Breaking changes:
 
         root.sockets.forEach(function(socket) {
             if (root.type === 'local') {
-                socket.send({
+                socket.send2({
                     streamid: root.streamid,
                     mute: !!enabled,
                     unmute: !enabled,
@@ -5233,7 +5251,7 @@ NEW/Breaking changes:
             }
 
             if (root.type === 'remote') {
-                socket.send({
+                socket.send2({
                     promptMuteUnmute: true,
                     streamid: root.streamid,
                     mute: !!enabled,
@@ -6100,6 +6118,14 @@ NEW/Breaking changes:
             },
             attachMediaStreams: function() {
                 var streams = this.attachStreams;
+
+                if (isFirefox) {
+                    if (streams[0]) {
+                        this.addStream(streams[0]);
+                    }
+                    return;
+                }
+
                 for (var i = 0; i < streams.length; i++) {
                     this.addStream(streams[i]);
                 }
@@ -6392,7 +6418,8 @@ NEW/Breaking changes:
 
         DetectRTC.isWebRTCSupported = !!window.webkitRTCPeerConnection || !!window.mozRTCPeerConnection;
         DetectRTC.isAudioContextSupported = (!!window.AudioContext || !!window.webkitAudioContext) && !!AudioContext.prototype.createMediaStreamSource;
-        DetectRTC.isScreenCapturingSupported = isChrome && chromeVersion >= 26 && (isNodeWebkit ? true : location.protocol === 'https:');
+        DetectRTC.isScreenCapturingSupported = (isFirefox && firefoxVersion >= 33 && location.protocol === 'https:') || (isChrome && chromeVersion >= 26 && (isNodeWebkit ? true : location.protocol === 'https:'));
+
         DetectRTC.isSctpDataChannelsSupported = !!navigator.mozGetUserMedia || (isChrome && chromeVersion >= 25);
         DetectRTC.isRtpDataChannelsSupported = isChrome && chromeVersion >= 31;
 
