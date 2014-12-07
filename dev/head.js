@@ -1,4 +1,4 @@
-// Last time updated at Dec 06, 2014, 08:32:23
+// Last time updated at Dec 07, 2014, 08:32:23
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
 // Latest file can be found here: https://cdn.webrtc-experiment.com/RTCMultiConnection.js
@@ -25,6 +25,8 @@
 --. connection.rtcConfiguration
 --. takeSnapshot now returns "blob" as second argument.
 --. Renegotiation is fixed for Firefox. Removing old stream and using new one.
+--. Fixed: If stream is having no audio or video tracks but session=audio:true,video:true
+--. Fixed: onstatechange isn't firing "request-accepted".
 
 NEW/Breaking changes:
 --. RTCMultiSession is renamed to "SignalingHandler"

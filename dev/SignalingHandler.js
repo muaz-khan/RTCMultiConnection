@@ -2176,6 +2176,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
         }
 
         log('accepting request from', e.userid);
+
         participants[e.userid] = e.userid;
         handlePeersNegotiation({
             isCreateOffer: true,
@@ -2183,6 +2184,10 @@ function SignalingHandler(connection, callbackForSignalingReady) {
             channel: e.channel,
             extra: e.extra || {},
             session: e.session || connection.session
+        });
+
+        connection.socket.send({
+            acceptedRequestOf: e.userid
         });
     }
 

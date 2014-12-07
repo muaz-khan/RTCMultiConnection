@@ -173,6 +173,19 @@ function getLength(obj) {
 // Get HTMLAudioElement/HTMLVideoElement accordingly
 
 function createMediaElement(stream, session) {
+    if (!stream.isAudio && stream.getVideoTracks && !stream.getVideoTracks().length) {
+        stream.isAudio = true;
+        session.video = session.screen = stream.isVideo = stream.isScreen = false;
+    }
+
+    if (stream.isAudio && stream.getAudioTracks && !stream.getAudioTracks().length) {
+        session.audio = stream.isAudio = false;
+
+        if (!stream.isScreen) {
+            stream.isVideo = true;
+        }
+    }
+
     var mediaElement = document.createElement(stream.isAudio ? 'audio' : 'video');
     mediaElement.id = stream.streamid;
 
