@@ -554,7 +554,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
             onSessionOpened();
 
             var harker;
-            if (connection.onspeaking) {
+            if (connection.onspeaking && false) { // temporarily disabled
                 initHark({
                     stream: stream,
                     streamedObject: streamedObject,

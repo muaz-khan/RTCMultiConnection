@@ -1,13 +1,17 @@
-// Last time updated at Dec 07, 2014, 08:32:23
+// Last time updated at Dec 09, 2014, 08:32:23
+
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
+
 // Latest file can be found here: https://cdn.webrtc-experiment.com/RTCMultiConnection.js
+
 // Muaz Khan     - www.MuazKhan.com
 // MIT License   - www.WebRTC-Experiment.com/licence
 // Documentation - www.RTCMultiConnection.org/docs
 // FAQ           - www.RTCMultiConnection.org/FAQ
 // Changes log   - www.RTCMultiConnection.org/changes-log/
 // Demos         - www.WebRTC-Experiment.com/RTCMultiConnection
+
 // _________________________
 // RTCMultiConnection-v2.2.4
 /* issues/features need to be fixed & implemented:
@@ -21,6 +25,8 @@
 --. added: connection.attachExternalStream(MediaStream, isScreen);
 --. connection.candidates={relay:true} fixed. (a=candidate is removed).
 --. connection.numberOfConnectedUsers is fixed.
+--. hark.js updated. "onspeaking" is disabled for remote streams. Check "Coding Tricks" wiki page for further details.
+--. Now, stream object is having "pause" and "resume" methods to pause/resume hark.js instances.
 
 --. connection.rtcConfiguration
 --. takeSnapshot now returns "blob" as second argument.
@@ -3045,7 +3051,7 @@ NEW/Breaking changes:
                 onSessionOpened();
 
                 var harker;
-                if (connection.onspeaking) {
+                if (connection.onspeaking && false) { // temporarily disabled
                     initHark({
                         stream: stream,
                         streamedObject: streamedObject,

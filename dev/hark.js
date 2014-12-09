@@ -62,6 +62,19 @@ function hark(stream, options) {
             options.onsilence();
         }
     };
+
+    stream.pause = function() {
+        running = false;
+        options.onsilence();
+    };
+
+    stream.resume = function() {
+        if (running) return;
+
+        running = true;
+        looper();
+    };
+
     harker.speakingHistory = [];
     for (var i = 0; i < history; i++) {
         harker.speakingHistory.push(0);
