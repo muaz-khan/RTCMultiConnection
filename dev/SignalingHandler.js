@@ -1372,6 +1372,13 @@ function SignalingHandler(connection, callbackForSignalingReady) {
     // if a user leaves
 
     function clearSession() {
+        if (connection.isInitiator) {
+            connection.socket.send({
+                sessionClosed: true,
+                session: connection.sessionDescription
+            });
+        }
+
         var alertMessage = {
             left: true,
             extra: connection.extra || {},
@@ -1735,6 +1742,10 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                 }
 
                 setTimeout(connection.playRoleOfInitiator, 2000);
+            }
+
+            if (response.sessionClosed) {
+                connection.onSessionClosed(response);
             }
         },
         callback: function(socket) {
