@@ -81,6 +81,7 @@ pre {
                <li><a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki</a></li>
                <li><a href="/docs/getting-started/">Getting Started</a></li>
                <li><a href="/FAQ/">FAQ</a></li>
+               <li><a href="https://github.com/muaz-khan/RTCMultiConnection">Open-Sourced</a></li>
              </ul>
             </nav>
             <div class="clear"></div>
@@ -201,6 +202,12 @@ pre {
               <div class="st1" style="text-align:left;">
                 <pre>
 https://cdn.webrtc-experiment.com/RTCMultiConnection.js
+
+// or
+http://www.rtcmulticonnection.org/latest.js
+
+// or specific version:
+https://cdn.webrtc-experiment.com/RTCMultiConnection-v2.2.5.js
 </pre>
               </div>
             </div>
@@ -231,11 +238,11 @@ var MODERATOR_EXTRA      = {};       // empty extra-data
             <div class="grid_8 preffix_2">
               <div class="st1" style="text-align:left;">
                 <pre>
-var moderator     = new RTCMultiConnection(MODERATOR_CHANNEL_ID);
-moderator.session = MODERATOR_SESSION;
-moderator.userid  = MODERATOR_ID;
-moderator.extra   = MODERATOR_EXTRA;
-moderator.open({
+var moderator     = <a href="http://www.RTCMultiConnection.org/docs/constructor/">new RTCMultiConnection</a>(MODERATOR_CHANNEL_ID);
+moderator.<a href="http://www.RTCMultiConnection.org/docs/session/">session</a> = MODERATOR_SESSION;
+moderator.<a href="http://www.RTCMultiConnection.org/docs/userid/">userid</a>  = MODERATOR_ID;
+moderator.<a href="http://www.RTCMultiConnection.org/docs/extra/">extra</a>   = MODERATOR_EXTRA;
+moderator.<a href="http://www.RTCMultiConnection.org/docs/open/">open</a>({
     dontTransmit: true,
     sessionid:    MODERATOR_SESSION_ID
 });
@@ -250,8 +257,8 @@ moderator.open({
             <div class="grid_8 preffix_2">
               <div class="st1" style="text-align:left;">
                 <pre>
-var participants = new RTCMultiConnection(MODERATOR_CHANNEL_ID);
-participants.join({
+var participants = <a href="http://www.RTCMultiConnection.org/docs/constructor/">new RTCMultiConnection</a>(MODERATOR_CHANNEL_ID);
+participants.<a href="http://www.RTCMultiConnection.org/docs/join/">join</a>({
     sessionid: MODERATOR_SESSION_ID,
     userid:    MODERATOR_ID,
     extra:     MODERATOR_EXTRA,
@@ -270,7 +277,7 @@ participants.join({
                 <pre>
 // same code can be used for participants
 // (it is optional) 
-moderator.onstreamid = function(event) {
+moderator.<a href="http://www.RTCMultiConnection.org/docs/onstreamid/">onstreamid</a> = function(event) {
     // got a clue of incoming remote stream
     // didn't get remote stream yet
     
@@ -284,7 +291,7 @@ moderator.onstreamid = function(event) {
 
 // same code can be used for participants
 // it is useful
-moderator.onstream = function(event) {
+moderator.<a href="http://www.RTCMultiConnection.org/docs/onstream/">onstream</a> = function(event) {
     // got local or remote stream
     // if(event.type == 'local')  {}
     // if(event.type == 'remote') {}
@@ -297,7 +304,7 @@ moderator.onstream = function(event) {
 
 // same code can be used for participants
 // it is useful but optional
-moderator.onstreamended = function(event) {
+moderator.<a href="http://www.RTCMultiConnection.org/docs/onstreamended/">onstreamended</a> = function(event) {
     event.mediaElement.parentNode.removeChild(event.mediaElement);
 };
 </pre>

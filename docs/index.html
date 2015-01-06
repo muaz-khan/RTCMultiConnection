@@ -56,10 +56,6 @@
     <body onload="sh_highlightDocument();">
         <article>
             <a href="http://www.RTCMultiConnection.org/" style="border-bottom: 1px solid #2844FA; font-size: 1.2em; position: absolute; right: 0; text-decoration: none; top: 0;">↑ www.RTCMultiConnection.org</a>
-            
-            <a href="https://github.com/muaz-khan/WebRTC-Experiment/blob/master/Signaling.md" style="bottom: 0; display: block; position: fixed; right: 0; width: 18%;">
-                <img src="http://www.RTCMultiConnection.org/img/RTCMultiConnection-Logo.png" alt="RTCMultiConnection Log" style="border: 1px solid red; border-top-left-radius: 30%; width: 100%;">
-            </a>
 
             <div class="github-stargazers"></div>
             
@@ -1798,6 +1794,31 @@ connection.dontOverrideSession = true;
 // it is false because workaround that is used to capture connections' failures
 // affects renegotiation scenarios!
 connection.autoReDialOnFailure = true;
+</pre>
+                        </li>
+                        
+                        <li>
+                            <a href="#rtcConfiguration">rtcConfiguration</a>
+                            <pre class="sh_javascript">
+connection.rtcConfiguration = {
+    iceServers: [],
+    iceTransports: 'all'
+};
+</pre>
+                        </li>
+                        
+                        <li>
+                            <a href="#attachExternalStream">attachExternalStream</a>
+                            <pre class="sh_javascript">
+navigator.webkitGetUserMedia({
+    video: {
+        chromeMediaSource: 'screen'
+    }
+}, function(stream) {
+    connection.attachExternalStream(stream, true);
+}, function(error) {
+    alert(JSON.stringify(error));
+};
 </pre>
                         </li>
                     </ol>

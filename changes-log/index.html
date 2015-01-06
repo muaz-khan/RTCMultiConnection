@@ -66,7 +66,7 @@
             <br /><br /><br />
             
             <section class="experiment">
-                <h2 id="v2.0"><a href="http://www.rtcmulticonnection.org/changes-log/#v2.0">v2.0</a> / its latest work-in-progress release.</h2>
+                <h2 id="v2.2"><a href="http://www.rtcmulticonnection.org/changes-log/#v2.2">v2.2</a> / its latest work-in-progress release.</h2>
                 
                 <blockquote class="inline">
                     <pre class="sh_html">
@@ -81,7 +81,111 @@ npm install rtcmulticonnection
 &lt;script src="//cdn.webrtc-experiment.com/RTCMultiConnection.js"&gt;&lt;/script&gt;
 
 // or
-&lt;script src="//cdn.webrtc-experiment.com/RTCMultiConnection-v2.2.1.js"&gt;&lt;/script&gt;
+&lt;script src="http://www.rtcmulticonnection.org/latest.js"&gt;&lt;/script&gt;
+
+// or
+&lt;script src="//cdn.webrtc-experiment.com/RTCMultiConnection-v2.2.5.js"&gt;&lt;/script&gt;
+</pre>
+                </blockquote>
+                
+                <ol>
+                    <li>
+                        NEW/Breaking changes:
+                        
+                        <ol>
+                            <li>
+                                RTCMultiSession is renamed to "SignalingHandler"
+                            </li>
+                            
+                            <li>
+                                "PeerConnection" is renamed to "RTCPeerConnectionHandler"
+                            </li>
+                            
+                            <li>
+                                MultiSockets concept has been removed. Now there is always single socket.
+                            </li>
+                        </ol>
+                    </li>
+                    
+                    <li>
+                        Now, "onSessionClosed" is fired as soon as initiator leaves, for all users---even for NON-connected users.
+                    </li>
+                    
+                    <li>
+                        Fixed: onstatechange isn't firing "request-accepted".
+                    </li>
+                    
+                    <li>
+                        Fixed: If stream is having no audio or video tracks but session=audio:true,video:true
+                    </li>
+                    
+                    <li>
+                        Renegotiation is fixed for Firefox. Removing old stream and using new one.
+                    </li>
+                    
+                    <li>
+                        <a href="http://www.rtcmulticonnection.org/docs/takeSnapshot/">takeSnapshot</a> now returns "blob" as second argument.
+                    </li>
+                    
+                    <li>
+                        Added: <code>connection.rtcConfiguration</code>:
+                        <pre class="sh_html">
+connection.rtcConfiguration = {
+    iceServers: [],
+    iceTransports: 'all'
+};
+</pre>
+                    </li>
+                    
+                    <li>
+                        hark.js updated. <a href="http://www.rtcmulticonnection.org/docs/onspeaking/">onspeaking</a> is disabled for remote streams. Check <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki/Coding-Tricks">Coding Tricks</a> wiki page for further details.
+                        <br><br>
+                        Now, stream object is having "pause" and "resume" methods to pause/resume hark.js instances.
+                    </li>
+                    
+                    <li>
+                        <code>connection.numberOfConnectedUsers</code> is fixed.
+                    </li>
+                    
+                    <li>
+                        <code>connection.candidates={relay:true}</code> fixed. (a=candidate is removed).
+                    </li>
+                    
+                    <li>
+                        Added: <code>connection.attachExternalStream(MediaStream, isScreen);</code>
+                        <pre class="sh_javascript">
+navigator.webkitGetUserMedia({
+    video: {
+        chromeMediaSource: 'screen'
+    }
+}, function(stream) {
+    connection.attachExternalStream(stream, true);
+}, function(error) {
+    alert(JSON.stringify(error));
+};
+</pre>
+                    </li>
+                    
+                    <li>
+                        Fixed: audio-only stream & crash.
+                    </li>
+                    
+                    <li>
+                        <code>connection.stopMediaStream</code> improved.
+                    </li>
+                    
+                    <li>
+                        Screen capturing improved & some bugs fixed.
+                    </li>
+                </ol>
+            </section>
+            
+            <section class="experiment">
+                <h2 id="v2.0"><a href="http://www.rtcmulticonnection.org/changes-log/#v2.0">v2.0</a> / released in Sep 01, 2014</h2>
+                
+                <blockquote class="inline">
+                    <pre class="sh_html">
+&lt;script src="//cdn.webrtc-experiment.com/RTCMultiConnection-v2.0.js"&gt;&lt;/script&gt;
 </pre>
                 </blockquote>
                 
@@ -2419,7 +2523,7 @@ connection.streams['stream-id'].<a href="http://www.RTCMultiConnection.org/docs/
             </section>
         </article>
 	
-        <a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/RTCMultiConnection" class="fork-left"></a>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection" class="fork-left"></a>
 	
         <footer>
             <a href="https://www.webrtc-experiment.com/" target="_blank">WebRTC Experiments!</a> and 
@@ -2427,6 +2531,6 @@ connection.streams['stream-id'].<a href="http://www.RTCMultiConnection.org/docs/
             <a href="mailto:muazkh@gmail.com" target="_blank">Muaz Khan</a>:
             <a href="https://twitter.com/WebRTCWeb" target="_blank">@WebRTCWeb</a>
         </footer>
-        <script src="//www.rtcmulticonnection.org/commits.js"> </script>
+        <script src="https://cdn.webrtc-experiment.com/commits.js"> </script>
     </body>
 </html>

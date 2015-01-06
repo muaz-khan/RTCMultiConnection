@@ -68,6 +68,19 @@
         </blockquote>
         
         <section class="experiment">
+            <h2>Disable XirSys Servers</h2>
+            <pre class="sh_javascript">
+// this line disables xirsys servers
+connection.getExternalIceServers = false;
+
+// this line sets defaults
+// prevents all "predefined" ice servers
+connection.iceServers = [];
+</pre>
+
+        </section>
+        
+        <section class="experiment">
             <h2>RTCMultiConnection & STUN/TURN servers</h2>
             <pre class="sh_javascript">
 // yep, its true that chrome is/was using only 1st STUN server.
@@ -112,6 +125,9 @@ connection.<a href="http://www.RTCMultiConnection.org/docs/iceServers/"><code>ic
 
 // cross-domain ICE-serving!
 
+connection.getExternalIceServers = false;
+connection.iceServers = [];
+
 var iceFrame, loadedIceFrame;
 
 function loadIceFrame(callback, skip) {
@@ -139,7 +155,7 @@ function loadIceFrame(callback, skip) {
 };
 
 loadIceFrame(function(_iceServers) {
-    connection.<a href="http://www.RTCMultiConnection.org/docs/iceServers/"><code>iceServers</code></a> = connection.iceServers.concat(_iceServers);
+    connection.<a href="http://www.RTCMultiConnection.org/docs/iceServers/"><code>iceServers</code></a> = _iceServers;
 });
 </pre>
         </section>
@@ -149,6 +165,9 @@ loadIceFrame(function(_iceServers) {
                 <a href="#xirsys-with-custom-account">XirSys' servers (using your custom account)</a>
             </h2>
             <pre class="sh_javascript">
+connection.getExternalIceServers = false;
+connection.iceServers = [];
+
 // put your data in these 6-lines
 var ident       = 'your-xirsys-username';
 var secret      = 'your-xirsys-secret-key';
@@ -172,10 +191,8 @@ function createCORSRequest(method, url) {
 var url = 'https://api.xirsys.com/getIceServers';
 var xhr = createCORSRequest('POST', url);
 xhr.onload = function() {
-    // got ice servers; concatenating in "RTCMultiConnection"
-    // you can use like this: connection.<a href="http://www.RTCMultiConnection.org/docs/iceServers/"><code>iceServers</code></a> = iceServers;
     var iceServers = JSON.parse(xhr.responseText).d.iceServers;
-    connection.<a href="http://www.RTCMultiConnection.org/docs/iceServers/"><code>iceServers</code></a> = connection.iceServers.concat(iceServers);
+    connection.<a href="http://www.RTCMultiConnection.org/docs/iceServers/"><code>iceServers</code></a> = iceServers;
 };
 xhr.onerror = function() {
     console.error('Woops, there was an error making xhr request.');
@@ -277,7 +294,8 @@ connection.<a href="http://www.RTCMultiConnection.org/docs/iceServers/"><code>ic
                 <div id="github-commits"></div>
             </section>
     </article>
-    <a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/RTCMultiConnection" class="fork-left"></a>
+    
+    <a href="https://github.com/muaz-khan/RTCMultiConnection" class="fork-left"></a>
 	
         <footer>
             <a href="https://www.webrtc-experiment.com/" target="_blank">WebRTC Experiments!</a> and 
@@ -285,6 +303,7 @@ connection.<a href="http://www.RTCMultiConnection.org/docs/iceServers/"><code>ic
             <a href="mailto:muazkh@gmail.com" target="_blank">Muaz Khan</a>:
             <a href="https://twitter.com/WebRTCWeb" target="_blank">@WebRTCWeb</a>
         </footer>
-    <script src="//www.rtcmulticonnection.org/commits.js"> </script>
+        
+    <script src="https://cdn.webrtc-experiment.com/commits.js"> </script>
 </body>
 </html>
