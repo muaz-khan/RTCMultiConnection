@@ -1372,7 +1372,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
     // if a user leaves
 
     function clearSession() {
-        if (connection.isInitiator) {
+        if (connection.isInitiator && connection.socket) {
             connection.socket.send({
                 sessionClosed: true,
                 session: connection.sessionDescription
@@ -1398,7 +1398,7 @@ function SignalingHandler(connection, callbackForSignalingReady) {
                         continue;
                     }
                 }
-                if (firstPeer) {
+                if (firstPeer && firstPeer.socket) {
                     // shift initiation control to another user
                     firstPeer.socket.send2({
                         isPlayRoleOfInitiator: true,
@@ -1411,7 +1411,9 @@ function SignalingHandler(connection, callbackForSignalingReady) {
             }
         }
 
-        connection.socket.send(alertMessage);
+        if (connection.socket) {
+            connection.socket.send(alertMessage);
+        }
 
         connection.refresh();
 
