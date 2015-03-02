@@ -66,6 +66,24 @@
         
         <section class="experiment">
             <pre class="sh_javascript">
+connection.<a href="http://www.RTCMultiConnection.org/docs/onstream/"><code>onstream</code></a> = function(event) {
+    if (event.isScreen) {
+        // screenVideo.src = event.blobURL;
+        screenDiv.appendChild(event.mediaElement);
+    }
+
+    if (event.isAudio) {
+        audioOnlyTag.src = event.blobURL;
+    }
+
+    if (event.isVideo) {
+        // audioPlusVideo.src = event.blobURL;
+        // videoOnly.src = event.blobURL;
+        videoDiv.appendChild(event.mediaElement);
+    }
+};
+
+// in details:
 connection.<a href="http://www.RTCMultiConnection.org/docs/onstream/"><code>onstream</code></a> = function(e) {
     // e.mediaElement (audio or video element)
     // e.stream     native MediaStream object

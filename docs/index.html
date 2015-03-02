@@ -472,21 +472,21 @@ connection.onleave = function(e) {
                         <li>
                             <a href="http://www.RTCMultiConnection.org/docs/onstream/">onstream</a>
                             <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/onstream/">onstream</a> = function(e) {
-    // e.mediaElement (audio or video element)
-    // e.stream     native MediaStream object
-    // e.streamid   unique identifier of the stream; it will be synced among all users!
-    // e.session {audio: true, video: true}
-    // e.blobURL
-    // e.type     "local" or "remote"
-    // e.extra
-    // e.userid   the person who shared stream with you!
-    
-    // easiest way to display audio/video elements
-    document.body.appendChild(e.mediaElement);
-    
-    // e.isVideo ---- if it is a  Video stream
-    // e.isAudio ---- if it is an Audio stream
+connection.<a href="http://www.RTCMultiConnection.org/docs/onstream/"><code>onstream</code></a> = function(event) {
+    if (event.isScreen) {
+        // screenVideo.src = event.blobURL;
+        screenDiv.appendChild(event.mediaElement);
+    }
+
+    if (event.isAudio) {
+        audioOnlyTag.src = event.blobURL;
+    }
+
+    if (event.isVideo) {
+        // audioPlusVideo.src = event.blobURL;
+        // videoOnly.src = event.blobURL;
+        videoDiv.appendChild(event.mediaElement);
+    }
 };
 </pre>
                         </li>

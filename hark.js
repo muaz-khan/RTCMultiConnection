@@ -1,21 +1,12 @@
 // original source code is taken from:
-// https://github.com/SimpleWebRTC/hark
+// github.com/SimpleWebRTC/hark
 // copyright goes to &yet team
 // edited by Muaz Khan for RTCMultiConnection.js
+
 function hark(stream, options) {
     var audioContextType = window.webkitAudioContext || window.AudioContext;
 
     var harker = this;
-    harker.events = {};
-    harker.on = function (event, callback) {
-        harker.events[event] = callback;
-    };
-
-    harker.emit = function () {
-        if (harker.events[arguments[0]]) {
-            harker.events[arguments[0]](arguments[1], arguments[2], arguments[3], arguments[4]);
-        }
-    };
 
     // make it not break in non-supported browsers
     if (!audioContextType) return harker;
@@ -23,7 +14,7 @@ function hark(stream, options) {
     options = options || {};
     // Config
     var smoothing = (options.smoothing || 0.1),
-        interval = (options.interval || 50),
+        interval = (options.interval || 300),
         threshold = options.threshold,
         play = options.play,
         history = options.history || 10,
@@ -55,31 +46,43 @@ function hark(stream, options) {
 
     harker.speaking = false;
 
-    harker.setThreshold = function (t) {
+    harker.setThreshold = function(t) {
         threshold = t;
     };
 
-    harker.setInterval = function (i) {
+    harker.setInterval = function(i) {
         interval = i;
     };
 
-    harker.stop = function () {
+    harker.stop = function() {
         running = false;
-        harker.emit('volume_change', -100, threshold);
+        options.onvolumechange(-100, threshold);
         if (harker.speaking) {
             harker.speaking = false;
-            harker.emit('stopped_speaking');
+            options.onsilence();
         }
     };
+
+    stream.pause = function() {
+        running = false;
+        options.onsilence();
+    };
+
+    stream.resume = function() {
+        if (running) return;
+
+        running = true;
+        looper();
+    };
+
     harker.speakingHistory = [];
     for (var i = 0; i < history; i++) {
         harker.speakingHistory.push(0);
     }
 
     // Poll the analyser node to determine if speaking
-    // and emit events if changed
-    var looper = function () {
-        setTimeout(function () {
+    var looper = function() {
+        setTimeout(function() {
 
             //check if stop has been called
             if (!running) {
@@ -88,7 +91,7 @@ function hark(stream, options) {
 
             var currentVolume = getMaxVolume(analyser, fftBins);
 
-            harker.emit('volume_change', currentVolume, threshold);
+            options.onvolumechange(currentVolume, threshold);
 
             var history = 0;
             if (currentVolume > threshold && !harker.speaking) {
@@ -98,7 +101,7 @@ function hark(stream, options) {
                 }
                 if (history >= 2) {
                     harker.speaking = true;
-                    harker.emit('speaking');
+                    options.onspeaking();
                 }
             } else if (currentVolume < threshold && harker.speaking) {
                 for (var j = 0; j < harker.speakingHistory.length; j++) {
@@ -106,7 +109,7 @@ function hark(stream, options) {
                 }
                 if (history === 0) {
                     harker.speaking = false;
-                    harker.emit('stopped_speaking');
+                    options.onsilence();
                 }
             }
             harker.speakingHistory.shift();
