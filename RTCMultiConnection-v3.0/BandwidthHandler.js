@@ -85,6 +85,10 @@ var BandwidthHandler = (function() {
         if (rtxIndex) {
             rtxPayload = getCodecPayloadType(sdpLines[rtxIndex]);
         }
+        
+        if(!rtxIndex) {
+            return sdp;
+        }
 
         var rtxFmtpLineIndex = findLine(sdpLines, 'a=fmtp:' + rtxPayload.toString());
         if (rtxFmtpLineIndex !== null) {

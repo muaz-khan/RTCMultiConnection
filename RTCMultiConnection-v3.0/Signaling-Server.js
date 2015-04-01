@@ -1,17 +1,11 @@
-var fs = require('fs');
+var useFakeKeys = !(!!process.env.PORT || !!process.env.IP);
 
-var https = require('https'),
+var server = require(useFakeKeys ? 'https' : 'http'),
     url = require('url'),
     path = require('path'),
     fs = require('fs');
-    
-var options = {
-    key: fs.readFileSync('fake-keys/privatekey.pem'),
-    cert: fs.readFileSync('fake-keys/certificate.pem')
-};
 
-var app = https.createServer(options, function(request, response) {
-
+function serverHandler(request, response) {
     var uri = url.parse(request.url).pathname,
         filename = path.join(process.cwd(), uri);
 
@@ -42,14 +36,27 @@ var app = https.createServer(options, function(request, response) {
             response.end();
         });
     });
-}).listen(process.env.PORT || 9001);
+}
+
+var app;
+
+if (useFakeKeys) {
+    var options = {
+        key: fs.readFileSync('fake-keys/privatekey.pem'),
+        cert: fs.readFileSync('fake-keys/certificate.pem')
+    };
+    app = server.createServer(options, serverHandler);
+} else app = server.createServer(serverHandler);
+
+app = app.listen(process.env.PORT || 9001, process.env.IP || "0.0.0.0", function() {
+    var addr = app.address();
+    console.log("Server listening at", addr.address + ":" + addr.port);
+});
 
 var io = require('socket.io').listen(app, {
     log: false,
     origins: '*:*'
 });
-
-console.log('Socket.io is running on port: 9001');
 
 io.set('transports', [
     'websocket', // 'disconnect' EVENT will work only with 'websocket'
@@ -64,37 +71,37 @@ io.sockets.on('connection', function(socket) {
     var params = socket.handshake.query;
 
     socket.userid = params.userid;
-    
+
     listOfUsers[socket.userid] = {
         socket: socket,
         connectedWith: {},
         isPublic: false,
         extra: {}
     };
-    
+
     socket.on('become-a-public-user', function() {
-        if(!listOfUsers[socket.userid]) return;
+        if (!listOfUsers[socket.userid]) return;
         listOfUsers[socket.userid].isPublic = true;
     });
-    
+
     socket.on('extra-data-updated', function(extra) {
-        if(!listOfUsers[socket.userid]) return;
+        if (!listOfUsers[socket.userid]) return;
         listOfUsers[socket.userid].extra = extra;
-        
-        for(var user in listOfUsers[socket.userid].connectedWith) {
+
+        for (var user in listOfUsers[socket.userid].connectedWith) {
             listOfUsers[user].socket.emit('extra-data-updated', socket.userid, extra);
         }
     });
 
     socket.on('changed-uuid', function(uuid) {
-        if(listOfUsers[socket.userid]) {
+        if (listOfUsers[socket.userid]) {
             var oldUserId = socket.userid;
             listOfUsers[uuid] = listOfUsers[oldUserId];
             listOfUsers[uuid].socket.userid = socket.userid = uuid;
             delete listOfUsers[oldUserId];
             return;
         }
-        
+
         socket.userid = uuid;
         listOfUsers[socket.userid] = {
             socket: socket,
@@ -103,30 +110,30 @@ io.sockets.on('connection', function(socket) {
             extra: {}
         };
     });
-    
+
     socket.on('set-password', function(password) {
         listOfUsers[socket.userid].password = password;
     });
-    
+
     socket.on('disconnect-with', function(remoteUserId) {
-        if(listOfUsers[socket.userid].connectedWith[remoteUserId]) {
+        if (listOfUsers[socket.userid].connectedWith[remoteUserId]) {
             delete listOfUsers[socket.userid].connectedWith[remoteUserId];
         }
-        
-        if(!listOfUsers[remoteUserId]) return;
-        
-        if(listOfUsers[remoteUserId].connectedWith[socket.userid]) {
+
+        if (!listOfUsers[remoteUserId]) return;
+
+        if (listOfUsers[remoteUserId].connectedWith[socket.userid]) {
             delete listOfUsers[remoteUserId].connectedWith[socket.userid];
             listOfUsers[remoteUserId].socket.emit('user-disconnected', socket.userid);
         }
     });
 
     function onMessageCallback(message) {
-        if(!listOfUsers[message.sender]) {
+        if (!listOfUsers[message.sender]) {
             console.log('user-not-exists', message.sender);
             return;
         }
-        
+
         if (!listOfUsers[message.sender].connectedWith[message.remoteUserId] && !!listOfUsers[message.remoteUserId]) {
             listOfUsers[message.sender].connectedWith[message.remoteUserId] = listOfUsers[message.remoteUserId].socket;
             if (!listOfUsers[message.remoteUserId]) {
@@ -141,54 +148,54 @@ io.sockets.on('connection', function(socket) {
             listOfUsers[message.remoteUserId].connectedWith[message.sender] = socket;
         }
 
-        if (listOfUsers[message.sender].connectedWith[message.remoteUserId]) {
+        if (listOfUsers[message.sender].connectedWith[message.remoteUserId] && listOfUsers[socket.userid]) {
             message.extra = listOfUsers[socket.userid].extra;
             listOfUsers[message.sender].connectedWith[message.remoteUserId].emit('message', message);
         }
     }
 
     var numberOfPasswordTries = 0;
-    socket.on('message', function(message, callback) {        
-        if(message.remoteUserId && message.remoteUserId != 'system' && message.message.newParticipationRequest) {
-            if(listOfUsers[message.remoteUserId] && listOfUsers[message.remoteUserId].password) {
-                if(numberOfPasswordTries > 3) {
+    socket.on('message', function(message, callback) {
+        if (message.remoteUserId && message.remoteUserId != 'system' && message.message.newParticipationRequest) {
+            if (listOfUsers[message.remoteUserId] && listOfUsers[message.remoteUserId].password) {
+                if (numberOfPasswordTries > 3) {
                     socket.emit('password-max-tries-over', message.remoteUserId);
                     return;
                 }
-                
-                if(!message.password) {
+
+                if (!message.password) {
                     numberOfPasswordTries++;
                     socket.emit('join-with-password', message.remoteUserId);
                     return;
                 }
-                
-                if(message.password != listOfUsers[message.remoteUserId].password) {
+
+                if (message.password != listOfUsers[message.remoteUserId].password) {
                     numberOfPasswordTries++;
                     socket.emit('invalid-password', message.remoteUserId, message.password);
                     return;
                 }
             }
         }
-        
+
         if (message.message.shiftedModerationControl) {
-            if(!message.message.firedOnLeave) {
+            if (!message.message.firedOnLeave) {
                 onMessageCallback(message);
                 return;
             }
             shiftedModerationControls[message.sender] = message;
             return;
         }
-        
-        if(message.remoteUserId == 'system') {
-            if(message.message.detectPresence) {
+
+        if (message.remoteUserId == 'system') {
+            if (message.message.detectPresence) {
                 callback(!!listOfUsers[message.message.userid], message.message.userid);
                 return;
             }
-            
-            if(message.message.getPublicUsers) {
+
+            if (message.message.getPublicUsers) {
                 var allPublicUsers = [];
-                for(var user in listOfUsers) {
-                    if(listOfUsers[user].isPublic) {
+                for (var user in listOfUsers) {
+                    if (listOfUsers[user].isPublic) {
                         allPublicUsers.push(user);
                     }
                 }
@@ -196,7 +203,7 @@ io.sockets.on('connection', function(socket) {
                 return;
             }
         }
-        
+
         if (!listOfUsers[message.sender]) {
             listOfUsers[message.sender] = {
                 socket: socket,
@@ -205,31 +212,30 @@ io.sockets.on('connection', function(socket) {
                 extra: {}
             };
         }
-        
+
         onMessageCallback(message);
 
         // if someone tries to join a person who is absent
-        if(!listOfUsers[message.sender].connectedWith[message.remoteUserId] && message.message.newParticipationRequest) {
+        if (!listOfUsers[message.sender].connectedWith[message.remoteUserId] && message.message.newParticipationRequest) {
             var waitFor = 120; // 2 minutes
             var invokedTimes = 0;
             (function repeater() {
                 invokedTimes++;
-                if(invokedTimes > waitFor) {
+                if (invokedTimes > waitFor) {
                     socket.emit('user-not-found', message.remoteUserId);
                     return;
                 }
-                
-                if(!!listOfUsers[message.remoteUserId]) {
+
+                if (!!listOfUsers[message.remoteUserId]) {
                     onMessageCallback(message);
-                }
-                else setTimeout(repeater, 1000);
+                } else setTimeout(repeater, 1000);
             })();
         }
     });
-    
+
     socket.on('change-userid', function(obj) {
-        if(!listOfUsers[obj.oldUserId]) return;
-        
+        if (!listOfUsers[obj.oldUserId]) return;
+
         listOfUsers[obj.newUserId] = listOfUsers[obj.oldUserId];
         delete listOfUsers[obj.oldUserId];
         listOfUsers[obj.newUserId].socket.userid = obj.newUserId;
@@ -250,7 +256,7 @@ io.sockets.on('connection', function(socket) {
             onMessageCallback(message);
             delete shiftedModerationControls[message.userid];
         }
-        
+
         delete listOfUsers[socket.userid];
     });
 });

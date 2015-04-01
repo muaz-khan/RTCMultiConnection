@@ -11,7 +11,9 @@ function setSdpConstraints(config) {
 
     sdpConstraints = {
         mandatory: sdpConstraints_mandatory,
-        optional: []
+        optional: [{
+            VoiceActivityDetection: false
+        }]
     };
 
     if (!!navigator.mozGetUserMedia && firefoxVersion > 34) {
@@ -184,6 +186,9 @@ function PeerInitiator(config) {
 
     peer.onaddstream = function(event) {
         event.stream.streamid = event.stream.id;
+        if(!event.stream.stop) {
+            event.stream.stop = function() {};
+        }
         allRemoteStreams[event.stream.id] = event.stream;
         config.onRemoteStream(event.stream);
     };

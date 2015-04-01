@@ -66,6 +66,9 @@ function getUserMedia(options) {
         
         navigator.getMedia(options.localMediaConstraints, function(stream) {
             stream.streamid = stream.id || getRandomString();
+            if(!stream.stop) {
+                stream.stop = function() {};
+            }
             streaming(stream);
         }, function(error) {
             options.onLocalMediaError(error, options.localMediaConstraints);

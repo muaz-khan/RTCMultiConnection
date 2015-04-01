@@ -7,10 +7,6 @@ function RTCMultiConnection(roomid) {
     var mPeer = new MultiPeers(connection);
 
     mPeer.onGettingLocalMedia = function(stream) {
-        if (window.StreamsHandler) {
-            StreamsHandler.setHandlers(stream);
-        }
-
         getMediaElement(stream, function(mediaElement) {
             mediaElement.id = stream.streamid;
             mediaElement.muted = true;
@@ -18,6 +14,10 @@ function RTCMultiConnection(roomid) {
 
             stream.mediaElement = mediaElement;
             connection.attachStreams.push(stream);
+            
+            if (window.StreamsHandler) {
+                StreamsHandler.setHandlers(stream);
+            }
 
             connection.onstream({
                 stream: stream,
@@ -31,12 +31,13 @@ function RTCMultiConnection(roomid) {
     };
 
     mPeer.onGettingRemoteMedia = function(stream, remoteUserId) {
-        if (window.StreamsHandler) {
-            StreamsHandler.setHandlers(stream, false);
-        }
-
         getMediaElement(stream, function(mediaElement) {
             mediaElement.id = stream.streamid;
+            stream.mediaElement = mediaElement;
+            
+            if (window.StreamsHandler) {
+                StreamsHandler.setHandlers(stream, false);
+            }
             connection.onstream({
                 stream: stream,
                 type: 'remote',
@@ -268,6 +269,11 @@ function RTCMultiConnection(roomid) {
             socket.emit('extra-data-updated', connection.extra);
             if (connectCallback) connectCallback();
         });
+        
+        socket.on('disconnect', function() {
+            socket = null;
+            connectSocket();
+        });
 
         socket.on('join-with-password', function(remoteUserId) {
             connection.onJoinWithPassword(remoteUserId);
@@ -382,6 +388,20 @@ function RTCMultiConnection(roomid) {
     };
 
     connection.rejoin = function(connectionDescription) {
+        if(!connectionDescription) {
+            connectionDescription = {
+                remoteUserId: connection.sessionid,
+                message: {
+                    newParticipationRequest: true,
+                    isOneWay: typeof connection.session.oneway != 'undefined' ? connection.session.oneway : connection.direction == 'one-way',
+                    isDataOnly: isData(connection.session),
+                    localPeerSdpConstraints: connection.mediaConstraints,
+                    remotePeerSdpConstraints: connection.mediaConstraints
+                },
+                sender: connection.userid
+            };
+        }
+        
         if(connection.peers[connectionDescription.remoteUserId]) {
             delete connection.peers[connectionDescription.remoteUserId];
         }
@@ -518,7 +538,7 @@ function RTCMultiConnection(roomid) {
         }
     };
 
-    function beforeUnload() {
+    function beforeUnload(shiftModerationControlOnLeave) {
         connection.peers.getAllParticipants().forEach(function(participant) {
             socket.emit('message', {
                 remoteUserId: participant,
@@ -528,6 +548,10 @@ function RTCMultiConnection(roomid) {
                 },
                 sender: connection.userid
             });
+            
+            if(connection.peers[participant] && connection.peers[participant].peer) {
+                connection.peers[participant].peer.close();
+            }
         });
 
         // equivalent of connection.isInitiator
@@ -540,8 +564,11 @@ function RTCMultiConnection(roomid) {
                 otherBroadcasters.push(broadcaster);
             }
         });
-
-        connection.shiftModerationControl(firstBroadcaster, otherBroadcasters, true);
+        
+        connection.shiftModerationControl(firstBroadcaster, otherBroadcasters, typeof shiftModerationControlOnLeave != 'undefined' ? shiftModerationControlOnLeave : true);
+        
+        connection.broadcasters = [];
+        connection.isInitiator = false;
     }
 
     window.addEventListener('beforeunload', beforeUnload, false);
@@ -631,7 +658,9 @@ function RTCMultiConnection(roomid) {
         connection.peers.send(data);
     };
 
-    connection.close = connection.disconnect = connection.leave = beforeUnload;
+    connection.close = connection.disconnect = connection.leave = function() {
+        beforeUnload(false);
+    };
 
     connection.onstream = function(e) {
         var parentNode = (document.body || document.documentElement);
