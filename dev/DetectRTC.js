@@ -1,33 +1,4 @@
-// Last time updated at May 05, 2015, 08:32:23
-
-// Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
-
-// Muaz Khan     - www.MuazKhan.com
-// MIT License   - www.WebRTC-Experiment.com/licence
-// Documentation - github.com/muaz-khan/DetectRTC
-// ____________
-// DetectRTC.js
-
-// DetectRTC.hasWebcam (has webcam device!)
-// DetectRTC.hasMicrophone (has microphone device!)
-// DetectRTC.hasSpeakers (has speakers!)
-// DetectRTC.isScreenCapturingSupported
-// DetectRTC.isSctpDataChannelsSupported
-// DetectRTC.isRtpDataChannelsSupported
-// DetectRTC.isAudioContextSupported
-// DetectRTC.isWebRTCSupported
-// DetectRTC.isDesktopCapturingSupported
-// DetectRTC.isMobileDevice
-// DetectRTC.isWebSocketsSupported
-
-// DetectRTC.DetectLocalIPAddress(callback)
-
-// ----------todo: add
-// DetectRTC.videoResolutions
-// DetectRTC.screenResolutions
-
 (function() {
-    'use strict';
 
     function warn(log) {
         if (window.console && typeof window.console.warn !== 'undefined') {
@@ -228,7 +199,6 @@
     DetectRTC.load = CheckDeviceSupport;
 
     function getBrowserInfo() {
-        var nVer = navigator.appVersion;
         var nAgt = navigator.userAgent;
         var browserName = navigator.appName;
         var fullVersion = '' + parseFloat(navigator.appVersion);
@@ -404,3 +374,5 @@
         }, 1000);
     }
 })();
+
+var DetectRTC = window.DetectRTC;
