@@ -1,7 +1,7 @@
 {
   "name": "rtcmulticonnection-v3",
   "preferGlobal": true,
-  "version": "3.0.4",
+  "version": "3.0.5",
   "author": {
     "name": "Muaz Khan",
     "email": "muazkh@gmail.com",
@@ -50,5 +50,14 @@
     "email": "muazkh@gmail.com"
   },
   "homepage": "https://github.com/muaz-khan/RTCMultiConnection/tree/master/RTCMultiConnection-v3.0",
-  "_from": "rtcmulticonnection-v3@"
+  "_from": "rtcmulticonnection-v3@",
+  "devDependencies": {
+    "grunt": "latest",
+    "grunt-cli": "latest",
+    "load-grunt-tasks": "latest",
+    "grunt-contrib-concat": "latest",
+    "grunt-contrib-uglify": "latest",
+    "grunt-jsbeautifier": "latest",
+    "grunt-bump": "latest"
+  }
 }

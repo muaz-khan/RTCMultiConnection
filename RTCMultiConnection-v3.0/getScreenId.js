@@ -96,11 +96,11 @@ getScreenId(function (error, sourceId, screen_constraints) {
     iframe.src = 'https://www.webrtc-experiment.com/getSourceId/';
     iframe.style.display = 'none';
     (document.body || document.documentElement).appendChild(iframe);
-    
+
     // this function is used in v3.0
-    window.getScreenConstraints = function (callback) {
-       getScreenId(function(error, sourceId, screen_constraints) {
-          callback(error, screen_constraints);
-       });
+    window.getScreenConstraints = function(callback) {
+        getScreenId(function(error, sourceId, screen_constraints) {
+            callback(error, screen_constraints.video);
+        });
     };
 })();

@@ -80,12 +80,12 @@ function isChromeExtensionAvailable(callback) {
 // this function can be used to get "source-id" from the extension
 function getSourceId(callback) {
     if (!callback) throw '"callback" parameter is mandatory.';
-    if(sourceId) {
+    if (sourceId) {
         callback(sourceId);
         sourceId = null;
         return;
     }
-    
+
     screenCallback = callback;
     window.postMessage('get-sourceId', '*');
 }
@@ -124,8 +124,8 @@ function getScreenConstraints(callback) {
         mozMediaSource: 'window',
         mediaSource: 'window'
     };
-    
-    if(isFirefox) return callback(null, firefoxScreenConstraints);
+
+    if (isFirefox) return callback(null, firefoxScreenConstraints);
 
     // this statement defines getUserMedia constraints
     // that will be used to capture content of screen

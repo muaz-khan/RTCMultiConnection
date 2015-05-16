@@ -58,18 +58,21 @@ function RTCMultiConnection(roomid) {
     };
 
     mPeer.onRemovingRemoteMedia = function(stream, remoteUserId) {
-        connection.onstreamended(connection.streamEvents[stream.streamid]);
+        var streamEvent = connection.streamEvents[stream.streamid];
+        if (!streamEvent) {
+            streamEvent = {
+                stream: stream,
+                type: 'remote',
+                userid: remoteUserId,
+                extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},
+                streamid: stream.streamid,
+                mediaElement: stream.mediaElement
+            };
+        }
+
+        connection.onstreamended(streamEvent);
+
         delete connection.streamEvents[stream.streamid];
-        /*
-        connection.onstreamended({
-            stream: stream,
-            type: 'remote',
-            userid: remoteUserId,
-            extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},
-            streamid: stream.streamid,
-            mediaElement: stream.mediaElement
-        });
-        */
     };
 
     mPeer.onNegotiationNeeded = function(message, remoteUserId) {
@@ -116,7 +119,7 @@ function RTCMultiConnection(roomid) {
             return;
         }
 
-        socket = io.connect('/?userid=' + connection.userid);
+        socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid);
 
         socket.on('extra-data-updated', function(remoteUserId, extra) {
             if (!connection.peers[remoteUserId]) return;
@@ -793,19 +796,20 @@ function RTCMultiConnection(roomid) {
 
                         // connection.renegotiate();
 
-                        connection.onstreamended(connection.streamEvents[change.object[change.name]]);
-                        delete connection.streamEvents[change.object[change.name]];
+                        var streamEvent = connection.streamEvents[change.object[change.name]];
+                        if (!streamEvent) {
+                            streamEvent = {
+                                stream: change.object[change.name],
+                                streamid: change.object[change.name].streamid,
+                                type: 'local',
+                                userid: connection.userid,
+                                extra: connection.extra,
+                                mediaElement: change.object[change.name].mediaElement
+                            };
+                        }
+                        connection.onstreamended(streamEvent);
 
-                        /*
-                        connection.onstreamended({
-                            stream: change.object[change.name],
-                            streamid: change.object[change.name].streamid,
-                            type: 'local',
-                            userid: connection.userid,
-                            extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},
-                            mediaElement: change.object[change.name].mediaElement
-                        });
-                        */
+                        delete connection.streamEvents[change.object[change.name]];
                     }, false);
                 }
 
@@ -988,4 +992,5 @@ function RTCMultiConnection(roomid) {
     connection.autoReDialOnFailure = true;
 
     connection.streamEvents = {};
+    connection.socketURL = '/';
 }

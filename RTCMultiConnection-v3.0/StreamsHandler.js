@@ -20,7 +20,7 @@ var StreamsHandler = (function() {
 
         stream.unmute = function(type) {
             graduallyIncreaseVolume();
-            
+
             if (typeof type == 'undefined' || type == 'audio') {
                 stream.getAudioTracks().forEach(function(track) {
                     track.enabled = true;
@@ -37,7 +37,7 @@ var StreamsHandler = (function() {
                 StreamsHandler.onSyncNeeded(stream.streamid, 'unmute', type);
             }
         };
-        
+
         function graduallyIncreaseVolume() {
             var mediaElement = stream.mediaElement;
             mediaElement.volume = 0;
@@ -46,7 +46,7 @@ var StreamsHandler = (function() {
             });
         }
     }
-    
+
     function afterEach(setTimeoutInteval, numberOfTimes, callback, startedTimes) {
         startedTimes = (startedTimes || 0) + 1;
         if (startedTimes >= numberOfTimes) return;

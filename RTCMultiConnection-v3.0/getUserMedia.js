@@ -20,9 +20,9 @@ function getUserMedia(options) {
 
         stream.addEventListener('ended', function() {
             delete currentUserMediaRequest.streams[idInstance];
-            
+
             currentUserMediaRequest.mutex = false;
-            if(currentUserMediaRequest.queueRequests.indexOf(options)) {
+            if (currentUserMediaRequest.queueRequests.indexOf(options)) {
                 delete currentUserMediaRequest.queueRequests[currentUserMediaRequest.queueRequests.indexOf(options)];
                 currentUserMediaRequest.queueRequests = removeNullEntries(currentUserMediaRequest.queueRequests);
             }
@@ -55,18 +55,18 @@ function getUserMedia(options) {
         }
 
         navigator.getMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-        
-        if(!DetectRTC.hasMicrophone) {
+
+        if (!DetectRTC.hasMicrophone) {
             options.localMediaConstraints.audio = false;
         }
-        
-        if(!DetectRTC.hasWebcam) {
+
+        if (!DetectRTC.hasWebcam) {
             options.localMediaConstraints.video = false;
         }
-        
+
         navigator.getMedia(options.localMediaConstraints, function(stream) {
             stream.streamid = stream.id || getRandomString();
-            if(!stream.stop) {
+            if (!stream.stop) {
                 stream.stop = function() {};
             }
             streaming(stream);

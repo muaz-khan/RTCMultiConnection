@@ -75,8 +75,8 @@ var BandwidthHandler = (function() {
         if (vp8Index) {
             vp8Payload = getCodecPayloadType(sdpLines[vp8Index]);
         }
-        
-        if(!vp8Payload) {
+
+        if (!vp8Payload) {
             return sdp;
         }
 
@@ -85,8 +85,8 @@ var BandwidthHandler = (function() {
         if (rtxIndex) {
             rtxPayload = getCodecPayloadType(sdpLines[rtxIndex]);
         }
-        
-        if(!rtxIndex) {
+
+        if (!rtxIndex) {
             return sdp;
         }
 

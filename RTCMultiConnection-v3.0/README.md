@@ -14,6 +14,27 @@ node Signaling-Server
 
 Now open: `https://localhost:9001/`
 
+## Link Single File
+
+```html
+<script src="/Single-File/RTCMultiConnection.js"></script>
+
+<!-- or minified file -->
+<script src="/Single-File/RTCMultiConnection.min.js"></script>
+```
+
+If you're sharing files, you also need to link:
+
+```html
+<script src="/FileBufferReader.js"></script>
+```
+
+## Set different socket URL
+
+```javascript
+connection.socketURL = 'http://yourdomain.com:8080/';
+```
+
 ## Configure v3.0
 
 * [wiki/Configure-v3.0](https://github.com/muaz-khan/RTCMultiConnection/wiki/Configure-v3.0)
