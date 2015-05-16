@@ -1,4 +1,40 @@
-var DetectRTC = (function() {
+// Last time updated at May 05, 2015, 08:32:23
+
+// Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
+
+// Muaz Khan     - www.MuazKhan.com
+// MIT License   - www.WebRTC-Experiment.com/licence
+// Documentation - github.com/muaz-khan/DetectRTC
+// ____________
+// DetectRTC.js
+
+// DetectRTC.hasWebcam (has webcam device!)
+// DetectRTC.hasMicrophone (has microphone device!)
+// DetectRTC.hasSpeakers (has speakers!)
+// DetectRTC.isScreenCapturingSupported
+// DetectRTC.isSctpDataChannelsSupported
+// DetectRTC.isRtpDataChannelsSupported
+// DetectRTC.isAudioContextSupported
+// DetectRTC.isWebRTCSupported
+// DetectRTC.isDesktopCapturingSupported
+// DetectRTC.isMobileDevice
+// DetectRTC.isWebSocketsSupported
+
+// DetectRTC.DetectLocalIPAddress(callback)
+
+// ----------todo: add
+// DetectRTC.videoResolutions
+// DetectRTC.screenResolutions
+
+(function() {
+    'use strict';
+
+    function warn(log) {
+        if (window.console && typeof window.console.warn !== 'undefined') {
+            console.warn(log);
+        }
+    }
+
     // detect node-webkit
     var browser = getBrowserInfo();
 
@@ -16,7 +52,15 @@ var DetectRTC = (function() {
 
     var isHTTPs = location.protocol === 'https:';
 
-    var detectRTC = {
+    if (navigator.mediaDevices && navigator.mediaDevices.enumerateDevices) {
+        // Firefox 38+ seems having support of enumerateDevices
+        // Thanks @xdumaine/enumerateDevices
+        navigator.enumerateDevices = function(callback) {
+            navigator.mediaDevices.enumerateDevices().then(callback);
+        };
+    }
+
+    window.DetectRTC = {
         browser: browser,
         hasMicrophone: navigator.getMediaDevices || navigator.enumerateDevices ? false : 'unable to detect',
         hasSpeakers: navigator.getMediaDevices || navigator.enumerateDevices ? false : 'unable to detect',
@@ -37,10 +81,11 @@ var DetectRTC = (function() {
     };
 
     if (!isHTTPs) {
-        detectRTC.isScreenCapturingSupported = detectRTC.isDesktopCapturingSupported = 'Requires HTTPs.';
+        window.DetectRTC.isScreenCapturingSupported =
+            window.DetectRTC.isDesktopCapturingSupported = 'Requires HTTPs.';
     }
 
-    detectRTC.browser = {
+    DetectRTC.browser = {
         isFirefox: isFirefox,
         isChrome: isChrome,
         isMobileDevice: isMobileDevice,
@@ -70,25 +115,28 @@ var DetectRTC = (function() {
         osName = 'Linux';
     }
 
-    detectRTC.osName = osName;
+    DetectRTC.osName = osName;
 
-    detectRTC.MediaDevices = [];
+    DetectRTC.MediaDevices = [];
+
+    if (!navigator.getMediaDevices) {
+        warn('navigator.getMediaDevices API are not available.');
+    }
+
+    if (!navigator.enumerateDevices) {
+        warn('navigator.enumerateDevices API are not available.');
+    }
+
+    if (!window.MediaStreamTrack || !window.MediaStreamTrack.getSources) {
+        warn('MediaStreamTrack.getSources are not available.');
+    }
 
     // http://dev.w3.org/2011/webrtc/editor/getusermedia.html#mediadevices
     // todo: switch to enumerateDevices when landed in canary.
     function CheckDeviceSupport(callback) {
         // This method is useful only for Chrome!
 
-        // Firefox seems having no support of enumerateDevices feature.
-        // Though there seems some clues of 'navigator.getMediaDevices' implementation.
-        if (isFirefox) {
-            if (callback) {
-                callback();
-            }
-            return;
-        }
-
-        if (!navigator.getMediaDevices && !!window.MediaStreamTrack && !!window.MediaStreamTrack.getSources) {
+        if (!navigator.getMediaDevices && window.MediaStreamTrack && window.MediaStreamTrack.getSources) {
             navigator.getMediaDevices = window.MediaStreamTrack.getSources.bind(window.MediaStreamTrack);
         }
 
@@ -98,11 +146,12 @@ var DetectRTC = (function() {
 
         // if still no 'getMediaDevices'; it MUST be Firefox!
         if (!navigator.getMediaDevices) {
+            warn('navigator.getMediaDevices is undefined.');
             // assuming that it is older chrome or chromium implementation
             if (isChrome) {
-                detectRTC.hasMicrophone = true;
-                detectRTC.hasSpeakers = true;
-                detectRTC.hasWebcam = true;
+                DetectRTC.hasMicrophone = true;
+                DetectRTC.hasSpeakers = true;
+                DetectRTC.hasWebcam = true;
             }
 
             if (callback) {
@@ -111,11 +160,16 @@ var DetectRTC = (function() {
             return;
         }
 
-        detectRTC.MediaDevices = [];
+        DetectRTC.MediaDevices = [];
         navigator.getMediaDevices(function(devices) {
-            devices.forEach(function(device) {
+            devices.forEach(function(_device) {
+                var device = {};
+                for (var d in _device) {
+                    device[d] = _device[d];
+                }
+
                 var skip;
-                detectRTC.MediaDevices.forEach(function(d) {
+                DetectRTC.MediaDevices.forEach(function(d) {
                     if (d.id === device.id) {
                         skip = true;
                     }
@@ -143,30 +197,24 @@ var DetectRTC = (function() {
                 }
 
                 if (!device.label) {
-                    if (location.protocol === 'https:') {
-                        device.label = 'Please invoke getUserMedia once.';
-                    }
-
-                    if (location.protocol === 'http:') {
-                        device.label = 'Plese use HTTPs instead.';
-                    }
+                    device.label = 'Please invoke getUserMedia once.';
                 }
 
                 if (device.kind === 'audioinput' || device.kind === 'audio') {
-                    detectRTC.hasMicrophone = true;
+                    DetectRTC.hasMicrophone = true;
                 }
 
                 if (device.kind === 'audiooutput') {
-                    detectRTC.hasSpeakers = true;
+                    DetectRTC.hasSpeakers = true;
                 }
 
                 if (device.kind === 'videoinput' || device.kind === 'video') {
-                    detectRTC.hasWebcam = true;
+                    DetectRTC.hasWebcam = true;
                 }
 
                 // there is no 'videoouput' in the spec.
 
-                detectRTC.MediaDevices.push(device);
+                DetectRTC.MediaDevices.push(device);
             });
 
             if (callback) {
@@ -177,7 +225,7 @@ var DetectRTC = (function() {
 
     // check for microphone/camera support!
     new CheckDeviceSupport();
-    detectRTC.load = CheckDeviceSupport;
+    DetectRTC.load = CheckDeviceSupport;
 
     function getBrowserInfo() {
         var nVer = navigator.appVersion;
@@ -252,99 +300,107 @@ var DetectRTC = (function() {
         };
     }
 
-    // get the IP addresses associated with an account
-    // @credit: https://diafygi.github.io/webrtc-ips/
+    // via: https://github.com/diafygi/webrtc-ips
+    DetectRTC.DetectLocalIPAddress = function(callback) {
+        getIPs(function(ip) {
+            //local IPs
+            if (ip.match(/^(192\.168\.|169\.254\.|10\.|172\.(1[6-9]|2\d|3[01]))/)) {
+                callback('Local: ' + ip);
+            }
+
+            //assume the rest are public IPs
+            else {
+                callback('Public: ' + ip);
+            }
+        });
+    };
+
+    //get the IP addresses associated with an account
     function getIPs(callback) {
-        var ip_dups = {};
+        var ipDuplicates = {};
 
         //compatibility for firefox and chrome
         var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
         var useWebKit = !!window.webkitRTCPeerConnection;
 
-        // bypass naive webrtc blocking
+        // bypass naive webrtc blocking using an iframe
         if (!RTCPeerConnection) {
-            var iframe = document.createElement('iframe');
-            //invalidate content script
-            iframe.sandbox = 'allow-same-origin';
-            iframe.style.display = 'none';
-            document.body.appendChild(iframe);
+            var iframe = document.getElementById('iframe');
+            if (!iframe) {
+                //<iframe id="iframe" sandbox="allow-same-origin" style="display: none"></iframe>
+                throw 'NOTE: you need to have an iframe in the page right above the script tag.';
+            }
             var win = iframe.contentWindow;
             RTCPeerConnection = win.RTCPeerConnection || win.mozRTCPeerConnection || win.webkitRTCPeerConnection;
             useWebKit = !!win.webkitRTCPeerConnection;
         }
 
-        // minimal requirements for data connection
+        //minimal requirements for data connection
         var mediaConstraints = {
             optional: [{
                 RtpDataChannels: true
             }]
         };
 
-        // firefox already has a default stun server in about:config
+        //firefox already has a default stun server in about:config
         //    media.peerconnection.default_iceservers =
         //    [{"url": "stun:stun.services.mozilla.com"}]
-        var servers = undefined;
+        var servers;
 
         //add same stun server for chrome
-        if (useWebKit)
+        if (useWebKit) {
             servers = {
                 iceServers: [{
-                    urls: "stun:stun.services.mozilla.com"
+                    urls: 'stun:stun.services.mozilla.com'
                 }]
             };
+        }
 
         //construct a new RTCPeerConnection
         var pc = new RTCPeerConnection(servers, mediaConstraints);
 
         function handleCandidate(candidate) {
             //match just the IP address
-            var ip_regex = /([0-9]{1,3}(\.[0-9]{1,3}){3})/
-            var ip_addr = ip_regex.exec(candidate)[1];
+            var ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3})/;
+            var ipAddress = ipRegex.exec(candidate)[1];
 
-            // remove duplicates
-            if (ip_dups[ip_addr] === undefined)
-                callback(ip_addr);
+            //remove duplicates
+            if (ipDuplicates[ipAddress] === undefined) {
+                callback(ipAddress);
+            }
 
-            ip_dups[ip_addr] = true;
+            ipDuplicates[ipAddress] = true;
         }
 
         //listen for candidate events
         pc.onicecandidate = function(ice) {
-
             //skip non-candidate events
-            if (ice.candidate)
+            if (ice.candidate) {
                 handleCandidate(ice.candidate.candidate);
+            }
         };
 
-        // create a bogus data channel
-        pc.createDataChannel("");
+        //create a bogus data channel
+        pc.createDataChannel('');
 
-        // create an offer sdp
+        //create an offer sdp
         pc.createOffer(function(result) {
 
-            // trigger the stun server request
+            //trigger the stun server request
             pc.setLocalDescription(result, function() {}, function() {});
 
         }, function() {});
 
-        // wait for a while to let everything done
+        //wait for a while to let everything done
         setTimeout(function() {
             //read candidate info from local description
             var lines = pc.localDescription.sdp.split('\n');
 
             lines.forEach(function(line) {
-                if (line.indexOf('a=candidate:') === 0)
+                if (line.indexOf('a=candidate:') === 0) {
                     handleCandidate(line);
+                }
             });
         }, 1000);
     }
-
-    detectRTC.DetectLocalIPAddress = detectRTC.DetectIPAddresses = function(callback) {
-        getIPs(function(ip) {
-            var isLocal = ip.match(/^(192\.168\.|169\.254\.|10\.|172\.(1[6-9]|2\d|3[01]))/);
-            callback((isLocal ? 'Local/System' : 'Modem/Public') + ': ' + ip);
-        });
-    };
-
-    return detectRTC;
 })();

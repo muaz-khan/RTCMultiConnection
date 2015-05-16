@@ -1,4 +1,3 @@
-// webrtc.js
 var defaults = {};
 
 function setSdpConstraints(config) {
@@ -139,15 +138,15 @@ function PeerInitiator(config) {
     };
 
     localStreams.forEach(function(localStream) {
-        if(config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.dontGetRemoteStream) {
+        if (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.dontGetRemoteStream) {
             return;
         }
-        
+
         // dontAttachLocalStream
-        if(config.dontAttachLocalStream) {
+        if (config.dontAttachLocalStream) {
             return;
         }
-        
+
         peer.addStream(localStream);
     });
 
@@ -186,7 +185,7 @@ function PeerInitiator(config) {
 
     peer.onaddstream = function(event) {
         event.stream.streamid = event.stream.id;
-        if(!event.stream.stop) {
+        if (!event.stream.stop) {
             event.stream.stop = function() {};
         }
         allRemoteStreams[event.stream.id] = event.stream;
@@ -263,11 +262,11 @@ function PeerInitiator(config) {
 
         peer.channel = channel;
     }
-    
-    if(config.session.audio == 'two-way' || config.session.video == 'two-way' || config.session.screen == 'two-way') {
+
+    if (config.session.audio == 'two-way' || config.session.video == 'two-way' || config.session.screen == 'two-way') {
         defaults.sdpConstraints = setSdpConstraints({
-           OfferToReceiveAudio: config.session.audio == 'two-way' || (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.OfferToReceiveAudio),
-           OfferToReceiveVideo: config.session.video == 'two-way' || config.session.screen == 'two-way' || (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.OfferToReceiveAudio)
+            OfferToReceiveAudio: config.session.audio == 'two-way' || (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.OfferToReceiveAudio),
+            OfferToReceiveVideo: config.session.video == 'two-way' || config.session.screen == 'two-way' || (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.OfferToReceiveAudio)
         });
     }
 

@@ -1,11 +1,6 @@
-<title>Audio+Video+TextChat+FileSharing</title>
-<h1>Audio+Video+TextChat+FileSharing</h1>
+<title>TextChat+FileSharing</title>
+<h1>TextChat+FileSharing</h1>
 <style>
-video {
-    object-fit: fill;
-    width: 30%;
-}
-
 button, input, select {
     font-family: Myriad, Arial, Verdana;
     font-weight: normal;
@@ -134,18 +129,12 @@ var connection = new RTCMultiConnection();
 connection.enableFileSharing = true; // by default, it is "false".
 
 connection.session = {
-    audio: true,
-    video: true,
     data : true
 };
 
 connection.sdpConstraints.mandatory = {
-    OfferToReceiveAudio: true,
-    OfferToReceiveVideo: true
-};
-
-connection.onstream = function(event) {
-    document.body.appendChild(event.mediaElement);
+    OfferToReceiveAudio: false,
+    OfferToReceiveVideo: false
 };
 
 connection.onmessage = appendDIV;

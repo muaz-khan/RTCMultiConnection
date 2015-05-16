@@ -1,4 +1,5 @@
 // Renegotiation now works in FF 38 and 39 (and multiple streams as well)
+// Firefox is supporting navigator.mediaDevices.getMediaDevices as well.
 function RTCMultiConnection(roomid) {
     var connection = this;
 
@@ -14,19 +15,22 @@ function RTCMultiConnection(roomid) {
 
             stream.mediaElement = mediaElement;
             connection.attachStreams.push(stream);
-            
+
             if (window.StreamsHandler) {
                 StreamsHandler.setHandlers(stream);
             }
 
-            connection.onstream({
+            connection.streamEvents[stream.streamid] = {
                 stream: stream,
                 type: 'local',
                 mediaElement: mediaElement,
                 userid: connection.userid,
                 extra: connection.extra,
-                streamid: stream.streamid
-            });
+                streamid: stream.streamid,
+                blobURL: mediaElement.src || URL.createObjectURL(stream)
+            };
+
+            connection.onstream(connection.streamEvents[stream.streamid]);
         });
     };
 
@@ -34,22 +38,29 @@ function RTCMultiConnection(roomid) {
         getMediaElement(stream, function(mediaElement) {
             mediaElement.id = stream.streamid;
             stream.mediaElement = mediaElement;
-            
+
             if (window.StreamsHandler) {
                 StreamsHandler.setHandlers(stream, false);
             }
-            connection.onstream({
+
+            connection.streamEvents[stream.streamid] = {
                 stream: stream,
                 type: 'remote',
                 userid: remoteUserId,
                 extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},
                 mediaElement: mediaElement,
-                streamid: stream.streamid
-            });
+                streamid: stream.streamid,
+                blobURL: mediaElement.src || URL.createObjectURL(stream)
+            };
+
+            connection.onstream(connection.streamEvents[stream.streamid]);
         });
     };
 
     mPeer.onRemovingRemoteMedia = function(stream, remoteUserId) {
+        connection.onstreamended(connection.streamEvents[stream.streamid]);
+        delete connection.streamEvents[stream.streamid];
+        /*
         connection.onstreamended({
             stream: stream,
             type: 'remote',
@@ -58,6 +69,7 @@ function RTCMultiConnection(roomid) {
             streamid: stream.streamid,
             mediaElement: stream.mediaElement
         });
+        */
     };
 
     mPeer.onNegotiationNeeded = function(message, remoteUserId) {
@@ -73,23 +85,23 @@ function RTCMultiConnection(roomid) {
             connection.peers[remoteUserId].streams.forEach(function(stream) {
                 stream.stop();
             });
-            
+
             connection.peers[remoteUserId].peer.close();
             connection.peers[remoteUserId].peer = null;
-            
+
             connection.onleave({
                 userid: remoteUserId,
                 extra: connection.peers[remoteUserId].extra
             });
         }
-        
+
         delete connection.peers[remoteUserId];
     }
     mPeer.onUserLeft = onUserLeft;
     mPeer.disconnectWith = function(remoteUserId) {
         socket.emit('disconnect-with', remoteUserId);
-        
-        if(connection.peers[remoteUserId]) {
+
+        if (connection.peers[remoteUserId]) {
             delete connection.peers[remoteUserId];
         }
     };
@@ -186,7 +198,7 @@ function RTCMultiConnection(roomid) {
             }
 
             if (message.message.newParticipant) {
-                if(message.message.newParticipant == connection.userid) return;
+                if (message.message.newParticipant == connection.userid) return;
                 if (!!connection.peers[message.message.newParticipant]) return;
                 connection.onNewParticipant(message.message.newParticipant, message.message.userPreferences);
                 return;
@@ -198,7 +210,7 @@ function RTCMultiConnection(roomid) {
 
             if (message.message.newParticipationRequest) {
                 if (connection.peers[message.sender]) {
-                    if(connection.peers[message.sender].peer) {
+                    if (connection.peers[message.sender].peer) {
                         connection.peers[message.sender].peer.close();
                         connection.peers[message.sender].peer = null;
                     }
@@ -269,7 +281,7 @@ function RTCMultiConnection(roomid) {
             socket.emit('extra-data-updated', connection.extra);
             if (connectCallback) connectCallback();
         });
-        
+
         socket.on('disconnect', function() {
             socket = null;
             connectSocket();
@@ -286,9 +298,9 @@ function RTCMultiConnection(roomid) {
         socket.on('password-max-tries-over', function(remoteUserId) {
             connection.onPasswordMaxTriesOver(remoteUserId);
         });
-        
+
         socket.on('user-disconnected', function(remoteUserId) {
-            if(connection.peers[remoteUserId] && connection.peers[remoteUserId].peer) {
+            if (connection.peers[remoteUserId] && connection.peers[remoteUserId].peer) {
                 connection.peers[remoteUserId].peer.close();
                 delete connection.peers[remoteUserId];
             }
@@ -388,7 +400,7 @@ function RTCMultiConnection(roomid) {
     };
 
     connection.rejoin = function(connectionDescription) {
-        if(!connectionDescription) {
+        if (!connectionDescription) {
             connectionDescription = {
                 remoteUserId: connection.sessionid,
                 message: {
@@ -401,11 +413,11 @@ function RTCMultiConnection(roomid) {
                 sender: connection.userid
             };
         }
-        
-        if(connection.peers[connectionDescription.remoteUserId]) {
+
+        if (connection.peers[connectionDescription.remoteUserId]) {
             delete connection.peers[connectionDescription.remoteUserId];
         }
-        
+
         socket.emit('message', connectionDescription);
     };
 
@@ -548,8 +560,8 @@ function RTCMultiConnection(roomid) {
                 },
                 sender: connection.userid
             });
-            
-            if(connection.peers[participant] && connection.peers[participant].peer) {
+
+            if (connection.peers[participant] && connection.peers[participant].peer) {
                 connection.peers[participant].peer.close();
             }
         });
@@ -564,9 +576,9 @@ function RTCMultiConnection(roomid) {
                 otherBroadcasters.push(broadcaster);
             }
         });
-        
+
         connection.shiftModerationControl(firstBroadcaster, otherBroadcasters, typeof shiftModerationControlOnLeave != 'undefined' ? shiftModerationControlOnLeave : true);
-        
+
         connection.broadcasters = [];
         connection.isInitiator = false;
     }
@@ -781,6 +793,10 @@ function RTCMultiConnection(roomid) {
 
                         // connection.renegotiate();
 
+                        connection.onstreamended(connection.streamEvents[change.object[change.name]]);
+                        delete connection.streamEvents[change.object[change.name]];
+
+                        /*
                         connection.onstreamended({
                             stream: change.object[change.name],
                             streamid: change.object[change.name].streamid,
@@ -789,6 +805,7 @@ function RTCMultiConnection(roomid) {
                             extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},
                             mediaElement: change.object[change.name].mediaElement
                         });
+                        */
                     }, false);
                 }
 
@@ -828,103 +845,16 @@ function RTCMultiConnection(roomid) {
     connection.body = connection.filesContainer = document.body || document.documentElement;
     connection.isInitiator = false;
 
-    var progressHelper = {};
-
-    // www.RTCMultiConnection.org/docs/onFileStart/
-    connection.onFileStart = function(file) {
-        var div = document.createElement('div');
-        div.title = file.name;
-        div.innerHTML = '<label>0%</label> <progress></progress>';
-        connection.filesContainer.insertBefore(div, connection.filesContainer.firstChild);
-        progressHelper[file.uuid] = {
-            div: div,
-            progress: div.querySelector('progress'),
-            label: div.querySelector('label')
-        };
-        progressHelper[file.uuid].progress.max = file.maxChunks;
-    };
-
-    // www.RTCMultiConnection.org/docs/onFileProgress/
-    connection.onFileProgress = function(chunk) {
-        var helper = progressHelper[chunk.uuid];
-        if (!helper) {
-            return;
-        }
-        helper.progress.value = chunk.currentPosition || chunk.maxChunks || helper.progress.max;
-        updateLabel(helper.progress, helper.label);
-    };
-
-    // www.RTCMultiConnection.org/docs/onFileEnd/
-    connection.onFileEnd = function(file) {
-        if (!progressHelper[file.uuid]) {
-            console.error('No such progress-helper element exists.', file);
-            return;
-        }
-
-        var div = progressHelper[file.uuid].div;
-        if (file.type.indexOf('image') != -1) {
-            div.innerHTML = '<a href="' + file.url + '" download="' + file.name + '">Download <strong style="color:red;">' + file.name + '</strong> </a><br /><img src="' + file.url + '" title="' + file.name + '" style="max-width: 80%;">';
-        } else {
-            div.innerHTML = '<a href="' + file.url + '" download="' + file.name + '">Download <strong style="color:red;">' + file.name + '</strong> </a><br /><iframe src="' + file.url + '" title="' + file.name + '" style="width: 80%;border: 0;height: inherit;margin-top:1em;"></iframe>';
-        }
-
-        // for backward compatibility
-        if (connection.onFileSent || connection.onFileReceived) {
-            if (connection.onFileSent) {
-                connection.onFileSent(file, file.uuid);
-            }
-
-            if (connection.onFileReceived) {
-                connection.onFileReceived(file.name, file);
-            }
-        }
-    };
-
-    function updateLabel(progress, label) {
-        if (progress.position === -1) {
-            return;
-        }
-
-        var position = +progress.position.toFixed(2).split('.')[1] || 100;
-        label.innerHTML = position + '%';
+    connection.shareFile = mPeer.shareFile;
+    if (typeof FileProgressBarHandler !== 'undefined') {
+        FileProgressBarHandler.handle(connection);
     }
 
-    connection.shareFile = mPeer.shareFile;
-
     connection.autoCloseEntireSession = false;
-    connection.autoTranslateText = false;
-    connection.language = 'en';
-    connection.googKey = 'AIzaSyCgB5hmFY74WYB-EoWkhr9cAGr6TiTHrEE';
 
-    // www.RTCMultiConnection.org/docs/Translator/
-    connection.Translator = {
-        TranslateText: function(text, callback) {
-            // if(location.protocol === 'https:') return callback(text);
-
-            var newScript = document.createElement('script');
-            newScript.type = 'text/javascript';
-
-            var sourceText = encodeURIComponent(text); // escape
-
-            var randomNumber = 'method' + connection.token();
-            window[randomNumber] = function(response) {
-                if (response.data && response.data.translations[0] && callback) {
-                    callback(response.data.translations[0].translatedText);
-                }
-
-                if (response.error && response.error.message === 'Daily Limit Exceeded') {
-                    warn('Text translation failed. Error message: "Daily Limit Exceeded."');
-
-                    // returning original text
-                    callback(text);
-                }
-            };
-
-            var source = 'https://www.googleapis.com/language/translate/v2?key=' + connection.googKey + '&target=' + (connection.language || 'en-US') + '&callback=window.' + randomNumber + '&q=' + sourceText;
-            newScript.src = source;
-            document.getElementsByTagName('head')[0].appendChild(newScript);
-        }
-    };
+    if (typeof TranslationHandler !== 'undefined') {
+        TranslationHandler.handle(connection);
+    }
 
     connection.token = getRandomString;
 
@@ -1056,4 +986,6 @@ function RTCMultiConnection(roomid) {
 
     connection.getRemoteStreams = mPeer.getRemoteStreams;
     connection.autoReDialOnFailure = true;
+
+    connection.streamEvents = {};
 }

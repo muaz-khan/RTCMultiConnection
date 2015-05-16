@@ -92,7 +92,7 @@ function MultiPeers(connection) {
             },
             onLocalCandidate: function(localCandidate) {
                 localCandidate = OnIceCandidateHandler.processCandidates(connection, localCandidate)
-                if(localCandidate) {
+                if (localCandidate) {
                     self.onNegotiationNeeded(localCandidate, remoteUserId);
                 }
             },
@@ -116,8 +116,10 @@ function MultiPeers(connection) {
 
                 if (message.readyForNextChunk) {
                     fbr.getNextChunk(message.uuid, function(nextChunk, isLastChunk) {
-                        connection.peers[remoteUserId].peer.channel.send(nextChunk);
-                    });
+                        connection.peers[remoteUserId].channels.forEach(function(channel) {
+                            channel.send(nextChunk);
+                        });
+                    }, remoteUserId);
                     return;
                 }
 
@@ -169,7 +171,7 @@ function MultiPeers(connection) {
                 if (states.iceConnectionState.search(/disconnected|closed/gi) !== -1) {
                     console.error('Peer connection is closed between you & ', remoteUserId);
                 }
-                
+
                 if (states.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1) {
                     self.onUserLeft(remoteUserId);
                     self.disconnectWith(remoteUserId);
@@ -289,15 +291,21 @@ function MultiPeers(connection) {
     }
 
     this.shareFile = function(file) {
-        if(!connection.enableFileSharing) {
+        if (!connection.enableFileSharing) {
             throw '"connection.enableFileSharing" is false.';
         }
-        
+
         initFileBufferReader();
 
         fbr.readAsArrayBuffer(file, function(uuid) {
-            fbr.getNextChunk(uuid, function(nextChunk, isLastChunk) {
-                connection.peers.send(nextChunk);
+            fbr.setMultipleUsers(uuid, connection.getAllParticipants());
+
+            connection.getAllParticipants().forEach(function(participant) {
+                fbr.getNextChunk(uuid, function(nextChunk, isLastChunk) {
+                    connection.peers[participant].channels.forEach(function(channel) {
+                        channel.send(nextChunk);
+                    });
+                }, participant);
             });
         });
     };
