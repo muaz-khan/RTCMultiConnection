@@ -75,12 +75,12 @@ function RTCMultiConnection(roomid) {
         delete connection.streamEvents[stream.streamid];
     };
 
-    mPeer.onNegotiationNeeded = function(message, remoteUserId) {
-        socket.emit('message', {
+    mPeer.onNegotiationNeeded = function(message, remoteUserId, callback) {
+        socket.emit(connection.socketMessageEvent, typeof message.password !== 'undefined' ? message : {
             remoteUserId: remoteUserId,
             message: message,
             sender: connection.userid
-        });
+        }, callback || function() {});
     };
 
     function onUserLeft(remoteUserId) {
@@ -126,14 +126,14 @@ function RTCMultiConnection(roomid) {
             connection.peers[remoteUserId].extra = extra;
         });
 
-        socket.on('message', function(message) {
+        socket.on(connection.socketMessageEvent, function(message) {
             if (message.remoteUserId != connection.userid) return;
 
             if (connection.peers[message.sender] && connection.peers[message.sender].extra != message.extra) {
                 connection.peers[message.sender].extra = message.extra;
                 connection.onExtraDataUpdated({
                     userid: message.sender,
-                    extr: message.extra
+                    extra: message.extra
                 });
             }
 
@@ -151,13 +151,9 @@ function RTCMultiConnection(roomid) {
                     connection.broadcasters.push(message.sender);
                 }
 
-                socket.emit('message', {
-                    remoteUserId: message.sender,
-                    message: {
-                        allParticipants: connection.peers.getAllParticipants(message.sender)
-                    },
-                    sender: connection.userid
-                });
+                mPeer.onNegotiationNeeded({
+                    allParticipants: connection.peers.getAllParticipants(message.sender)
+                }, message.sender);
                 return;
             }
 
@@ -312,14 +308,10 @@ function RTCMultiConnection(roomid) {
 
     connection.openOrJoin = function(localUserid, password) {
         connectSocket(function() {
-            socket.emit('message', {
-                remoteUserId: 'system',
-                sender: connection.userid,
-                message: {
-                    detectPresence: true,
-                    userid: localUserid || connection.sessionid
-                }
-            }, function(isRoomExists, roomid) {
+            mPeer.onNegotiationNeeded({
+                detectPresence: true,
+                userid: localUserid || connection.sessionid
+            }, 'system', function(isRoomExists, roomid) {
                 if (isRoomExists) {
                     connection.sessionid = roomid;
 
@@ -351,7 +343,7 @@ function RTCMultiConnection(roomid) {
                         password: password || false
                     };
 
-                    socket.emit('message', connectionDescription);
+                    mPeer.onNegotiationNeeded(connectionDescription, connectionDescription.remoteUserId);
                     return;
                 }
 
@@ -421,7 +413,7 @@ function RTCMultiConnection(roomid) {
             delete connection.peers[connectionDescription.remoteUserId];
         }
 
-        socket.emit('message', connectionDescription);
+        mPeer.onNegotiationNeeded(connectionDescription, connectionDescription.remoteUserId);
     };
 
     connection.join = connection.connect = function(remoteUserId) {
@@ -467,33 +459,21 @@ function RTCMultiConnection(roomid) {
                 return;
             }
 
-            socket.emit('message', connectionDescription);
+            mPeer.onNegotiationNeeded(connectionDescription, connectionDescription.remoteUserId);
         });
 
         return connectionDescription;
     };
 
     connection.connectWithAllParticipants = function(remoteUserId) {
-        socket.emit('message', {
-            remoteUserId: remoteUserId || connection.sessionid,
-            message: 'connectWithAllParticipants',
-            sender: connection.userid
-        });
+        mPeer.onNegotiationNeeded('connectWithAllParticipants', remoteUserId || connection.sessionid);
     };
 
     connection.removeFromBroadcastersList = function(remoteUserId) {
-        socket.emit('message', {
-            remoteUserId: remoteUserId || connection.sessionid,
-            message: 'removeFromBroadcastersList',
-            sender: connection.userid
-        });
+        mPeer.onNegotiationNeeded('removeFromBroadcastersList', remoteUserId || connection.sessionid);
 
         connection.peers.getAllParticipants(remoteUserId || connection.sessionid).forEach(function(participant) {
-            socket.emit('message', {
-                remoteUserId: participant,
-                message: 'dropPeerConnection',
-                sender: connection.userid
-            });
+            mPeer.onNegotiationNeeded('dropPeerConnection', participant);
 
             connection.peers[participant].peer.close();
             connection.peers[participant].peer = null;
@@ -555,14 +535,10 @@ function RTCMultiConnection(roomid) {
 
     function beforeUnload(shiftModerationControlOnLeave) {
         connection.peers.getAllParticipants().forEach(function(participant) {
-            socket.emit('message', {
-                remoteUserId: participant,
-                message: {
-                    userLeft: true,
-                    autoCloseEntireSession: !!connection.autoCloseEntireSession
-                },
-                sender: connection.userid
-            });
+            mPeer.onNegotiationNeeded({
+                userLeft: true,
+                autoCloseEntireSession: !!connection.autoCloseEntireSession
+            }, participant);
 
             if (connection.peers[participant] && connection.peers[participant].peer) {
                 connection.peers[participant].peer.close();
@@ -831,14 +807,10 @@ function RTCMultiConnection(roomid) {
 
     connection.addNewBroadcaster = function(broadcasterId, userPreferences) {
         connection.broadcasters.forEach(function(broadcaster) {
-            socket.emit('message', {
-                remoteUserId: broadcaster,
-                message: {
-                    newParticipant: broadcasterId,
-                    userPreferences: userPreferences || false
-                },
-                sender: connection.userid
-            });
+            mPeer.onNegotiationNeeded({
+                newParticipant: broadcasterId,
+                userPreferences: userPreferences || false
+            }, broadcaster);
         });
 
         if (!connection.session.oneway && connection.direction === 'many-to-many' && connection.broadcasters.indexOf(broadcasterId) === -1) {
@@ -890,30 +862,22 @@ function RTCMultiConnection(roomid) {
 
         connection.broadcasters = existingBroadcasters;
         connection.peers.getAllParticipants().forEach(function(participant) {
-            socket.emit('message', {
-                remoteUserId: participant,
-                message: {
-                    changedUUID: sender,
-                    oldUUID: connection.userid,
-                    newUUID: sender
-                },
-                sender: connection.userid
-            });
+            mPeer.onNegotiationNeeded({
+                changedUUID: sender,
+                oldUUID: connection.userid,
+                newUUID: sender
+            }, participant);
         });
         connection.userid = sender;
         socket.emit('changed-uuid', connection.userid);
     };
 
     connection.shiftModerationControl = function(remoteUserId, existingBroadcasters, firedOnLeave, overrideSender) {
-        socket.emit('message', {
-            remoteUserId: remoteUserId,
-            message: {
-                shiftedModerationControl: true,
-                broadcasters: existingBroadcasters,
-                firedOnLeave: !!firedOnLeave
-            },
-            sender: overrideSender || connection.userid
-        });
+        mPeer.onNegotiationNeeded({
+            shiftedModerationControl: true,
+            broadcasters: existingBroadcasters,
+            firedOnLeave: !!firedOnLeave
+        }, remoteUserId);
     };
 
     connection.processSdp = function(sdp) {
@@ -941,15 +905,9 @@ function RTCMultiConnection(roomid) {
 
     connection.getPublicRooms = function(callback) {
         connectSocket(function() {
-            socket.emit('message', {
-                remoteUserId: 'system',
-                sender: connection.userid,
-                message: {
-                    getPublicUsers: true
-                }
-            }, function(listOfPublicUsers) {
-                callback(listOfPublicUsers);
-            });
+            mPeer.onNegotiationNeeded({
+                getPublicUsers: true
+            }, 'system', callback);
         });
     };
 
@@ -974,16 +932,12 @@ function RTCMultiConnection(roomid) {
     if (window.StreamsHandler) {
         StreamsHandler.onSyncNeeded = function(streamid, action, type) {
             connection.peers.getAllParticipants().forEach(function(participant) {
-                socket.emit('message', {
-                    remoteUserId: participant,
-                    sender: connection.userid,
-                    message: {
-                        streamid: streamid,
-                        action: action,
-                        streamSyncNeeded: true,
-                        type: type || 'both'
-                    }
-                });
+                mPeer.onNegotiationNeeded({
+                    streamid: streamid,
+                    action: action,
+                    streamSyncNeeded: true,
+                    type: type || 'both'
+                }, participant);
             });
         };
     }
@@ -993,4 +947,5 @@ function RTCMultiConnection(roomid) {
 
     connection.streamEvents = {};
     connection.socketURL = '/';
+    connection.socketMessageEvent = 'RTCMultiConnection-Message';
 }

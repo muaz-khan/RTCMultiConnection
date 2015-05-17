@@ -1,4 +1,5 @@
 var useFakeKeys = !(!!process.env.PORT || !!process.env.IP);
+var socketMessageEvent = 'RTCMultiConnection-Message';
 
 var server = require(useFakeKeys ? 'https' : 'http'),
     url = require('url'),
@@ -19,7 +20,27 @@ function serverHandler(request, response) {
             return;
         }
 
-        if (fs.statSync(filename).isDirectory()) filename += '/demos/index.html';
+        if (filename.indexOf('favicon.ico') !== -1) {
+            return;
+        }
+
+        var isWin = !!process.platform.match(/^win/);
+
+        if (fs.statSync(filename).isDirectory() && !isWin) {
+            if (filename.indexOf('/demos/') !== -1) {
+                filename = filename.replace('/demos/', '');
+            }
+
+            filename += '/demos/index.html';
+        }
+
+        if (fs.statSync(filename).isDirectory() && !!isWin) {
+            if (filename.indexOf('\\demos\\') !== -1) {
+                filename = filename.replace('\\demos\\', '');
+            }
+
+            filename += '\\demos\\index.html';
+        }
 
         fs.readFile(filename, 'binary', function(err, file) {
             if (err) {
@@ -150,12 +171,12 @@ io.sockets.on('connection', function(socket) {
 
         if (listOfUsers[message.sender].connectedWith[message.remoteUserId] && listOfUsers[socket.userid]) {
             message.extra = listOfUsers[socket.userid].extra;
-            listOfUsers[message.sender].connectedWith[message.remoteUserId].emit('message', message);
+            listOfUsers[message.sender].connectedWith[message.remoteUserId].emit(socketMessageEvent, message);
         }
     }
 
     var numberOfPasswordTries = 0;
-    socket.on('message', function(message, callback) {
+    socket.on(socketMessageEvent, function(message, callback) {
         if (message.remoteUserId && message.remoteUserId != 'system' && message.message.newParticipationRequest) {
             if (listOfUsers[message.remoteUserId] && listOfUsers[message.remoteUserId].password) {
                 if (numberOfPasswordTries > 3) {
