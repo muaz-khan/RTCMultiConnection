@@ -1,4 +1,4 @@
-// Last time updated at May 17, 2015, 08:32:23
+// Last time updated at May 22, 2015, 08:32:23
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -84,8 +84,8 @@
         };
 
         mPeer.onNegotiationNeeded = function(message, remoteUserId, callback) {
-            socket.emit(connection.socketMessageEvent, typeof message.password !== 'undefined' ? message : {
-                remoteUserId: remoteUserId,
+            socket.emit(connection.socketMessageEvent, 'password' in message ? message : {
+                remoteUserId: message.remoteUserId || remoteUserId,
                 message: message,
                 sender: connection.userid
             }, callback || function() {});
@@ -127,7 +127,7 @@
                 return;
             }
 
-            socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid);
+            socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid + '&msgEvent=' + connection.socketMessageEvent);
 
             socket.on('extra-data-updated', function(remoteUserId, extra) {
                 if (!connection.peers[remoteUserId]) return;
@@ -351,7 +351,7 @@
                             password: password || false
                         };
 
-                        mPeer.onNegotiationNeeded(connectionDescription, connectionDescription.remoteUserId);
+                        mPeer.onNegotiationNeeded(connectionDescription);
                         return;
                     }
 
@@ -413,7 +413,8 @@
                         localPeerSdpConstraints: connection.mediaConstraints,
                         remotePeerSdpConstraints: connection.mediaConstraints
                     },
-                    sender: connection.userid
+                    sender: connection.userid,
+                    password: false
                 };
             }
 
@@ -421,7 +422,7 @@
                 delete connection.peers[connectionDescription.remoteUserId];
             }
 
-            mPeer.onNegotiationNeeded(connectionDescription, connectionDescription.remoteUserId);
+            mPeer.onNegotiationNeeded(connectionDescription);
         };
 
         connection.join = connection.connect = function(remoteUserId) {
@@ -458,7 +459,8 @@
                     localPeerSdpConstraints: localPeerSdpConstraints,
                     remotePeerSdpConstraints: remotePeerSdpConstraints
                 },
-                sender: connection.userid
+                sender: connection.userid,
+                password: false
             };
 
             connectSocket(function() {
@@ -467,7 +469,7 @@
                     return;
                 }
 
-                mPeer.onNegotiationNeeded(connectionDescription, connectionDescription.remoteUserId);
+                mPeer.onNegotiationNeeded(connectionDescription);
             });
 
             return connectionDescription;

@@ -1,5 +1,4 @@
 var useFakeKeys = !(!!process.env.PORT || !!process.env.IP);
-var socketMessageEvent = 'RTCMultiConnection-Message';
 
 var server = require(useFakeKeys ? 'https' : 'http'),
     url = require('url'),
@@ -90,6 +89,7 @@ var shiftedModerationControls = {};
 
 io.sockets.on('connection', function(socket) {
     var params = socket.handshake.query;
+    var socketMessageEvent = params.msgEvent || 'RTCMultiConnection-Message';
 
     socket.userid = params.userid;
 

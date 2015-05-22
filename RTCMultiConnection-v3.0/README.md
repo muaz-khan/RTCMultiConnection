@@ -33,6 +33,10 @@ If you're sharing files, you also need to link:
 
 ```javascript
 connection.socketURL = 'http://yourdomain.com:8080/';
+
+// if your server is already having "message" event
+// then you can use something else, unique.
+connection.socketMessageEvent = 'unique-message';
 ```
 
 ## Configure v3.0

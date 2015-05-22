@@ -76,8 +76,8 @@ function RTCMultiConnection(roomid) {
     };
 
     mPeer.onNegotiationNeeded = function(message, remoteUserId, callback) {
-        socket.emit(connection.socketMessageEvent, typeof message.password !== 'undefined' ? message : {
-            remoteUserId: remoteUserId,
+        socket.emit(connection.socketMessageEvent, 'password' in message ? message : {
+            remoteUserId: message.remoteUserId || remoteUserId,
             message: message,
             sender: connection.userid
         }, callback || function() {});
@@ -119,7 +119,7 @@ function RTCMultiConnection(roomid) {
             return;
         }
 
-        socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid);
+        socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid + '&msgEvent=' + connection.socketMessageEvent);
 
         socket.on('extra-data-updated', function(remoteUserId, extra) {
             if (!connection.peers[remoteUserId]) return;
@@ -343,7 +343,7 @@ function RTCMultiConnection(roomid) {
                         password: password || false
                     };
 
-                    mPeer.onNegotiationNeeded(connectionDescription, connectionDescription.remoteUserId);
+                    mPeer.onNegotiationNeeded(connectionDescription);
                     return;
                 }
 
@@ -405,7 +405,8 @@ function RTCMultiConnection(roomid) {
                     localPeerSdpConstraints: connection.mediaConstraints,
                     remotePeerSdpConstraints: connection.mediaConstraints
                 },
-                sender: connection.userid
+                sender: connection.userid,
+                password: false
             };
         }
 
@@ -413,7 +414,7 @@ function RTCMultiConnection(roomid) {
             delete connection.peers[connectionDescription.remoteUserId];
         }
 
-        mPeer.onNegotiationNeeded(connectionDescription, connectionDescription.remoteUserId);
+        mPeer.onNegotiationNeeded(connectionDescription);
     };
 
     connection.join = connection.connect = function(remoteUserId) {
@@ -450,7 +451,8 @@ function RTCMultiConnection(roomid) {
                 localPeerSdpConstraints: localPeerSdpConstraints,
                 remotePeerSdpConstraints: remotePeerSdpConstraints
             },
-            sender: connection.userid
+            sender: connection.userid,
+            password: false
         };
 
         connectSocket(function() {
@@ -459,7 +461,7 @@ function RTCMultiConnection(roomid) {
                 return;
             }
 
-            mPeer.onNegotiationNeeded(connectionDescription, connectionDescription.remoteUserId);
+            mPeer.onNegotiationNeeded(connectionDescription);
         });
 
         return connectionDescription;
