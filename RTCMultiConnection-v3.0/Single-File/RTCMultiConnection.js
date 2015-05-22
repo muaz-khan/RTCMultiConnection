@@ -1272,7 +1272,7 @@
             });
         };
 
-        if (window.TextReceiver) {
+        if (typeof 'TextReceiver' !== 'undefined') {
             var textReceiver = new TextReceiver(connection);
         }
 
