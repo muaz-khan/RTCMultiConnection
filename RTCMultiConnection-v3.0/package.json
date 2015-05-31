@@ -1,7 +1,7 @@
 {
   "name": "rtcmulticonnection-v3",
   "preferGlobal": true,
-  "version": "3.0.9",
+  "version": "3.1.0",
   "author": {
     "name": "Muaz Khan",
     "email": "muazkh@gmail.com",
@@ -9,9 +9,9 @@
   },
   "description": "RTCMultiConnection is a WebRTC JavaScript wrapper library runs top over RTCPeerConnection API to support all possible peer-to-peer features.",
   "scripts": {
-    "start": "node Signaling-Server.js"
+    "start": "node server.js"
   },
-  "main": "./Signaling-Server.js",
+  "main": "./server.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/muaz-khan/RTCMultiConnection.git"

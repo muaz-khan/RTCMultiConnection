@@ -1,4 +1,4 @@
-// Last time updated at May 05, 2015, 08:32:23
+// Last time updated at May 28, 2015, 08:32:23
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
 
@@ -77,8 +77,34 @@
         isSctpDataChannelsSupported: isFirefox || (isChrome && browser.version >= 25),
         isRtpDataChannelsSupported: isChrome && browser.version >= 31,
         isMobileDevice: !!navigator.userAgent.match(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i),
-        isWebSocketsSupported: 'WebSocket' in window && 2 === window.WebSocket.CLOSING
+        isWebSocketsSupported: 'WebSocket' in window && 2 === window.WebSocket.CLOSING,
+        isCanvasCaptureStreamSupported: false,
+        isVideoCaptureStreamSupported: false
     };
+
+    (function detectCanvasCaptureStream() {
+        // latest Firefox nighly is supporting this "awesome" feature!
+        var canvas = document.createElement('canvas');
+
+        if (typeof canvas.captureStream === 'function') {
+            DetectRTC.isCanvasCaptureStreamSupported = true;
+        } else if (typeof canvas.mozCaptureStream === 'function') {
+            DetectRTC.isCanvasCaptureStreamSupported = true;
+        } else if (typeof canvas.webkitCaptureStream === 'function') {
+            DetectRTC.isCanvasCaptureStreamSupported = true;
+        }
+    })();
+
+    (function detectVideoCaptureStream() {
+        var video = document.createElement('video');
+        if (typeof video.captureStream === 'function') {
+            DetectRTC.isVideoCaptureStreamSupported = true;
+        } else if (typeof video.mozCaptureStream === 'function') {
+            DetectRTC.isVideoCaptureStreamSupported = true;
+        } else if (typeof video.webkitCaptureStream === 'function') {
+            DetectRTC.isVideoCaptureStreamSupported = true;
+        }
+    })();
 
     if (!isHTTPs) {
         window.DetectRTC.isScreenCapturingSupported =

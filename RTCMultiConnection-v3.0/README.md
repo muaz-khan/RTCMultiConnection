@@ -9,7 +9,7 @@ npm install rtcmulticonnection-v3
 To TEST:
 
 ```
-node Signaling-Server
+node server
 ```
 
 Now open: `https://localhost:9001/`
@@ -17,17 +17,19 @@ Now open: `https://localhost:9001/`
 ## Link Single File
 
 ```html
-<script src="/Single-File/RTCMultiConnection.js"></script>
+<script src="/RTCMultiConnection.js"></script>
 
 <!-- or minified file -->
-<script src="/Single-File/RTCMultiConnection.min.js"></script>
+<script src="/RTCMultiConnection.min.js"></script>
 ```
 
 If you're sharing files, you also need to link:
 
 ```html
-<script src="/FileBufferReader.js"></script>
+<script src="/dev/FileBufferReader.js"></script>
 ```
+
+You can link multiple files from "dev" directory.
 
 ## Set different socket URL
 
@@ -37,6 +39,13 @@ connection.socketURL = 'http://yourdomain.com:8080/';
 // if your server is already having "message" event
 // then you can use something else, unique.
 connection.socketMessageEvent = 'unique-message';
+```
+
+## Integrate in your own applications?
+
+```javascript
+// node.js code
+require('./Signaling-Server.js')(httpServerHandlerOrPort);
 ```
 
 ## Configure v3.0

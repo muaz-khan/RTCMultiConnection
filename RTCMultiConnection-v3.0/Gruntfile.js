@@ -18,25 +18,25 @@ module.exports = function(grunt) {
             },
             dist: {
                 src: [
-                    'head.js',
-                    'RTCMultiConnection.js',
-                    'MultiPeersHandler.js',
-                    'RTCPeerConnection.js',
-                    'getUserMedia.js',
-                    'globals.js',
-                    'BandwidthHandler.js',
-                    'DetectRTC.js',
-                    'FileProgressBarHandler.js',
-                    'getScreenId.js',
-                    'IceServersHandler.js',
-                    'OnIceCandidateHandler.js',
-                    'Plugin.EveryWhere.js',
-                    'StreamsHandler.js',
-                    'TextSenderReceiver.js',
-                    'TranslationHandler.js',
-                    'tail.js'
+                    'dev/head.js',
+                    'dev/RTCMultiConnection.js',
+                    'dev/MultiPeersHandler.js',
+                    'dev/RTCPeerConnection.js',
+                    'dev/getUserMedia.js',
+                    'dev/globals.js',
+                    'dev/BandwidthHandler.js',
+                    'dev/DetectRTC.js',
+                    'dev/FileProgressBarHandler.js',
+                    'dev/getScreenId.js',
+                    'dev/IceServersHandler.js',
+                    'dev/OnIceCandidateHandler.js',
+                    'dev/Plugin.EveryWhere.js',
+                    'dev/StreamsHandler.js',
+                    'dev/TextSenderReceiver.js',
+                    'dev/TranslationHandler.js',
+                    'dev/tail.js'
                 ],
-                dest: 'Single-File/RTCMultiConnection.js',
+                dest: 'RTCMultiConnection.js',
             },
         },
         uglify: {
@@ -45,12 +45,12 @@ module.exports = function(grunt) {
             },
             my_target: {
                 files: {
-                    'Single-File/RTCMultiConnection.min.js': ['Single-File/RTCMultiConnection.js']
+                    'RTCMultiConnection.min.js': ['RTCMultiConnection.js']
                 }
             }
         },
         jsbeautifier: {
-            files: ['Single-File/RTCMultiConnection.js', '*.js', 'Gruntfile.js'],
+            files: ['RTCMultiConnection.js', 'dev/*.js', 'Gruntfile.js'],
             options: {
                 js: {
                     braceStyle: "collapse",
