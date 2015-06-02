@@ -1,3 +1,5 @@
+// RecordingHandler.js
+
 var RecordingHandler = (function() {
     var recorders = {};
 

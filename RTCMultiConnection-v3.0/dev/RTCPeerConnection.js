@@ -1,11 +1,13 @@
+// RTCPeerConnection.js
+
 var defaults = {};
 
 function setSdpConstraints(config) {
     var sdpConstraints;
 
     var sdpConstraints_mandatory = {
-        OfferToReceiveAudio: config.OfferToReceiveAudio,
-        OfferToReceiveVideo: config.OfferToReceiveVideo
+        OfferToReceiveAudio: !!config.OfferToReceiveAudio,
+        OfferToReceiveVideo: !!config.OfferToReceiveVideo
     };
 
     sdpConstraints = {
@@ -17,8 +19,8 @@ function setSdpConstraints(config) {
 
     if (!!navigator.mozGetUserMedia && firefoxVersion > 34) {
         sdpConstraints = {
-            OfferToReceiveAudio: config.OfferToReceiveAudio,
-            OfferToReceiveVideo: config.OfferToReceiveVideo
+            OfferToReceiveAudio: !!config.OfferToReceiveAudio,
+            OfferToReceiveVideo: !!config.OfferToReceiveVideo
         };
     }
 
@@ -31,14 +33,15 @@ var RTCIceCandidate = window.mozRTCIceCandidate || window.RTCIceCandidate;
 var MediaStreamTrack = window.MediaStreamTrack;
 
 var Plugin = {};
-window.onPluginRTCInitialized = function(pluginRTCObject) {
+
+function onPluginRTCInitialized(pluginRTCObject) {
     Plugin = pluginRTCObject;
     MediaStreamTrack = Plugin.MediaStreamTrack;
     RTCPeerConnection = Plugin.RTCPeerConnection;
     RTCIceCandidate = Plugin.RTCIceCandidate;
     RTCSessionDescription = Plugin.RTCSessionDescription;
-};
-if (!!window.PluginRTC) window.onPluginRTCInitialized(window.PluginRTC);
+}
+if (typeof PluginRTC !== 'undefined') onPluginRTCInitialized(PluginRTC);
 
 var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
 var isIE = !!document.documentMode;
@@ -184,9 +187,25 @@ function PeerInitiator(config) {
     defaults.sdpConstraints = setSdpConstraints(sdpConstraints);
 
     peer.onaddstream = function(event) {
+        var streamsToShare = {};
+        if (config.remoteSdp && config.remoteSdp.streamsToShare) {
+            streamsToShare = config.remoteSdp.streamsToShare;
+        } else if (config.streamsToShare) {
+            streamsToShare = config.streamsToShare;
+        }
+
+        var streamToShare = streamsToShare[event.stream.id];
+        if (streamToShare) {
+            event.stream.isAudio = streamToShare.isAudio;
+            event.stream.isVideo = streamToShare.isVideo;
+            event.stream.isScreen = streamToShare.isScreen;
+        }
+
         event.stream.streamid = event.stream.id;
         if (!event.stream.stop) {
-            event.stream.stop = function() {};
+            event.stream.stop = function() {
+                fireEvent(event.stream, 'ended', event);
+            };
         }
         allRemoteStreams[event.stream.id] = event.stream;
         config.onRemoteStream(event.stream);
@@ -270,6 +289,15 @@ function PeerInitiator(config) {
         });
     }
 
+    var streamsToShare = {};
+    peer.getLocalStreams().forEach(function(stream) {
+        streamsToShare[stream.streamid] = {
+            isAudio: !!stream.isAudio,
+            isVideo: !!stream.isVideo,
+            isScreen: !!stream.isScreen
+        };
+    });
+
     peer[isOfferer ? 'createOffer' : 'createAnswer'](function(localSdp) {
         localSdp.sdp = config.processSdp(localSdp.sdp);
         peer.setLocalDescription(localSdp);
@@ -280,7 +308,8 @@ function PeerInitiator(config) {
             renegotiatingPeer: !!config.renegotiatingPeer || false,
             connectionDescription: that.connectionDescription,
             dontGetRemoteStream: !!config.dontGetRemoteStream,
-            extra: config.rtcMultiConnection ? config.rtcMultiConnection.extra : {}
+            extra: config.rtcMultiConnection ? config.rtcMultiConnection.extra : {},
+            streamsToShare: streamsToShare
         });
     }, function(error) {
         console.error('sdp-error', error);

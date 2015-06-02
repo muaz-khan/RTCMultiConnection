@@ -1,4 +1,5 @@
-// FileProgressBarHandler
+// FileProgressBarHandler.js
+
 var FileProgressBarHandler = (function() {
     function handle(connection) {
         var progressHelper = {};

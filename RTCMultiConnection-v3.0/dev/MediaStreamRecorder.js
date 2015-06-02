@@ -3,6 +3,7 @@
 // Documentation - github.com/streamproc/MediaStreamRecorder
 // ______________________
 // MediaStreamRecorder.js
+
 function MediaStreamRecorder(mediaStream) {
     if (!mediaStream) throw 'MediaStream is mandatory.';
 

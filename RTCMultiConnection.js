@@ -6728,5 +6728,4 @@
     })();
 
     var DetectRTC = window.DetectRTC;
-
 })();

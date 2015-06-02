@@ -1,11 +1,23 @@
-// getUserMedia
+// getUserMediaHandler.js
+
+function setStreamType(constraints, stream) {
+    if (constraints.mandatory && constraints.mandatory.chromeMediaSource) {
+        stream.isScreen = true;
+    } else if (constraints.mozMediaSource || constraints.mediaSource) {
+        stream.isScreen = true;
+    } else if (constraints.video) {
+        stream.isVideo = true;
+    } else if (constraints.audio) {
+        stream.isAudio = true;
+    }
+}
 var currentUserMediaRequest = {
     streams: [],
     mutex: false,
     queueRequests: []
 };
 
-function getUserMedia(options) {
+function getUserMediaHandler(options) {
     if (currentUserMediaRequest.mutex === true) {
         currentUserMediaRequest.queueRequests.push(options);
         return;
@@ -16,6 +28,7 @@ function getUserMedia(options) {
     var idInstance = JSON.stringify(options.localMediaConstraints);
 
     function streaming(stream, returnBack) {
+        setStreamType(options.localMediaConstraints, stream);
         options.onGettingLocalMedia(stream, returnBack);
 
         stream.addEventListener('ended', function() {
@@ -34,7 +47,7 @@ function getUserMedia(options) {
         currentUserMediaRequest.mutex = false;
 
         if (currentUserMediaRequest.queueRequests.length) {
-            getUserMedia(currentUserMediaRequest.queueRequests.shift());
+            getUserMediaHandler(currentUserMediaRequest.queueRequests.shift());
         }
     }
 
@@ -56,18 +69,22 @@ function getUserMedia(options) {
 
         navigator.getMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
-        if (!DetectRTC.hasMicrophone) {
-            options.localMediaConstraints.audio = false;
-        }
+        if (typeof DetectRTC !== 'undefined') {
+            if (!DetectRTC.hasMicrophone) {
+                options.localMediaConstraints.audio = false;
+            }
 
-        if (!DetectRTC.hasWebcam) {
-            options.localMediaConstraints.video = false;
+            if (!DetectRTC.hasWebcam) {
+                options.localMediaConstraints.video = false;
+            }
         }
 
         navigator.getMedia(options.localMediaConstraints, function(stream) {
             stream.streamid = stream.id || getRandomString();
             if (!stream.stop) {
-                stream.stop = function() {};
+                stream.stop = function() {
+                    fireEvent(stream, 'ended');
+                };
             }
             streaming(stream);
         }, function(error) {

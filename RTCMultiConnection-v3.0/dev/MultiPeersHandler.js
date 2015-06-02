@@ -1,3 +1,5 @@
+// MultiPeersHandler.js
+
 function MultiPeers(connection) {
     var self = this;
 
@@ -72,6 +74,7 @@ function MultiPeers(connection) {
         }
 
         return {
+            streamsToShare: userPreferences.streamsToShare || {},
             session: connection.session,
             rtcMultiConnection: connection,
             connectionDescription: userPreferences.connectionDescription,
@@ -183,7 +186,8 @@ function MultiPeers(connection) {
 
     this.createNewPeer = function(remoteUserId, userPreferences) {
         userPreferences = userPreferences || {};
-        if (!userPreferences.isOneWay && !isData(connection.session)) {
+
+        if (!userPreferences.isOneWay && !userPreferences.isDataOnly) {
             userPreferences.isOneWay = true;
             this.onNegotiationNeeded({
                 enableMedia: true,
@@ -242,6 +246,16 @@ function MultiPeers(connection) {
 
         if (message.enableMedia) {
             if (connection.attachStreams.length) {
+                var streamsToShare = {};
+                connection.attachStreams.forEach(function(stream) {
+                    streamsToShare[stream.streamid] = {
+                        isAudio: !!stream.isAudio,
+                        isVideo: !!stream.isVideo,
+                        isScreen: !!stream.isScreen
+                    };
+                });
+                message.userPreferences.streamsToShare = streamsToShare;
+
                 self.onNegotiationNeeded({
                     readyForOffer: true,
                     userPreferences: message.userPreferences
@@ -249,16 +263,37 @@ function MultiPeers(connection) {
                 return;
             }
 
-            getUserMedia({
+            var localMediaConstraints = {};
+            var userPreferences = message.userPreferences;
+            if (userPreferences.localPeerSdpConstraints.OfferToReceiveAudio) {
+                localMediaConstraints.audio = connection.mediaConstraints.audio;
+            }
+
+            if (userPreferences.localPeerSdpConstraints.OfferToReceiveVideo) {
+                localMediaConstraints.video = connection.mediaConstraints.video;
+            }
+
+            getUserMediaHandler({
                 onGettingLocalMedia: function(localStream) {
                     self.onGettingLocalMedia(localStream);
+
+                    var streamsToShare = {};
+                    connection.attachStreams.forEach(function(stream) {
+                        streamsToShare[stream.streamid] = {
+                            isAudio: !!stream.isAudio,
+                            isVideo: !!stream.isVideo,
+                            isScreen: !!stream.isScreen
+                        };
+                    });
+                    message.userPreferences.streamsToShare = streamsToShare;
+
                     self.onNegotiationNeeded({
                         readyForOffer: true,
                         userPreferences: message.userPreferences
                     }, remoteUserId);
                 },
                 onLocalMediaError: this.onLocalMediaError,
-                localMediaConstraints: connection.mediaConstraints
+                localMediaConstraints: localMediaConstraints
             });
         }
 

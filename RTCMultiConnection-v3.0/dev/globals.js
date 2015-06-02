@@ -1,3 +1,5 @@
+// globals.js
+
 var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 var isFirefox = typeof window.InstallTrigger !== 'undefined';
 var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
@@ -24,6 +26,46 @@ if (isFirefox && matchArray && matchArray[1]) {
     firefoxVersion = parseInt(matchArray[1], 10);
 }
 
+function fireEvent(obj, eventName, args) {
+    if (typeof CustomEvent === 'undefined') {
+        return;
+    }
+
+    var event = new CustomEvent(eventName, args);
+    obj.dispatchEvent(event);
+}
+
+function setHarkEvents(connection, streamEvent) {
+    if (!connection || !streamEvent) {
+        throw 'Both arguments are required.';
+    }
+
+    if (!connection.onspeaking || !connection.onsilence) {
+        return;
+    }
+
+    if (typeof hark === 'undefined') {
+        throw 'hark.js not found.';
+    }
+
+    hark(streamEvent.stream, {
+        onspeaking: function() {
+            connection.onspeaking(streamEvent);
+        },
+        onsilence: function() {
+            connection.onsilence(streamEvent);
+        },
+        onvolumechange: function(volume, threshold) {
+            if (!connection.onvolumechange) {
+                return;
+            }
+            connection.onvolumechange(merge({
+                volume: volume,
+                threshold: threshold
+            }, streamEvent));
+        }
+    });
+}
 
 function getRandomString() {
     if (window.crypto && window.crypto.getRandomValues && navigator.userAgent.indexOf('Safari') === -1) {

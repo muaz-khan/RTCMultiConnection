@@ -1,3 +1,5 @@
+// IceServersHandler.js
+
 var IceServersHandler = (function(connection) {
     function getIceServers(iceServers) {
         iceServers = iceServers || [];

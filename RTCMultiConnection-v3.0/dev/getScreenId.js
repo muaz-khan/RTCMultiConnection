@@ -1,4 +1,4 @@
-// Last time updated at Sep 07, 2014, 08:32:23
+// Last time updated at June 02, 2015, 08:32:23
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/getScreenId.js
 
@@ -89,18 +89,20 @@ getScreenId(function (error, sourceId, screen_constraints) {
         }, '*');
     }
 
-    var iframe = document.createElement('iframe');
-    iframe.onload = function() {
-        iframe.isLoaded = true;
-    };
-    iframe.src = 'https://www.webrtc-experiment.com/getSourceId/';
-    iframe.style.display = 'none';
-    (document.body || document.documentElement).appendChild(iframe);
+    var iframe;
 
     // this function is used in v3.0
     window.getScreenConstraints = function(callback) {
-        getScreenId(function(error, sourceId, screen_constraints) {
-            callback(error, screen_constraints.video);
-        });
+        iframe = document.createElement('iframe');
+        iframe.onload = function() {
+            iframe.isLoaded = true;
+
+            getScreenId(function(error, sourceId, screen_constraints) {
+                callback(error, screen_constraints.video);
+            });
+        };
+        iframe.src = 'https://www.webrtc-experiment.com/getSourceId/';
+        iframe.style.display = 'none';
+        (document.body || document.documentElement).appendChild(iframe);
     };
 })();

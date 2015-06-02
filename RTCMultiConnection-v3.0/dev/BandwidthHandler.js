@@ -1,3 +1,5 @@
+// BandwidthHandler.js
+
 var BandwidthHandler = (function() {
     function setBAS(sdp, bandwidth, isScreen) {
         if (isMobileDevice || isFirefox || !bandwidth) {

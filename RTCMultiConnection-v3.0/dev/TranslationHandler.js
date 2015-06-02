@@ -1,4 +1,5 @@
-// TranslationHandler
+// TranslationHandler.js
+
 var TranslationHandler = (function() {
     function handle(connection) {
         connection.autoTranslateText = false;

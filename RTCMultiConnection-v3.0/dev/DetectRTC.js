@@ -253,6 +253,13 @@
     new CheckDeviceSupport();
     DetectRTC.load = CheckDeviceSupport;
 
+    DetectRTC.detectMediaAvailability = function(callback) {
+        DetectRTC.load(function() {
+            // todo? should return merely required properties or?
+            callback(DetectRTC);
+        });
+    };
+
     function getBrowserInfo() {
         var nVer = navigator.appVersion;
         var nAgt = navigator.userAgent;

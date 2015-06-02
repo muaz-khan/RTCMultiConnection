@@ -1,3 +1,5 @@
+// TextReceiver.js
+
 function TextReceiver(connection) {
     var content = {};
 
