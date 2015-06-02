@@ -65,6 +65,7 @@ module.exports = exports = function(app, socketCallback) {
         socket.on('disconnect-with', function(remoteUserId) {
             if (listOfUsers[socket.userid].connectedWith[remoteUserId]) {
                 delete listOfUsers[socket.userid].connectedWith[remoteUserId];
+                socket.emit('user-disconnected', remoteUserId);
             }
 
             if (!listOfUsers[remoteUserId]) return;
@@ -83,6 +84,8 @@ module.exports = exports = function(app, socketCallback) {
 
             if (!listOfUsers[message.sender].connectedWith[message.remoteUserId] && !!listOfUsers[message.remoteUserId]) {
                 listOfUsers[message.sender].connectedWith[message.remoteUserId] = listOfUsers[message.remoteUserId].socket;
+                listOfUsers[message.sender].socket.emit('user-connected', message.remoteUserId);
+
                 if (!listOfUsers[message.remoteUserId]) {
                     listOfUsers[message.remoteUserId] = {
                         socket: listOfUsers[message.remoteUserId].socket,
@@ -93,6 +96,7 @@ module.exports = exports = function(app, socketCallback) {
                 }
 
                 listOfUsers[message.remoteUserId].connectedWith[message.sender] = socket;
+                listOfUsers[message.remoteUserId].socket.emit('user-connected', message.sender);
             }
 
             if (listOfUsers[message.sender].connectedWith[message.remoteUserId] && listOfUsers[socket.userid]) {
@@ -195,7 +199,12 @@ module.exports = exports = function(app, socketCallback) {
             // inform all connected users
             if (listOfUsers[socket.userid]) {
                 for (var s in listOfUsers[socket.userid].connectedWith) {
-                    listOfUsers[socket.userid].connectedWith[s].emit('user-left', socket.userid);
+                    listOfUsers[socket.userid].connectedWith[s].emit('user-disconnected', socket.userid);
+
+                    if (listOfUsers[s] && listOfUsers[s].connectedWith[socket.userid]) {
+                        delete listOfUsers[s].connectedWith[socket.userid];
+                        listOfUsers[s].socket.emit('user-disconnected', socket.userid);
+                    }
                 }
             }
 
