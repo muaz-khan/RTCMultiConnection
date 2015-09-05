@@ -14,25 +14,31 @@ module.exports = function(grunt) {
         concat: {
             options: {
                 stripBanners: true,
-                separator: ''
+                separator: '\n'
             },
             dist: {
                 src: [
                     'dev/head.js',
                     'dev/RTCMultiConnection.js',
                     'dev/MultiPeersHandler.js',
-                    'dev/RTCPeerConnection.js',
-                    'dev/getUserMedia.js',
+
                     'dev/globals.js',
-                    'dev/BandwidthHandler.js',
-                    'dev/DetectRTC.js',
-                    'dev/FileProgressBarHandler.js',
-                    'dev/getScreenId.js',
-                    'dev/IceServersHandler.js',
+
+                    'dev/RTCPeerConnection.js',
                     'dev/OnIceCandidateHandler.js',
-                    'dev/Plugin.EveryWhere.js',
+                    'dev/IceServersHandler.js',
+                    'dev/BandwidthHandler.js',
+
+                    'dev/getUserMedia.js',
                     'dev/StreamsHandler.js',
+
+                    'dev/DetectRTC.js',
+                    'dev/getScreenId.js',
+                    'dev/Plugin.EveryWhere.js',
+
                     'dev/TextSenderReceiver.js',
+                    'dev/FileProgressBarHandler.js',
+
                     'dev/TranslationHandler.js',
                     'dev/tail.js'
                 ],

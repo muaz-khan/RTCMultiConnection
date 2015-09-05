@@ -17,6 +17,8 @@ var StreamsHandler = (function() {
         if (type.video) {
             return 'video';
         }
+
+        return undefined;
     }
 
     function setHandlers(stream, syncAction) {

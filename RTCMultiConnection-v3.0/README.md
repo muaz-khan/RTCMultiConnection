@@ -3,13 +3,23 @@
 Fetch latest code:
 
 ```
-npm install rtcmulticonnection-v3
+sudo npm install rtcmulticonnection-v3
+
+# or MOST preferred one
+mkdir RTCMultiConnection-v3.0 && cd RTCMultiConnection-v3.0
+wget http://dl.webrtc-experiment.com/rtcmulticonnection-v3.tar.gz
+tar -zxvf rtcmulticonnection-v3.tar.gz
+ls -a
 ```
 
 To TEST:
 
 ```
-node server
+node server.js
+
+# if fails,
+lsof -n -i4TCP:9001 | grep LISTEN
+kill process-ID
 ```
 
 Now open: `https://localhost:9001/`
@@ -88,28 +98,6 @@ var stream = connection.streamEvents['streamid'].stream;
 stream.mute('audio'); // audio or video or both
 ```
 
-Wanna watch for mute/unmute events?
-
-```javascritp
-connection.onstream = function(event) {
-	event.stream.addEventListener('mute', function(type) {
-		e.session = {
-			audio: type == 'audio' || type == null,
-			video: type == 'video' || type == null
-		};
-		connection.onmute(e);
-	}, false);
-
-	event.stream.addEventListener('unmute', function(type) {
-		e.session = {
-			audio: type == 'audio' || type == null,
-			video: type == 'video' || type == null
-		};
-		connection.onunmute(e);
-	}, false);
-};
-```
-
 Wanna detect current browser?
 
 ```javascript
@@ -155,6 +143,18 @@ connection.onNewParticipant = function(participantId, userPreferences) {
 		connection.addParticipationRequest(participantId, userPreferences);
 	}
 };
+```
+
+Wanna get reference to socket object?
+
+```javascript
+var socket = connection.getSocket();
+
+// note: server.js allows you listen for custom-events over socket.io
+socket.emit('custom-event', { data: true });
+socket.on('custom-event', function(data) {
+	// hello
+});
 ```
 
 PS. v3.0 documentation is still incomplete. Need to expand this section for more features or backward compatibility hacks.

@@ -73,4 +73,15 @@ app = app.listen(process.env.PORT || 9001, process.env.IP || "0.0.0.0", function
     console.log("Server listening at", addr.address + ":" + addr.port);
 });
 
-require('./Signaling-Server.js')(app);
+require('./Signaling-Server.js')(app, function(socket) {
+    // "socket" object is totally in your own hands!
+    // do whatever you want!
+
+    // in your HTML page, you can access socket as following:
+    // var socket = connection.getSocket();
+    // socket.emit('custom-event', { test: true });
+
+    socket.on('custom-event', function(data) {
+        socket.emit('custom-event', data);
+    });
+});

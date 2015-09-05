@@ -1,4 +1,33 @@
+// Last time updated at August 17, 2015, 08:32:23
+
+// Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
+
+// Muaz Khan     - www.MuazKhan.com
+// MIT License   - www.WebRTC-Experiment.com/licence
+// Documentation - github.com/muaz-khan/DetectRTC
+// ____________
+// DetectRTC.js
+
+// DetectRTC.hasWebcam (has webcam device!)
+// DetectRTC.hasMicrophone (has microphone device!)
+// DetectRTC.hasSpeakers (has speakers!)
+// DetectRTC.isScreenCapturingSupported
+// DetectRTC.isSctpDataChannelsSupported
+// DetectRTC.isRtpDataChannelsSupported
+// DetectRTC.isAudioContextSupported
+// DetectRTC.isWebRTCSupported
+// DetectRTC.isDesktopCapturingSupported
+// DetectRTC.isMobileDevice
+// DetectRTC.isWebSocketsSupported
+
+// DetectRTC.DetectLocalIPAddress(callback)
+
+// ----------todo: add
+// DetectRTC.videoResolutions
+// DetectRTC.screenResolutions
+
 (function() {
+    'use strict';
 
     function warn(log) {
         if (window.console && typeof window.console.warn !== 'undefined') {
@@ -33,9 +62,9 @@
 
     window.DetectRTC = {
         browser: browser,
-        hasMicrophone: navigator.getMediaDevices || navigator.enumerateDevices ? false : 'unable to detect',
-        hasSpeakers: navigator.getMediaDevices || navigator.enumerateDevices ? false : 'unable to detect',
-        hasWebcam: navigator.getMediaDevices || navigator.enumerateDevices ? false : 'unable to detect',
+        hasMicrophone: navigator.enumerateDevices ? false : 'unable to detect',
+        hasSpeakers: navigator.enumerateDevices ? false : 'unable to detect',
+        hasWebcam: navigator.enumerateDevices ? false : 'unable to detect',
 
         isWebRTCSupported: !!window.webkitRTCPeerConnection || !!window.mozRTCPeerConnection,
         isAudioContextSupported: (!!window.AudioContext && !!window.AudioContext.prototype.createMediaStreamSource) || (!!window.webkitAudioContext && !!window.webkitAudioContext.prototype.createMediaStreamSource),
@@ -48,8 +77,34 @@
         isSctpDataChannelsSupported: isFirefox || (isChrome && browser.version >= 25),
         isRtpDataChannelsSupported: isChrome && browser.version >= 31,
         isMobileDevice: !!navigator.userAgent.match(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i),
-        isWebSocketsSupported: 'WebSocket' in window && 2 === window.WebSocket.CLOSING
+        isWebSocketsSupported: 'WebSocket' in window && 2 === window.WebSocket.CLOSING,
+        isCanvasCaptureStreamSupported: false,
+        isVideoCaptureStreamSupported: false
     };
+
+    (function detectCanvasCaptureStream() {
+        // latest Firefox nighly is supporting this "awesome" feature!
+        var canvas = document.createElement('canvas');
+
+        if (typeof canvas.captureStream === 'function') {
+            DetectRTC.isCanvasCaptureStreamSupported = true;
+        } else if (typeof canvas.mozCaptureStream === 'function') {
+            DetectRTC.isCanvasCaptureStreamSupported = true;
+        } else if (typeof canvas.webkitCaptureStream === 'function') {
+            DetectRTC.isCanvasCaptureStreamSupported = true;
+        }
+    })();
+
+    (function detectVideoCaptureStream() {
+        var video = document.createElement('video');
+        if (typeof video.captureStream === 'function') {
+            DetectRTC.isVideoCaptureStreamSupported = true;
+        } else if (typeof video.mozCaptureStream === 'function') {
+            DetectRTC.isVideoCaptureStreamSupported = true;
+        } else if (typeof video.webkitCaptureStream === 'function') {
+            DetectRTC.isVideoCaptureStreamSupported = true;
+        }
+    })();
 
     if (!isHTTPs) {
         window.DetectRTC.isScreenCapturingSupported =
@@ -90,15 +145,11 @@
 
     DetectRTC.MediaDevices = [];
 
-    if (!navigator.getMediaDevices) {
-        warn('navigator.getMediaDevices API are not available.');
-    }
-
     if (!navigator.enumerateDevices) {
         warn('navigator.enumerateDevices API are not available.');
     }
 
-    if (!window.MediaStreamTrack || !window.MediaStreamTrack.getSources) {
+    if (!navigator.enumerateDevices && (!window.MediaStreamTrack || !window.MediaStreamTrack.getSources)) {
         warn('MediaStreamTrack.getSources are not available.');
     }
 
@@ -107,17 +158,16 @@
     function CheckDeviceSupport(callback) {
         // This method is useful only for Chrome!
 
-        if (!navigator.getMediaDevices && window.MediaStreamTrack && window.MediaStreamTrack.getSources) {
-            navigator.getMediaDevices = window.MediaStreamTrack.getSources.bind(window.MediaStreamTrack);
+        if (!navigator.enumerateDevices && window.MediaStreamTrack && window.MediaStreamTrack.getSources) {
+            navigator.enumerateDevices = window.MediaStreamTrack.getSources.bind(window.MediaStreamTrack);
         }
 
-        if (!navigator.getMediaDevices && navigator.enumerateDevices) {
-            navigator.getMediaDevices = navigator.enumerateDevices.bind(navigator);
+        if (!navigator.enumerateDevices && navigator.enumerateDevices) {
+            navigator.enumerateDevices = navigator.enumerateDevices.bind(navigator);
         }
 
-        // if still no 'getMediaDevices'; it MUST be Firefox!
-        if (!navigator.getMediaDevices) {
-            warn('navigator.getMediaDevices is undefined.');
+        if (!navigator.enumerateDevices) {
+            warn('navigator.enumerateDevices is undefined.');
             // assuming that it is older chrome or chromium implementation
             if (isChrome) {
                 DetectRTC.hasMicrophone = true;
@@ -132,7 +182,7 @@
         }
 
         DetectRTC.MediaDevices = [];
-        navigator.getMediaDevices(function(devices) {
+        navigator.enumerateDevices(function(devices) {
             devices.forEach(function(_device) {
                 var device = {};
                 for (var d in _device) {
@@ -199,6 +249,7 @@
     DetectRTC.load = CheckDeviceSupport;
 
     function getBrowserInfo() {
+        var nVer = navigator.appVersion;
         var nAgt = navigator.userAgent;
         var browserName = navigator.appName;
         var fullVersion = '' + parseFloat(navigator.appVersion);
@@ -374,5 +425,3 @@
         }, 1000);
     }
 })();
-
-var DetectRTC = window.DetectRTC;

@@ -1,4 +1,4 @@
-// TextReceiver.js
+// TextReceiver.js & TextSender.js
 
 function TextReceiver(connection) {
     var content = {};
@@ -47,6 +47,8 @@ function TextReceiver(connection) {
         receive: receive
     };
 }
+
+// TextSender.js
 var TextSender = {
     send: function(config) {
         var connection = config.connection;

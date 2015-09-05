@@ -35,6 +35,7 @@ function RTCMultiConnection(roomid) {
             };
 
             setHarkEvents(connection, connection.streamEvents[stream.streamid]);
+            setMuteHandlers(connection, connection.streamEvents[stream.streamid]);
 
             connection.onstream(connection.streamEvents[stream.streamid]);
         });
@@ -58,6 +59,8 @@ function RTCMultiConnection(roomid) {
                 streamid: stream.streamid,
                 blobURL: mediaElement.src || URL.createObjectURL(stream)
             };
+
+            setMuteHandlers(connection, connection.streamEvents[stream.streamid]);
 
             connection.onstream(connection.streamEvents[stream.streamid]);
         });
@@ -121,7 +124,7 @@ function RTCMultiConnection(roomid) {
 
     function connectSocket(connectCallback) {
         if (socket) { // todo: check here readySate/etc. to make sure socket is still opened
-            connectCallback(socket);
+            if (connectCallback) connectCallback(socket);
             return;
         }
 
@@ -300,6 +303,11 @@ function RTCMultiConnection(roomid) {
                 userid: userid,
                 status: 'offline',
                 extra: connection.peers[userid] ? connection.peers[userid].extra || {} : {}
+            });
+
+            // todo: ???
+            connection.onleave({
+                userid: userid
             });
         });
 
@@ -946,8 +954,8 @@ function RTCMultiConnection(roomid) {
     connection.processSdp = function(sdp) {
         sdp = BandwidthHandler.setApplicationSpecificBandwidth(sdp, connection.bandwidth, !!connection.session.screen);
         sdp = BandwidthHandler.setVideoBitrates(sdp, {
-            min: 50,
-            max: 2048
+            min: connection.bandwidth.video,
+            max: connection.bandwidth.video
         });
         sdp = BandwidthHandler.setOpusAttributes(sdp);
         return sdp;
@@ -955,8 +963,8 @@ function RTCMultiConnection(roomid) {
 
     connection.bandwidth = {
         screen: 300, // 300kbps minimum
-        audio: 30,
-        video: 50
+        audio: 50,
+        video: 256
     };
 
     connection.onleave = function(userid) {};
@@ -1005,17 +1013,39 @@ function RTCMultiConnection(roomid) {
         };
     }
 
+    connection.getAllVideos = function(remoteUserId) {
+        var videos = [];
+        Array.prototype.slice.call(document.querySelectorAll('video')).forEach(function(video) {
+            if (video.getAttribute('data-userid') === remoteUserId) {
+                videos.push(video);
+            }
+        });
+        return videos;
+    }
+
+    connection.connectSocket = function(callback) {
+        connectSocket(callback);
+    };
+
+    connection.getSocket = function(callback) {
+        if (!socket) {
+            connectSocket();
+        }
+
+        return socket;
+    };
+
     connection.getRemoteStreams = mPeer.getRemoteStreams;
     connection.autoReDialOnFailure = true;
 
     connection.streamEvents = {};
     connection.socketURL = '/';
     connection.socketMessageEvent = 'RTCMultiConnection-Message';
-
-    connection.getSocket = connectSocket;
     connection.DetectRTC = DetectRTC;
 
     connection.onUserStatusChanged = function(event) {
         console.log(event.userid, event.status);
     };
+
+    connection.getUserMediaHandler = getUserMediaHandler;
 }

@@ -1,4 +1,4 @@
-// Last time updated at May 28, 2015, 08:32:23
+// Last time updated at August 17, 2015, 08:32:23
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
 
@@ -62,9 +62,9 @@
 
     window.DetectRTC = {
         browser: browser,
-        hasMicrophone: navigator.getMediaDevices || navigator.enumerateDevices ? false : 'unable to detect',
-        hasSpeakers: navigator.getMediaDevices || navigator.enumerateDevices ? false : 'unable to detect',
-        hasWebcam: navigator.getMediaDevices || navigator.enumerateDevices ? false : 'unable to detect',
+        hasMicrophone: navigator.enumerateDevices ? false : 'unable to detect',
+        hasSpeakers: navigator.enumerateDevices ? false : 'unable to detect',
+        hasWebcam: navigator.enumerateDevices ? false : 'unable to detect',
 
         isWebRTCSupported: !!window.webkitRTCPeerConnection || !!window.mozRTCPeerConnection,
         isAudioContextSupported: (!!window.AudioContext && !!window.AudioContext.prototype.createMediaStreamSource) || (!!window.webkitAudioContext && !!window.webkitAudioContext.prototype.createMediaStreamSource),
@@ -145,15 +145,11 @@
 
     DetectRTC.MediaDevices = [];
 
-    if (!navigator.getMediaDevices) {
-        warn('navigator.getMediaDevices API are not available.');
-    }
-
     if (!navigator.enumerateDevices) {
         warn('navigator.enumerateDevices API are not available.');
     }
 
-    if (!window.MediaStreamTrack || !window.MediaStreamTrack.getSources) {
+    if (!navigator.enumerateDevices && (!window.MediaStreamTrack || !window.MediaStreamTrack.getSources)) {
         warn('MediaStreamTrack.getSources are not available.');
     }
 
@@ -162,17 +158,16 @@
     function CheckDeviceSupport(callback) {
         // This method is useful only for Chrome!
 
-        if (!navigator.getMediaDevices && window.MediaStreamTrack && window.MediaStreamTrack.getSources) {
-            navigator.getMediaDevices = window.MediaStreamTrack.getSources.bind(window.MediaStreamTrack);
+        if (!navigator.enumerateDevices && window.MediaStreamTrack && window.MediaStreamTrack.getSources) {
+            navigator.enumerateDevices = window.MediaStreamTrack.getSources.bind(window.MediaStreamTrack);
         }
 
-        if (!navigator.getMediaDevices && navigator.enumerateDevices) {
-            navigator.getMediaDevices = navigator.enumerateDevices.bind(navigator);
+        if (!navigator.enumerateDevices && navigator.enumerateDevices) {
+            navigator.enumerateDevices = navigator.enumerateDevices.bind(navigator);
         }
 
-        // if still no 'getMediaDevices'; it MUST be Firefox!
-        if (!navigator.getMediaDevices) {
-            warn('navigator.getMediaDevices is undefined.');
+        if (!navigator.enumerateDevices) {
+            warn('navigator.enumerateDevices is undefined.');
             // assuming that it is older chrome or chromium implementation
             if (isChrome) {
                 DetectRTC.hasMicrophone = true;
@@ -187,7 +182,7 @@
         }
 
         DetectRTC.MediaDevices = [];
-        navigator.getMediaDevices(function(devices) {
+        navigator.enumerateDevices(function(devices) {
             devices.forEach(function(_device) {
                 var device = {};
                 for (var d in _device) {
@@ -252,13 +247,6 @@
     // check for microphone/camera support!
     new CheckDeviceSupport();
     DetectRTC.load = CheckDeviceSupport;
-
-    DetectRTC.detectMediaAvailability = function(callback) {
-        DetectRTC.load(function() {
-            // todo? should return merely required properties or?
-            callback(DetectRTC);
-        });
-    };
 
     function getBrowserInfo() {
         var nVer = navigator.appVersion;

@@ -1,4 +1,5 @@
 // IceServersHandler.js
+// note: "urls" doesn't works in old-firefox.
 
 var IceServersHandler = (function(connection) {
     function getIceServers(iceServers) {

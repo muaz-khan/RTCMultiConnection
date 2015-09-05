@@ -31,7 +31,12 @@ function fireEvent(obj, eventName, args) {
         return;
     }
 
-    var event = new CustomEvent(eventName, args);
+    var eventDetail = {
+        arguments: args,
+        __exposedProps__: args
+    };
+
+    var event = new CustomEvent(eventName, eventDetail);
     obj.dispatchEvent(event);
 }
 
@@ -65,6 +70,48 @@ function setHarkEvents(connection, streamEvent) {
             }, streamEvent));
         }
     });
+}
+
+function setMuteHandlers(connection, streamEvent) {
+    streamEvent.stream.addEventListener('mute', function(event) {
+        streamEvent.session = {
+            audio: event.type === 'audio' || event.type === 'both' || event.type === null,
+            video: event.type === 'video' || event.type === 'both' || event.ype === null
+        };
+        if (connection.onmute) {
+            connection.onmute(streamEvent);
+        }
+    }, false);
+
+    streamEvent.stream.addEventListener('unmute', function(event) {
+        streamEvent.session = {
+            audio: event.type === 'audio' || event.type === 'both' || event.type === null,
+            video: event.type === 'video' || event.type === 'both' || event.type === null
+        };
+        if (connection.onunmute) {
+            connection.onunmute(streamEvent);
+        }
+    }, false);
+
+    connection.onmute = function(e) {
+        if (e.stream.isVideo && e.mediaElement) {
+            e.mediaElement.pause();
+            e.mediaElement.setAttribute('poster', e.snapshot || 'https://cdn.webrtc-experiment.com/images/muted.png');
+        }
+        if (e.stream.isAudio && e.mediaElement) {
+            e.mediaElement.muted = true;
+        }
+    };
+
+    connection.onunmute = function(e) {
+        if (e.stream.isVideo && e.mediaElement) {
+            e.mediaElement.play();
+            e.mediaElement.removeAttribute('poster');
+        }
+        if (e.stream.isAudio && e.mediaElement) {
+            e.mediaElement.muted = false;
+        }
+    };
 }
 
 function getRandomString() {
