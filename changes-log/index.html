@@ -64,9 +64,39 @@
             <h1><a href="http://www.RTCMultiConnection.org/docs/">RTCMultiConnection</a> Changes Log ----/ <a href="http://www.RTCMultiConnection.org/docs/">Docs</a> | <a href="http://www.RTCMultiConnection.org/FAQ/">FAQ</a> | <a href="https://www.webrtc-experiment.com/RTCMultiConnection/">Demos!</a></h1>
 		
             <br /><br /><br />
+
+            <section class="experiment">
+                <h2 id="v3.0"><a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/RTCMultiConnection-v3.0">v3.0</a> - Its latest Beta release.</h2>
+                
+                <blockquote class="inline">
+                    <pre class="sh_html">
+// Open-Sourced here:
+<a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/RTCMultiConnection-v3.0">https://github.com/muaz-khan/RTCMultiConnection/tree/master/RTCMultiConnection-v3.0</a>
+
+// To install it:
+sudo npm install rtcmulticonnection-v3
+
+// or MOST preferred one
+mkdir RTCMultiConnection-v3.0 && cd RTCMultiConnection-v3.0
+wget http://dl.webrtc-experiment.com/rtcmulticonnection-v3.tar.gz
+tar -zxvf rtcmulticonnection-v3.tar.gz
+ls -a
+
+// To test it:
+node server.js
+
+// if fails,
+lsof -n -i4TCP:9001 | grep LISTEN
+kill process-ID
+
+// Now open: 
+https://localhost:9001/
+</pre>
+                </blockquote>
+        </section>
             
             <section class="experiment">
-                <h2 id="v2.2"><a href="http://www.rtcmulticonnection.org/changes-log/#v2.2">v2.2</a> / its latest work-in-progress release.</h2>
+                <h2 id="v2.2"><a href="http://www.rtcmulticonnection.org/changes-log/#v2.2">v2.2</a></h2>
                 
                 <blockquote class="inline">
                     <pre class="sh_html">
@@ -79,12 +109,6 @@ npm install rtcmulticonnection
 // or instead of installing NPM package,
 // directly link the file:
 &lt;script src="//cdn.webrtc-experiment.com/RTCMultiConnection.js"&gt;&lt;/script&gt;
-
-// or
-&lt;script src="http://www.rtcmulticonnection.org/latest.js"&gt;&lt;/script&gt;
-
-// or
-&lt;script src="//cdn.webrtc-experiment.com/RTCMultiConnection-v2.2.5.js"&gt;&lt;/script&gt;
 </pre>
                 </blockquote>
                 

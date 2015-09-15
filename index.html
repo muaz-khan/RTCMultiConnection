@@ -202,12 +202,6 @@ pre {
               <div class="st1" style="text-align:left;">
                 <pre>
 https://cdn.webrtc-experiment.com/RTCMultiConnection.js
-
-// or
-http://www.rtcmulticonnection.org/latest.js
-
-// or specific version:
-https://cdn.webrtc-experiment.com/RTCMultiConnection-v2.2.5.js
 </pre>
               </div>
             </div>
@@ -277,7 +271,7 @@ participants.<a href="http://www.RTCMultiConnection.org/docs/join/">join</a>({
                 <pre>
 // same code can be used for participants
 // (it is optional) 
-moderator.<a href="http://www.RTCMultiConnection.org/docs/onstreamid/">onstreamid</a> = function(event) {
+connection.<a href="http://www.RTCMultiConnection.org/docs/onstreamid/">onstreamid</a> = function(event) {
     // got a clue of incoming remote stream
     // didn't get remote stream yet
     
@@ -291,7 +285,7 @@ moderator.<a href="http://www.RTCMultiConnection.org/docs/onstreamid/">onstreami
 
 // same code can be used for participants
 // it is useful
-moderator.<a href="http://www.RTCMultiConnection.org/docs/onstream/">onstream</a> = function(event) {
+connection.<a href="http://www.RTCMultiConnection.org/docs/onstream/">onstream</a> = function(event) {
     // got local or remote stream
     // if(event.type == 'local')  {}
     // if(event.type == 'remote') {}
@@ -304,7 +298,7 @@ moderator.<a href="http://www.RTCMultiConnection.org/docs/onstream/">onstream</a
 
 // same code can be used for participants
 // it is useful but optional
-moderator.<a href="http://www.RTCMultiConnection.org/docs/onstreamended/">onstreamended</a> = function(event) {
+connection.<a href="http://www.RTCMultiConnection.org/docs/onstreamended/">onstreamended</a> = function(event) {
     event.mediaElement.parentNode.removeChild(event.mediaElement);
 };
 </pre>
