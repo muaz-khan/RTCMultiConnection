@@ -1,4 +1,4 @@
-// Last time updated at Sep 06, 2015, 08:32:23
+// Last time updated at Sep 25, 2015, 08:32:23
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -6,10 +6,6 @@
 'use strict';
 
 (function() {
-
-    // Renegotiation now works in FF 38 and 39 (and multiple streams as well)
-    // Firefox is supporting navigator.mediaDevices.getMediaDevices as well.
-    // Firefox is supporting canvas.captureStream as well. Though still can't be used as input source for RTCPeerConnection.
 
     // RTCMultiConnection.js
 
@@ -455,10 +451,13 @@
             });
 
             if (isData(connection.session)) {
+                if (typeof isPublicUser === 'function') {
+                    isPublicUser();
+                }
                 return;
             }
 
-            connection.captureUserMedia();
+            connection.captureUserMedia(typeof isPublicUser === 'function' ? isPublicUser : null);
         };
 
         connection.rejoin = function(connectionDescription) {
@@ -589,7 +588,8 @@
                         }
 
                         invokeGetUserMedia({
-                            video: screen_constraints
+                            video: screen_constraints,
+                            isScreen: true
                         }, session.audio || session.video ? invokeGetUserMedia : false);
                     });
                 } else if (session.audio || session.video) {
@@ -598,8 +598,24 @@
             }
 
             function invokeGetUserMedia(localMediaConstraints, getUserMedia_callback) {
+                var isScreen = false;
+                if (localMediaConstraints) {
+                    isScreen = localMediaConstraints.isScreen;
+                    delete localMediaConstraints.isScreen;
+                }
+
                 getUserMediaHandler({
                     onGettingLocalMedia: function(stream) {
+                        stream.isAudio = stream.isVideo = stream.isScreen = false;
+
+                        if (isScreen) {
+                            stream.isScreen = true;
+                        } else if (session.audio && session.video) {
+                            stream.isVideo = true;
+                        } else if (session.audio) {
+                            stream.isAudio = true;
+                        }
+
                         mPeer.onGettingLocalMedia(stream);
 
                         if (getUserMedia_callback) {
@@ -821,6 +837,117 @@
                         }
 
                         connection.renegotiate();
+                    },
+                    onLocalMediaError: mPeer.onLocalMediaError,
+                    localMediaConstraints: localMediaConstraints || {
+                        audio: session.audio ? connection.mediaConstraints.audio : false,
+                        video: session.video ? connection.mediaConstraints.video : false
+                    }
+                });
+            }
+        };
+
+        function applyConstraints(stream, mediaConstraints) {
+            if (!stream) {
+                console.error('No stream to applyConstraints.');
+                return;
+            }
+
+            if (mediaConstraints.audio) {
+                stream.getAudioTracks().forEach(function(track) {
+                    track.applyConstraints(mediaConstraints.audio);
+                });
+                console.log('Applied audio constraints', mediaConstraints.audio);
+            }
+
+            if (mediaConstraints.video) {
+                stream.getVideoTracks().forEach(function(track) {
+                    track.applyConstraints(mediaConstraints.video);
+                });
+                console.log('Applied video constraints', mediaConstraints.video);
+            }
+        }
+
+        connection.applyConstraints = function(mediaConstraints, streamid) {
+            if (!MediaStreamTrack || !MediaStreamTrack.prototype.applyConstraints) {
+                alert('track.applyConstraints is NOT supported in your browser.');
+                return;
+            }
+
+            if (streamid) {
+                var streams;
+                if (connection.streamEvents[streamid]) {
+                    stream = connection.streamEvents[streamid].stream;
+                }
+                applyConstraints(stream, mediaConstraints);
+                return;
+            }
+
+            connection.attachStreams.forEach(function(stream) {
+                applyConstraints(stream, mediaConstraints);
+            });
+        };
+
+        function replaceTrack(track, remoteUserId) {
+            if (remoteUserId) {
+                mPeer.replaceTrack(track, remoteUserId);
+                return;
+            }
+
+            connection.peers.getAllParticipants().forEach(function(participant) {
+                mPeer.replaceTrack(track, participant);
+            });
+        }
+
+        connection.replaceTrack = function(session) {
+            session = session || {};
+
+            if (!RTCPeerConnection.prototype.getSenders) {
+                this.addStream(session);
+                return;
+            }
+
+            if (session instanceof MediaStreamTrack) {
+                replaceTrack(session);
+                return;
+            }
+
+            if (session instanceof MediaStream) {
+                replaceTrack(session.getVideoTracks()[0]);
+                return;
+            }
+
+            if (isData(session)) {
+                throw 'connection.replaceTrack requires audio and/or video and/or screen.';
+                return;
+            }
+
+            if (!session.audio || session.video || session.screen) {
+                if (session.screen) {
+                    getScreenConstraints(function(error, screen_constraints) {
+                        if (error) {
+                            return alert(error);
+                        }
+
+                        invokeGetUserMedia({
+                            video: screen_constraints
+                        }, session.audio || session.video ? invokeGetUserMedia : false);
+                    });
+                } else if (session.audio || session.video) {
+                    invokeGetUserMedia();
+                }
+            }
+
+            function invokeGetUserMedia(localMediaConstraints, callback) {
+                getUserMediaHandler({
+                    onGettingLocalMedia: function(stream) {
+                        mPeer.onGettingLocalMedia(stream);
+
+                        if (callback) {
+                            return callback();
+                        }
+
+                        connection.replaceTrack(stream);
                     },
                     onLocalMediaError: mPeer.onLocalMediaError,
                     localMediaConstraints: localMediaConstraints || {
@@ -1283,6 +1410,22 @@
             connection.peers[remoteUserId] = new PeerInitiator(localConfig);
         };
 
+        this.replaceTrack = function(track, remoteUserId) {
+            if (!connection.peers[remoteUserId]) {
+                throw 'This peer (' + remoteUserId + ') does not exists.';
+            }
+
+            var peer = connection.peers[remoteUserId].peer;
+
+            if (!!peer.getSenders && typeof peer.getSenders === 'function' && peer.getSenders()[0] && peer.getSenders()[0].replaceTrack) {
+                peer.getSenders()[0].replaceTrack(track);
+                return;
+            }
+
+            console.warn('RTPSender.replaceTrack is NOT supported.');
+            this.renegotiatePeer(remoteUserId);
+        };
+
         this.onNegotiationNeeded = function(message, remoteUserId) {};
         this.addNegotiatedMessage = function(message, remoteUserId) {
             if (message.type && message.sdp) {
@@ -1403,6 +1546,8 @@
                         });
                     }, participant);
                 });
+            }, {
+                userid: connection.userid
             });
         };
 
@@ -2077,6 +2222,8 @@
         function getIceServers(iceServers) {
             iceServers = iceServers || [];
 
+            // Firefox <= 37 doesn't understands "urls"
+
             iceServers.push({
                 urls: 'stun:stun.l.google.com:19302'
             });
@@ -2108,7 +2255,11 @@
 
     var BandwidthHandler = (function() {
         function setBAS(sdp, bandwidth, isScreen) {
-            if (isMobileDevice || isFirefox || !bandwidth) {
+            if (!bandwidth) {
+                return sdp;
+            }
+
+            if (typeof isFirefox !== 'undefined' && isFirefox) {
                 return sdp;
             }
 
@@ -3380,17 +3531,6 @@
                     div.innerHTML = '<a href="' + file.url + '" download="' + file.name + '">Download <strong style="color:red;">' + file.name + '</strong> </a><br /><img src="' + file.url + '" title="' + file.name + '" style="max-width: 80%;">';
                 } else {
                     div.innerHTML = '<a href="' + file.url + '" download="' + file.name + '">Download <strong style="color:red;">' + file.name + '</strong> </a><br /><iframe src="' + file.url + '" title="' + file.name + '" style="width: 80%;border: 0;height: inherit;margin-top:1em;"></iframe>';
-                }
-
-                // for backward compatibility
-                if (connection.onFileSent || connection.onFileReceived) {
-                    if (connection.onFileSent) {
-                        connection.onFileSent(file, file.uuid);
-                    }
-
-                    if (connection.onFileReceived) {
-                        connection.onFileReceived(file.name, file);
-                    }
                 }
             };
 

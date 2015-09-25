@@ -1,7 +1,3 @@
-// Renegotiation now works in FF 38 and 39 (and multiple streams as well)
-// Firefox is supporting navigator.mediaDevices.getMediaDevices as well.
-// Firefox is supporting canvas.captureStream as well. Though still can't be used as input source for RTCPeerConnection.
-
 // RTCMultiConnection.js
 
 function RTCMultiConnection(roomid) {
@@ -446,10 +442,13 @@ function RTCMultiConnection(roomid) {
         });
 
         if (isData(connection.session)) {
+            if (typeof isPublicUser === 'function') {
+                isPublicUser();
+            }
             return;
         }
 
-        connection.captureUserMedia();
+        connection.captureUserMedia(typeof isPublicUser === 'function' ? isPublicUser : null);
     };
 
     connection.rejoin = function(connectionDescription) {
@@ -580,7 +579,8 @@ function RTCMultiConnection(roomid) {
                     }
 
                     invokeGetUserMedia({
-                        video: screen_constraints
+                        video: screen_constraints,
+                        isScreen: true
                     }, session.audio || session.video ? invokeGetUserMedia : false);
                 });
             } else if (session.audio || session.video) {
@@ -589,8 +589,24 @@ function RTCMultiConnection(roomid) {
         }
 
         function invokeGetUserMedia(localMediaConstraints, getUserMedia_callback) {
+            var isScreen = false;
+            if (localMediaConstraints) {
+                isScreen = localMediaConstraints.isScreen;
+                delete localMediaConstraints.isScreen;
+            }
+
             getUserMediaHandler({
                 onGettingLocalMedia: function(stream) {
+                    stream.isAudio = stream.isVideo = stream.isScreen = false;
+
+                    if (isScreen) {
+                        stream.isScreen = true;
+                    } else if (session.audio && session.video) {
+                        stream.isVideo = true;
+                    } else if (session.audio) {
+                        stream.isAudio = true;
+                    }
+
                     mPeer.onGettingLocalMedia(stream);
 
                     if (getUserMedia_callback) {
@@ -812,6 +828,117 @@ function RTCMultiConnection(roomid) {
                     }
 
                     connection.renegotiate();
+                },
+                onLocalMediaError: mPeer.onLocalMediaError,
+                localMediaConstraints: localMediaConstraints || {
+                    audio: session.audio ? connection.mediaConstraints.audio : false,
+                    video: session.video ? connection.mediaConstraints.video : false
+                }
+            });
+        }
+    };
+
+    function applyConstraints(stream, mediaConstraints) {
+        if (!stream) {
+            console.error('No stream to applyConstraints.');
+            return;
+        }
+
+        if (mediaConstraints.audio) {
+            stream.getAudioTracks().forEach(function(track) {
+                track.applyConstraints(mediaConstraints.audio);
+            });
+            console.log('Applied audio constraints', mediaConstraints.audio);
+        }
+
+        if (mediaConstraints.video) {
+            stream.getVideoTracks().forEach(function(track) {
+                track.applyConstraints(mediaConstraints.video);
+            });
+            console.log('Applied video constraints', mediaConstraints.video);
+        }
+    }
+
+    connection.applyConstraints = function(mediaConstraints, streamid) {
+        if (!MediaStreamTrack || !MediaStreamTrack.prototype.applyConstraints) {
+            alert('track.applyConstraints is NOT supported in your browser.');
+            return;
+        }
+
+        if (streamid) {
+            var streams;
+            if (connection.streamEvents[streamid]) {
+                stream = connection.streamEvents[streamid].stream;
+            }
+            applyConstraints(stream, mediaConstraints);
+            return;
+        }
+
+        connection.attachStreams.forEach(function(stream) {
+            applyConstraints(stream, mediaConstraints);
+        });
+    };
+
+    function replaceTrack(track, remoteUserId) {
+        if (remoteUserId) {
+            mPeer.replaceTrack(track, remoteUserId);
+            return;
+        }
+
+        connection.peers.getAllParticipants().forEach(function(participant) {
+            mPeer.replaceTrack(track, participant);
+        });
+    }
+
+    connection.replaceTrack = function(session) {
+        session = session || {};
+
+        if (!RTCPeerConnection.prototype.getSenders) {
+            this.addStream(session);
+            return;
+        }
+
+        if (session instanceof MediaStreamTrack) {
+            replaceTrack(session);
+            return;
+        }
+
+        if (session instanceof MediaStream) {
+            replaceTrack(session.getVideoTracks()[0]);
+            return;
+        }
+
+        if (isData(session)) {
+            throw 'connection.replaceTrack requires audio and/or video and/or screen.';
+            return;
+        }
+
+        if (!session.audio || session.video || session.screen) {
+            if (session.screen) {
+                getScreenConstraints(function(error, screen_constraints) {
+                    if (error) {
+                        return alert(error);
+                    }
+
+                    invokeGetUserMedia({
+                        video: screen_constraints
+                    }, session.audio || session.video ? invokeGetUserMedia : false);
+                });
+            } else if (session.audio || session.video) {
+                invokeGetUserMedia();
+            }
+        }
+
+        function invokeGetUserMedia(localMediaConstraints, callback) {
+            getUserMediaHandler({
+                onGettingLocalMedia: function(stream) {
+                    mPeer.onGettingLocalMedia(stream);
+
+                    if (callback) {
+                        return callback();
+                    }
+
+                    connection.replaceTrack(stream);
                 },
                 onLocalMediaError: mPeer.onLocalMediaError,
                 localMediaConstraints: localMediaConstraints || {
