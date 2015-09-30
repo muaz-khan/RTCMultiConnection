@@ -40,6 +40,16 @@ module.exports = exports = function(app, socketCallback) {
             }
         });
 
+        socket.on('change-userid', function(obj) {
+            if(obj.oldUserId === obj.newUserId) return;
+            if (!listOfUsers[obj.oldUserId]) return;
+
+            listOfUsers[obj.newUserId] = listOfUsers[obj.oldUserId];
+            delete listOfUsers[obj.oldUserId];
+            listOfUsers[obj.newUserId].socket.userid = obj.newUserId;
+            socket.userid = obj.newUserId;
+        });
+
         socket.on('changed-uuid', function(uuid) {
             if (listOfUsers[socket.userid]) {
                 var oldUserId = socket.userid;
@@ -182,15 +192,6 @@ module.exports = exports = function(app, socketCallback) {
                     } else setTimeout(repeater, 1000);
                 })();
             }
-        });
-
-        socket.on('change-userid', function(obj) {
-            if (!listOfUsers[obj.oldUserId]) return;
-
-            listOfUsers[obj.newUserId] = listOfUsers[obj.oldUserId];
-            delete listOfUsers[obj.oldUserId];
-            listOfUsers[obj.newUserId].socket.userid = obj.newUserId;
-            socket.userid = obj.newUserId;
         });
 
         socket.on('disconnect', function() {
