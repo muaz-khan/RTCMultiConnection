@@ -404,10 +404,7 @@ function RTCMultiConnection(roomid) {
                 var oldUserId = connection.userid;
                 connection.userid = connection.sessionid = localUserid || connection.sessionid;
 
-                socket.emit('change-userid', {
-                    oldUserId: oldUserId,
-                    newUserId: connection.userid
-                });
+                socket.emit('changed-uuid', connection.userid);
 
                 if (password) {
                     socket.emit('set-password', password);
@@ -431,10 +428,7 @@ function RTCMultiConnection(roomid) {
         connection.isInitiator = true;
 
         connectSocket(function() {
-            socket.emit('change-userid', {
-                oldUserId: oldUserId,
-                newUserId: connection.userid
-            });
+            socket.emit('changed-uuid', connection.userid);
 
             if (typeof isPublicUser == 'undefined' || isPublicUser == true) {
                 socket.emit('become-a-public-user');
