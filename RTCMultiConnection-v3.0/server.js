@@ -81,7 +81,7 @@ require('./Signaling-Server.js')(app, function(socket) {
     // var socket = connection.getSocket();
     // socket.emit('custom-event', { test: true });
 
-    socket.on('custom-event', function(data) {
-        socket.emit('custom-event', data);
+    socket.on('custom-message', function(message) {
+        socket.broadcast.emit('custom-message', message);
     });
 });

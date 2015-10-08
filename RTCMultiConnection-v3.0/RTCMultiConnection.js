@@ -1,4 +1,4 @@
-// Last time updated at Sep 25, 2015, 08:32:23
+// Last time updated at Thursday, October 8th, 2015, 11:49:00 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -1828,6 +1828,25 @@
 
     function isString(obj) {
         return typeof obj === 'string';
+    }
+
+    var MediaStream = window.MediaStream;
+
+    if (typeof MediaStream === 'undefined' && typeof webkitMediaStream !== 'undefined') {
+        MediaStream = webkitMediaStream;
+    }
+
+    /*global MediaStream:true */
+    if (!('stop' in MediaStream.prototype)) {
+        MediaStream.prototype.stop = function() {
+            this.getAudioTracks().forEach(function(track) {
+                track.stop();
+            });
+
+            this.getVideoTracks().forEach(function(track) {
+                track.stop();
+            });
+        };
     }
 
     // RTCPeerConnection.js

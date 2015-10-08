@@ -1,4 +1,4 @@
-// Last time updated at Sep 21, 2015, 08:32:23
+// Last time updated at Thursday, October 8th, 2015, 11:49:06 PM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -3670,6 +3670,25 @@
     if (isPluginRTC) {
         loadScript('https://cdn.webrtc-experiment.com/Plugin.EveryWhere.js');
         // loadScript('https://cdn.webrtc-experiment.com/Plugin.Temasys.js');
+    }
+
+    var MediaStream = window.MediaStream;
+
+    if (typeof MediaStream === 'undefined' && typeof webkitMediaStream !== 'undefined') {
+        MediaStream = webkitMediaStream;
+    }
+
+    /*global MediaStream:true */
+    if (!('stop' in MediaStream.prototype)) {
+        MediaStream.prototype.stop = function() {
+            this.getAudioTracks().forEach(function(track) {
+                track.stop();
+            });
+
+            this.getVideoTracks().forEach(function(track) {
+                track.stop();
+            });
+        };
     }
 
     var defaultConstraints = {
