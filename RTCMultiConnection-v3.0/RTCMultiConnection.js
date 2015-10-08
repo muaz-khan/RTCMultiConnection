@@ -1,4 +1,4 @@
-// Last time updated at Thursday, October 8th, 2015, 11:49:00 PM 
+// Last time updated at Thursday, October 8th, 2015, 11:54:42 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -1878,9 +1878,9 @@
         return sdpConstraints;
     }
 
-    var RTCPeerConnection = window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
-    var RTCSessionDescription = window.mozRTCSessionDescription || window.RTCSessionDescription;
-    var RTCIceCandidate = window.mozRTCIceCandidate || window.RTCIceCandidate;
+    var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+    var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription;
+    var RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate;
     var MediaStreamTrack = window.MediaStreamTrack;
 
     var Plugin = {};
