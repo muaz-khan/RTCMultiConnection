@@ -1,6 +1,6 @@
-var useFakeKeys = !(!!process.env.PORT || !!process.env.IP);
+var isUseHTTPs = !(!!process.env.PORT || !!process.env.IP);
 
-var server = require(useFakeKeys ? 'https' : 'http'),
+var server = require(isUseHTTPs ? 'https' : 'http'),
     url = require('url'),
     path = require('path'),
     fs = require('fs');
@@ -60,7 +60,7 @@ function serverHandler(request, response) {
 
 var app;
 
-if (useFakeKeys) {
+if (isUseHTTPs) {
     var options = {
         key: fs.readFileSync('fake-keys/privatekey.pem'),
         cert: fs.readFileSync('fake-keys/certificate.pem')

@@ -1,4 +1,4 @@
-// Last time updated at Thursday, October 8th, 2015, 11:54:30 PM 
+// Last time updated at Sunday, October 11th, 2015, 9:23:31 PM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -21,7 +21,7 @@
     // usually page-URL is used as channel-id
     // you can always override it!
     // www.RTCMultiConnection.org/docs/channel-id/
-    window.RMCDefaultChannel = location.href.replace(/\/|:|#|\?|\$|\^|%|\.|`|~|!|@|\[|\||]|\|*. /g, '').split('\n').join('').split('\r').join('');
+    window.RMCDefaultChannel = location.href.replace(/\/|:|#|\?|\$|\^|%|\.|`|~|!|\+|@|\[|\||]|\|*. /g, '').split('\n').join('').split('\r').join('');
 
     // www.RTCMultiConnection.org/docs/constructor/
     window.RTCMultiConnection = function(channel) {

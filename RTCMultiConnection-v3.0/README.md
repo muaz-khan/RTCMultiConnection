@@ -291,6 +291,25 @@ Its defined here:
 
 * [getUserMedia.js#L20](https://github.com/muaz-khan/RTCMultiConnection/blob/master/RTCMultiConnection-v3.0/dev/getUserMedia.js#L20)
 
+## Firebase?
+
+If you are willing to use Firebase instead of Socket.io there, open [GruntFile.js](https://github.com/muaz-khan/RTCMultiConnection/blob/master/RTCMultiConnection-v3.0/Gruntfile.js) and replace `SocketConnection.js` with `FirebaseConnection.js`.
+
+Then use `grunt` to recompile RTCMultiConnection.js.
+
+**Otherwise** if you don't want to modify RTCMultiConnection:
+
+```html
+<script src="/dev/globals.js"></script>
+<script src="/dev/FirebaseConnection.js"></script>
+<script>
+var connection = new RTCMultiConnection();
+
+// below line replaces FirebaseConnection
+connection.setCustomSocketHandler(FirebaseConnection);
+</script>
+```
+
 PS. v3.0 documentation is still incomplete. Need to expand this section for more features or backward compatibility hacks.
 
 ## Configure v3.0
