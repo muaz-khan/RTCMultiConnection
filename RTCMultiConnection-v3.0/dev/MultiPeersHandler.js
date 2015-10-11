@@ -257,6 +257,10 @@ function MultiPeers(connection) {
 
         if (message.candidate) {
             connection.peers[remoteUserId].addRemoteCandidate(message);
+
+            if (connection.enableLogs) {
+                console.log('Remote peer\'s candidate pairs:', message.candidate);
+            }
             return;
         }
 

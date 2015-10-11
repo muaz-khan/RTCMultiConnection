@@ -34,7 +34,7 @@ module.exports = function(grunt) {
                     'dev/StreamsHandler.js',
 
                     'dev/DetectRTC.js',
-                    'dev/getScreenId.js',
+                    'dev/Screen-Capturing.js',
                     'dev/Plugin.EveryWhere.js',
 
                     'dev/TextSenderReceiver.js',
