@@ -3,7 +3,7 @@
 function RTCMultiConnection(roomid) {
     var connection = this;
 
-    connection.sessionid = roomid || location.href.replace(/\/|:|#|\?|\$|\^|%|\.|`|~|!|\+|@|\[|\||]|\|*. /g, '').split('\n').join('').split('\r').join('');
+    connection.channel = connection.sessionid = roomid || location.href.replace(/\/|:|#|\?|\$|\^|%|\.|`|~|!|\+|@|\[|\||]|\|*. /g, '').split('\n').join('').split('\r').join('');
 
     var mPeer = new MultiPeers(connection);
 

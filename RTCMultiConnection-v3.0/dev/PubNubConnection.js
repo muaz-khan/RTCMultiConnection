@@ -1,22 +1,36 @@
-function FirebaseConnection(connection, connectCallback) {
-    connection.firebase = connection.firebase || 'webrtc-experiment';
+function PubNubConnection(connection, connectCallback) {
     var channelId = connection.channel;
-    var socket = new Firebase('https://' + connection.firebase + '.firebaseio.com/' + channelId);
 
-    socket.on('child_added', function(snap) {
-        var data = JSON.parse(snap.val());
+    var pub = 'pub-c-3c0fc243-9892-4858-aa38-1445e58b4ecb';
+    var sub = 'sub-c-d0c386c6-7263-11e2-8b02-12313f022c90';
+
+    WebSocket = PUBNUB.ws;
+    var socket = new WebSocket('wss://pubsub.pubnub.com/' + pub + '/' + sub + '/' + channelId);
+
+    socket.onmessage = function(e) {
+        var data = JSON.parse(e.data);
 
         if (data.eventName === connection.socketMessageEvent) {
             onMessagesCallback(data.data);
         }
+    };
 
-        snap.ref().remove(); // for socket.io live behavior
-    });
+    socket.onerror = function() {
+        console.error('Socket connection is failed.');
+    };
 
-    socket.onDisconnect().remove();
+    socket.onclose = function() {
+        console.warn('Socket connection is closed.');
+    };
+
+    socket.onopen = function() {
+        // if connection.enableLogs
+        console.info('socket.io connection is opened.');
+        if (connectCallback) connectCallback(socket);
+    };
 
     socket.emit = function(eventName, data, callback) {
-        socket.push(JSON.stringify({
+        socket.send(JSON.stringify({
             eventName: eventName,
             data: data
         }));
@@ -188,14 +202,6 @@ function FirebaseConnection(connection, connectCallback) {
 
         mPeer.addNegotiatedMessage(message.message, message.sender);
     }
-
-    new Firebase('https://' + connection.firebase + '.firebaseio.com/.info/connected').on('value', function(snap) {
-        if (snap.val()) {
-            // if connection.enableLogs
-            console.info('socket.io connection is opened.');
-            if (connectCallback) connectCallback(socket);
-        }
-    });
 
     return socket;
 }

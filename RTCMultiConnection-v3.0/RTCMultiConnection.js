@@ -1,4 +1,4 @@
-// Last time updated at Sunday, October 11th, 2015, 10:44:20 PM 
+// Last time updated at Monday, October 12th, 2015, 7:35:23 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -12,7 +12,7 @@
     function RTCMultiConnection(roomid) {
         var connection = this;
 
-        connection.sessionid = roomid || location.href.replace(/\/|:|#|\?|\$|\^|%|\.|`|~|!|\+|@|\[|\||]|\|*. /g, '').split('\n').join('').split('\r').join('');
+        connection.channel = connection.sessionid = roomid || location.href.replace(/\/|:|#|\?|\$|\^|%|\.|`|~|!|\+|@|\[|\||]|\|*. /g, '').split('\n').join('').split('\r').join('');
 
         var mPeer = new MultiPeers(connection);
 

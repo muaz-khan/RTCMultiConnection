@@ -305,12 +305,20 @@ Then use `grunt` to recompile RTCMultiConnection.js.
 <script>
 var connection = new RTCMultiConnection();
 
+connection.firebase = 'your-firebase-account';
+
 // below line replaces FirebaseConnection
 connection.setCustomSocketHandler(FirebaseConnection);
 </script>
 ```
 
 PS. v3.0 documentation is still incomplete. Need to expand this section for more features or backward compatibility hacks.
+
+## PubNub?
+
+Follow above all "firebase" steps and use `PubNubConnection.js` instead.
+
+Please don't forget to use your own PubNub keys.
 
 ## Configure v3.0
 
