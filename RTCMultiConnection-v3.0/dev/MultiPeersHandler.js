@@ -345,7 +345,7 @@ function MultiPeers(connection) {
         };
     }
 
-    this.shareFile = function(file) {
+    this.shareFile = function(file, remoteUserId) {
         if (!connection.enableFileSharing) {
             throw '"connection.enableFileSharing" is false.';
         }
@@ -353,9 +353,15 @@ function MultiPeers(connection) {
         initFileBufferReader();
 
         fbr.readAsArrayBuffer(file, function(uuid) {
-            fbr.setMultipleUsers(uuid, connection.getAllParticipants());
+            var arrayOfUsers = connection.getAllParticipants();
 
-            connection.getAllParticipants().forEach(function(participant) {
+            if (remoteUserId) {
+                arrayOfUsers = [remoteUserId];
+            }
+
+            fbr.setMultipleUsers(uuid, arrayOfUsers);
+
+            arrayOfUsers.forEach(function(participant) {
                 fbr.getNextChunk(uuid, function(nextChunk, isLastChunk) {
                     connection.peers[participant].channels.forEach(function(channel) {
                         channel.send(nextChunk);
@@ -363,7 +369,9 @@ function MultiPeers(connection) {
                 }, participant);
             });
         }, {
-            userid: connection.userid
+            userid: connection.userid,
+            // extra: connection.extra,
+            chunkSize: connection.chunkSize || 0
         });
     };
 

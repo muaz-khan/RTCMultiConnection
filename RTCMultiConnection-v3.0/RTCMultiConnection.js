@@ -1,4 +1,4 @@
-// Last time updated at Monday, October 12th, 2015, 7:35:23 PM 
+// Last time updated at Tuesday, October 13th, 2015, 4:42:14 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -133,6 +133,16 @@
                     connectCallback(socket);
                 }
                 return;
+            }
+
+            if (typeof SocketConnection === 'undefined') {
+                if (typeof FirebaseConnection !== 'undefined') {
+                    window.SocketConnection = FirebaseConnection;
+                } else if (typeof PubNubConnection !== 'undefined') {
+                    window.SocketConnection = PubNubConnection;
+                } else {
+                    throw 'SocketConnection.js seems missed.';
+                }
             }
 
             socket = new SocketConnection(connection, function(s) {
@@ -957,6 +967,10 @@
                 SocketConnection = customSocketHandler;
             }
         };
+
+        // default value is 15k because Firefox's receiving limit is 16k!
+        // however 64k works chrome-to-chrome
+        connection.chunkSize = 15 * 1000;
     }
 
     function SocketConnection(connection, connectCallback) {
@@ -1546,7 +1560,7 @@
             };
         }
 
-        this.shareFile = function(file) {
+        this.shareFile = function(file, remoteUserId) {
             if (!connection.enableFileSharing) {
                 throw '"connection.enableFileSharing" is false.';
             }
@@ -1554,9 +1568,15 @@
             initFileBufferReader();
 
             fbr.readAsArrayBuffer(file, function(uuid) {
-                fbr.setMultipleUsers(uuid, connection.getAllParticipants());
+                var arrayOfUsers = connection.getAllParticipants();
 
-                connection.getAllParticipants().forEach(function(participant) {
+                if (remoteUserId) {
+                    arrayOfUsers = [remoteUserId];
+                }
+
+                fbr.setMultipleUsers(uuid, arrayOfUsers);
+
+                arrayOfUsers.forEach(function(participant) {
                     fbr.getNextChunk(uuid, function(nextChunk, isLastChunk) {
                         connection.peers[participant].channels.forEach(function(channel) {
                             channel.send(nextChunk);
@@ -1564,7 +1584,9 @@
                     }, participant);
                 });
             }, {
-                userid: connection.userid
+                userid: connection.userid,
+                // extra: connection.extra,
+                chunkSize: connection.chunkSize || 0
             });
         };
 

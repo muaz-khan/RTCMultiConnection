@@ -13,6 +13,16 @@ function PubNubConnection(connection, connectCallback) {
         if (data.eventName === connection.socketMessageEvent) {
             onMessagesCallback(data.data);
         }
+
+        if (data.eventName === 'presence') {
+            data = data.data;
+            if (data.userid === connection.userid) return;
+            connection.onUserStatusChanged({
+                userid: data.userid,
+                status: data.isOnline === true ? 'online' : 'offline',
+                extra: connection.peers[data.userid] ? connection.peers[data.userid].extra : {}
+            });
+        }
     };
 
     socket.onerror = function() {
@@ -27,6 +37,11 @@ function PubNubConnection(connection, connectCallback) {
         // if connection.enableLogs
         console.info('socket.io connection is opened.');
         if (connectCallback) connectCallback(socket);
+
+        socket.emit('presence', {
+            userid: connection.userid,
+            isOnline: true
+        });
     };
 
     socket.emit = function(eventName, data, callback) {
@@ -202,6 +217,13 @@ function PubNubConnection(connection, connectCallback) {
 
         mPeer.addNegotiatedMessage(message.message, message.sender);
     }
+
+    window.addEventListener('beforeunload', function() {
+        socket.emit('presence', {
+            userid: connection.userid,
+            isOnline: false
+        });
+    }, false);
 
     return socket;
 }

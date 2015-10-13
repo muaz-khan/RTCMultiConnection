@@ -312,13 +312,15 @@ connection.setCustomSocketHandler(FirebaseConnection);
 </script>
 ```
 
-PS. v3.0 documentation is still incomplete. Need to expand this section for more features or backward compatibility hacks.
+Demo: [https://cdn.rawgit.com/muaz-khan/RTCMultiConnection/master/RTCMultiConnection-v3.0/demos/Firebase-Demo.html](https://cdn.rawgit.com/muaz-khan/RTCMultiConnection/master/RTCMultiConnection-v3.0/demos/Firebase-Demo.html)
 
 ## PubNub?
 
 Follow above all "firebase" steps and use `PubNubConnection.js` instead.
 
 Please don't forget to use your own PubNub keys.
+
+Demo: [https://cdn.rawgit.com/muaz-khan/RTCMultiConnection/master/RTCMultiConnection-v3.0/demos/PubNub-Demo.html](https://cdn.rawgit.com/muaz-khan/RTCMultiConnection/master/RTCMultiConnection-v3.0/demos/PubNub-Demo.html)
 
 ## Configure v3.0
 

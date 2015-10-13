@@ -126,6 +126,16 @@ function RTCMultiConnection(roomid) {
             return;
         }
 
+        if (typeof SocketConnection === 'undefined') {
+            if (typeof FirebaseConnection !== 'undefined') {
+                window.SocketConnection = FirebaseConnection;
+            } else if (typeof PubNubConnection !== 'undefined') {
+                window.SocketConnection = PubNubConnection;
+            } else {
+                throw 'SocketConnection.js seems missed.';
+            }
+        }
+
         socket = new SocketConnection(connection, function(s) {
             socket = s;
             connectCallback(socket);
@@ -948,4 +958,8 @@ function RTCMultiConnection(roomid) {
             SocketConnection = customSocketHandler;
         }
     };
+
+    // default value is 15k because Firefox's receiving limit is 16k!
+    // however 64k works chrome-to-chrome
+    connection.chunkSize = 15 * 1000;
 }
