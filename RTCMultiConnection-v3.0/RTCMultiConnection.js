@@ -1,4 +1,4 @@
-// Last time updated at Tuesday, October 13th, 2015, 4:42:14 PM 
+// Last time updated at Wednesday, October 14th, 2015, 1:31:49 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -1882,7 +1882,7 @@
     }
 
     /*global MediaStream:true */
-    if (!('stop' in MediaStream.prototype)) {
+    if (typeof MediaStream !== 'undefined' && !('stop' in MediaStream.prototype)) {
         MediaStream.prototype.stop = function() {
             this.getAudioTracks().forEach(function(track) {
                 track.stop();

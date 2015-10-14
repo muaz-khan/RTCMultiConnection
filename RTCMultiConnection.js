@@ -1,4 +1,4 @@
-// Last time updated at Sunday, October 11th, 2015, 9:23:31 PM 
+// Last time updated at Wednesday, October 14th, 2015, 1:31:55 PM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -3679,7 +3679,7 @@
     }
 
     /*global MediaStream:true */
-    if (!('stop' in MediaStream.prototype)) {
+    if (typeof MediaStream !== 'undefined' && !('stop' in MediaStream.prototype)) {
         MediaStream.prototype.stop = function() {
             this.getAudioTracks().forEach(function(track) {
                 track.stop();
