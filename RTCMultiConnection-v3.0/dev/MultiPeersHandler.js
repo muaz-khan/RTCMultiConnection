@@ -326,7 +326,7 @@ function MultiPeers(connection) {
     this.onRemovingRemoteMedia = function(stream, remoteUserId) {};
     this.onGettingLocalMedia = function(localStream) {};
     this.onLocalMediaError = function(error) {
-        console.error('onLocalMediaError', error);
+        console.error('onLocalMediaError', JSON.stringify(error, null, '\t'));
         connection.onMediaError(error);
     };
 

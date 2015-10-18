@@ -101,10 +101,10 @@ function PeerInitiator(config) {
     });
 
     if (!renegotiatingPeer) {
-        peer = new RTCPeerConnection({
+        peer = new RTCPeerConnection(navigator.onLine ? {
             iceServers: config.iceServers,
             iceTransports: 'all'
-        }, config.optionalArgument);
+        } : null, config.optionalArgument);
     } else {
         peer = config.peerRef;
 
