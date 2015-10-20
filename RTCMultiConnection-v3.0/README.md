@@ -17,6 +17,9 @@ ls -a
 To TEST:
 
 ```
+npm start
+
+# or
 node server.js
 
 # if fails,
@@ -44,6 +47,17 @@ If you're sharing files, you also need to link:
 You can link multiple files from "dev" directory.
 
 ## Set different socket URL
+
+Either via `config.json` file:
+
+```json
+{
+  "socketURL": "/",
+  "socketMessageEvent": "RTCMultiConnection-Message"
+}
+```
+
+or override in your HTML code:
 
 ```javascript
 connection.socketURL = 'http://yourdomain.com:8080/';

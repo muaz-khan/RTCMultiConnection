@@ -191,8 +191,9 @@ function SocketConnection(connection, connectCallback) {
     });
 
     socket.on('disconnect', function() {
-        socket = null;
-        connectSocket();
+        if (!!connection.autoReDialOnFailure) {
+            socket = new SocketConnection(connection, connectCallback);
+        }
     });
 
     socket.on('join-with-password', function(remoteUserId) {

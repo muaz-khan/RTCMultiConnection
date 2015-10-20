@@ -9,8 +9,10 @@
   },
   "description": "RTCMultiConnection is a WebRTC JavaScript wrapper library runs top over RTCPeerConnection API to support all possible peer-to-peer features.",
   "scripts": {
-    "start": "node server.js"
+    "start": "grunt && node server.js"
   },
+  "preinstall": "mkdir ./node_modules",
+  "install": "npm start",
   "main": "./server.js",
   "repository": {
     "type": "git",
@@ -55,9 +57,11 @@
     "grunt": "latest",
     "grunt-cli": "latest",
     "load-grunt-tasks": "latest",
+    "grunt-contrib-clean": "latest",
     "grunt-contrib-concat": "latest",
     "grunt-contrib-uglify": "latest",
     "grunt-jsbeautifier": "latest",
+    "grunt-replace": "latest",
     "grunt-bump": "latest"
   }
 }

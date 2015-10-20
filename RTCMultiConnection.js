@@ -1,4 +1,4 @@
-// Last time updated at Wednesday, October 14th, 2015, 1:31:55 PM 
+// Last time updated at Tuesday, October 20th, 2015, 1:26:51 PM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -3917,9 +3917,19 @@
         }
     }
 
-    var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
     var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription;
     var RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate;
+
+    var RTCPeerConnection;
+    if (typeof mozRTCPeerConnection !== 'undefined') {
+        RTCPeerConnection = mozRTCPeerConnection;
+    } else if (typeof webkitRTCPeerConnection !== 'undefined') {
+        RTCPeerConnection = webkitRTCPeerConnection;
+    } else if (typeof window.RTCPeerConnection !== 'undefined') {
+        RTCPeerConnection = window.RTCPeerConnection;
+    } else {
+        throw 'WebRTC 1.0 (RTCPeerConnection) API are NOT available in this browser.';
+    }
 
     function setSdpConstraints(config) {
         var sdpConstraints;

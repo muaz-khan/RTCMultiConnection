@@ -1,4 +1,4 @@
-// Last time updated at Sunday, October 18th, 2015, 12:54:53 PM 
+// Last time updated at Tuesday, October 20th, 2015, 1:26:46 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -115,10 +115,14 @@
             delete connection.peers[remoteUserId];
         }
         mPeer.onUserLeft = onUserLeft;
-        mPeer.disconnectWith = function(remoteUserId) {
-            socket.emit('disconnect-with', remoteUserId);
+        mPeer.disconnectWith = function(remoteUserId, callback) {
+            socket.emit('disconnect-with', remoteUserId, callback || function() {});
 
             if (connection.peers[remoteUserId]) {
+                if (connection.peers[remoteUserId].peer) {
+                    connection.peers[remoteUserId].peer.close();
+                }
+
                 delete connection.peers[remoteUserId];
             }
         };
@@ -448,12 +452,15 @@
         window.addEventListener('beforeunload', beforeUnload, false);
 
         connection.userid = getRandomString();
+        connection.changeUserId = function(newUserId) {
+            connection.userid = newUserId || getRandomString();
+            socket.emit('changed-uuid', connection.userid);
+        };
+
         connection.extra = {};
         if (Object.observe) {
             Object.observe(connection.extra, function(changes) {
-                changes.forEach(function(change) {
-                    socket.emit('extra-data-updated', connection.extra);
-                });
+                socket.emit('extra-data-updated', connection.extra);
             });
         }
 
@@ -467,15 +474,39 @@
         connection.mediaConstraints = {
             audio: {
                 mandatory: {},
-                optional: [{
-                    chromeRenderToAssociatedSink: true
-                }]
+                optional: []
             },
             video: {
                 mandatory: {},
                 optional: []
             }
         };
+
+        DetectRTC.load(function() {
+            // it will force RTCMultiConnection to capture default devices
+            var firstAudioDevice, firstVideoDevice;
+            DetectRTC.MediaDevices.forEach(function(device) {
+                if (!firstAudioDevice && device.kind === 'audioinput') {
+                    firstAudioDevice = device;
+                    connection.mediaConstraints.audio = {
+                        optional: [{
+                            sourceId: device.id
+                        }],
+                        mandatory: {}
+                    };
+                }
+
+                if (!firstVideoDevice && device.kind === 'videoinput') {
+                    firstVideoDevice = device;
+                    connection.mediaConstraints.video = {
+                        optional: [{
+                            sourceId: device.id
+                        }],
+                        mandatory: {}
+                    };
+                }
+            })
+        });
 
         connection.sdpConstraints = {
             mandatory: {
@@ -1001,8 +1032,8 @@
             },
             selectAll: function() {}
         };
-        connection.socketURL = '/';
-        connection.socketMessageEvent = 'RTCMultiConnection-Message';
+        connection.socketURL = '/'; // generated via config.json
+        connection.socketMessageEvent = 'RTCMultiConnection-Message'; // generated via config.json
         connection.DetectRTC = DetectRTC;
 
         connection.onUserStatusChanged = function(event) {
@@ -1021,6 +1052,9 @@
         // default value is 15k because Firefox's receiving limit is 16k!
         // however 64k works chrome-to-chrome
         connection.chunkSize = 15 * 1000;
+
+        // eject or leave single user
+        connection.disconnectWith = mPeer.disconnectWith;
     }
 
     function SocketConnection(connection, connectCallback) {
@@ -1216,8 +1250,9 @@
         });
 
         socket.on('disconnect', function() {
-            socket = null;
-            connectSocket();
+            if (!!connection.autoReDialOnFailure) {
+                socket = new SocketConnection(connection, connectCallback);
+            }
         });
 
         socket.on('join-with-password', function(remoteUserId) {
@@ -1955,7 +1990,17 @@
         return sdpConstraints;
     }
 
-    var RTCPeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+    var RTCPeerConnection;
+    if (typeof mozRTCPeerConnection !== 'undefined') {
+        RTCPeerConnection = mozRTCPeerConnection;
+    } else if (typeof webkitRTCPeerConnection !== 'undefined') {
+        RTCPeerConnection = webkitRTCPeerConnection;
+    } else if (typeof window.RTCPeerConnection !== 'undefined') {
+        RTCPeerConnection = window.RTCPeerConnection;
+    } else {
+        throw 'WebRTC 1.0 (RTCPeerConnection) API are NOT available in this browser.';
+    }
+
     var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription;
     var RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate;
     var MediaStreamTrack = window.MediaStreamTrack;

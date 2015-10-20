@@ -9,6 +9,15 @@ function serverHandler(request, response) {
     var uri = url.parse(request.url).pathname,
         filename = path.join(process.cwd(), uri);
 
+    if (filename.indexOf('/null') !== -1 || filename.indexOf('\\null') !== -1) {
+        response.writeHead(404, {
+            'Content-Type': 'text/plain'
+        });
+        response.write('404 Not Found: ' + filename + '\n');
+        response.end();
+        return;
+    }
+
     fs.exists(filename, function(exists) {
         if (!exists) {
             response.writeHead(404, {
