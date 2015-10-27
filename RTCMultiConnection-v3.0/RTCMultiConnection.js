@@ -1,4 +1,4 @@
-// Last time updated at Thursday, October 22nd, 2015, 8:09:35 PM 
+// Last time updated at Tuesday, October 27th, 2015, 11:03:53 AM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -1659,10 +1659,8 @@
                     arrayOfUsers = [remoteUserId];
                 }
 
-                fbr.setMultipleUsers(uuid, arrayOfUsers);
-
                 arrayOfUsers.forEach(function(participant) {
-                    fbr.getNextChunk(uuid, function(nextChunk, isLastChunk) {
+                    fbr.getNextChunk(uuid, function(nextChunk) {
                         connection.peers[participant].channels.forEach(function(channel) {
                             channel.send(nextChunk);
                         });
@@ -3382,171 +3380,236 @@
 
     })();
 
-    // Last time updated at Sep 23, 2014, 08:32:23
+    // Last time updated at Oct 24, 2015, 08:32:23
 
-    // Latest file can be found here: https://cdn.webrtc-experiment.com/Screen-Capturing.js
+    // Latest file can be found here: https://cdn.webrtc-experiment.com/getScreenId.js
 
-    // Muaz Khan     - www.MuazKhan.com
-    // MIT License   - www.WebRTC-Experiment.com/licence
-    // Documentation - https://github.com/muaz-khan/Chrome-Extensions/tree/master/Screen-Capturing.js
-    // Demo          - https://www.webrtc-experiment.com/Screen-Capturing/
+    // Muaz Khan         - www.MuazKhan.com
+    // MIT License       - www.WebRTC-Experiment.com/licence
+    // Documentation     - https://github.com/muaz-khan/getScreenId.
 
-    // ___________________
-    // Screen-Capturing.js
+    // ______________
+    // getScreenId.js
 
-    // Source code: https://github.com/muaz-khan/Chrome-Extensions/tree/master/desktopCapture
-    // Google AppStore installation path: https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk
-
-    // This JavaScript file is aimed to explain steps needed to integrate above chrome extension
-    // in your own webpages
-
-    // Usage:
-    // getScreenConstraints(function(screen_constraints) {
-    //    navigator.webkitGetUserMedia({ video: screen_constraints }, onSuccess, onFailure );
-    // });
-
-    // First Step: Download the extension, modify "manifest.json" and publish to Google AppStore
-    //             https://github.com/muaz-khan/Chrome-Extensions/tree/master/desktopCapture#how-to-publish-yourself
-
-    // Second Step: Listen for postMessage handler
-    // postMessage is used to exchange "sourceId" between chrome extension and you webpage.
-    // though, there are tons other options as well, e.g. XHR-signaling, websockets, etc.
-    window.addEventListener('message', function(event) {
-        if (event.origin != window.location.origin) {
-            return;
+    /*
+    getScreenId(function (error, sourceId, screen_constraints) {
+        // error    == null || 'permission-denied' || 'not-installed' || 'installed-disabled' || 'not-chrome'
+        // sourceId == null || 'string' || 'firefox'
+        
+        if(sourceId == 'firefox') {
+            navigator.mozGetUserMedia(screen_constraints, onSuccess, onFailure);
         }
-
-        onMessageCallback(event.data);
+        else navigator.webkitGetUserMedia(screen_constraints, onSuccess, onFailure);
     });
+    */
 
-    // and the function that handles received messages
+    (function() {
+        window.getScreenId = function(callback) {
+            // for Firefox:
+            // sourceId == 'firefox'
+            // screen_constraints = {...}
+            if (!!navigator.mozGetUserMedia) {
+                callback(null, 'firefox', {
+                    video: {
+                        mozMediaSource: 'window',
+                        mediaSource: 'window'
+                    }
+                });
+                return;
+            }
 
-    function onMessageCallback(data) {
-        // "cancel" button is clicked
-        if (data == 'PermissionDeniedError') {
-            chromeMediaSource = 'PermissionDeniedError';
-            if (screenCallback) return screenCallback('PermissionDeniedError');
-            else throw new Error('PermissionDeniedError');
-        }
+            postMessage();
 
-        // extension notified his presence
-        if (data == 'rtcmulticonnection-extension-loaded') {
-            chromeMediaSource = 'desktop';
-        }
+            window.addEventListener('message', onIFrameCallback);
 
-        // extension shared temp sourceId
-        if (data.sourceId && screenCallback) {
-            screenCallback(sourceId = data.sourceId);
-        }
-    }
+            function onIFrameCallback(event) {
+                if (!event.data) return;
 
-    // global variables
-    var chromeMediaSource = 'screen';
-    var sourceId;
-    var screenCallback;
+                if (event.data.chromeMediaSourceId) {
+                    if (event.data.chromeMediaSourceId === 'PermissionDeniedError') {
+                        callback('permission-denied');
+                    } else callback(null, event.data.chromeMediaSourceId, getScreenConstraints(null, event.data.chromeMediaSourceId));
+                }
 
-    // this method can be used to check if chrome extension is installed & enabled.
-    function isChromeExtensionAvailable(callback) {
-        if (!callback) return;
+                if (event.data.chromeExtensionStatus) {
+                    callback(event.data.chromeExtensionStatus, null, getScreenConstraints(event.data.chromeExtensionStatus));
+                }
 
-        if (chromeMediaSource == 'desktop') return callback(true);
-
-        // ask extension if it is available
-        window.postMessage('are-you-there', '*');
-
-        setTimeout(function() {
-            if (chromeMediaSource == 'screen') {
-                callback(false);
-            } else callback(true);
-        }, 2000);
-    }
-
-    // this function can be used to get "source-id" from the extension
-    function getSourceId(callback) {
-        if (!callback) throw '"callback" parameter is mandatory.';
-        if (sourceId) {
-            callback(sourceId);
-            sourceId = null;
-            return;
-        }
-
-        screenCallback = callback;
-        window.postMessage('get-sourceId', '*');
-    }
-
-    var isFirefox = typeof window.InstallTrigger !== 'undefined';
-    var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-    var isChrome = !!window.chrome && !isOpera;
-
-    function getChromeExtensionStatus(extensionid, callback) {
-        if (isFirefox) return callback('not-chrome');
-
-        if (arguments.length != 2) {
-            callback = extensionid;
-            extensionid = 'ajhifddimkapgcifgcodmmfdlknahffk'; // default extension-id
-        }
-
-        var image = document.createElement('img');
-        image.src = 'chrome-extension://' + extensionid + '/icon.png';
-        image.onload = function() {
-            chromeMediaSource = 'screen';
-            window.postMessage('are-you-there', '*');
-            setTimeout(function() {
-                if (chromeMediaSource == 'screen') {
-                    callback(extensionid == extensionid ? 'installed-enabled' : 'installed-disabled');
-                } else callback('installed-enabled');
-            }, 2000);
-        };
-        image.onerror = function() {
-            callback('not-installed');
-        };
-    }
-
-    // this function explains how to use above methods/objects
-    function getScreenConstraints(callback) {
-        var firefoxScreenConstraints = {
-            mozMediaSource: 'window',
-            mediaSource: 'window'
+                // this event listener is no more needed
+                window.removeEventListener('message', onIFrameCallback);
+            }
         };
 
-        if (isFirefox) return callback(null, firefoxScreenConstraints);
+        function getScreenConstraints(error, sourceId) {
+            var screen_constraints = {
+                audio: false,
+                video: {
+                    mandatory: {
+                        chromeMediaSource: error ? 'screen' : 'desktop',
+                        maxWidth: window.screen.width > 1920 ? window.screen.width : 1920,
+                        maxHeight: window.screen.height > 1080 ? window.screen.height : 1080
+                    },
+                    optional: []
+                }
+            };
 
-        // this statement defines getUserMedia constraints
-        // that will be used to capture content of screen
-        var screen_constraints = {
-            mandatory: {
-                chromeMediaSource: chromeMediaSource,
-                maxWidth: screen.width > 1920 ? screen.width : 1920,
-                maxHeight: screen.height > 1080 ? screen.height : 1080,
-                minFrameRate: 30,
-                maxFrameRate: 64,
-                minAspectRatio: 1.77,
-                googLeakyBucket: true,
-                googTemporalLayeredScreencast: true
-            },
-            optional: []
-        };
+            if (sourceId) {
+                screen_constraints.video.mandatory.chromeMediaSourceId = sourceId;
+            }
 
-        // this statement verifies chrome extension availability
-        // if installed and available then it will invoke extension API
-        // otherwise it will fallback to command-line based screen capturing API
-        if (chromeMediaSource == 'desktop' && !sourceId) {
-            getSourceId(function() {
-                screen_constraints.mandatory.chromeMediaSourceId = sourceId;
-                callback(sourceId == 'PermissionDeniedError' ? sourceId : null, screen_constraints);
-                sourceId = null;
+            return screen_constraints;
+        }
+
+        function postMessage() {
+            if (!iframe) {
+                loadIFrame(postMessage);
+                return;
+            }
+
+            if (!iframe.isLoaded) {
+                setTimeout(postMessage, 100);
+                return;
+            }
+
+            iframe.contentWindow.postMessage({
+                captureSourceId: true
+            }, '*');
+        }
+
+        function loadIFrame(loadCallback) {
+            if (iframe) {
+                loadCallback();
+                return;
+            }
+
+            iframe = document.createElement('iframe');
+            iframe.onload = function() {
+                iframe.isLoaded = true;
+
+                loadCallback();
+            };
+            iframe.src = 'https://www.webrtc-experiment.com/getSourceId/'; // https://wwww.yourdomain.com/getScreenId.html
+            iframe.style.display = 'none';
+            (document.body || document.documentElement).appendChild(iframe);
+        }
+
+        var iframe;
+
+        // this function is used in v3.0
+        window.getScreenConstraints = function(callback) {
+            loadIFrame(function() {
+                getScreenId(function(error, sourceId, screen_constraints) {
+                    callback(error, screen_constraints.video);
+                });
             });
+        };
+    })();
+
+    (function() {
+        if (document.domain.indexOf('webrtc-experiment.com') === -1) {
             return;
         }
 
-        // this statement sets gets 'sourceId" and sets "chromeMediaSourceId" 
-        if (chromeMediaSource == 'desktop') {
-            screen_constraints.mandatory.chromeMediaSourceId = sourceId;
+        window.getScreenId = function(callback) {
+            // for Firefox:
+            // sourceId == 'firefox'
+            // screen_constraints = {...}
+            if (!!navigator.mozGetUserMedia) {
+                callback(null, 'firefox', {
+                    video: {
+                        mozMediaSource: 'window',
+                        mediaSource: 'window'
+                    }
+                });
+                return;
+            }
+
+            postMessage();
+
+            window.addEventListener('message', onIFrameCallback);
+
+            function onIFrameCallback(event) {
+                if (!event.data) return;
+
+                if (event.data.chromeMediaSourceId) {
+                    if (event.data.chromeMediaSourceId === 'PermissionDeniedError') {
+                        callback('permission-denied');
+                    } else callback(null, event.data.chromeMediaSourceId, getScreenConstraints(null, event.data.chromeMediaSourceId));
+                }
+
+                if (event.data.chromeExtensionStatus) {
+                    callback(event.data.chromeExtensionStatus, null, getScreenConstraints(event.data.chromeExtensionStatus));
+                }
+
+                // this event listener is no more needed
+                window.removeEventListener('message', onIFrameCallback);
+            }
+        };
+
+        function getScreenConstraints(error, sourceId) {
+            var screen_constraints = {
+                audio: false,
+                video: {
+                    mandatory: {
+                        chromeMediaSource: error ? 'screen' : 'desktop',
+                        maxWidth: window.screen.width > 1920 ? window.screen.width : 1920,
+                        maxHeight: window.screen.height > 1080 ? window.screen.height : 1080
+                    },
+                    optional: []
+                }
+            };
+
+            if (sourceId) {
+                screen_constraints.video.mandatory.chromeMediaSourceId = sourceId;
+            }
+
+            return screen_constraints;
         }
 
-        // now invoking native getUserMedia API
-        callback(null, screen_constraints);
-    }
+        function postMessage() {
+            if (!iframe) {
+                loadIFrame(postMessage);
+                return;
+            }
+
+            if (!iframe.isLoaded) {
+                setTimeout(postMessage, 100);
+                return;
+            }
+
+            iframe.contentWindow.postMessage({
+                captureSourceId: true
+            }, '*');
+        }
+
+        function loadIFrame(loadCallback) {
+            if (iframe) {
+                loadCallback();
+                return;
+            }
+
+            iframe = document.createElement('iframe');
+            iframe.onload = function() {
+                iframe.isLoaded = true;
+
+                loadCallback();
+            };
+            iframe.src = 'https://www.webrtc-experiment.com/getSourceId/'; // https://wwww.yourdomain.com/getScreenId.html
+            iframe.style.display = 'none';
+            (document.body || document.documentElement).appendChild(iframe);
+        }
+
+        var iframe;
+
+        // this function is used in v3.0
+        window.getScreenConstraints = function(callback) {
+            loadIFrame(function() {
+                getScreenId(function(error, sourceId, screen_constraints) {
+                    callback(error, screen_constraints.video);
+                });
+            });
+        };
+    })();
 
     // Last time updated at Feb 08, 2015, 08:32:23
 
@@ -3861,6 +3924,10 @@
 
                 if (file.remoteUserId) {
                     div.innerHTML += ' (Sharing with:' + file.remoteUserId + ')';
+                }
+
+                if (!connection.filesContainer) {
+                    connection.filesContainer = document.body || document.documentElement;
                 }
 
                 connection.filesContainer.insertBefore(div, connection.filesContainer.firstChild);
