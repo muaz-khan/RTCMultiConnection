@@ -69,11 +69,13 @@ module.exports = exports = function(app, socketCallback) {
         });
 
         socket.on('set-password', function(password) {
-            listOfUsers[socket.userid].password = password;
+            if (listOfUsers[socket.userid]) {
+                listOfUsers[socket.userid].password = password; 
+            }
         });
 
         socket.on('disconnect-with', function(remoteUserId, callback) {
-            if (listOfUsers[socket.userid].connectedWith[remoteUserId]) {
+            if (listOfUsers[socket.userid] && listOfUsers[socket.userid].connectedWith[remoteUserId]) {
                 delete listOfUsers[socket.userid].connectedWith[remoteUserId];
                 socket.emit('user-disconnected', remoteUserId);
             }

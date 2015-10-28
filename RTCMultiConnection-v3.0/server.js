@@ -71,8 +71,8 @@ var app;
 
 if (isUseHTTPs) {
     var options = {
-        key: fs.readFileSync('fake-keys/privatekey.pem'),
-        cert: fs.readFileSync('fake-keys/certificate.pem')
+        key: fs.readFileSync(path.join(__dirname, 'fake-keys/privatekey.pem')),
+        cert: fs.readFileSync(path.join(__dirname, 'fake-keys/certificate.pem'))
     };
     app = server.createServer(options, serverHandler);
 } else app = server.createServer(serverHandler);
