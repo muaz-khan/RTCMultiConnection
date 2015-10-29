@@ -348,7 +348,10 @@ window.RTCMultiConnection = function(channel) {
 
             // Firefox is supporting audio+screen from single getUserMedia request
             // audio+video+screen will become audio+screen for Firefox
-            // because Firefox isn't supporting multi-streams feature
+            // because Firefox isn't supporting multi-streams feature version < 38
+            // version >38 supports multi-stream sharing.
+            // we can use:  firefoxVersion < 38
+            // however capturing audio and screen using single getUserMedia is a better option
             if (constraints.audio /* && !session.video */ ) {
                 screen_constraints.audio = true;
                 constraints = {};

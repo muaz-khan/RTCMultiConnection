@@ -1,4 +1,4 @@
-// Last time updated at Thursday, October 29th, 2015, 8:02:41 PM 
+// Last time updated at Thursday, October 29th, 2015, 8:16:15 PM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -367,7 +367,10 @@
 
                 // Firefox is supporting audio+screen from single getUserMedia request
                 // audio+video+screen will become audio+screen for Firefox
-                // because Firefox isn't supporting multi-streams feature
+                // because Firefox isn't supporting multi-streams feature version < 38
+                // version >38 supports multi-stream sharing.
+                // we can use:  firefoxVersion < 38
+                // however capturing audio and screen using single getUserMedia is a better option
                 if (constraints.audio /* && !session.video */ ) {
                     screen_constraints.audio = true;
                     constraints = {};
