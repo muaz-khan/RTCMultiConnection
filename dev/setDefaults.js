@@ -1136,7 +1136,7 @@ function setDefaults(connection) {
         if (!event.peer.numOfRetries) event.peer.numOfRetries = 0;
         event.peer.numOfRetries++;
 
-        if (isFirefox || event.targetuser.browser == 'firefox') {
+        if ((isFirefox || event.targetuser.browser == 'firefox') && firefoxVersion < 38) {
             error('ICE connectivity check is failed. Re-establishing peer connection.');
             event.peer.numOfRetries < 2 && event.peer.redial();
         } else {

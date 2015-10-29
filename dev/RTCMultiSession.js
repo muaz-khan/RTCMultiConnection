@@ -1194,9 +1194,9 @@ function RTCMultiSession(connection, callbackForSignalingReady) {
             }
 
             function createAnswer() {
-                // because Firefox has no support of renegotiation yet;
+                // because Firefox has no support of renegotiation in older versions (<38)
                 // so both chrome and firefox should redial instead of renegotiate!
-                if (isFirefox || _config.userinfo.browser == 'firefox') {
+                if ((isFirefox || _config.userinfo.browser == 'firefox') && firefoxVersion < 38) {
                     if (connection.peers[_config.userid]) {
                         connection.peers[_config.userid].redial();
                     }

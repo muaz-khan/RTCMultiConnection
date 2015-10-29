@@ -1,4 +1,4 @@
-// Last time updated at Thursday, October 22nd, 2015, 8:03:56 PM 
+// Last time updated at Thursday, October 29th, 2015, 8:02:41 PM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -2199,9 +2199,9 @@
                 }
 
                 function createAnswer() {
-                    // because Firefox has no support of renegotiation yet;
+                    // because Firefox has no support of renegotiation in older versions (<38)
                     // so both chrome and firefox should redial instead of renegotiate!
-                    if (isFirefox || _config.userinfo.browser == 'firefox') {
+                    if ((isFirefox || _config.userinfo.browser == 'firefox') && firefoxVersion < 38) {
                         if (connection.peers[_config.userid]) {
                             connection.peers[_config.userid].redial();
                         }
@@ -6509,7 +6509,7 @@
             if (!event.peer.numOfRetries) event.peer.numOfRetries = 0;
             event.peer.numOfRetries++;
 
-            if (isFirefox || event.targetuser.browser == 'firefox') {
+            if ((isFirefox || event.targetuser.browser == 'firefox') && firefoxVersion < 38) {
                 error('ICE connectivity check is failed. Re-establishing peer connection.');
                 event.peer.numOfRetries < 2 && event.peer.redial();
             } else {
