@@ -1,4 +1,4 @@
-// Last time updated at Thursday, October 29th, 2015, 8:16:15 PM 
+// Last time updated at Friday, October 30th, 2015, 8:06:23 PM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -1224,7 +1224,7 @@
                 onaddstream: function(stream, session) {
                     session = session || _config.renegotiate || connection.session;
 
-                    // if it is Firefox; then return.
+                    // if it is data-only connection; then return.
                     if (isData(session)) return;
 
                     if (session.screen && (session.audio || session.video)) {
@@ -2186,9 +2186,7 @@
                     connection.captureUserMedia(function(stream) {
                         _config.capturing = false;
 
-                        if (isChrome || (isFirefox && !peer.connection.getLocalStreams().length)) {
-                            peer.addStream(stream);
-                        }
+                        peer.addStream(stream);
 
                         connection.renegotiatedSessions[JSON.stringify(_config.renegotiate)] = {
                             session: _config.renegotiate,
@@ -2202,15 +2200,6 @@
                 }
 
                 function createAnswer() {
-                    // because Firefox has no support of renegotiation in older versions (<38)
-                    // so both chrome and firefox should redial instead of renegotiate!
-                    if ((isFirefox || _config.userinfo.browser == 'firefox') && firefoxVersion < 38) {
-                        if (connection.peers[_config.userid]) {
-                            connection.peers[_config.userid].redial();
-                        }
-                        return;
-                    }
-
                     peer.recreateAnswer(sdp, session, function(_sdp, streaminfo) {
                         sendsdp({
                             sdp: _sdp,
@@ -2955,25 +2944,18 @@
                 var peer = _peer.peer;
 
                 if (e.stream) {
-                    peer.attachStreams = [e.stream];
+                    if (!peer.attachStreams) {
+                        peer.attachStreams = [];
+                    }
+
+                    peer.attachStreams.push(e.stream);
                 }
 
                 // detaching old streams
                 detachMediaStream(connection.detachStreams, peer.connection);
 
                 if (e.stream && (session.audio || session.video || session.screen)) {
-                    // removeStream is not yet implemented in Firefox
-                    // if(isFirefox) peer.connection.removeStream(e.stream);
-
-                    if (isChrome || (isFirefox && !peer.connection.getLocalStreams().length)) {
-                        peer.addStream(e.stream);
-                    }
-                }
-
-                // because Firefox has no support of renegotiation yet;
-                // so both chrome and firefox should redial instead of renegotiate!
-                if (isFirefox || _peer.userinfo.browser == 'firefox') {
-                    return _peer.redial();
+                    peer.addStream(e.stream);
                 }
 
                 peer.recreateOffer(session, function(sdp, streaminfo) {
@@ -4021,13 +4003,6 @@
 
                 if (isFirefox) return sdp;
 
-                if (this.renegotiate) {
-                    // sdp = sdp.replace(/a=rtpmap:.* rtx.*\r\n/gi, '');
-                    // sdp = sdp.replace(/a=fmtp:.* apt=.*\r\n/gi, '');
-                    // sdp = sdp.replace(/a=rtcp-fb.*\r\n/gi, '');
-                    // sdp = sdp.replace(/a=candidate:.*\r\n/gi, '');
-                }
-
                 if (this.session.inactive && !this.holdMLine) {
                     this.hold = true;
                     if ((this.session.screen || this.session.video) && this.session.audio) {
@@ -4461,12 +4436,9 @@
                 }
             },
             recreateOffer: function(renegotiate, callback) {
-                // if(isFirefox) this.create(this.type, this);
-
                 log('recreating offer');
 
                 this.type = 'offer';
-                this.renegotiate = true;
                 this.session = renegotiate;
 
                 // todo: make sure this doesn't affect renegotiation scenarios
@@ -4488,7 +4460,6 @@
                 log('recreating answer');
 
                 this.type = 'answer';
-                this.renegotiate = true;
                 this.session = session;
 
                 // todo: make sure this doesn't affect renegotiation scenarios
@@ -6512,13 +6483,8 @@
             if (!event.peer.numOfRetries) event.peer.numOfRetries = 0;
             event.peer.numOfRetries++;
 
-            if ((isFirefox || event.targetuser.browser == 'firefox') && firefoxVersion < 38) {
-                error('ICE connectivity check is failed. Re-establishing peer connection.');
-                event.peer.numOfRetries < 2 && event.peer.redial();
-            } else {
-                error('ICE connectivity check is failed. Renegotiating peer connection.');
-                event.peer.numOfRetries < 2 && event.peer.renegotiate();
-            }
+            error('ICE connectivity check is failed. Renegotiating peer connection.');
+            event.peer.numOfRetries < 2 && event.peer.renegotiate();
 
             if (event.peer.numOfRetries >= 2) event.peer.numOfRetries = 0;
         };

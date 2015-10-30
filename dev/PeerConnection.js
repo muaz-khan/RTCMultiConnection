@@ -99,13 +99,6 @@ function PeerConnection() {
 
             if (isFirefox) return sdp;
 
-            if (this.renegotiate) {
-                // sdp = sdp.replace(/a=rtpmap:.* rtx.*\r\n/gi, '');
-                // sdp = sdp.replace(/a=fmtp:.* apt=.*\r\n/gi, '');
-                // sdp = sdp.replace(/a=rtcp-fb.*\r\n/gi, '');
-                // sdp = sdp.replace(/a=candidate:.*\r\n/gi, '');
-            }
-
             if (this.session.inactive && !this.holdMLine) {
                 this.hold = true;
                 if ((this.session.screen || this.session.video) && this.session.audio) {
@@ -539,12 +532,9 @@ function PeerConnection() {
             }
         },
         recreateOffer: function(renegotiate, callback) {
-            // if(isFirefox) this.create(this.type, this);
-
             log('recreating offer');
 
             this.type = 'offer';
-            this.renegotiate = true;
             this.session = renegotiate;
 
             // todo: make sure this doesn't affect renegotiation scenarios
@@ -566,7 +556,6 @@ function PeerConnection() {
             log('recreating answer');
 
             this.type = 'answer';
-            this.renegotiate = true;
             this.session = session;
 
             // todo: make sure this doesn't affect renegotiation scenarios
