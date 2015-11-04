@@ -1,4 +1,4 @@
-// Last time updated at Friday, October 30th, 2015, 8:06:23 PM 
+// Last time updated at Wednesday, November 4th, 2015, 11:23:25 AM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -2217,7 +2217,17 @@
             for (var i = 0; i < labels.length; i++) {
                 var label = labels[i];
                 if (connection.streams[label]) {
-                    peer.removeStream(connection.streams[label].stream);
+                    try {
+                        peer.removeStream(connection.streams[label].stream);
+                        // Fallback - on Firefox removeStream has not been implemented yet
+                    } catch (e) {
+                        // Force stop all the tracks
+                        var stream = connection.streams[label].stream;
+                        var tracks = stream.getTracks();
+
+                        for (var k in tracks)
+                            tracks[k].stop();
+                    }
                 }
             }
         }
