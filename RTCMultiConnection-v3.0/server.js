@@ -9,61 +9,40 @@ function serverHandler(request, response) {
     var uri = url.parse(request.url).pathname,
         filename = path.join(process.cwd(), uri);
 
-    if (filename.indexOf('/null') !== -1 || filename.indexOf('\\null') !== -1) {
+    var stats;
+
+    try {
+        stats = fs.lstatSync(filename);
+    } catch (e) {
         response.writeHead(404, {
             'Content-Type': 'text/plain'
         });
-        response.write('404 Not Found: ' + filename + '\n');
+        response.write('404 Not Found: ' + path.join('/', uri) + '\n');
         response.end();
         return;
     }
+    if (fs.statSync(filename).isDirectory()) {
+        if (filename.indexOf('/demos/') !== -1) {
+            filename = filename.replace('/demos/', '');
+        }
 
-    fs.exists(filename, function(exists) {
-        if (!exists) {
-            response.writeHead(404, {
+        filename += '/demos/index.html';
+    }
+
+
+    fs.readFile(filename, 'binary', function(err, file) {
+        if (err) {
+            response.writeHead(500, {
                 'Content-Type': 'text/plain'
             });
-            response.write('404 Not Found: ' + filename + '\n');
+            response.write(err + '\n');
             response.end();
             return;
         }
 
-        if (filename.indexOf('favicon.ico') !== -1) {
-            return;
-        }
-
-        var isWin = !!process.platform.match(/^win/);
-
-        if (fs.statSync(filename).isDirectory() && !isWin) {
-            if (filename.indexOf('/demos/') !== -1) {
-                filename = filename.replace('/demos/', '');
-            }
-
-            filename += '/demos/index.html';
-        }
-
-        if (fs.statSync(filename).isDirectory() && !!isWin) {
-            if (filename.indexOf('\\demos\\') !== -1) {
-                filename = filename.replace('\\demos\\', '');
-            }
-
-            filename += '\\demos\\index.html';
-        }
-
-        fs.readFile(filename, 'binary', function(err, file) {
-            if (err) {
-                response.writeHead(500, {
-                    'Content-Type': 'text/plain'
-                });
-                response.write(err + '\n');
-                response.end();
-                return;
-            }
-
-            response.writeHead(200);
-            response.write(file, 'binary');
-            response.end();
-        });
+        response.writeHead(200);
+        response.write(file, 'binary');
+        response.end();
     });
 }
 

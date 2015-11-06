@@ -1,4 +1,4 @@
-// Last time updated at Friday, October 30th, 2015, 8:06:23 PM 
+// Last time updated at Saturday, October 31st, 2015, 10:36:37 AM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -896,29 +896,6 @@
 
             if (!streamid) streamid = 'all';
             if (!isString(streamid) || streamid.search(/all|audio|video|screen/gi) != -1) {
-                for (var stream in connection.streams) {
-                    if (connection._skip.indexOf(stream) == -1) {
-                        _stream = connection.streams[stream];
-
-                        if (streamid == 'all') _detachStream(_stream, {
-                            audio: true,
-                            video: true,
-                            screen: true
-                        });
-
-                        else if (isString(streamid)) {
-                            // connection.removeStream('screen');
-                            var config = {};
-                            config[streamid] = true;
-                            _detachStream(_stream, config);
-                        } else _detachStream(_stream, streamid);
-                    }
-                }
-
-                if (!dontRenegotiate && connection.detachStreams.length) {
-                    connection.renegotiate();
-                }
-
                 function _detachStream(_stream, config) {
                     if (config.local && _stream.type != 'local') return;
                     if (config.remote && _stream.type != 'remote') return;
@@ -952,6 +929,30 @@
                         }
                     }
                 }
+
+                for (var stream in connection.streams) {
+                    if (connection._skip.indexOf(stream) == -1) {
+                        _stream = connection.streams[stream];
+
+                        if (streamid == 'all') _detachStream(_stream, {
+                            audio: true,
+                            video: true,
+                            screen: true
+                        });
+
+                        else if (isString(streamid)) {
+                            // connection.removeStream('screen');
+                            var config = {};
+                            config[streamid] = true;
+                            _detachStream(_stream, config);
+                        } else _detachStream(_stream, streamid);
+                    }
+                }
+
+                if (!dontRenegotiate && connection.detachStreams.length) {
+                    connection.renegotiate();
+                }
+
                 return;
             }
 

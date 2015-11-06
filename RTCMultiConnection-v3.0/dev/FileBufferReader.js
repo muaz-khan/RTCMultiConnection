@@ -142,6 +142,14 @@ function FileBufferReaderHelper() {
                 };
             }
 
+            if (chunk.end) {
+                for (var f in options.file) {
+                    if (![chunk[f]]) {
+                        chunk[f] = options.file[f];
+                    }
+                }
+            }
+
             options.extra = options.extra || {
                 userid: 0
             };
@@ -213,7 +221,7 @@ function FileBufferReaderHelper() {
             size: file.size,
             name: file.name,
             type: file.type,
-            lastModifiedDate: file.lastModifiedDate.toString(),
+            lastModifiedDate: !!file.lastModifiedDate ? file.lastModifiedDate.toString() : '',
             start: true
         });
 
@@ -230,14 +238,13 @@ function FileBufferReaderHelper() {
                         blob = file.slice(sliceId * sliceSize, file.size);
                         reader.readAsArrayBuffer(blob);
                     } else {
-                        file.url = URL.createObjectURL(file);
                         callback({
                             currentPosition: currentPosition,
                             uuid: file.uuid,
                             maxChunks: maxChunks,
                             size: file.size,
                             name: file.name,
-                            lastModifiedDate: file.lastModifiedDate.toString(),
+                            lastModifiedDate: !!file.lastModifiedDate ? file.lastModifiedDate.toString() : '',
                             url: URL.createObjectURL(file),
                             type: file.type,
                             end: true
@@ -266,7 +273,7 @@ function FileBufferReaderHelper() {
 
                     size: file.size,
                     name: file.name,
-                    lastModifiedDate: file.lastModifiedDate.toString(),
+                    lastModifiedDate: !!file.lastModifiedDate ? file.lastModifiedDate.toString() : '',
                     type: file.type
                 });
 

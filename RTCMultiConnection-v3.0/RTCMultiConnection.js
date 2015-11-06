@@ -1,4 +1,4 @@
-// Last time updated at Tuesday, October 27th, 2015, 11:03:53 AM 
+// Last time updated at Friday, November 6th, 2015, 12:16:04 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
