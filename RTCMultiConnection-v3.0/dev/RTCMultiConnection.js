@@ -535,19 +535,27 @@ function RTCMultiConnection(roomid) {
 
     // EVENTs
     connection.onopen = function(event) {
-        console.info('Data connection has been opened between you & ', event.userid);
+        if (!!connection.enableLogs) {
+            console.info('Data connection has been opened between you & ', event.userid);
+        }
     };
 
     connection.onclose = function(event) {
-        console.warn('Data connection has been closed between you & ', event.userid);
+        if (!!connection.enableLogs) {
+            console.warn('Data connection has been closed between you & ', event.userid);
+        }
     };
 
     connection.onerror = function(error) {
-        console.error(error.userid, 'data-error', error);
+        if (!!connection.enableLogs) {
+            console.error(error.userid, 'data-error', error);
+        }
     };
 
     connection.onmessage = function(event) {
-        console.debug('data-message', event.userid, event.data);
+        if (!!connection.enableLogs) {
+            console.debug('data-message', event.userid, event.data);
+        }
     };
 
     connection.send = function(data) {
@@ -652,7 +660,9 @@ function RTCMultiConnection(roomid) {
 
     function applyConstraints(stream, mediaConstraints) {
         if (!stream) {
-            console.error('No stream to applyConstraints.');
+            if (!!connection.enableLogs) {
+                console.error('No stream to applyConstraints.');
+            }
             return;
         }
 
@@ -660,14 +670,12 @@ function RTCMultiConnection(roomid) {
             stream.getAudioTracks().forEach(function(track) {
                 track.applyConstraints(mediaConstraints.audio);
             });
-            console.log('Applied audio constraints', mediaConstraints.audio);
         }
 
         if (mediaConstraints.video) {
             stream.getVideoTracks().forEach(function(track) {
                 track.applyConstraints(mediaConstraints.video);
             });
-            console.log('Applied video constraints', mediaConstraints.video);
         }
     }
 
@@ -818,7 +826,9 @@ function RTCMultiConnection(roomid) {
     }
 
     connection.onMediaError = function(error) {
-        console.error(error);
+        if (!!connection.enableLogs) {
+            console.error(error);
+        }
     };
 
     connection.addNewBroadcaster = function(broadcasterId, userPreferences) {
@@ -1028,12 +1038,14 @@ function RTCMultiConnection(roomid) {
     connection.DetectRTC = DetectRTC;
 
     connection.onUserStatusChanged = function(event) {
-        console.log(event.userid, event.status);
+        if (!!connection.enableLogs) {
+            console.info(event.userid, event.status);
+        }
     };
 
     connection.getUserMediaHandler = getUserMediaHandler;
     connection.multiPeersHandler = mPeer;
-    connection.enableLogs = false;
+    connection.enableLogs = true;
     connection.setCustomSocketHandler = function(customSocketHandler) {
         if (typeof SocketConnection !== 'undefined') {
             SocketConnection = customSocketHandler;

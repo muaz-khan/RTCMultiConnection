@@ -1,4 +1,4 @@
-// Last time updated at Friday, November 6th, 2015, 12:16:04 PM 
+// Last time updated at Sunday, November 8th, 2015, 7:52:17 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -544,19 +544,27 @@
 
         // EVENTs
         connection.onopen = function(event) {
-            console.info('Data connection has been opened between you & ', event.userid);
+            if (!!connection.enableLogs) {
+                console.info('Data connection has been opened between you & ', event.userid);
+            }
         };
 
         connection.onclose = function(event) {
-            console.warn('Data connection has been closed between you & ', event.userid);
+            if (!!connection.enableLogs) {
+                console.warn('Data connection has been closed between you & ', event.userid);
+            }
         };
 
         connection.onerror = function(error) {
-            console.error(error.userid, 'data-error', error);
+            if (!!connection.enableLogs) {
+                console.error(error.userid, 'data-error', error);
+            }
         };
 
         connection.onmessage = function(event) {
-            console.debug('data-message', event.userid, event.data);
+            if (!!connection.enableLogs) {
+                console.debug('data-message', event.userid, event.data);
+            }
         };
 
         connection.send = function(data) {
@@ -661,7 +669,9 @@
 
         function applyConstraints(stream, mediaConstraints) {
             if (!stream) {
-                console.error('No stream to applyConstraints.');
+                if (!!connection.enableLogs) {
+                    console.error('No stream to applyConstraints.');
+                }
                 return;
             }
 
@@ -669,14 +679,12 @@
                 stream.getAudioTracks().forEach(function(track) {
                     track.applyConstraints(mediaConstraints.audio);
                 });
-                console.log('Applied audio constraints', mediaConstraints.audio);
             }
 
             if (mediaConstraints.video) {
                 stream.getVideoTracks().forEach(function(track) {
                     track.applyConstraints(mediaConstraints.video);
                 });
-                console.log('Applied video constraints', mediaConstraints.video);
             }
         }
 
@@ -827,7 +835,9 @@
         }
 
         connection.onMediaError = function(error) {
-            console.error(error);
+            if (!!connection.enableLogs) {
+                console.error(error);
+            }
         };
 
         connection.addNewBroadcaster = function(broadcasterId, userPreferences) {
@@ -1037,12 +1047,14 @@
         connection.DetectRTC = DetectRTC;
 
         connection.onUserStatusChanged = function(event) {
-            console.log(event.userid, event.status);
+            if (!!connection.enableLogs) {
+                console.info(event.userid, event.status);
+            }
         };
 
         connection.getUserMediaHandler = getUserMediaHandler;
         connection.multiPeersHandler = mPeer;
-        connection.enableLogs = false;
+        connection.enableLogs = true;
         connection.setCustomSocketHandler = function(customSocketHandler) {
             if (typeof SocketConnection !== 'undefined') {
                 SocketConnection = customSocketHandler;
@@ -1472,10 +1484,12 @@
                     }
 
                     if (states.iceConnectionState.search(/disconnected|closed/gi) !== -1) {
-                        console.error('Peer connection is closed between you & ', remoteUserId);
+                        if (!!connection.enableLogs) {
+                            console.error('Peer connection is closed between you & ', remoteUserId);
+                        }
                     }
 
-                    if (states.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1) {
+                    if (states.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1 && !!states.iceConnectionEstablished) {
                         self.onUserLeft(remoteUserId);
                         self.disconnectWith(remoteUserId);
                     }
@@ -1542,7 +1556,9 @@
         this.addNegotiatedMessage = function(message, remoteUserId) {
             if (message.type && message.sdp) {
                 if (message.type == 'answer') {
-                    connection.peers[remoteUserId].addRemoteSdp(message);
+                    if (connection.peers[remoteUserId]) {
+                        connection.peers[remoteUserId].addRemoteSdp(message);
+                    }
                 }
 
                 if (message.type == 'offer') {
@@ -1552,11 +1568,17 @@
                         this.createAnsweringPeer(message, remoteUserId);
                     }
                 }
+
+                if (connection.enableLogs) {
+                    console.log('Remote peer\'s sdp:', message.sdp);
+                }
                 return;
             }
 
             if (message.candidate) {
-                connection.peers[remoteUserId].addRemoteCandidate(message);
+                if (connection.peers[remoteUserId]) {
+                    connection.peers[remoteUserId].addRemoteCandidate(message);
+                }
 
                 if (connection.enableLogs) {
                     console.log('Remote peer\'s candidate pairs:', message.candidate);
@@ -1626,7 +1648,9 @@
         this.onRemovingRemoteMedia = function(stream, remoteUserId) {};
         this.onGettingLocalMedia = function(localStream) {};
         this.onLocalMediaError = function(error) {
-            console.error('onLocalMediaError', JSON.stringify(error, null, '\t'));
+            if (!!connection.enableLogs) {
+                console.error('onLocalMediaError', JSON.stringify(error, null, '\t'));
+            }
             connection.onMediaError(error);
         };
 
@@ -2116,7 +2140,6 @@
                 return;
             }
 
-            // dontAttachLocalStream
             if (config.dontAttachLocalStream) {
                 return;
             }
@@ -2125,10 +2148,15 @@
         });
 
         peer.oniceconnectionstatechange = peer.onsignalingstatechange = function() {
+            if (peer.iceConnectionState === 'connected') {
+                peer.iceConnectionEstablished = true;
+            }
+
             config.onPeerStateChanged({
                 iceConnectionState: peer.iceConnectionState,
                 iceGatheringState: peer.iceGatheringState,
-                signalingState: peer.signalingState
+                signalingState: peer.signalingState,
+                iceConnectionEstablished: !!peer.iceConnectionEstablished
             });
 
             if (peer.iceConnectionState.search(/disconnected|closed/gi) !== -1) {
@@ -2198,7 +2226,15 @@
 
         this.addRemoteSdp = function(remoteSdp) {
             peer.setRemoteDescription(new RTCSessionDescription(remoteSdp), function() {}, function(error) {
-                console.error(JSON.stringify(error, null, '\t'));
+                if (!!config.rtcMultiConnection.enableLogs) {
+                    console.error(JSON.stringify(error, null, '\t'));
+                }
+
+                if (!!config.rtcMultiConnection.autoReDialOnFailure) {
+                    setTimeout(function() {
+                        config.rtcMultiConnection.rejoin(that.connectionDescription);
+                    }, 2000);
+                }
             });
         };
 
@@ -2234,6 +2270,9 @@
         }
 
         function setChannelEvents(channel) {
+            // force ArrayBuffer in Firefox; which uses "Blob" by default.
+            channel.binaryType = 'arraybuffer';
+
             channel.onmessage = function(event) {
                 config.onDataChannelMessage(event.data);
             };
@@ -2283,7 +2322,15 @@
                 streamsToShare: streamsToShare
             });
         }, function(error) {
-            console.error('sdp-error', error);
+            if (!!config.rtcMultiConnection.enableLogs) {
+                console.error('sdp-error', error);
+            }
+
+            if (!!config.rtcMultiConnection.autoReDialOnFailure) {
+                setTimeout(function() {
+                    config.rtcMultiConnection.rejoin(that.connectionDescription);
+                }, 2000);
+            }
         }, defaults.sdpConstraints);
 
         peer.nativeClose = peer.close;

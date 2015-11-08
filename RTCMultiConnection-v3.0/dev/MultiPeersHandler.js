@@ -172,10 +172,12 @@ function MultiPeers(connection) {
                 }
 
                 if (states.iceConnectionState.search(/disconnected|closed/gi) !== -1) {
-                    console.error('Peer connection is closed between you & ', remoteUserId);
+                    if (!!connection.enableLogs) {
+                        console.error('Peer connection is closed between you & ', remoteUserId);
+                    }
                 }
 
-                if (states.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1) {
+                if (states.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1 && !!states.iceConnectionEstablished) {
                     self.onUserLeft(remoteUserId);
                     self.disconnectWith(remoteUserId);
                 }
@@ -242,7 +244,9 @@ function MultiPeers(connection) {
     this.addNegotiatedMessage = function(message, remoteUserId) {
         if (message.type && message.sdp) {
             if (message.type == 'answer') {
-                connection.peers[remoteUserId].addRemoteSdp(message);
+                if (connection.peers[remoteUserId]) {
+                    connection.peers[remoteUserId].addRemoteSdp(message);
+                }
             }
 
             if (message.type == 'offer') {
@@ -252,11 +256,17 @@ function MultiPeers(connection) {
                     this.createAnsweringPeer(message, remoteUserId);
                 }
             }
+
+            if (connection.enableLogs) {
+                console.log('Remote peer\'s sdp:', message.sdp);
+            }
             return;
         }
 
         if (message.candidate) {
-            connection.peers[remoteUserId].addRemoteCandidate(message);
+            if (connection.peers[remoteUserId]) {
+                connection.peers[remoteUserId].addRemoteCandidate(message);
+            }
 
             if (connection.enableLogs) {
                 console.log('Remote peer\'s candidate pairs:', message.candidate);
@@ -326,7 +336,9 @@ function MultiPeers(connection) {
     this.onRemovingRemoteMedia = function(stream, remoteUserId) {};
     this.onGettingLocalMedia = function(localStream) {};
     this.onLocalMediaError = function(error) {
-        console.error('onLocalMediaError', JSON.stringify(error, null, '\t'));
+        if (!!connection.enableLogs) {
+            console.error('onLocalMediaError', JSON.stringify(error, null, '\t'));
+        }
         connection.onMediaError(error);
     };
 
