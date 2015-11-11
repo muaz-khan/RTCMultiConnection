@@ -1,3 +1,5 @@
+// Last time updated at Tuesday, November 10th, 2015, 7:15:14 PM 
+
 // Last time updated at Sep 25, 2015, 08:32:23
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
@@ -362,17 +364,6 @@
                     device[d] = _device[d];
                 }
 
-                var skip;
-                MediaDevices.forEach(function(d) {
-                    if (d.id === device.id) {
-                        skip = true;
-                    }
-                });
-
-                if (skip) {
-                    return;
-                }
-
                 // if it is MediaStreamTrack.getSources
                 if (device.kind === 'audio') {
                     device.kind = 'audioinput';
@@ -380,6 +371,17 @@
 
                 if (device.kind === 'video') {
                     device.kind = 'videoinput';
+                }
+
+                var skip;
+                MediaDevices.forEach(function(d) {
+                    if (d.id === device.id && d.kind === device.kind) {
+                        skip = true;
+                    }
+                });
+
+                if (skip) {
+                    return;
                 }
 
                 if (!device.deviceId) {
@@ -397,7 +399,7 @@
                     }
                 }
 
-                if (device.kind === 'audioinput' || device.kind === 'audio') {
+                if (device.kind === 'audioinput') {
                     hasMicrophone = true;
                 }
 
@@ -405,7 +407,7 @@
                     hasSpeakers = true;
                 }
 
-                if (device.kind === 'videoinput' || device.kind === 'video') {
+                if (device.kind === 'videoinput') {
                     hasWebcam = true;
                 }
 
