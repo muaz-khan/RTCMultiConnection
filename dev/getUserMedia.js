@@ -186,7 +186,7 @@ function getUserMedia(options) {
     // todo: need to verify all possible situations
     log('invoked getUserMedia with constraints:', toStr(hints));
 
-    // easy way to match 
+    // easy way to match
     var idInstance = JSON.stringify(hints);
 
     function streaming(stream, returnBack, streamid) {
@@ -198,7 +198,7 @@ function getUserMedia(options) {
 
         var video = options.video;
         if (video) {
-            video[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : window.webkitURL.createObjectURL(stream);
+            video[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : (window.URL || window.webkitURL).createObjectURL(stream);
             video.play();
         }
 
