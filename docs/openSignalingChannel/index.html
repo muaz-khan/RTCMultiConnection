@@ -257,6 +257,221 @@ connection.<a href="http://www.RTCMultiConnection.org/docs/openSignalingChannel/
 };
 </pre>
         </section>
+
+        <section class="experiment">
+            <h2 id="java-signaling">
+                <a href="#java-signaling">Using Java for Signaling</a>
+            </h2>
+            <pre class="sh_javascript">
+// Java/Tomcat Server code
+// via: https://www.webrtc-experiment.com/docs/WebRTC-Signaling-Concepts.html#comment-2341098344
+// Thanks @(sunder tattavarada) 
+
+import javax.websocket.OnMessage;
+
+import javax.websocket.OnOpen;
+
+import javax.websocket.Session;
+
+import javax.websocket.server.ServerEndpoint;
+
+import org.json.JSONException;
+
+import org.json.JSONObject;
+
+@ServerEndpoint("/webrtc")
+
+public class WebRTCSocket {
+
+    public static Map < string, hashtable < string, object[] >> sessionMap = new Hashtable < string, hashtable < string, object[] >> ();
+
+    @OnMessage
+
+    public void message(String message, Session session) {
+
+        try {
+
+            JSONObject jsonObject = new JSONObject(message);
+
+            try {
+
+                Object isOpen = jsonObject.get("open");
+
+                if (isOpen != null && (Boolean) isOpen == true) {
+
+                    String channel = (String) jsonObject.get("channel");
+
+                    Object value = sessionMap.get(channel);
+
+                    Hashtable < string, object[] > sourceDestMap = null;
+
+                    if (value == null) {
+
+                        sourceDestMap = new Hashtable < string, object[] > ();
+
+                    } else sourceDestMap = (Hashtable < string, object[] > ) value;
+
+                    sourceDestMap.put(session.getId(), new Object[] {
+                        session
+                    });
+
+                    sessionMap.put(channel, sourceDestMap);
+
+                }
+
+            } catch (JSONException je) {
+
+                je.printStackTrace();
+
+            }
+
+            try {
+
+                Object dataObj = jsonObject.get("data");
+
+                JSONObject dataMapObj = (JSONObject) dataObj;
+
+                //Object thisUserId = dataMapObj.get("userid");
+
+                String channel = null;
+
+                try {
+
+                    channel = (String) dataMapObj.get("sessionid");
+
+                } catch (JSONException json) {
+
+                    channel = (String) jsonObject.get("channel");
+
+                }
+
+                /*
+                JSONObject dataMapObj = (JSONObject) dataObj;
+
+                Object thisUserId = dataMapObj.get("userid");
+                
+                String channel = (String) dataMapObj.get("sessionid");
+                
+                Hashtable < string, object > sourceDestMap = sessionMap.get(channel);
+                
+                if (thisUserId != null && sourceDestMap.get((String) thisUserId) == null) {
+                
+                    sourceDestMap.put((String) thisUserId, new Object[] {
+                        message, session
+                    });
+                
+                }
+                
+                for (String userId: sourceDestMap.keySet()) {
+                
+                    if (!userId.equals(thisUserId)) {
+                
+                        Session otherSession = (Session)((Object[]) sourceDestMap.get(userId))[1];
+                
+                        otherSession.getBasicRemote().sendText(message);
+                
+                    }
+                
+                }
+                */
+
+                Hashtable < string, object[] > sourceDestMap = sessionMap.get(channel);
+
+                if (sourceDestMap != null)
+
+                for (String id: sourceDestMap.keySet()) {
+
+                    if (!id.equals(session.getId())) {
+
+                        Session otherSession = (Session)((Object[]) sourceDestMap.get(id))[0];
+
+                        if (otherSession.isOpen())
+
+                        otherSession.getBasicRemote().sendText(dataMapObj.toString());
+
+                    }
+
+                }
+
+            } catch (JSONException je) {
+
+                je.printStackTrace();
+
+            }
+
+        } catch (JSONException | IOException je) {
+
+            je.printStackTrace();
+
+        }
+
+        System.out.println("Message received:" + message);
+
+    }
+
+    @OnOpen
+
+    public void open(Session session) {
+
+        System.out.println("Channel opened");
+
+    }
+
+    // need to implement @OnClose too
+
+}
+</pre>
+
+        <pre class="sh_javascript">
+// HTML/Browser side code (client-code)
+var SIGNALING_SERVER = "ws://YOUR_TOMCAT_APPLICATION_PATH/webrtc";
+
+connection.openSignalingChannel = function(config) {
+
+    config.channel = config.channel || this.channel;
+
+    var websocket = new WebSocket(SIGNALING_SERVER);
+
+    websocket.channel = config.channel;
+
+    websocket.onopen = function() {
+
+        websocket.push(JSON.stringify({
+
+            open: true,
+
+            channel: config.channel
+
+        }));
+
+        if (config.callback)
+
+            config.callback(websocket);
+
+    };
+
+    websocket.onmessage = function(event) {
+
+        config.onmessage(JSON.parse(event.data));
+
+    };
+
+    websocket.push = websocket.send;
+
+    websocket.send = function(data) {
+
+        websocket.push(JSON.stringify({
+
+            data: data,
+
+            channel: config.channel
+
+        }));
+
+    };
+};
+</pre>
+        </section>
         
         <section class="experiment">
             <h2 id="pusher-signaling">
@@ -509,6 +724,12 @@ connection.<a href="http://www.RTCMultiConnection.org/docs/openSignalingChannel/
         </section>
         
         <br />
+
+        <section class="experiment own-widgets">
+            <h2 class="header" id="updates" style="color: red;padding-bottom: .1em;"><a href="https://github.com/muaz-khan/RTCMultiConnection/issues">Latest Issues</a></h2>
+            <div id="github-issues"></div>
+        </section>
+
         <section style="border: 1px solid rgb(189, 189, 189); margin: 1em 3em; border-radius: .2em;">
                 <h2 id="feedback" style="padding: .2em .4em; border-bottom: 1px solid rgb(189, 189, 189);">Want to ask a Question?</h2>
                 <div>
@@ -518,12 +739,12 @@ connection.<a href="http://www.RTCMultiConnection.org/docs/openSignalingChannel/
             </section>
             
             <section class="experiment own-widgets latest-commits">
-                <h2 class="header" id="updates" style="color: red; padding-bottom: .1em;"><a href="https://github.com/muaz-khan/WebRTC-Experiment/commits/master" target="_blank">Latest Updates</a></h2>
+                <h2 class="header" id="updates" style="color: red; padding-bottom: .1em;"><a href="https://github.com/muaz-khan/RTCMultiConnection/commits/master" target="_blank">Latest Updates</a></h2>
                 <div id="github-commits"></div>
             </section>
     </article>
     
-    <a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/RTCMultiConnection" class="fork-left"></a>
+    <a href="https://github.com/muaz-khan/RTCMultiConnection" class="fork-left"></a>
 	
         <footer>
             <a href="https://www.webrtc-experiment.com/" target="_blank">WebRTC Experiments!</a> and 
@@ -531,7 +752,11 @@ connection.<a href="http://www.RTCMultiConnection.org/docs/openSignalingChannel/
             <a href="mailto:muazkh@gmail.com" target="_blank">Muaz Khan</a>:
             <a href="https://twitter.com/WebRTCWeb" target="_blank">@WebRTCWeb</a>
         </footer>
+
+    <script>
+        window.useThisGithubPath = 'muaz-khan/RTCMultiConnection';
+    </script>
         
-    <script src="//www.rtcmulticonnection.org/commits.js"> </script>
+    <script src="https://cdn.webrtc-experiment.com/commits.js" async></script>
 </body>
 </html>
