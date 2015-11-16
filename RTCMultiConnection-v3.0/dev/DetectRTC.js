@@ -1,6 +1,4 @@
-// Last time updated at Tuesday, November 10th, 2015, 7:15:14 PM 
-
-// Last time updated at Sep 25, 2015, 08:32:23
+// Last time updated at Monday, November 16th, 2015, 9:04:34 PM 
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
 
@@ -472,6 +470,9 @@
     // --------- Detect if WebAudio API are supported
     var webAudio = {};
     ['AudioContext', 'webkitAudioContext', 'mozAudioContext', 'msAudioContext'].forEach(function(item) {
+        if (webAudio.isSupported && webAudio.isCreateMediaStreamSourceSupported) {
+            return;
+        }
         if (item in window) {
             webAudio.isSupported = true;
 
@@ -518,6 +519,7 @@
             if (DetectRTC.loadCallback) {
                 DetectRTC.loadCallback();
             }
+            websocket.close();
         };
         websocket.onerror = function() {
             DetectRTC.isWebSocketsBlocked = true;
