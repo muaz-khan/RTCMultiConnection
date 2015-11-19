@@ -1,5 +1,5 @@
 function SocketConnection(connection, connectCallback) {
-    var socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid + '&msgEvent=' + connection.socketMessageEvent);
+    var socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid + '&msgEvent=' + connection.socketMessageEvent, connection.socketOptions);
 
     var mPeer = connection.multiPeersHandler;
 
@@ -191,7 +191,9 @@ function SocketConnection(connection, connectCallback) {
     });
 
     socket.on('disconnect', function() {
+        console.info('socket.io connection is closed');
         if (!!connection.autoReDialOnFailure) {
+            console.warn('socket.io reconnecting');
             socket = new SocketConnection(connection, connectCallback);
         }
     });
