@@ -1,4 +1,4 @@
-// Last time updated at Sep 25, 2015, 08:32:23
+// Last time updated at Monday, November 16th, 2015, 9:04:34 PM 
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
 
@@ -362,17 +362,6 @@
                     device[d] = _device[d];
                 }
 
-                var skip;
-                MediaDevices.forEach(function(d) {
-                    if (d.id === device.id) {
-                        skip = true;
-                    }
-                });
-
-                if (skip) {
-                    return;
-                }
-
                 // if it is MediaStreamTrack.getSources
                 if (device.kind === 'audio') {
                     device.kind = 'audioinput';
@@ -380,6 +369,17 @@
 
                 if (device.kind === 'video') {
                     device.kind = 'videoinput';
+                }
+
+                var skip;
+                MediaDevices.forEach(function(d) {
+                    if (d.id === device.id && d.kind === device.kind) {
+                        skip = true;
+                    }
+                });
+
+                if (skip) {
+                    return;
                 }
 
                 if (!device.deviceId) {
@@ -397,7 +397,7 @@
                     }
                 }
 
-                if (device.kind === 'audioinput' || device.kind === 'audio') {
+                if (device.kind === 'audioinput') {
                     hasMicrophone = true;
                 }
 
@@ -405,7 +405,7 @@
                     hasSpeakers = true;
                 }
 
-                if (device.kind === 'videoinput' || device.kind === 'video') {
+                if (device.kind === 'videoinput') {
                     hasWebcam = true;
                 }
 
@@ -470,6 +470,9 @@
     // --------- Detect if WebAudio API are supported
     var webAudio = {};
     ['AudioContext', 'webkitAudioContext', 'mozAudioContext', 'msAudioContext'].forEach(function(item) {
+        if (webAudio.isSupported && webAudio.isCreateMediaStreamSourceSupported) {
+            return;
+        }
         if (item in window) {
             webAudio.isSupported = true;
 
@@ -516,6 +519,7 @@
             if (DetectRTC.loadCallback) {
                 DetectRTC.loadCallback();
             }
+            websocket.close();
         };
         websocket.onerror = function() {
             DetectRTC.isWebSocketsBlocked = true;

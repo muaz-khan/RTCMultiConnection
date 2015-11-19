@@ -174,7 +174,7 @@ function createMediaElement(stream, session) {
     }
 
     // "mozSrcObject" is always preferred over "src"!!
-    mediaElement[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : window.webkitURL.createObjectURL(stream);
+    mediaElement[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : (window.URL || window.webkitURL).createObjectURL(stream);
 
     mediaElement.controls = true;
     mediaElement.autoplay = !!session.remote;
@@ -449,7 +449,7 @@ function muteOrUnmute(e) {
     if (root.type == 'remote') return;
 
     // According to issue #135, onmute/onumute must be fired for self
-    // "fakeObject" is used because we need to keep session for renegotiated streams; 
+    // "fakeObject" is used because we need to keep session for renegotiated streams;
     // and MUST pass exact session over onStreamEndedHandler/onmute/onhold/etc. events.
     var fakeObject = merge({}, root);
     fakeObject.session = session;

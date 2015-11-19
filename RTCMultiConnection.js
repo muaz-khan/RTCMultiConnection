@@ -1,4 +1,4 @@
-// Last time updated at Wednesday, November 4th, 2015, 11:23:25 AM 
+// Last time updated at Thursday, November 19th, 2015, 4:19:18 PM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -896,29 +896,6 @@
 
             if (!streamid) streamid = 'all';
             if (!isString(streamid) || streamid.search(/all|audio|video|screen/gi) != -1) {
-                for (var stream in connection.streams) {
-                    if (connection._skip.indexOf(stream) == -1) {
-                        _stream = connection.streams[stream];
-
-                        if (streamid == 'all') _detachStream(_stream, {
-                            audio: true,
-                            video: true,
-                            screen: true
-                        });
-
-                        else if (isString(streamid)) {
-                            // connection.removeStream('screen');
-                            var config = {};
-                            config[streamid] = true;
-                            _detachStream(_stream, config);
-                        } else _detachStream(_stream, streamid);
-                    }
-                }
-
-                if (!dontRenegotiate && connection.detachStreams.length) {
-                    connection.renegotiate();
-                }
-
                 function _detachStream(_stream, config) {
                     if (config.local && _stream.type != 'local') return;
                     if (config.remote && _stream.type != 'remote') return;
@@ -952,6 +929,30 @@
                         }
                     }
                 }
+
+                for (var stream in connection.streams) {
+                    if (connection._skip.indexOf(stream) == -1) {
+                        _stream = connection.streams[stream];
+
+                        if (streamid == 'all') _detachStream(_stream, {
+                            audio: true,
+                            video: true,
+                            screen: true
+                        });
+
+                        else if (isString(streamid)) {
+                            // connection.removeStream('screen');
+                            var config = {};
+                            config[streamid] = true;
+                            _detachStream(_stream, config);
+                        } else _detachStream(_stream, streamid);
+                    }
+                }
+
+                if (!dontRenegotiate && connection.detachStreams.length) {
+                    connection.renegotiate();
+                }
+
                 return;
             }
 
@@ -3302,7 +3303,7 @@
         }
 
         // "mozSrcObject" is always preferred over "src"!!
-        mediaElement[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : window.webkitURL.createObjectURL(stream);
+        mediaElement[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : (window.URL || window.webkitURL).createObjectURL(stream);
 
         mediaElement.controls = true;
         mediaElement.autoplay = !!session.remote;
@@ -3577,7 +3578,7 @@
         if (root.type == 'remote') return;
 
         // According to issue #135, onmute/onumute must be fired for self
-        // "fakeObject" is used because we need to keep session for renegotiated streams; 
+        // "fakeObject" is used because we need to keep session for renegotiated streams;
         // and MUST pass exact session over onStreamEndedHandler/onmute/onhold/etc. events.
         var fakeObject = merge({}, root);
         fakeObject.session = session;
@@ -3874,7 +3875,7 @@
         // todo: need to verify all possible situations
         log('invoked getUserMedia with constraints:', toStr(hints));
 
-        // easy way to match 
+        // easy way to match
         var idInstance = JSON.stringify(hints);
 
         function streaming(stream, returnBack, streamid) {
@@ -3886,7 +3887,7 @@
 
             var video = options.video;
             if (video) {
-                video[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : window.webkitURL.createObjectURL(stream);
+                video[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : (window.URL || window.webkitURL).createObjectURL(stream);
                 video.play();
             }
 
@@ -4705,12 +4706,12 @@
                 browserName = 'IE';
                 fullVersion = nAgt.substring(verOffset + 5);
             }
-            // In Chrome, the true version is after 'Chrome' 
+            // In Chrome, the true version is after 'Chrome'
             else if ((verOffset = nAgt.indexOf('Chrome')) !== -1) {
                 browserName = 'Chrome';
                 fullVersion = nAgt.substring(verOffset + 7);
             }
-            // In Safari, the true version is after 'Safari' or after 'Version' 
+            // In Safari, the true version is after 'Safari' or after 'Version'
             else if ((verOffset = nAgt.indexOf('Safari')) !== -1) {
                 browserName = 'Safari';
                 fullVersion = nAgt.substring(verOffset + 7);
@@ -4719,13 +4720,13 @@
                     fullVersion = nAgt.substring(verOffset + 8);
                 }
             }
-            // In Firefox, the true version is after 'Firefox' 
+            // In Firefox, the true version is after 'Firefox'
             else if ((verOffset = nAgt.indexOf('Firefox')) !== -1) {
                 browserName = 'Firefox';
                 fullVersion = nAgt.substring(verOffset + 8);
             }
 
-            // In most other browsers, 'name/version' is at the end of userAgent 
+            // In most other browsers, 'name/version' is at the end of userAgent
             else if ((nameOffset = nAgt.lastIndexOf(' ') + 1) < (verOffset = nAgt.lastIndexOf('/'))) {
                 browserName = nAgt.substring(nameOffset, verOffset);
                 fullVersion = nAgt.substring(verOffset + 1);
@@ -5107,6 +5108,9 @@
         // --------- Detect if WebAudio API are supported
         var webAudio = {};
         ['AudioContext', 'webkitAudioContext', 'mozAudioContext', 'msAudioContext'].forEach(function(item) {
+            if (webAudio.isSupported && webAudio.isCreateMediaStreamSourceSupported) {
+                return;
+            }
             if (item in window) {
                 webAudio.isSupported = true;
 

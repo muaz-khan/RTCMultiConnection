@@ -155,7 +155,6 @@ function PeerInitiator(config) {
             return;
         }
 
-        // dontAttachLocalStream
         if (config.dontAttachLocalStream) {
             return;
         }
@@ -164,10 +163,15 @@ function PeerInitiator(config) {
     });
 
     peer.oniceconnectionstatechange = peer.onsignalingstatechange = function() {
+        if (peer.iceConnectionState === 'connected') {
+            peer.iceConnectionEstablished = true;
+        }
+
         config.onPeerStateChanged({
             iceConnectionState: peer.iceConnectionState,
             iceGatheringState: peer.iceGatheringState,
-            signalingState: peer.signalingState
+            signalingState: peer.signalingState,
+            iceConnectionEstablished: !!peer.iceConnectionEstablished
         });
 
         if (peer.iceConnectionState.search(/disconnected|closed/gi) !== -1) {
@@ -237,7 +241,15 @@ function PeerInitiator(config) {
 
     this.addRemoteSdp = function(remoteSdp) {
         peer.setRemoteDescription(new RTCSessionDescription(remoteSdp), function() {}, function(error) {
-            console.error(JSON.stringify(error, null, '\t'));
+            if (!!config.rtcMultiConnection.enableLogs) {
+                console.error(JSON.stringify(error, null, '\t'));
+            }
+
+            if (!!config.rtcMultiConnection.autoReDialOnFailure) {
+                setTimeout(function() {
+                    config.rtcMultiConnection.rejoin(that.connectionDescription);
+                }, 2000);
+            }
         });
     };
 
@@ -273,6 +285,9 @@ function PeerInitiator(config) {
     }
 
     function setChannelEvents(channel) {
+        // force ArrayBuffer in Firefox; which uses "Blob" by default.
+        channel.binaryType = 'arraybuffer';
+
         channel.onmessage = function(event) {
             config.onDataChannelMessage(event.data);
         };
@@ -322,7 +337,15 @@ function PeerInitiator(config) {
             streamsToShare: streamsToShare
         });
     }, function(error) {
-        console.error('sdp-error', error);
+        if (!!config.rtcMultiConnection.enableLogs) {
+            console.error('sdp-error', error);
+        }
+
+        if (!!config.rtcMultiConnection.autoReDialOnFailure) {
+            setTimeout(function() {
+                config.rtcMultiConnection.rejoin(that.connectionDescription);
+            }, 2000);
+        }
     }, defaults.sdpConstraints);
 
     peer.nativeClose = peer.close;

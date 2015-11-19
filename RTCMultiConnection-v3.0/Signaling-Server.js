@@ -70,7 +70,7 @@ module.exports = exports = function(app, socketCallback) {
 
         socket.on('set-password', function(password) {
             if (listOfUsers[socket.userid]) {
-                listOfUsers[socket.userid].password = password; 
+                listOfUsers[socket.userid].password = password;
             }
         });
 
