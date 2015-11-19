@@ -1020,7 +1020,9 @@ function RTCMultiConnection(roomid) {
 
     connection.getSocket = function(callback) {
         if (!socket) {
-            connectSocket();
+            connectSocket(callback);
+        } else if (callback) {
+            callback(socket);
         }
 
         return socket;

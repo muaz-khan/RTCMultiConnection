@@ -1,4 +1,4 @@
-// Last time updated at Thursday, November 19th, 2015, 4:57:21 PM 
+// Last time updated at Thursday, November 19th, 2015, 5:02:50 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -1029,7 +1029,9 @@
 
         connection.getSocket = function(callback) {
             if (!socket) {
-                connectSocket();
+                connectSocket(callback);
+            } else if (callback) {
+                callback(socket);
             }
 
             return socket;
