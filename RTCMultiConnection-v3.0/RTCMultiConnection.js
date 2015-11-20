@@ -1,4 +1,4 @@
-// Last time updated at Monday, November 16th, 2015, 9:10:31 PM 
+// Last time updated at Thursday, November 19th, 2015, 5:02:50 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -129,6 +129,12 @@
 
         connection.broadcasters = [];
 
+        if (typeof SocketConnection !== 'undefined') {
+            connection.socketOptions = {
+                'force new connection': true, // For SocketIO version < 1.0
+                forceNew: true // For SocketIO version >= 1.0
+            };
+        }
         var socket;
 
         function connectSocket(connectCallback) {
@@ -431,6 +437,14 @@
                     connection.peers[participant].peer.close();
                 }
             });
+
+            if (socket) {
+                if (typeof socket.disconnect !== 'undefined') {
+                    connection.autoReDialOnFailure = false; // Prevent reconnection		
+                    socket.disconnect();
+                }
+                socket = null;
+            }
 
             // equivalent of connection.isInitiator
             if (!connection.broadcasters.length || !!connection.autoCloseEntireSession) return;
@@ -1015,7 +1029,9 @@
 
         connection.getSocket = function(callback) {
             if (!socket) {
-                connectSocket();
+                connectSocket(callback);
+            } else if (callback) {
+                callback(socket);
             }
 
             return socket;
@@ -1070,7 +1086,7 @@
     }
 
     function SocketConnection(connection, connectCallback) {
-        var socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid + '&msgEvent=' + connection.socketMessageEvent);
+        var socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid + '&msgEvent=' + connection.socketMessageEvent, connection.socketOptions);
 
         var mPeer = connection.multiPeersHandler;
 
@@ -1262,7 +1278,9 @@
         });
 
         socket.on('disconnect', function() {
+            console.info('socket.io connection is closed');
             if (!!connection.autoReDialOnFailure) {
+                console.warn('socket.io reconnecting');
                 socket = new SocketConnection(connection, connectCallback);
             }
         });

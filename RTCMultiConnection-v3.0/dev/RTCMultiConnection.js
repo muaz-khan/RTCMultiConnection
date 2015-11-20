@@ -120,6 +120,12 @@ function RTCMultiConnection(roomid) {
 
     connection.broadcasters = [];
 
+    if (typeof SocketConnection !== 'undefined') {
+        connection.socketOptions = {
+            'force new connection': true, // For SocketIO version < 1.0
+            forceNew: true // For SocketIO version >= 1.0
+        };
+    }
     var socket;
 
     function connectSocket(connectCallback) {
@@ -422,6 +428,14 @@ function RTCMultiConnection(roomid) {
                 connection.peers[participant].peer.close();
             }
         });
+
+        if (socket) {
+            if (typeof socket.disconnect !== 'undefined') {
+                connection.autoReDialOnFailure = false; // Prevent reconnection		
+                socket.disconnect();
+            }
+            socket = null;
+        }
 
         // equivalent of connection.isInitiator
         if (!connection.broadcasters.length || !!connection.autoCloseEntireSession) return;
@@ -1006,7 +1020,9 @@ function RTCMultiConnection(roomid) {
 
     connection.getSocket = function(callback) {
         if (!socket) {
-            connectSocket();
+            connectSocket(callback);
+        } else if (callback) {
+            callback(socket);
         }
 
         return socket;
