@@ -21,12 +21,14 @@ function serverHandler(request, response) {
         response.end();
         return;
     }
+
     if (fs.statSync(filename).isDirectory()) {
         if (filename.indexOf('/demos/') !== -1) {
             filename = filename.replace('/demos/', '');
+            filename += '/demos/index.html';
+        } else {
+            filename += '/demos/index.html';
         }
-
-        filename += '/demos/index.html';
     }
 
 
@@ -35,7 +37,7 @@ function serverHandler(request, response) {
             response.writeHead(500, {
                 'Content-Type': 'text/plain'
             });
-            response.write(err + '\n');
+            response.write('404 Not Found: ' + path.join('/', uri) + '\n');
             response.end();
             return;
         }

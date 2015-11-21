@@ -107,7 +107,9 @@ function RTCMultiConnection(roomid) {
     }
     mPeer.onUserLeft = onUserLeft;
     mPeer.disconnectWith = function(remoteUserId, callback) {
-        socket.emit('disconnect-with', remoteUserId, callback || function() {});
+        if (socket) {
+            socket.emit('disconnect-with', remoteUserId, callback || function() {});
+        }
 
         if (connection.peers[remoteUserId]) {
             if (connection.peers[remoteUserId].peer) {
@@ -160,6 +162,11 @@ function RTCMultiConnection(roomid) {
                 detectPresence: true,
                 userid: (localUserid || connection.sessionid) + ''
             }, 'system', function(isRoomExists, roomid) {
+                if (typeof password === 'function') {
+                    password(isRoomExists, roomid);
+                    password = null;
+                }
+
                 if (isRoomExists) {
                     connection.sessionid = roomid;
 

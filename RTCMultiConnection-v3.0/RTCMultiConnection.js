@@ -1,4 +1,4 @@
-// Last time updated at Saturday, November 21st, 2015, 11:16:36 AM 
+// Last time updated at Saturday, November 21st, 2015, 3:08:56 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -116,7 +116,9 @@
         }
         mPeer.onUserLeft = onUserLeft;
         mPeer.disconnectWith = function(remoteUserId, callback) {
-            socket.emit('disconnect-with', remoteUserId, callback || function() {});
+            if (socket) {
+                socket.emit('disconnect-with', remoteUserId, callback || function() {});
+            }
 
             if (connection.peers[remoteUserId]) {
                 if (connection.peers[remoteUserId].peer) {
@@ -169,6 +171,11 @@
                     detectPresence: true,
                     userid: (localUserid || connection.sessionid) + ''
                 }, 'system', function(isRoomExists, roomid) {
+                    if (typeof password === 'function') {
+                        password(isRoomExists, roomid);
+                        password = null;
+                    }
+
                     if (isRoomExists) {
                         connection.sessionid = roomid;
 
