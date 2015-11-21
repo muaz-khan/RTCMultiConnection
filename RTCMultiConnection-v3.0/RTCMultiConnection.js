@@ -1,4 +1,4 @@
-// Last time updated at Thursday, November 19th, 2015, 5:02:50 PM 
+// Last time updated at Saturday, November 21st, 2015, 11:16:36 AM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -129,12 +129,12 @@
 
         connection.broadcasters = [];
 
-        if (typeof SocketConnection !== 'undefined') {
-            connection.socketOptions = {
-                'force new connection': true, // For SocketIO version < 1.0
-                forceNew: true // For SocketIO version >= 1.0
-            };
-        }
+        connection.socketOptions = {
+            'force new connection': true, // For SocketIO version < 1.0
+            'forceNew': true, // For SocketIO version >= 1.0
+            'transport': 'polling' // fixing transport:unknown issues
+        };
+
         var socket;
 
         function connectSocket(connectCallback) {

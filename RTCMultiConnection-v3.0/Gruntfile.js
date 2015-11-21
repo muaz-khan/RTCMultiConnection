@@ -65,7 +65,8 @@ module.exports = function(grunt) {
         clean: ['./temp'],
         uglify: {
             options: {
-                mangle: false
+                mangle: false,
+                banner: '// Last time updated at <%= grunt.template.today("dddd, mmmm dS, yyyy, h:MM:ss TT") %> \n\n'
             },
             my_target: {
                 files: {

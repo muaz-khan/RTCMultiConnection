@@ -120,12 +120,12 @@ function RTCMultiConnection(roomid) {
 
     connection.broadcasters = [];
 
-    if (typeof SocketConnection !== 'undefined') {
-        connection.socketOptions = {
-            'force new connection': true, // For SocketIO version < 1.0
-            forceNew: true // For SocketIO version >= 1.0
-        };
-    }
+    connection.socketOptions = {
+        'force new connection': true, // For SocketIO version < 1.0
+        'forceNew': true, // For SocketIO version >= 1.0
+        'transport': 'polling' // fixing transport:unknown issues
+    };
+
     var socket;
 
     function connectSocket(connectCallback) {
