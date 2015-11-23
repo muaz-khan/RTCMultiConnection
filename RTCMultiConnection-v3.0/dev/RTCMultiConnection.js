@@ -425,6 +425,9 @@ function RTCMultiConnection(roomid) {
     };
 
     function beforeUnload(shiftModerationControlOnLeave) {
+        if (!connection.closeBeforeUnload) {
+            return;
+        }
         connection.peers.getAllParticipants().forEach(function(participant) {
             mPeer.onNegotiationNeeded({
                 userLeft: true,
@@ -461,6 +464,7 @@ function RTCMultiConnection(roomid) {
         connection.isInitiator = false;
     }
 
+    connection.closeBeforeUnload = true;
     window.addEventListener('beforeunload', beforeUnload, false);
 
     connection.userid = getRandomString();
