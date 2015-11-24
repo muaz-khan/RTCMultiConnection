@@ -1,4 +1,4 @@
-// Last time updated at Saturday, November 21st, 2015, 3:08:56 PM 
+// Last time updated at Monday, November 23rd, 2015, 7:54:15 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -434,6 +434,9 @@
         };
 
         function beforeUnload(shiftModerationControlOnLeave) {
+            if (!connection.closeBeforeUnload) {
+                return;
+            }
             connection.peers.getAllParticipants().forEach(function(participant) {
                 mPeer.onNegotiationNeeded({
                     userLeft: true,
@@ -470,6 +473,7 @@
             connection.isInitiator = false;
         }
 
+        connection.closeBeforeUnload = true;
         window.addEventListener('beforeunload', beforeUnload, false);
 
         connection.userid = getRandomString();
