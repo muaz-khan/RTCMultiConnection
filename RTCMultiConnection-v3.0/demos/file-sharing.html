@@ -422,6 +422,10 @@
             }
 
             iframe.onload = function() {
+                Array.prototype.slice.call(iframe.contentWindow.document.body.querySelectorAll('*')).forEach(function(element) {
+                    element.style.maxWidth = '100%';
+                });
+                
                 if (file.type.match(/image|video|audio|pdf/g)) {
                     iframe.contentWindow.document.body.style.textAlign = 'center';
                     iframe.contentWindow.document.body.style.background = 'black';

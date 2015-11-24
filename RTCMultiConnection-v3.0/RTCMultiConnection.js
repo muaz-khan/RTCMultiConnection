@@ -1,4 +1,4 @@
-// Last time updated at Monday, November 23rd, 2015, 7:54:15 PM 
+// Last time updated at Tuesday, November 24th, 2015, 12:00:46 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -943,6 +943,10 @@
             sdp = BandwidthHandler.setOpusAttributes(sdp);
             return sdp;
         };
+
+        if (typeof BandwidthHandler !== 'undefined') {
+            connection.BandwidthHandler = BandwidthHandler;
+        }
 
         connection.bandwidth = {
             screen: 300, // 300kbps minimum

@@ -935,6 +935,10 @@ function RTCMultiConnection(roomid) {
         return sdp;
     };
 
+    if (typeof BandwidthHandler !== 'undefined') {
+        connection.BandwidthHandler = BandwidthHandler;
+    }
+
     connection.bandwidth = {
         screen: 300, // 300kbps minimum
         audio: 50,
