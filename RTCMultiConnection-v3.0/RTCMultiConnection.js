@@ -1,4 +1,4 @@
-// Last time updated at Tuesday, November 24th, 2015, 12:00:46 PM 
+// Last time updated at Tuesday, December 1st, 2015, 6:01:40 AM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -2847,7 +2847,7 @@
         };
     })();
 
-    // Last time updated at Monday, November 16th, 2015, 9:04:34 PM 
+    // Last time updated at Monday, November 30th, 2015, 10:25:38 AM 
 
     // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
 
@@ -2885,7 +2885,8 @@
             }
         } else {
             navigator = {
-                getUserMedia: function() {}
+                getUserMedia: function() {},
+                userAgent: 'Fake/5.0 (FakeOS) AppleWebKit/123 (KHTML, like Gecko) Fake/12.3.4567.89 Fake/123.45'
             };
         }
 
@@ -2950,7 +2951,7 @@
             if (isEdge) {
                 browserName = 'Edge';
                 // fullVersion = navigator.userAgent.split('Edge/')[1];
-                fullVersion = parseInt(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)[2], 10);
+                fullVersion = parseInt(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)[2], 10).toString();
             }
 
             // trim the fullVersion string at semicolon/space if present
@@ -3047,18 +3048,25 @@
         var isCanvasSupportsStreamCapturing = false;
         var isVideoSupportsStreamCapturing = false;
         ['captureStream', 'mozCaptureStream', 'webkitCaptureStream'].forEach(function(item) {
-            // asdf
-            if (item in document.createElement('canvas')) {
+            if (!isCanvasSupportsStreamCapturing && item in document.createElement('canvas')) {
                 isCanvasSupportsStreamCapturing = true;
             }
 
-            if (item in document.createElement('video')) {
+            if (!isVideoSupportsStreamCapturing && item in document.createElement('video')) {
                 isVideoSupportsStreamCapturing = true;
             }
         });
 
         // via: https://github.com/diafygi/webrtc-ips
         function DetectLocalIPAddress(callback) {
+            if (!DetectRTC.isWebRTCSupported) {
+                return;
+            }
+
+            if (DetectRTC.isORTCSupported) {
+                return;
+            }
+
             getIPs(function(ip) {
                 //local IPs
                 if (ip.match(/^(192\.168\.|169\.254\.|10\.|172\.(1[6-9]|2\d|3[01]))/)) {
@@ -3090,6 +3098,11 @@
                 var win = iframe.contentWindow;
                 RTCPeerConnection = win.RTCPeerConnection || win.mozRTCPeerConnection || win.webkitRTCPeerConnection;
                 useWebKit = !!win.webkitRTCPeerConnection;
+            }
+
+            // if still no RTCPeerConnection then it is not supported by the browser so just return
+            if (!RTCPeerConnection) {
+                return;
             }
 
             //minimal requirements for data connection
@@ -3125,7 +3138,12 @@
             function handleCandidate(candidate) {
                 //match just the IP address
                 var ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3})/;
-                var ipAddress = ipRegex.exec(candidate)[1];
+                var match = ipRegex.exec(candidate);
+                if (!match) {
+                    console.warn('Could not match IP address in', candidate);
+                    return;
+                }
+                var ipAddress = match[1];
 
                 //remove duplicates
                 if (ipDuplicates[ipAddress] === undefined) {
@@ -3293,7 +3311,11 @@
 
         // --------- Detect if system supports WebRTC 1.0 or WebRTC 1.1.
         var isWebRTCSupported = false;
-        ['webkitRTCPeerConnection', 'mozRTCPeerConnection', 'RTCIceGatherer'].forEach(function(item) {
+        ['RTCPeerConnection', 'webkitRTCPeerConnection', 'mozRTCPeerConnection', 'RTCIceGatherer'].forEach(function(item) {
+            if (isWebRTCSupported) {
+                return;
+            }
+
             if (item in window) {
                 isWebRTCSupported = true;
             }
@@ -3317,11 +3339,16 @@
         DetectRTC.isScreenCapturingSupported = isScreenCapturingSupported;
 
         // --------- Detect if WebAudio API are supported
-        var webAudio = {};
+        var webAudio = {
+            isSupported: false,
+            isCreateMediaStreamSourceSupported: false
+        };
+
         ['AudioContext', 'webkitAudioContext', 'mozAudioContext', 'msAudioContext'].forEach(function(item) {
-            if (webAudio.isSupported && webAudio.isCreateMediaStreamSourceSupported) {
+            if (webAudio.isSupported) {
                 return;
             }
+
             if (item in window) {
                 webAudio.isSupported = true;
 
@@ -3386,7 +3413,7 @@
         } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             isGetUserMediaSupported = true;
         }
-        if (DetectRTC.browser.isChrome && DetectRTC.browser.version >= 47 && !isHTTPs) {
+        if (DetectRTC.browser.isChrome && DetectRTC.browser.version >= 46 && !isHTTPs) {
             DetectRTC.isGetUserMediaSupported = 'Requires HTTPs';
         }
         DetectRTC.isGetUserMediaSupported = isGetUserMediaSupported;
