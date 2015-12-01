@@ -2,6 +2,13 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta charset="utf-8">
 
+<script>
+    if(!location.hash.replace('#', '').length) {
+        location.href = location.href.split('#')[0] + '#' + (Math.random() * 100).toString().replace('.', '');
+        location.reload();
+    }
+</script>
+
 <meta name="description" content="AppRTC like RTCMultiConnection demo where styles and layout is taken from AppRTC demo." />
 <meta name="keywords" content="AppRTC,RTCMultiConnection,AppRTC-Look,WebRTC" />
 

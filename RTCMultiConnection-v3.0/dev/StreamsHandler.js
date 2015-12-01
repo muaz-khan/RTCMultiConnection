@@ -26,6 +26,12 @@ var StreamsHandler = (function() {
     }
 
     function setHandlers(stream, syncAction, connection) {
+        if (typeof syncAction == 'undefined' || syncAction == true) {
+            stream.addEventListener('ended', function() {
+                StreamsHandler.onSyncNeeded(stream.streamid, 'ended');
+            }, false);
+        }
+
         stream.mute = function(type) {
             type = handleType(type);
 

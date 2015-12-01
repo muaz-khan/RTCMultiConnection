@@ -8,6 +8,8 @@ function RTCMultiConnection(roomid) {
     var mPeer = new MultiPeers(connection);
 
     mPeer.onGettingLocalMedia = function(stream) {
+        setStreamEndHandler(stream);
+
         getMediaElement(stream, function(mediaElement) {
             mediaElement.id = stream.streamid;
             mediaElement.muted = true;
@@ -805,37 +807,46 @@ function RTCMultiConnection(roomid) {
         });
     };
 
+    function setStreamEndHandler(stream) {
+        if (stream.alreadySetEndHandler) {
+            return;
+        }
+        stream.alreadySetEndHandler = true;
+
+        stream.addEventListener('ended', function() {
+            delete connection.attachStreams[connection.attachStreams.indexOf(stream)];
+
+            if (connection.removeStreams.indexOf(stream) === -1) {
+                connection.removeStreams.push(stream);
+            }
+
+            connection.attachStreams = removeNullEntries(connection.attachStreams);
+            connection.removeStreams = removeNullEntries(connection.removeStreams);
+
+            // connection.renegotiate();
+
+            var streamEvent = connection.streamEvents[stream];
+            if (!streamEvent) {
+                streamEvent = {
+                    stream: stream,
+                    streamid: stream.streamid,
+                    type: 'local',
+                    userid: connection.userid,
+                    extra: connection.extra,
+                    mediaElement: stream.mediaElement
+                };
+            }
+            connection.onstreamended(streamEvent);
+
+            delete connection.streamEvents[stream.streamid];
+        }, false);
+    }
+
     if (Object.observe) {
         Object.observe(connection.attachStreams, function(changes) {
             changes.forEach(function(change) {
                 if (change.type === 'add') {
-                    change.object[change.name].addEventListener('ended', function() {
-                        delete connection.attachStreams[connection.attachStreams.indexOf(change.object[change.name])];
-
-                        if (connection.removeStreams.indexOf(change.object[change.name]) === -1) {
-                            connection.removeStreams.push(change.object[change.name]);
-                        }
-
-                        connection.attachStreams = removeNullEntries(connection.attachStreams);
-                        connection.removeStreams = removeNullEntries(connection.removeStreams);
-
-                        // connection.renegotiate();
-
-                        var streamEvent = connection.streamEvents[change.object[change.name]];
-                        if (!streamEvent) {
-                            streamEvent = {
-                                stream: change.object[change.name],
-                                streamid: change.object[change.name].streamid,
-                                type: 'local',
-                                userid: connection.userid,
-                                extra: connection.extra,
-                                mediaElement: change.object[change.name].mediaElement
-                            };
-                        }
-                        connection.onstreamended(streamEvent);
-
-                        delete connection.streamEvents[change.object[change.name]];
-                    }, false);
+                    setStreamEndHandler(change.object[change.name]);
                 }
 
                 if (change.type === 'remove' || change.type === 'delete') {
@@ -1086,6 +1097,8 @@ function RTCMultiConnection(roomid) {
     // default value is 15k because Firefox's receiving limit is 16k!
     // however 64k works chrome-to-chrome
     connection.chunkSize = 15 * 1000;
+
+    connection.maxParticipantsAllowed = 1000;
 
     // eject or leave single user
     connection.disconnectWith = mPeer.disconnectWith;

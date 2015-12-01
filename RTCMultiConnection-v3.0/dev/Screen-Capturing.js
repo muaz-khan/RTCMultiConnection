@@ -1,4 +1,4 @@
-// Last time updated at Sep 23, 2014, 08:32:23
+// Last time updated at Dec 01, 2015, 08:32:23
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/Screen-Capturing.js
 
@@ -65,6 +65,8 @@ var screenCallback;
 function isChromeExtensionAvailable(callback) {
     if (!callback) return;
 
+    if (isFirefox) return isFirefoxExtensionAvailable(callback);
+
     if (chromeMediaSource == 'desktop') return callback(true);
 
     // ask extension if it is available
@@ -75,6 +77,42 @@ function isChromeExtensionAvailable(callback) {
             callback(false);
         } else callback(true);
     }, 2000);
+}
+
+function isFirefoxExtensionAvailable(callback) {
+    if (!callback) return;
+
+    if (!isFirefox) return isChromeExtensionAvailable(callback);
+
+    var isFirefoxAddonResponded = false;
+
+    function messageCallback(event) {
+        var addonMessage = event.data;
+
+        if (!addonMessage || typeof addonMessage.isScreenCapturingEnabled === 'undefined') return;
+
+        isFirefoxAddonResponded = true;
+
+        if (addonMessage.isScreenCapturingEnabled === true) {
+            callback(true);
+        } else {
+            callback(false);
+        }
+
+        window.removeEventListener("message", messageCallback, false);
+    }
+
+    window.addEventListener("message", messageCallback, false);
+
+    window.postMessage({
+        checkIfScreenCapturingEnabled: true
+    }, "*");
+
+    setTimeout(function() {
+        if (!isFirefoxAddonResponded) {
+            callback(false);
+        }
+    }, 2000); // wait 2-seconds-- todo: is this enough limit?
 }
 
 // this function can be used to get "source-id" from the extension
@@ -95,12 +133,12 @@ var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 var isChrome = !!window.chrome && !isOpera;
 
 function getChromeExtensionStatus(extensionid, callback) {
-    if (isFirefox) return callback('not-chrome');
-
     if (arguments.length != 2) {
         callback = extensionid;
         extensionid = 'ajhifddimkapgcifgcodmmfdlknahffk'; // default extension-id
     }
+
+    if (isFirefox) return callback('not-chrome');
 
     var image = document.createElement('img');
     image.src = 'chrome-extension://' + extensionid + '/icon.png';
@@ -127,39 +165,43 @@ function getScreenConstraints(callback) {
 
     if (isFirefox) return callback(null, firefoxScreenConstraints);
 
-    // this statement defines getUserMedia constraints
-    // that will be used to capture content of screen
-    var screen_constraints = {
-        mandatory: {
-            chromeMediaSource: chromeMediaSource,
-            maxWidth: screen.width > 1920 ? screen.width : 1920,
-            maxHeight: screen.height > 1080 ? screen.height : 1080,
-            minFrameRate: 30,
-            maxFrameRate: 64,
-            minAspectRatio: 1.77,
-            googLeakyBucket: true,
-            googTemporalLayeredScreencast: true
-        },
-        optional: []
-    };
+    getChromeExtensionStatus(function(status) {
+        isChromeExtensionAvailable(function(isAvailable) {
+            // this statement defines getUserMedia constraints
+            // that will be used to capture content of screen
+            var screen_constraints = {
+                mandatory: {
+                    chromeMediaSource: chromeMediaSource,
+                    maxWidth: screen.width > 1920 ? screen.width : 1920,
+                    maxHeight: screen.height > 1080 ? screen.height : 1080,
+                    minFrameRate: 30,
+                    maxFrameRate: 64,
+                    minAspectRatio: 1.77,
+                    googLeakyBucket: true,
+                    googTemporalLayeredScreencast: true
+                },
+                optional: []
+            };
 
-    // this statement verifies chrome extension availability
-    // if installed and available then it will invoke extension API
-    // otherwise it will fallback to command-line based screen capturing API
-    if (chromeMediaSource == 'desktop' && !sourceId) {
-        getSourceId(function() {
-            screen_constraints.mandatory.chromeMediaSourceId = sourceId;
-            callback(sourceId == 'PermissionDeniedError' ? sourceId : null, screen_constraints);
-            sourceId = null;
-        });
-        return;
-    }
+            // this statement verifies chrome extension availability
+            // if installed and available then it will invoke extension API
+            // otherwise it will fallback to command-line based screen capturing API
+            if (chromeMediaSource == 'desktop' && !sourceId) {
+                getSourceId(function() {
+                    screen_constraints.mandatory.chromeMediaSourceId = sourceId;
+                    callback(sourceId == 'PermissionDeniedError' ? sourceId : null, screen_constraints);
+                    sourceId = null;
+                });
+                return;
+            }
 
-    // this statement sets gets 'sourceId" and sets "chromeMediaSourceId" 
-    if (chromeMediaSource == 'desktop') {
-        screen_constraints.mandatory.chromeMediaSourceId = sourceId;
-    }
+            // this statement sets gets 'sourceId" and sets "chromeMediaSourceId" 
+            if (chromeMediaSource == 'desktop') {
+                screen_constraints.mandatory.chromeMediaSourceId = sourceId;
+            }
 
-    // now invoking native getUserMedia API
-    callback(null, screen_constraints);
+            // now invoking native getUserMedia API
+            callback(null, screen_constraints);
+        })
+    });
 }

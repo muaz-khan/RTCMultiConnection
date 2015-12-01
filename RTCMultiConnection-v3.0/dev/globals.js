@@ -240,5 +240,7 @@ if (typeof MediaStream !== 'undefined' && !('stop' in MediaStream.prototype)) {
         this.getVideoTracks().forEach(function(track) {
             track.stop();
         });
+
+        fireEvent(this, 'ended');
     };
 }

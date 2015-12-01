@@ -443,7 +443,7 @@ function enterFullScreen() {
 // var config = { openSocket: openSignalingChannel };
 
 // via: https://github.com/muaz-khan/WebRTC-Experiment/tree/master/socketio-over-nodejs#how-to-use
-var SIGNALING_SERVER = 'https://webrtc-signaling.nodejitsu.com:443/';
+var SIGNALING_SERVER = 'https://socketio-signaling.herokuapp.com:443/';
 var mainSocket = io.connect(SIGNALING_SERVER);
 
 connection.openSignalingChannel = function(config) {

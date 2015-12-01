@@ -46,6 +46,12 @@ function FirebaseConnection(connection, connectCallback) {
             }
 
             var action = message.message.action;
+
+            if (action === 'ended') {
+                connection.onstreamended(stream);
+                return;
+            }
+
             var type = message.message.type != 'both' ? message.message.type : null;
             stream.stream[action](type);
             return;

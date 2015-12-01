@@ -1,4 +1,4 @@
-// Last time updated at Tuesday, November 24th, 2015, 12:00:46 PM 
+// Last time updated at Tuesday, December 1st, 2015, 2:13:08 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -17,6 +17,8 @@
         var mPeer = new MultiPeers(connection);
 
         mPeer.onGettingLocalMedia = function(stream) {
+            setStreamEndHandler(stream);
+
             getMediaElement(stream, function(mediaElement) {
                 mediaElement.id = stream.streamid;
                 mediaElement.muted = true;
@@ -814,37 +816,46 @@
             });
         };
 
+        function setStreamEndHandler(stream) {
+            if (stream.alreadySetEndHandler) {
+                return;
+            }
+            stream.alreadySetEndHandler = true;
+
+            stream.addEventListener('ended', function() {
+                delete connection.attachStreams[connection.attachStreams.indexOf(stream)];
+
+                if (connection.removeStreams.indexOf(stream) === -1) {
+                    connection.removeStreams.push(stream);
+                }
+
+                connection.attachStreams = removeNullEntries(connection.attachStreams);
+                connection.removeStreams = removeNullEntries(connection.removeStreams);
+
+                // connection.renegotiate();
+
+                var streamEvent = connection.streamEvents[stream];
+                if (!streamEvent) {
+                    streamEvent = {
+                        stream: stream,
+                        streamid: stream.streamid,
+                        type: 'local',
+                        userid: connection.userid,
+                        extra: connection.extra,
+                        mediaElement: stream.mediaElement
+                    };
+                }
+                connection.onstreamended(streamEvent);
+
+                delete connection.streamEvents[stream.streamid];
+            }, false);
+        }
+
         if (Object.observe) {
             Object.observe(connection.attachStreams, function(changes) {
                 changes.forEach(function(change) {
                     if (change.type === 'add') {
-                        change.object[change.name].addEventListener('ended', function() {
-                            delete connection.attachStreams[connection.attachStreams.indexOf(change.object[change.name])];
-
-                            if (connection.removeStreams.indexOf(change.object[change.name]) === -1) {
-                                connection.removeStreams.push(change.object[change.name]);
-                            }
-
-                            connection.attachStreams = removeNullEntries(connection.attachStreams);
-                            connection.removeStreams = removeNullEntries(connection.removeStreams);
-
-                            // connection.renegotiate();
-
-                            var streamEvent = connection.streamEvents[change.object[change.name]];
-                            if (!streamEvent) {
-                                streamEvent = {
-                                    stream: change.object[change.name],
-                                    streamid: change.object[change.name].streamid,
-                                    type: 'local',
-                                    userid: connection.userid,
-                                    extra: connection.extra,
-                                    mediaElement: change.object[change.name].mediaElement
-                                };
-                            }
-                            connection.onstreamended(streamEvent);
-
-                            delete connection.streamEvents[change.object[change.name]];
-                        }, false);
+                        setStreamEndHandler(change.object[change.name]);
                     }
 
                     if (change.type === 'remove' || change.type === 'delete') {
@@ -1096,6 +1107,8 @@
         // however 64k works chrome-to-chrome
         connection.chunkSize = 15 * 1000;
 
+        connection.maxParticipantsAllowed = 1000;
+
         // eject or leave single user
         connection.disconnectWith = mPeer.disconnectWith;
     }
@@ -1128,6 +1141,12 @@
                 }
 
                 var action = message.message.action;
+
+                if (action === 'ended') {
+                    connection.onstreamended(stream);
+                    return;
+                }
+
                 var type = message.message.type != 'both' ? message.message.type : null;
                 stream.stream[action](type);
                 return;
@@ -1532,6 +1551,10 @@
         };
 
         this.createNewPeer = function(remoteUserId, userPreferences) {
+            if (connection.maxParticipantsAllowed <= connection.getAllParticipants().length) {
+                return;
+            }
+
             userPreferences = userPreferences || {};
 
             if (!userPreferences.isOneWay && !userPreferences.isDataOnly) {
@@ -2013,6 +2036,8 @@
             this.getVideoTracks().forEach(function(track) {
                 track.stop();
             });
+
+            fireEvent(this, 'ended');
         };
     }
 
@@ -2728,11 +2753,6 @@
 
             navigator.getMedia(options.localMediaConstraints, function(stream) {
                 stream.streamid = stream.id || getRandomString();
-                if (!stream.stop) {
-                    stream.stop = function() {
-                        fireEvent(stream, 'ended');
-                    };
-                }
                 streaming(stream);
             }, function(error) {
                 options.onLocalMediaError(error, options.localMediaConstraints);
@@ -2768,6 +2788,12 @@
         }
 
         function setHandlers(stream, syncAction, connection) {
+            if (typeof syncAction == 'undefined' || syncAction == true) {
+                stream.addEventListener('ended', function() {
+                    StreamsHandler.onSyncNeeded(stream.streamid, 'ended');
+                }, false);
+            }
+
             stream.mute = function(type) {
                 type = handleType(type);
 
@@ -2847,7 +2873,7 @@
         };
     })();
 
-    // Last time updated at Monday, November 16th, 2015, 9:04:34 PM 
+    // Last time updated at Monday, November 30th, 2015, 10:25:38 AM 
 
     // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
 
@@ -2885,7 +2911,8 @@
             }
         } else {
             navigator = {
-                getUserMedia: function() {}
+                getUserMedia: function() {},
+                userAgent: 'Fake/5.0 (FakeOS) AppleWebKit/123 (KHTML, like Gecko) Fake/12.3.4567.89 Fake/123.45'
             };
         }
 
@@ -2950,7 +2977,7 @@
             if (isEdge) {
                 browserName = 'Edge';
                 // fullVersion = navigator.userAgent.split('Edge/')[1];
-                fullVersion = parseInt(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)[2], 10);
+                fullVersion = parseInt(navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)[2], 10).toString();
             }
 
             // trim the fullVersion string at semicolon/space if present
@@ -3047,18 +3074,25 @@
         var isCanvasSupportsStreamCapturing = false;
         var isVideoSupportsStreamCapturing = false;
         ['captureStream', 'mozCaptureStream', 'webkitCaptureStream'].forEach(function(item) {
-            // asdf
-            if (item in document.createElement('canvas')) {
+            if (!isCanvasSupportsStreamCapturing && item in document.createElement('canvas')) {
                 isCanvasSupportsStreamCapturing = true;
             }
 
-            if (item in document.createElement('video')) {
+            if (!isVideoSupportsStreamCapturing && item in document.createElement('video')) {
                 isVideoSupportsStreamCapturing = true;
             }
         });
 
         // via: https://github.com/diafygi/webrtc-ips
         function DetectLocalIPAddress(callback) {
+            if (!DetectRTC.isWebRTCSupported) {
+                return;
+            }
+
+            if (DetectRTC.isORTCSupported) {
+                return;
+            }
+
             getIPs(function(ip) {
                 //local IPs
                 if (ip.match(/^(192\.168\.|169\.254\.|10\.|172\.(1[6-9]|2\d|3[01]))/)) {
@@ -3090,6 +3124,11 @@
                 var win = iframe.contentWindow;
                 RTCPeerConnection = win.RTCPeerConnection || win.mozRTCPeerConnection || win.webkitRTCPeerConnection;
                 useWebKit = !!win.webkitRTCPeerConnection;
+            }
+
+            // if still no RTCPeerConnection then it is not supported by the browser so just return
+            if (!RTCPeerConnection) {
+                return;
             }
 
             //minimal requirements for data connection
@@ -3125,7 +3164,12 @@
             function handleCandidate(candidate) {
                 //match just the IP address
                 var ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3})/;
-                var ipAddress = ipRegex.exec(candidate)[1];
+                var match = ipRegex.exec(candidate);
+                if (!match) {
+                    console.warn('Could not match IP address in', candidate);
+                    return;
+                }
+                var ipAddress = match[1];
 
                 //remove duplicates
                 if (ipDuplicates[ipAddress] === undefined) {
@@ -3293,7 +3337,11 @@
 
         // --------- Detect if system supports WebRTC 1.0 or WebRTC 1.1.
         var isWebRTCSupported = false;
-        ['webkitRTCPeerConnection', 'mozRTCPeerConnection', 'RTCIceGatherer'].forEach(function(item) {
+        ['RTCPeerConnection', 'webkitRTCPeerConnection', 'mozRTCPeerConnection', 'RTCIceGatherer'].forEach(function(item) {
+            if (isWebRTCSupported) {
+                return;
+            }
+
             if (item in window) {
                 isWebRTCSupported = true;
             }
@@ -3317,11 +3365,16 @@
         DetectRTC.isScreenCapturingSupported = isScreenCapturingSupported;
 
         // --------- Detect if WebAudio API are supported
-        var webAudio = {};
+        var webAudio = {
+            isSupported: false,
+            isCreateMediaStreamSourceSupported: false
+        };
+
         ['AudioContext', 'webkitAudioContext', 'mozAudioContext', 'msAudioContext'].forEach(function(item) {
-            if (webAudio.isSupported && webAudio.isCreateMediaStreamSourceSupported) {
+            if (webAudio.isSupported) {
                 return;
             }
+
             if (item in window) {
                 webAudio.isSupported = true;
 
@@ -3386,7 +3439,7 @@
         } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             isGetUserMediaSupported = true;
         }
-        if (DetectRTC.browser.isChrome && DetectRTC.browser.version >= 47 && !isHTTPs) {
+        if (DetectRTC.browser.isChrome && DetectRTC.browser.version >= 46 && !isHTTPs) {
             DetectRTC.isGetUserMediaSupported = 'Requires HTTPs';
         }
         DetectRTC.isGetUserMediaSupported = isGetUserMediaSupported;

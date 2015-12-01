@@ -187,6 +187,10 @@ function MultiPeers(connection) {
     };
 
     this.createNewPeer = function(remoteUserId, userPreferences) {
+        if (connection.maxParticipantsAllowed <= connection.getAllParticipants().length) {
+            return;
+        }
+
         userPreferences = userPreferences || {};
 
         if (!userPreferences.isOneWay && !userPreferences.isDataOnly) {
