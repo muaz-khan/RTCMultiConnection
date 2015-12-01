@@ -38,6 +38,7 @@ var StreamsHandler = (function() {
             if (typeof type == 'undefined' || type == 'audio') {
                 stream.getAudioTracks().forEach(function(track) {
                     track.enabled = false;
+                    connection.streamEvents[stream.streamid].isAudioMuted = true;
                 });
             }
 
@@ -64,6 +65,7 @@ var StreamsHandler = (function() {
             if (typeof type == 'undefined' || type == 'audio') {
                 stream.getAudioTracks().forEach(function(track) {
                     track.enabled = true;
+                    connection.streamEvents[stream.streamid].isAudioMuted = false;
                 });
             }
 
@@ -71,6 +73,26 @@ var StreamsHandler = (function() {
                 stream.getVideoTracks().forEach(function(track) {
                     track.enabled = true;
                 });
+
+                // make sure that video unmute doesn't affects audio
+                if (typeof type !== 'undefined' && type == 'video' && connection.streamEvents[stream.streamid].isAudioMuted) {
+                    (function looper(times) {
+                        if (!times) {
+                            times = 0;
+                        }
+
+                        times++;
+
+                        // check until five-seconds
+                        if (times < 100 && connection.streamEvents[stream.streamid].isAudioMuted) {
+                            stream.mute('audio');
+
+                            setTimeout(function() {
+                                looper(times);
+                            }, 50);
+                        }
+                    })();
+                }
             }
 
             if (typeof syncAction == 'undefined' || syncAction == true) {

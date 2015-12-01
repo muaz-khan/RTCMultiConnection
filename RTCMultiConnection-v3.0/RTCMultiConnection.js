@@ -1,4 +1,4 @@
-// Last time updated at Tuesday, December 1st, 2015, 2:13:08 PM 
+// Last time updated at Tuesday, December 1st, 2015, 10:42:28 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -38,7 +38,8 @@
                     userid: connection.userid,
                     extra: connection.extra,
                     streamid: stream.streamid,
-                    blobURL: mediaElement.src || URL.createObjectURL(stream)
+                    blobURL: mediaElement.src || URL.createObjectURL(stream),
+                    isAudioMuted: true
                 };
 
                 setHarkEvents(connection, connection.streamEvents[stream.streamid]);
@@ -2800,6 +2801,7 @@
                 if (typeof type == 'undefined' || type == 'audio') {
                     stream.getAudioTracks().forEach(function(track) {
                         track.enabled = false;
+                        connection.streamEvents[stream.streamid].isAudioMuted = true;
                     });
                 }
 
@@ -2826,6 +2828,7 @@
                 if (typeof type == 'undefined' || type == 'audio') {
                     stream.getAudioTracks().forEach(function(track) {
                         track.enabled = true;
+                        connection.streamEvents[stream.streamid].isAudioMuted = false;
                     });
                 }
 
@@ -2833,6 +2836,26 @@
                     stream.getVideoTracks().forEach(function(track) {
                         track.enabled = true;
                     });
+
+                    // make sure that video unmute doesn't affects audio
+                    if (typeof type !== 'undefined' && type == 'video' && connection.streamEvents[stream.streamid].isAudioMuted) {
+                        (function looper(times) {
+                            if (!times) {
+                                times = 0;
+                            }
+
+                            times++;
+
+                            // check until five-seconds
+                            if (times < 100 && connection.streamEvents[stream.streamid].isAudioMuted) {
+                                stream.mute('audio');
+
+                                setTimeout(function() {
+                                    looper(times);
+                                }, 50);
+                            }
+                        })();
+                    }
                 }
 
                 if (typeof syncAction == 'undefined' || syncAction == true) {

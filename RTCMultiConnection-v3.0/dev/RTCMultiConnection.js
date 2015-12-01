@@ -29,7 +29,8 @@ function RTCMultiConnection(roomid) {
                 userid: connection.userid,
                 extra: connection.extra,
                 streamid: stream.streamid,
-                blobURL: mediaElement.src || URL.createObjectURL(stream)
+                blobURL: mediaElement.src || URL.createObjectURL(stream),
+                isAudioMuted: true
             };
 
             setHarkEvents(connection, connection.streamEvents[stream.streamid]);
