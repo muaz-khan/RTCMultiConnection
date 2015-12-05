@@ -32,8 +32,12 @@ var StreamsHandler = (function() {
             }, false);
         }
 
-        stream.mute = function(type) {
+        stream.mute = function(type, isSyncAction) {
             type = handleType(type);
+
+            if (typeof isSyncAction !== 'undefined') {
+                syncAction = isSyncAction;
+            }
 
             if (typeof type == 'undefined' || type == 'audio') {
                 stream.getAudioTracks().forEach(function(track) {
@@ -57,8 +61,12 @@ var StreamsHandler = (function() {
             fireEvent(stream, 'mute', type);
         };
 
-        stream.unmute = function(type) {
+        stream.unmute = function(type, isSyncAction) {
             type = handleType(type);
+
+            if (typeof isSyncAction !== 'undefined') {
+                syncAction = isSyncAction;
+            }
 
             graduallyIncreaseVolume();
 

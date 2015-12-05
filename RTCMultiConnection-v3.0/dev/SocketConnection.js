@@ -1,5 +1,5 @@
 function SocketConnection(connection, connectCallback) {
-    var socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid + '&msgEvent=' + connection.socketMessageEvent, connection.socketOptions);
+    var socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid + '&msgEvent=' + connection.socketMessageEvent + '&socketCustomEvent=' + connection.socketCustomEvent, connection.socketOptions);
 
     var mPeer = connection.multiPeersHandler;
 

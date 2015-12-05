@@ -1,4 +1,4 @@
-// Last time updated at Tuesday, December 1st, 2015, 10:42:28 PM 
+// Last time updated at Saturday, December 5th, 2015, 11:11:28 AM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -135,8 +135,8 @@
         connection.broadcasters = [];
 
         connection.socketOptions = {
-            'force new connection': true, // For SocketIO version < 1.0
-            'forceNew': true, // For SocketIO version >= 1.0
+            // 'force new connection': true, // For SocketIO version < 1.0
+            // 'forceNew': true, // For SocketIO version >= 1.0
             'transport': 'polling' // fixing transport:unknown issues
         };
 
@@ -1087,6 +1087,7 @@
         };
         connection.socketURL = '/'; // generated via config.json
         connection.socketMessageEvent = 'RTCMultiConnection-Message'; // generated via config.json
+        connection.socketCustomEvent = 'RTCMultiConnection-Custom-Message'; // generated via config.json
         connection.DetectRTC = DetectRTC;
 
         connection.onUserStatusChanged = function(event) {
@@ -1115,7 +1116,7 @@
     }
 
     function SocketConnection(connection, connectCallback) {
-        var socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid + '&msgEvent=' + connection.socketMessageEvent, connection.socketOptions);
+        var socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid + '&msgEvent=' + connection.socketMessageEvent + '&socketCustomEvent=' + connection.socketCustomEvent, connection.socketOptions);
 
         var mPeer = connection.multiPeersHandler;
 
@@ -2795,8 +2796,12 @@
                 }, false);
             }
 
-            stream.mute = function(type) {
+            stream.mute = function(type, isSyncAction) {
                 type = handleType(type);
+
+                if (typeof isSyncAction !== 'undefined') {
+                    syncAction = isSyncAction;
+                }
 
                 if (typeof type == 'undefined' || type == 'audio') {
                     stream.getAudioTracks().forEach(function(track) {
@@ -2820,8 +2825,12 @@
                 fireEvent(stream, 'mute', type);
             };
 
-            stream.unmute = function(type) {
+            stream.unmute = function(type, isSyncAction) {
                 type = handleType(type);
+
+                if (typeof isSyncAction !== 'undefined') {
+                    syncAction = isSyncAction;
+                }
 
                 graduallyIncreaseVolume();
 

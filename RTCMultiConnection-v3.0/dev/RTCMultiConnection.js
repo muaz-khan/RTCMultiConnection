@@ -126,8 +126,8 @@ function RTCMultiConnection(roomid) {
     connection.broadcasters = [];
 
     connection.socketOptions = {
-        'force new connection': true, // For SocketIO version < 1.0
-        'forceNew': true, // For SocketIO version >= 1.0
+        // 'force new connection': true, // For SocketIO version < 1.0
+        // 'forceNew': true, // For SocketIO version >= 1.0
         'transport': 'polling' // fixing transport:unknown issues
     };
 
@@ -1078,6 +1078,7 @@ function RTCMultiConnection(roomid) {
     };
     connection.socketURL = '@@socketURL'; // generated via config.json
     connection.socketMessageEvent = '@@socketMessageEvent'; // generated via config.json
+    connection.socketCustomEvent = '@@socketCustomEvent'; // generated via config.json
     connection.DetectRTC = DetectRTC;
 
     connection.onUserStatusChanged = function(event) {

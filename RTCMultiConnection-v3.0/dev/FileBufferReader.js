@@ -127,8 +127,11 @@ function FileBufferReaderHelper() {
             type: 'application/javascript'
         }));
 
-        var worker = new Worker(blob);
-        return worker;
+        if (!window.fileBufferWorker) {
+            window.fileBufferWorker = new Worker(blob);
+        }
+
+        return window.fileBufferWorker;
     }
 
     fbrHelper.readAsArrayBuffer = function(fbr, options) {
