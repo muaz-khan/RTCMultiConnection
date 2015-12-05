@@ -74,7 +74,7 @@ require('./Signaling-Server.js')(app, function(socket) {
     // var socket = connection.getSocket();
     // socket.emit(connection.socketCustomEvent, { test: true });
 
-    if(!params.socketCustomEvent) {
+    if (!params.socketCustomEvent) {
         params.socketCustomEvent = 'custom-message';
     }
 

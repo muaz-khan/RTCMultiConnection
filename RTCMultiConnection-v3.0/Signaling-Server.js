@@ -152,6 +152,11 @@ module.exports = exports = function(app, socketCallback) {
 
             if (message.remoteUserId == 'system') {
                 if (message.message.detectPresence) {
+                    if(message.message.userid === socket.userid) {
+                        callback(false, socket.userid);
+                        return;
+                    }
+
                     callback(!!listOfUsers[message.message.userid], message.message.userid);
                     return;
                 }

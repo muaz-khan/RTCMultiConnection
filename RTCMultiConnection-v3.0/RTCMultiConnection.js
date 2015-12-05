@@ -1,4 +1,4 @@
-// Last time updated at Saturday, December 5th, 2015, 11:11:28 AM 
+// Last time updated at Saturday, December 5th, 2015, 1:22:31 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -93,11 +93,13 @@
         };
 
         mPeer.onNegotiationNeeded = function(message, remoteUserId, callback) {
-            socket.emit(connection.socketMessageEvent, 'password' in message ? message : {
-                remoteUserId: message.remoteUserId || remoteUserId,
-                message: message,
-                sender: connection.userid
-            }, callback || function() {});
+            connectSocket(function() {
+                socket.emit(connection.socketMessageEvent, 'password' in message ? message : {
+                    remoteUserId: message.remoteUserId || remoteUserId,
+                    message: message,
+                    sender: connection.userid
+                }, callback || function() {});
+            });
         };
 
         function onUserLeft(remoteUserId) {
@@ -169,69 +171,64 @@
         }
 
         connection.openOrJoin = function(localUserid, password) {
-            connectSocket(function() {
-                mPeer.onNegotiationNeeded({
-                    detectPresence: true,
-                    userid: (localUserid || connection.sessionid) + ''
-                }, 'system', function(isRoomExists, roomid) {
-                    if (typeof password === 'function') {
-                        password(isRoomExists, roomid);
-                        password = null;
+            connection.checkPresence(localUserid, function(isRoomExists, roomid) {
+                if (typeof password === 'function') {
+                    password(isRoomExists, roomid);
+                    password = null;
+                }
+
+                if (isRoomExists) {
+                    connection.sessionid = roomid;
+
+                    var localPeerSdpConstraints = false;
+                    var remotePeerSdpConstraints = false;
+                    var isOneWay = !!connection.session.oneway;
+                    var isDataOnly = isData(connection.session);
+
+                    remotePeerSdpConstraints = {
+                        OfferToReceiveAudio: connection.sdpConstraints.mandatory.OfferToReceiveAudio,
+                        OfferToReceiveVideo: connection.sdpConstraints.mandatory.OfferToReceiveVideo
                     }
 
-                    if (isRoomExists) {
-                        connection.sessionid = roomid;
-
-                        var localPeerSdpConstraints = false;
-                        var remotePeerSdpConstraints = false;
-                        var isOneWay = !!connection.session.oneway;
-                        var isDataOnly = isData(connection.session);
-
-                        remotePeerSdpConstraints = {
-                            OfferToReceiveAudio: connection.sdpConstraints.mandatory.OfferToReceiveAudio,
-                            OfferToReceiveVideo: connection.sdpConstraints.mandatory.OfferToReceiveVideo
-                        }
-
-                        localPeerSdpConstraints = {
-                            OfferToReceiveAudio: isOneWay ? !!connection.session.audio : connection.sdpConstraints.mandatory.OfferToReceiveAudio,
-                            OfferToReceiveVideo: isOneWay ? !!connection.session.video || !!connection.session.screen : connection.sdpConstraints.mandatory.OfferToReceiveVideo
-                        }
-
-                        var connectionDescription = {
-                            remoteUserId: connection.sessionid,
-                            message: {
-                                newParticipationRequest: true,
-                                isOneWay: isOneWay,
-                                isDataOnly: isDataOnly,
-                                localPeerSdpConstraints: localPeerSdpConstraints,
-                                remotePeerSdpConstraints: remotePeerSdpConstraints
-                            },
-                            sender: connection.userid,
-                            password: password || false
-                        };
-
-                        mPeer.onNegotiationNeeded(connectionDescription);
-                        return;
+                    localPeerSdpConstraints = {
+                        OfferToReceiveAudio: isOneWay ? !!connection.session.audio : connection.sdpConstraints.mandatory.OfferToReceiveAudio,
+                        OfferToReceiveVideo: isOneWay ? !!connection.session.video || !!connection.session.screen : connection.sdpConstraints.mandatory.OfferToReceiveVideo
                     }
 
-                    var oldUserId = connection.userid;
-                    connection.userid = connection.sessionid = localUserid || connection.sessionid;
-                    connection.userid = connection.userid + '';
+                    var connectionDescription = {
+                        remoteUserId: connection.sessionid,
+                        message: {
+                            newParticipationRequest: true,
+                            isOneWay: isOneWay,
+                            isDataOnly: isDataOnly,
+                            localPeerSdpConstraints: localPeerSdpConstraints,
+                            remotePeerSdpConstraints: remotePeerSdpConstraints
+                        },
+                        sender: connection.userid,
+                        password: password || false
+                    };
 
-                    socket.emit('changed-uuid', connection.userid);
+                    mPeer.onNegotiationNeeded(connectionDescription);
+                    return;
+                }
 
-                    if (password) {
-                        socket.emit('set-password', password);
-                    }
+                var oldUserId = connection.userid;
+                connection.userid = connection.sessionid = localUserid || connection.sessionid;
+                connection.userid = connection.userid + '';
 
-                    connection.isInitiator = true;
+                socket.emit('changed-uuid', connection.userid);
 
-                    if (isData(connection.session)) {
-                        return;
-                    }
+                if (password) {
+                    socket.emit('set-password', password);
+                }
 
-                    connection.captureUserMedia();
-                });
+                connection.isInitiator = true;
+
+                if (isData(connection.session)) {
+                    return;
+                }
+
+                connection.captureUserMedia();
             });
         };
 
@@ -1113,6 +1110,13 @@
 
         // eject or leave single user
         connection.disconnectWith = mPeer.disconnectWith;
+
+        connection.checkPresence = function(remoteUserId, callback) {
+            mPeer.onNegotiationNeeded({
+                detectPresence: true,
+                userid: (remoteUserId || connection.sessionid) + ''
+            }, 'system', callback);
+        };
     }
 
     function SocketConnection(connection, connectCallback) {

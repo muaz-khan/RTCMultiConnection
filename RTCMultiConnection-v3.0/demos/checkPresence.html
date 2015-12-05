@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
 
-    <title>Custom+Socket+Event</title>
+    <title>checkPresence / Detect if room exists</title>
 
     <style>
         video {
@@ -36,7 +36,7 @@
     <article>
 
         <header style="text-align: center;">
-            <h1>Custom+Socket+Event</h1>
+            <h1>checkPresence / Detect if room exists</h1>
             <p>
                 <a href="https://rtcmulticonnection.herokuapp.com/">HOME</a>
                 <span> &copy; </span>
@@ -54,15 +54,12 @@
         <section class="experiment">
             <div class="make-center">
                 <input type="text" id="room-id" value="abcdef">
-                <button id="open-room">Open Room</button>
-                <button id="join-room">Join Room</button>
-                <button id="open-or-join-room">Auto Open Or Join Room</button>
-
+                <button id="open-room" disabled>Open Room</button>
+                <button id="join-room" disabled>Join Room</button>
                 <br><br>
                 <p>
-                    Use this button to share custom messages (strings, numbers, objects, whatever) among all the users on this page. Remember, all the users MUST be using same URL.
-                    <br>
-                    <button id="send-custom-message" disabled>Send Custom Message</button>
+                    Check presence of the room before clicking open or join buttons:<br>
+                    <button id="check-presence">Check Presence</button>
                 </p>
             </div>
 
@@ -89,9 +86,18 @@
                 connection.join(document.getElementById('room-id').value);
             };
 
-            document.getElementById('open-or-join-room').onclick = function() {
+            document.getElementById('check-presence').onclick = function() {
                 this.disabled = true;
-                connection.openOrJoin(document.getElementById('room-id').value);
+                connection.checkPresence(document.getElementById('room-id').value, function(isRoomExists, roomid) {
+                    alert('isRoomExists (' + roomid + '): ' + isRoomExists);
+
+                    if(isRoomExists) {
+                        document.getElementById('join-room').disabled = false;
+                    }
+                    else {
+                        document.getElementById('open-room').disabled = false;
+                    }
+                });
             };
 
             var chatContainer = document.querySelector('.chat-output');
@@ -128,38 +134,6 @@
             connection.onstream = function(event) {
                 videosContainer.appendChild(event.mediaElement);
             };
-
-            // ......................................................
-            // ..................Custom Messages.....................
-            // ......................................................
-
-            // this line must be defined earlier before "getSocket"
-            // or before open/join/openOrJoin
-            // connection.socketCustomEvent = 'custom-socket-event';
-
-            // to make above line highly secure;
-            // so that only users in the same channel can receive/send custom messages!
-            connection.socketCustomEvent = connection.channel;
-
-            // above line is optional,
-            // however if you define it; make sure that it is on top of below line.
-            // because below line will setup an event listener on server based on above value.
-            connection.connectSocket(function(socket) {
-                // listen custom messages from server
-                socket.on(connection.socketCustomEvent, function(message) {
-                    alert(message.sender + ' shared custom message:\n\n' + message.customMessage);
-                });
-
-                // send custom messages to server
-                document.getElementById('send-custom-message').disabled = false;
-                document.getElementById('send-custom-message').onclick = function() {
-                    var customMessage = prompt('Enter test message.');
-                    socket.emit(connection.socketCustomEvent, {
-                        sender: connection.userid,
-                        customMessage: customMessage
-                    });
-                }
-            });
         </script>
 
         <section class="experiment own-widgets latest-commits">
