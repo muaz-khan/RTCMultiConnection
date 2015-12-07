@@ -1,4 +1,4 @@
-// Last time updated at Saturday, December 5th, 2015, 1:22:31 PM 
+// Last time updated at Monday, December 7th, 2015, 10:43:47 AM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -508,11 +508,10 @@
         };
 
         DetectRTC.load(function() {
-            // it will force RTCMultiConnection to capture default devices
-            var firstAudioDevice, firstVideoDevice;
+            // it will force RTCMultiConnection to capture last-devices
+            // i.e. if external microphone is attached to system, we should prefer it over built-in devices.
             DetectRTC.MediaDevices.forEach(function(device) {
-                if (!firstAudioDevice && device.kind === 'audioinput') {
-                    firstAudioDevice = device;
+                if (device.kind === 'audioinput') {
                     connection.mediaConstraints.audio = {
                         optional: [{
                             sourceId: device.id
@@ -521,8 +520,7 @@
                     };
                 }
 
-                if (!firstVideoDevice && device.kind === 'videoinput') {
-                    firstVideoDevice = device;
+                if (device.kind === 'videoinput') {
                     connection.mediaConstraints.video = {
                         optional: [{
                             sourceId: device.id
@@ -1117,6 +1115,10 @@
                 userid: (remoteUserId || connection.sessionid) + ''
             }, 'system', callback);
         };
+
+        connection.onReadyForOffer = function(remoteUserId, userPreferences) {
+            connection.multiPeersHandler.createNewPeer(remoteUserId, userPreferences);
+        };
     }
 
     function SocketConnection(connection, connectCallback) {
@@ -1702,7 +1704,7 @@
             }
 
             if (message.readyForOffer) {
-                this.createNewPeer(remoteUserId, message.userPreferences);
+                connection.onReadyForOffer(remoteUserId, message.userPreferences);
             }
         };
 

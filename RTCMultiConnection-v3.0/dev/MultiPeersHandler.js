@@ -332,7 +332,7 @@ function MultiPeers(connection) {
         }
 
         if (message.readyForOffer) {
-            this.createNewPeer(remoteUserId, message.userPreferences);
+            connection.onReadyForOffer(remoteUserId, message.userPreferences);
         }
     };
 

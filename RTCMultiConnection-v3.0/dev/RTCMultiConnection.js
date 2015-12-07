@@ -499,11 +499,10 @@ function RTCMultiConnection(roomid) {
     };
 
     DetectRTC.load(function() {
-        // it will force RTCMultiConnection to capture default devices
-        var firstAudioDevice, firstVideoDevice;
+        // it will force RTCMultiConnection to capture last-devices
+        // i.e. if external microphone is attached to system, we should prefer it over built-in devices.
         DetectRTC.MediaDevices.forEach(function(device) {
-            if (!firstAudioDevice && device.kind === 'audioinput') {
-                firstAudioDevice = device;
+            if (device.kind === 'audioinput') {
                 connection.mediaConstraints.audio = {
                     optional: [{
                         sourceId: device.id
@@ -512,8 +511,7 @@ function RTCMultiConnection(roomid) {
                 };
             }
 
-            if (!firstVideoDevice && device.kind === 'videoinput') {
-                firstVideoDevice = device;
+            if (device.kind === 'videoinput') {
                 connection.mediaConstraints.video = {
                     optional: [{
                         sourceId: device.id
@@ -1107,5 +1105,9 @@ function RTCMultiConnection(roomid) {
             detectPresence: true,
             userid: (remoteUserId || connection.sessionid) + ''
         }, 'system', callback);
+    };
+
+    connection.onReadyForOffer = function(remoteUserId, userPreferences) {
+        connection.multiPeersHandler.createNewPeer(remoteUserId, userPreferences);
     };
 }
