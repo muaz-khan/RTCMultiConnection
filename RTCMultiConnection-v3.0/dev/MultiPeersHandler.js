@@ -37,11 +37,11 @@ function MultiPeers(connection) {
                 callbcak(connection.peers[participant]);
             });
         },
-        send: function(data) {
+        send: function(data, remoteUserId) {
             var that = this;
 
             if (!isNull(data.size) && !isNull(data.type)) {
-                self.shareFile(data);
+                self.shareFile(data, remoteUserId);
                 return;
             }
 
@@ -49,13 +49,24 @@ function MultiPeers(connection) {
                 TextSender.send({
                     text: data,
                     channel: this,
-                    connection: connection
+                    connection: connection,
+                    remoteUserId: remoteUserId
                 });
                 return;
             }
 
             if (data.type === 'text') {
                 data = JSON.stringify(data);
+            }
+
+            if (remoteUserId) {
+                var remoteUser = connection.peers[remoteUserId];
+                if (remoteUser) {
+                    remoteUser.channels.forEach(function(channel) {
+                        channel.send(data);
+                    });
+                    return;
+                }
             }
 
             this.getAllParticipants().forEach(function(participant) {
@@ -177,7 +188,7 @@ function MultiPeers(connection) {
                     }
                 }
 
-                if (states.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1 && !!states.iceConnectionEstablished) {
+                if (states.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1) {
                     self.onUserLeft(remoteUserId);
                     self.disconnectWith(remoteUserId);
                 }

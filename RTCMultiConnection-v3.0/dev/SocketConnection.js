@@ -106,7 +106,7 @@ function SocketConnection(connection, connectCallback) {
             return;
         }
 
-        if (message.message.readyForOffer) {
+        if (message.message.readyForOffer || message.message.addMeAsBroadcaster) {
             connection.addNewBroadcaster(message.sender);
         }
 
@@ -176,6 +176,8 @@ function SocketConnection(connection, connectCallback) {
     });
 
     socket.on('user-left', function(userid) {
+        if (socket.dontFireUserDisconnected) return;
+
         onUserLeft(userid);
 
         connection.onUserStatusChanged({
@@ -184,24 +186,33 @@ function SocketConnection(connection, connectCallback) {
             extra: connection.peers[userid] ? connection.peers[userid].extra || {} : {}
         });
 
-        // todo: ???
         connection.onleave({
-            userid: userid
+            userid: userid,
+            extra: {}
         });
     });
 
     socket.on('connect', function() {
-        console.info('socket.io connection is opened.');
+        if (connection.enableLogs) {
+            console.info('socket.io connection is opened.');
+        }
+
         socket.emit('extra-data-updated', connection.extra);
+
+        if (!connection.isInitiator && socket.dontFireUserDisconnected && connection.getAllParticipants().length) {
+            return;
+        }
+
         if (connectCallback) connectCallback(socket);
     });
 
     socket.on('disconnect', function() {
-        console.info('socket.io connection is closed');
-        if (!!connection.autoReDialOnFailure) {
+        if (connection.enableLogs) {
+            console.info('socket.io connection is closed');
             console.warn('socket.io reconnecting');
-            socket = new SocketConnection(connection, connectCallback);
         }
+
+        socket.dontFireUserDisconnected = true;
     });
 
     socket.on('join-with-password', function(remoteUserId) {
@@ -217,6 +228,8 @@ function SocketConnection(connection, connectCallback) {
     });
 
     socket.on('user-disconnected', function(remoteUserId) {
+        if (socket.dontFireUserDisconnected) return;
+
         if (remoteUserId === connection.userid) {
             return;
         }

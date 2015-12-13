@@ -105,12 +105,13 @@ function isFirefoxExtensionAvailable(callback) {
     window.addEventListener("message", messageCallback, false);
 
     window.postMessage({
-        checkIfScreenCapturingEnabled: true
+        checkIfScreenCapturingEnabled: true,
+        domains: [document.domain]
     }, "*");
 
     setTimeout(function() {
         if (!isFirefoxAddonResponded) {
-            callback(false);
+            callback(true); // can be old firefox extension
         }
     }, 2000); // wait 2-seconds-- todo: is this enough limit?
 }
@@ -159,8 +160,8 @@ function getChromeExtensionStatus(extensionid, callback) {
 // this function explains how to use above methods/objects
 function getScreenConstraints(callback) {
     var firefoxScreenConstraints = {
-        mozMediaSource: 'window',
-        mediaSource: 'window'
+        mozMediaSource: 'screen',
+        mediaSource: 'screen'
     };
 
     if (isFirefox) return callback(null, firefoxScreenConstraints);

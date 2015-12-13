@@ -35,7 +35,8 @@ if (typeof mozRTCPeerConnection !== 'undefined') {
 } else if (typeof window.RTCPeerConnection !== 'undefined') {
     RTCPeerConnection = window.RTCPeerConnection;
 } else {
-    throw 'WebRTC 1.0 (RTCPeerConnection) API are NOT available in this browser.';
+    console.error('WebRTC 1.0 (RTCPeerConnection) API are NOT available in this browser.');
+    RTCPeerConnection = window.RTCSessionDescription = window.RTCIceCandidate = function() {};
 }
 
 var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription;
@@ -150,6 +151,11 @@ function PeerInitiator(config) {
         });
     };
 
+    var isFirefoxOffered = !isFirefox;
+    if (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.isFirefoxOffered) {
+        isFirefoxOffered = true;
+    }
+
     localStreams.forEach(function(localStream) {
         if (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.dontGetRemoteStream) {
             return;
@@ -163,15 +169,10 @@ function PeerInitiator(config) {
     });
 
     peer.oniceconnectionstatechange = peer.onsignalingstatechange = function() {
-        if (peer.iceConnectionState === 'connected') {
-            peer.iceConnectionEstablished = true;
-        }
-
         config.onPeerStateChanged({
             iceConnectionState: peer.iceConnectionState,
             iceGatheringState: peer.iceGatheringState,
-            signalingState: peer.signalingState,
-            iceConnectionEstablished: !!peer.iceConnectionEstablished
+            signalingState: peer.signalingState
         });
 
         if (peer.iceConnectionState.search(/disconnected|closed/gi) !== -1) {
@@ -334,14 +335,15 @@ function PeerInitiator(config) {
             connectionDescription: that.connectionDescription,
             dontGetRemoteStream: !!config.dontGetRemoteStream,
             extra: config.rtcMultiConnection ? config.rtcMultiConnection.extra : {},
-            streamsToShare: streamsToShare
+            streamsToShare: streamsToShare,
+            isFirefoxOffered: isFirefox
         });
     }, function(error) {
         if (!!config.rtcMultiConnection.enableLogs) {
             console.error('sdp-error', error);
         }
 
-        if (!!config.rtcMultiConnection.autoReDialOnFailure) {
+        if (!!config.rtcMultiConnection.autoReDialOnFailure && !isFirefox && !isFirefoxOffered) {
             setTimeout(function() {
                 config.rtcMultiConnection.rejoin(that.connectionDescription);
             }, 2000);
@@ -350,8 +352,9 @@ function PeerInitiator(config) {
 
     peer.nativeClose = peer.close;
     peer.close = function() {
-        if (peer && peer.signalingState !== 'closed') {
+        if (peer && peer.iceConnectionState === 'connected') {
             peer.nativeClose();
+            peer = null;
         }
     };
 

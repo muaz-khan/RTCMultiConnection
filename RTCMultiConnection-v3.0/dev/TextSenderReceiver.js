@@ -54,7 +54,7 @@ var TextSender = {
         var connection = config.connection;
 
         var channel = config.channel,
-            _channel = config._channel,
+            remoteUserId = config.remoteUserId,
             initialText = config.text,
             packetSize = connection.chunkSize || 1000,
             textToTransfer = '',
@@ -91,7 +91,7 @@ var TextSender = {
                 data.isobject = isobject;
             }
 
-            channel.send(data, _channel);
+            channel.send(data, remoteUserId);
 
             textToTransfer = text.slice(data.message.length);
 

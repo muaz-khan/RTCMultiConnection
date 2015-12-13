@@ -16,7 +16,10 @@ function RTCMultiConnection(roomid) {
             mediaElement.volume = 0;
 
             stream.mediaElement = mediaElement;
-            connection.attachStreams.push(stream);
+
+            if (connection.attachStreams.indexOf(stream) === -1) {
+                connection.attachStreams.push(stream);
+            }
 
             if (typeof StreamsHandler !== 'undefined') {
                 StreamsHandler.setHandlers(stream, true, connection);
@@ -441,7 +444,7 @@ function RTCMultiConnection(roomid) {
 
         if (socket) {
             if (typeof socket.disconnect !== 'undefined') {
-                connection.autoReDialOnFailure = false; // Prevent reconnection		
+                connection.autoReDialOnFailure = false; // Prevent reconnection     
                 socket.disconnect();
             }
             socket = null;
@@ -581,8 +584,8 @@ function RTCMultiConnection(roomid) {
         }
     };
 
-    connection.send = function(data) {
-        connection.peers.send(data);
+    connection.send = function(data, remoteUserId) {
+        connection.peers.send(data, remoteUserId);
     };
 
     connection.close = connection.disconnect = connection.leave = function() {
@@ -664,7 +667,25 @@ function RTCMultiConnection(roomid) {
         function invokeGetUserMedia(localMediaConstraints, callback) {
             getUserMediaHandler({
                 onGettingLocalMedia: function(stream) {
+                    var videoConstraints = localMediaConstraints ? localMediaConstraints.video : connection.mediaConstraints;
+                    if (videoConstraints) {
+                        if (videoConstraints.mediaSource || videoConstraints.mozMediaSource) {
+                            stream.isScreen = true;
+                        } else if (videoConstraints.mandatory && videoConstraints.mandatory.chromeMediaSource) {
+                            stream.isScreen = true;
+                        }
+                    }
+
+                    if (!stream.isScreen) {
+                        stream.isVideo = stream.getVideoTracks().length;
+                        stream.isAudio = !stream.isVideo && stream.getAudioTracks().length;
+                    }
+
                     mPeer.onGettingLocalMedia(stream);
+
+                    if (session.streamCallback) {
+                        session.streamCallback(stream);
+                    }
 
                     if (callback) {
                         return callback();
@@ -1071,9 +1092,9 @@ function RTCMultiConnection(roomid) {
         },
         selectAll: function() {}
     };
-    connection.socketURL = '@@socketURL'; // generated via config.json
-    connection.socketMessageEvent = '@@socketMessageEvent'; // generated via config.json
-    connection.socketCustomEvent = '@@socketCustomEvent'; // generated via config.json
+    connection.socketURL = '/'; // generated via config.json
+    connection.socketMessageEvent = 'RTCMultiConnection-Message'; // generated via config.json
+    connection.socketCustomEvent = 'RTCMultiConnection-Custom-Message'; // generated via config.json
     connection.DetectRTC = DetectRTC;
 
     connection.onUserStatusChanged = function(event) {
