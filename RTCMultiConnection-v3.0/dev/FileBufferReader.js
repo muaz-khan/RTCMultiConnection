@@ -172,7 +172,13 @@ function FileBufferReaderHelper() {
                 earlyCallback = null;
             }
         }
-        if (typeof Worker !== 'undefined') {
+
+        if(!!navigator.mozGetUserMedia) {
+            window.___Worker = window.Worker;
+            delete window.Worker;
+        }
+
+        if (!!window.Worker && typeof Worker === 'function') {
             var webWorker = processInWebWorker(fileReaderWrapper);
 
             webWorker.onmessage = function(event) {
@@ -181,13 +187,11 @@ function FileBufferReaderHelper() {
 
             webWorker.postMessage(options);
         } else {
-            var reader = new FileReader();
-            reader.readAsDataURL(options);
-            reader.onload = function(event) {
-                callback(event.target.result);
-            };
+            fileReaderWrapper(options, processChunk);
 
-            fileReaderWrapper(option, processChunk);
+            if(!!navigator.mozGetUserMedia) {
+                window.Worker = window.___Worker;
+            }
         }
     };
 
