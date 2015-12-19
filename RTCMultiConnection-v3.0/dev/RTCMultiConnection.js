@@ -226,7 +226,7 @@ function RTCMultiConnection(roomid) {
         });
     };
 
-    connection.open = function(localUserid, isPublicUser) {
+    connection.open = function(localUserid, isPublicModerator) {
         var oldUserId = connection.userid;
         connection.userid = connection.sessionid = localUserid || connection.sessionid;
         connection.userid = connection.userid + '';
@@ -236,19 +236,24 @@ function RTCMultiConnection(roomid) {
         connectSocket(function() {
             socket.emit('changed-uuid', connection.userid);
 
-            if (typeof isPublicUser == 'undefined' || isPublicUser == true) {
-                socket.emit('become-a-public-user');
+            if (isPublicModerator == true) {
+                connection.becomePublicModerator();
             }
         });
 
         if (isData(connection.session)) {
-            if (typeof isPublicUser === 'function') {
-                isPublicUser();
+            if (typeof isPublicModerator === 'function') {
+                isPublicModerator();
             }
             return;
         }
 
-        connection.captureUserMedia(typeof isPublicUser === 'function' ? isPublicUser : null);
+        connection.captureUserMedia(typeof isPublicModerator === 'function' ? isPublicModerator : null);
+    };
+
+    connection.becomePublicModerator = function() {
+        if (!connection.isInitiator) return;
+        socket.emit('become-a-public-moderator');
     };
 
     connection.rejoin = function(connectionDescription) {
@@ -593,7 +598,7 @@ function RTCMultiConnection(roomid) {
     };
 
     connection.onstream = function(e) {
-        var parentNode = (document.body || document.documentElement);
+        var parentNode = connection.videosContainer;
         parentNode.insertBefore(e.mediaElement, parentNode.firstChild);
     };
 
@@ -897,7 +902,7 @@ function RTCMultiConnection(roomid) {
         }
     };
 
-    connection.body = connection.filesContainer = document.body || document.documentElement;
+    connection.filesContainer = connection.videosContainer = document.body || document.documentElement;
     connection.isInitiator = false;
 
     connection.shareFile = mPeer.shareFile;
@@ -945,7 +950,7 @@ function RTCMultiConnection(roomid) {
         socket.emit('changed-uuid', connection.userid);
     };
 
-    connection.shiftModerationControl = function(remoteUserId, existingBroadcasters, firedOnLeave, overrideSender) {
+    connection.shiftModerationControl = function(remoteUserId, existingBroadcasters, firedOnLeave) {
         mPeer.onNegotiationNeeded({
             shiftedModerationControl: true,
             broadcasters: existingBroadcasters,
@@ -980,11 +985,17 @@ function RTCMultiConnection(roomid) {
         selector.selectSingleFile(callback);
     };
 
-    connection.getPublicRooms = function(callback) {
-        connectSocket(function() {
-            mPeer.onNegotiationNeeded({
-                getPublicUsers: true
-            }, 'system', callback);
+    connection.getPublicModerators = function(userIdStartsWith, callback) {
+        if (typeof userIdStartsWith === 'function') {
+            callback = userIdStartsWith;
+        }
+
+        connectSocket(function(socket) {
+            socket.emit(
+                'get-public-moderators',
+                typeof userIdStartsWith === 'string' ? userIdStartsWith : '',
+                callback
+            );
         });
     };
 
@@ -1016,7 +1027,10 @@ function RTCMultiConnection(roomid) {
         }
     };
 
-    connection.onExtraDataUpdated = function(event) {};
+    connection.onExtraDataUpdated = function(event) {
+        event.status = 'online';
+        connection.onUserStatusChanged(event, true);
+    };
 
     connection.onJoinWithPassword = function(remoteUserId) {
         console.warn(remoteUserId, 'is password protected. Please join with password.');
@@ -1092,13 +1106,13 @@ function RTCMultiConnection(roomid) {
         },
         selectAll: function() {}
     };
-    connection.socketURL = '/'; // generated via config.json
-    connection.socketMessageEvent = 'RTCMultiConnection-Message'; // generated via config.json
-    connection.socketCustomEvent = 'RTCMultiConnection-Custom-Message'; // generated via config.json
+    connection.socketURL = '@@socketURL'; // generated via config.json
+    connection.socketMessageEvent = '@@socketMessageEvent'; // generated via config.json
+    connection.socketCustomEvent = '@@socketCustomEvent'; // generated via config.json
     connection.DetectRTC = DetectRTC;
 
-    connection.onUserStatusChanged = function(event) {
-        if (!!connection.enableLogs) {
+    connection.onUserStatusChanged = function(event, dontWriteLogs) {
+        if (!!connection.enableLogs && !dontWriteLogs) {
             console.info(event.userid, event.status);
         }
     };
@@ -1130,5 +1144,13 @@ function RTCMultiConnection(roomid) {
 
     connection.onReadyForOffer = function(remoteUserId, userPreferences) {
         connection.multiPeersHandler.createNewPeer(remoteUserId, userPreferences);
+    };
+
+    connection.setUserPreferences = function(userPreferences) {
+        return userPreferences;
+    };
+
+    connection.updateExtraData = function() {
+        socket.emit('extra-data-updated', connection.extra);
     };
 }

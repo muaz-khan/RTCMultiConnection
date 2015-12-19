@@ -213,11 +213,15 @@ function MultiPeers(connection) {
             return;
         }
 
+        userPreferences = connection.setUserPreferences(userPreferences);
+
         var localConfig = this.getLocalConfig(null, remoteUserId, userPreferences);
         connection.peers[remoteUserId] = new PeerInitiator(localConfig);
     };
 
     this.createAnsweringPeer = function(remoteSdp, remoteUserId, userPreferences) {
+        userPreferences = connection.setUserPreferences(userPreferences || {});
+
         var localConfig = this.getLocalConfig(remoteSdp, remoteUserId, userPreferences);
         connection.peers[remoteUserId] = new PeerInitiator(localConfig);
     };

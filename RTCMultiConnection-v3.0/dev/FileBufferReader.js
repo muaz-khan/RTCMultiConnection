@@ -173,7 +173,7 @@ function FileBufferReaderHelper() {
             }
         }
 
-        if(!!navigator.mozGetUserMedia) {
+        if (!!navigator.mozGetUserMedia) {
             window.___Worker = window.Worker;
             delete window.Worker;
         }
@@ -189,7 +189,7 @@ function FileBufferReaderHelper() {
         } else {
             fileReaderWrapper(options, processChunk);
 
-            if(!!navigator.mozGetUserMedia) {
+            if (!!navigator.mozGetUserMedia) {
                 window.Worker = window.___Worker;
             }
         }

@@ -1,4 +1,4 @@
-// Last time updated at Sunday, December 13th, 2015, 11:13:19 AM 
+// Last time updated at Saturday, December 19th, 2015, 12:09:54 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -235,7 +235,7 @@
             });
         };
 
-        connection.open = function(localUserid, isPublicUser) {
+        connection.open = function(localUserid, isPublicModerator) {
             var oldUserId = connection.userid;
             connection.userid = connection.sessionid = localUserid || connection.sessionid;
             connection.userid = connection.userid + '';
@@ -245,19 +245,24 @@
             connectSocket(function() {
                 socket.emit('changed-uuid', connection.userid);
 
-                if (typeof isPublicUser == 'undefined' || isPublicUser == true) {
-                    socket.emit('become-a-public-user');
+                if (isPublicModerator == true) {
+                    connection.becomePublicModerator();
                 }
             });
 
             if (isData(connection.session)) {
-                if (typeof isPublicUser === 'function') {
-                    isPublicUser();
+                if (typeof isPublicModerator === 'function') {
+                    isPublicModerator();
                 }
                 return;
             }
 
-            connection.captureUserMedia(typeof isPublicUser === 'function' ? isPublicUser : null);
+            connection.captureUserMedia(typeof isPublicModerator === 'function' ? isPublicModerator : null);
+        };
+
+        connection.becomePublicModerator = function() {
+            if (!connection.isInitiator) return;
+            socket.emit('become-a-public-moderator');
         };
 
         connection.rejoin = function(connectionDescription) {
@@ -602,7 +607,7 @@
         };
 
         connection.onstream = function(e) {
-            var parentNode = (document.body || document.documentElement);
+            var parentNode = connection.videosContainer;
             parentNode.insertBefore(e.mediaElement, parentNode.firstChild);
         };
 
@@ -906,7 +911,7 @@
             }
         };
 
-        connection.body = connection.filesContainer = document.body || document.documentElement;
+        connection.filesContainer = connection.videosContainer = document.body || document.documentElement;
         connection.isInitiator = false;
 
         connection.shareFile = mPeer.shareFile;
@@ -954,7 +959,7 @@
             socket.emit('changed-uuid', connection.userid);
         };
 
-        connection.shiftModerationControl = function(remoteUserId, existingBroadcasters, firedOnLeave, overrideSender) {
+        connection.shiftModerationControl = function(remoteUserId, existingBroadcasters, firedOnLeave) {
             mPeer.onNegotiationNeeded({
                 shiftedModerationControl: true,
                 broadcasters: existingBroadcasters,
@@ -989,11 +994,17 @@
             selector.selectSingleFile(callback);
         };
 
-        connection.getPublicRooms = function(callback) {
-            connectSocket(function() {
-                mPeer.onNegotiationNeeded({
-                    getPublicUsers: true
-                }, 'system', callback);
+        connection.getPublicModerators = function(userIdStartsWith, callback) {
+            if (typeof userIdStartsWith === 'function') {
+                callback = userIdStartsWith;
+            }
+
+            connectSocket(function(socket) {
+                socket.emit(
+                    'get-public-moderators',
+                    typeof userIdStartsWith === 'string' ? userIdStartsWith : '',
+                    callback
+                );
             });
         };
 
@@ -1025,7 +1036,10 @@
             }
         };
 
-        connection.onExtraDataUpdated = function(event) {};
+        connection.onExtraDataUpdated = function(event) {
+            event.status = 'online';
+            connection.onUserStatusChanged(event, true);
+        };
 
         connection.onJoinWithPassword = function(remoteUserId) {
             console.warn(remoteUserId, 'is password protected. Please join with password.');
@@ -1106,8 +1120,8 @@
         connection.socketCustomEvent = 'RTCMultiConnection-Custom-Message'; // generated via config.json
         connection.DetectRTC = DetectRTC;
 
-        connection.onUserStatusChanged = function(event) {
-            if (!!connection.enableLogs) {
+        connection.onUserStatusChanged = function(event, dontWriteLogs) {
+            if (!!connection.enableLogs && !dontWriteLogs) {
                 console.info(event.userid, event.status);
             }
         };
@@ -1140,6 +1154,14 @@
         connection.onReadyForOffer = function(remoteUserId, userPreferences) {
             connection.multiPeersHandler.createNewPeer(remoteUserId, userPreferences);
         };
+
+        connection.setUserPreferences = function(userPreferences) {
+            return userPreferences;
+        };
+
+        connection.updateExtraData = function() {
+            socket.emit('extra-data-updated', connection.extra);
+        };
     }
 
     function SocketConnection(connection, connectCallback) {
@@ -1150,6 +1172,11 @@
         socket.on('extra-data-updated', function(remoteUserId, extra) {
             if (!connection.peers[remoteUserId]) return;
             connection.peers[remoteUserId].extra = extra;
+
+            connection.onExtraDataUpdated({
+                userid: remoteUserId,
+                extra: extra
+            });
         });
 
         socket.on(connection.socketMessageEvent, function(message) {
@@ -1619,11 +1646,15 @@
                 return;
             }
 
+            userPreferences = connection.setUserPreferences(userPreferences);
+
             var localConfig = this.getLocalConfig(null, remoteUserId, userPreferences);
             connection.peers[remoteUserId] = new PeerInitiator(localConfig);
         };
 
         this.createAnsweringPeer = function(remoteSdp, remoteUserId, userPreferences) {
+            userPreferences = connection.setUserPreferences(userPreferences || {});
+
             var localConfig = this.getLocalConfig(remoteSdp, remoteUserId, userPreferences);
             connection.peers[remoteUserId] = new PeerInitiator(localConfig);
         };
@@ -2399,6 +2430,15 @@
 
             channel.onclose = function(event) {
                 config.onDataChannelClosed(event);
+            };
+
+            channel.internalSend = channel.send;
+            channel.send = function(data) {
+                if (channel.readyState !== 'open') {
+                    return;
+                }
+
+                channel.internalSend(data);
             };
 
             peer.channel = channel;

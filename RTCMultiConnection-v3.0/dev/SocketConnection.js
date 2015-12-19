@@ -6,6 +6,11 @@ function SocketConnection(connection, connectCallback) {
     socket.on('extra-data-updated', function(remoteUserId, extra) {
         if (!connection.peers[remoteUserId]) return;
         connection.peers[remoteUserId].extra = extra;
+
+        connection.onExtraDataUpdated({
+            userid: remoteUserId,
+            extra: extra
+        });
     });
 
     socket.on(connection.socketMessageEvent, function(message) {

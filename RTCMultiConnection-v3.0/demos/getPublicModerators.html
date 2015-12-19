@@ -6,9 +6,9 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
 
-    <title>Audio Conferencing using RTCMultiConnection-v3.0</title>
+    <title>getPublicModerators using RTCMultiConnection-v3.0</title>
 
-    <meta name="description" content="Create audio conferencing rooms using RTCMultiConnection v3.0" />
+    <meta name="description" content="Get List of all Public Rooms using RTCMultiConnection v3.0" />
     <meta name="keywords" content="WebRTC,RTCMultiConnection,Demos,Experiments,Samples,Examples" />
 
     <style>
@@ -39,7 +39,7 @@
     <article>
 
         <header style="text-align: center;">
-            <h1>Audio Conferencing using RTCMultiConnection-v3.0</h1>
+            <h1>getPublicModerators using RTCMultiConnection-v3.0</h1>
             <p>
                 <a href="https://rtcmulticonnection.herokuapp.com/">HOME</a>
                 <span> &copy; </span>
@@ -57,9 +57,13 @@
         <section class="experiment">
             <div class="make-center">
                 <input type="text" id="room-id" value="abcdef">
-                <button id="open-room">Open Room</button>
-                <button id="join-room">Join Room</button>
-                <button id="open-or-join-room">Auto Open Or Join Room</button>
+                <button id="open-public-room">Open Public Room</button>
+                <button id="open-private-room">Open Private Room</button>
+                <button id="become-public-moderator" disabled>Become Public Moderator</button>
+
+                <br><br>
+                <h2>List of all public moderators:</h2>
+                <ol id="public-rooms" style="text-align:left;"></ol>
             </div>
 
             <div id="videos-container"></div>
@@ -75,19 +79,24 @@
             // .......................UI Code........................
             // ......................................................
 
-            document.getElementById('open-room').onclick = function() {
+            document.getElementById('open-public-room').onclick = function() {
                 this.disabled = true;
-                connection.open(document.getElementById('room-id').value);
+
+                var isPublicModerator = true;
+                connection.open(document.getElementById('room-id').value, isPublicModerator);
             };
 
-            document.getElementById('join-room').onclick = function() {
+            document.getElementById('open-private-room').onclick = function() {
                 this.disabled = true;
-                connection.join(document.getElementById('room-id').value);
+
+                var isPublicModerator = false;
+                connection.open(document.getElementById('room-id').value, isPublicModerator);
+                document.getElementById('become-public-moderator').disabled = false;
             };
 
-            document.getElementById('open-or-join-room').onclick = function() {
+            document.getElementById('become-public-moderator').onclick = function() {
                 this.disabled = true;
-                connection.openOrJoin(document.getElementById('room-id').value);
+                connection.becomePublicModerator();
             };
 
             // ......................................................
@@ -99,18 +108,52 @@
             document.getElementById('room-id').value = connection.userid;
 
             connection.session = {
-                audio: true
+                audio: true,
+                video: true
             };
 
             connection.sdpConstraints.mandatory = {
                 OfferToReceiveAudio: true,
-                OfferToReceiveVideo: false
+                OfferToReceiveVideo: true
             };
 
             var videosContainer = document.getElementById('videos-container');
             connection.onstream = function(event) {
                 videosContainer.appendChild(event.mediaElement);
             };
+
+            var publicRoomsDiv = document.getElementById('public-rooms');
+            (function looper() {
+                // connection.getPublicModerators(startsWith, callback)
+                connection.getPublicModerators(function(array) {
+                    publicRoomsDiv.innerHTML = '';
+                    array.forEach(function(moderator) {
+                        // moderator.userid
+                        // moderator.extra
+                        if(moderator.userid == connection.userid) return; // if owner himself
+
+                        var li = document.createElement('li');
+                        li.innerHTML = '<b>' + moderator.userid + '</b>&nbsp;&nbsp;';
+
+                        var button = document.createElement('button');
+                        button.id = moderator.userid;
+                        button.onclick = function() {
+                            this.disabled = true;
+                            connection.join(this.id);
+                        };
+                        button.innerHTML = 'Join this room';
+                        li.appendChild(button);
+
+                        if(moderator.userid == connection.sessionid) {
+                            // if already connected with same moderator
+                            button.disabled = true;
+                        }
+
+                        publicRoomsDiv.insertBefore(li, publicRoomsDiv.firstChild);
+                    });
+                    setTimeout(looper, 3000);
+                });
+            })();
         </script>
 
         <section class="experiment own-widgets latest-commits">

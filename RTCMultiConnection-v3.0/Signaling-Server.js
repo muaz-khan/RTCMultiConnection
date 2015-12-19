@@ -1,11 +1,3 @@
-/*
-require('./Signaling-Server.js')(app, function(socket) {
-    socket.on('custom-event', function(data) {
-        socket.broadcast.emit('custom-event', data);
-    });
-});
-*/
-
 module.exports = exports = function(app, socketCallback) {
     var io = require('socket.io').listen(app, {
         log: false,
@@ -30,14 +22,9 @@ module.exports = exports = function(app, socketCallback) {
         listOfUsers[socket.userid] = {
             socket: socket,
             connectedWith: {},
-            isPublic: false,
+            isPublic: false, // means: isPublicModerator
             extra: {}
         };
-
-        socket.on('become-a-public-user', function() {
-            if (!listOfUsers[socket.userid]) return;
-            listOfUsers[socket.userid].isPublic = true;
-        });
 
         socket.on('extra-data-updated', function(extra) {
             if (!listOfUsers[socket.userid]) return;
@@ -48,8 +35,29 @@ module.exports = exports = function(app, socketCallback) {
             }
         });
 
+        socket.on('become-a-public-moderator', function() {
+            if (!listOfUsers[socket.userid]) return;
+            listOfUsers[socket.userid].isPublic = true;
+        });
+
+        socket.on('get-public-moderators', function(userIdStartsWith, callback) {
+            userIdStartsWith = userIdStartsWith || '';
+            var allPublicModerators = [];
+            for (var moderatorId in listOfUsers) {
+                if (listOfUsers[moderatorId].isPublic && moderatorId.indexOf(userIdStartsWith) === 0 && moderatorId !== socket.userid) {
+                    var moderator = listOfUsers[moderatorId];
+                    allPublicModerators.push({
+                        userid: moderatorId,
+                        extra: moderator.extra
+                    });
+                }
+            }
+
+            callback(allPublicModerators);
+        });
+
         socket.on('changed-uuid', function(newUserId) {
-            if (listOfUsers[socket.userid]) {
+            if (listOfUsers[socket.userid] && listOfUsers[socket.userid].socket.id == socket.userid) {
                 if (newUserId === socket.userid) return;
 
                 var oldUserId = socket.userid;
@@ -158,17 +166,6 @@ module.exports = exports = function(app, socketCallback) {
                     }
 
                     callback(!!listOfUsers[message.message.userid], message.message.userid);
-                    return;
-                }
-
-                if (message.message.getPublicUsers) {
-                    var allPublicUsers = [];
-                    for (var user in listOfUsers) {
-                        if (listOfUsers[user].isPublic) {
-                            allPublicUsers.push(user);
-                        }
-                    }
-                    callback(allPublicUsers);
                     return;
                 }
             }

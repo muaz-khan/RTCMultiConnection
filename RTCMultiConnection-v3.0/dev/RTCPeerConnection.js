@@ -305,6 +305,15 @@ function PeerInitiator(config) {
             config.onDataChannelClosed(event);
         };
 
+        channel.internalSend = channel.send;
+        channel.send = function(data) {
+            if (channel.readyState !== 'open') {
+                return;
+            }
+
+            channel.internalSend(data);
+        };
+
         peer.channel = channel;
     }
 
