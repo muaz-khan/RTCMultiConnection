@@ -1,8 +1,10 @@
-<a href="https://github.com/muaz-khan/RTCMultiConnection"><img src="https://i.imgur.com/MFfRBSM.png" /></a> / <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki Pages</a> / <a href="http://www.rtcmulticonnection.org/docs/">Documentation</a> / <a href="http://www.rtcmulticonnection.org/FAQ/">FAQ</a> / <a href="https://www.webrtc-experiment.com/RTCMultiConnection/">Demos</a> / <a href="http://www.rtcmulticonnection.org/changes-log/">Changes Log</a>
+<a href="https://github.com/muaz-khan/RTCMultiConnection"><img src="https://i.imgur.com/MFfRBSM.png" /></a>
 
 ## WebRTC Library  [![npm](https://img.shields.io/npm/v/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![Build Status: Linux](https://travis-ci.org/muaz-khan/RTCMultiConnection.png?branch=master)](https://travis-ci.org/muaz-khan/RTCMultiConnection)
 
-* [RTCMultiConnection-v3.0](https://github.com/muaz-khan/RTCMultiConnection/tree/master/RTCMultiConnection-v3.0) is latest Beta [![npm](https://img.shields.io/npm/v/rtcmulticonnection-v3.svg)](https://npmjs.org/package/rtcmulticonnection-v3) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection-v3.svg)](https://npmjs.org/package/rtcmulticonnection-v3)
+<a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki Pages</a> / <a href="http://www.rtcmulticonnection.org/docs/">Documentation</a> / <a href="http://www.rtcmulticonnection.org/FAQ/">FAQ</a> / <a href="https://www.webrtc-experiment.com/RTCMultiConnection/">Demos</a> / <a href="http://www.rtcmulticonnection.org/changes-log/">Changes Log</a>
+
+* [RTCMultiConnection-v3.0](https://github.com/muaz-khan/RTCMultiConnection/tree/master/RTCMultiConnection-v3.0) is latest version [![npm](https://img.shields.io/npm/v/rtcmulticonnection-v3.svg)](https://npmjs.org/package/rtcmulticonnection-v3) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection-v3.svg)](https://npmjs.org/package/rtcmulticonnection-v3)
 * RTCMultiConnection-v3.0 demo: [https://rtcmulticonnection.herokuapp.com/](https://rtcmulticonnection.herokuapp.com/)
 
 ```
@@ -12,6 +14,10 @@
 
 npm install rtcmulticonnection-v3
 ```
+
+* [rtcmulticonnection-v3.tar.gz](http://dl.webrtc-experiment.com/rtcmulticonnection-v3.tar.gz)
+
+> [Latest version v3.0](https://github.com/muaz-khan/RTCMultiConnection/tree/master/RTCMultiConnection-v3.0) is preferred over `v2.2.2`
 
 ### Quick-Demos for newbies:
 

@@ -1,4 +1,4 @@
-// Last time updated at Saturday, December 19th, 2015, 12:09:54 PM 
+// Last time updated at Sunday, December 20th, 2015, 2:19:17 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -382,7 +382,10 @@
         connection.getUserMedia = connection.captureUserMedia = function(callback, session) {
             session = session || connection.session;
 
-            if (isData(session)) {
+            if (connection.dontCaptureUserMedia || isData(session)) {
+                if (callback) {
+                    callback();
+                }
                 return;
             }
 
@@ -1156,16 +1159,42 @@
         };
 
         connection.setUserPreferences = function(userPreferences) {
+            if (connection.dontAttachStream) {
+                userPreferences.dontAttachLocalStream = true;
+            }
+
+            if (connection.dontGetRemoteStream) {
+                userPreferences.dontGetRemoteStream = true;
+            }
+
             return userPreferences;
         };
 
         connection.updateExtraData = function() {
             socket.emit('extra-data-updated', connection.extra);
         };
+
+        connection.enableScalableBroadcast = false;
+        connection.singleBroadcastAttendees = 3; // each broadcast should serve only 3 users
+
+        connection.dontCaptureUserMedia = false;
+        connection.dontAttachStream = false;
+        connection.dontGetRemoteStream = false;
     }
 
     function SocketConnection(connection, connectCallback) {
-        var socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid + '&msgEvent=' + connection.socketMessageEvent + '&socketCustomEvent=' + connection.socketCustomEvent, connection.socketOptions);
+        var parameters = '';
+
+        parameters += '?userid=' + connection.userid;
+        parameters += '&msgEvent=' + connection.socketMessageEvent;
+        parameters += '&socketCustomEvent=' + connection.socketCustomEvent;
+
+        if (connection.enableScalableBroadcast) {
+            parameters += '&enableScalableBroadcast=true';
+            parameters += '&singleBroadcastAttendees=' + connection.singleBroadcastAttendees;
+        }
+
+        var socket = io.connect((connection.socketURL || '/') + parameters, connection.socketOptions);
 
         var mPeer = connection.multiPeersHandler;
 
@@ -1428,6 +1457,12 @@
                 extra: connection.peers[userid] ? connection.peers[userid].extra || {} : {}
             });
         });
+
+        socket.on('logs', function(log) {
+            if (!connection.enableLogs) return;
+            console.debug('server-logs', log);
+        });
+
         return socket;
     }
 

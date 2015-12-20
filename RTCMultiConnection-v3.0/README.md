@@ -1,4 +1,4 @@
-## [RTCMultiConnection-v3.0](https://github.com/muaz-khan/RTCMultiConnection/tree/master/RTCMultiConnection-v3.0) (Beta) / [LIVE Demo](https://rtcmulticonnection.herokuapp.com/)  
+## [RTCMultiConnection-v3.0](https://github.com/muaz-khan/RTCMultiConnection/tree/master/RTCMultiConnection-v3.0) / [Many Live Demos](https://rtcmulticonnection.herokuapp.com/)  
 
 [![npm](https://img.shields.io/npm/v/rtcmulticonnection-v3.svg)](https://npmjs.org/package/rtcmulticonnection-v3) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection-v3.svg)](https://npmjs.org/package/rtcmulticonnection-v3) [![Build Status: Linux](https://travis-ci.org/muaz-khan/RTCMultiConnection.png?branch=master)](https://travis-ci.org/muaz-khan/RTCMultiConnection)
 
@@ -499,10 +499,6 @@ By default, logs are enabled.
 connection.enableLogs = false; // to disable logs
 ```
 
-## Firebase?
-
-If you are willing to use Firebase instead of Socket.io there, open [GruntFile.js](https://github.com/muaz-khan/RTCMultiConnection/blob/master/RTCMultiConnection-v3.0/Gruntfile.js) and replace `SocketConnection.js` with `FirebaseConnection.js`.
-
 ## `updateExtraData`
 
 You can force all the extra-data to be synced among all connected users.
@@ -825,8 +821,38 @@ connection.openOrJoin('roomid');
 connection.openOrJoin('roomid', function(isRoomExists, roomid) {
 	if(isRoomExists) alert('opened the room');
 	else alert('joined the room');
-})l
+});
 ```
+
+## `dontCaptureUserMedia`
+
+By default, it is `false`. Which means that RTCMultiConnection will always capture video if `connection.session.video===true`.
+
+If you are attaching external streams, you can ask RTCMultiConnection to DO NOT capture video:
+
+```javascript
+connection.dontCaptureUserMedia = true;
+```
+
+## `dontAttachStream`
+
+By default, it is `false`. Which means that RTCMultiConnection will always attach local streams.
+
+```javascript
+connection.dontAttachStream = true;
+```
+
+## `dontGetRemoteStream`
+
+By default, it is `false`. Which means that RTCMultiConnection will always get remote streams.
+
+```javascript
+connection.dontGetRemoteStream = true;
+```
+
+## Firebase?
+
+If you are willing to use Firebase instead of Socket.io there, open [GruntFile.js](https://github.com/muaz-khan/RTCMultiConnection/blob/master/RTCMultiConnection-v3.0/Gruntfile.js) and replace `SocketConnection.js` with `FirebaseConnection.js`.
 
 Then use `grunt` to recompile RTCMultiConnection.js.
 
@@ -858,6 +884,44 @@ Demo: [https://rtcmulticonnection.herokuapp.com/demos/PubNub-Demo.html](https://
 ## Configure v3.0
 
 * [wiki/Configure-v3.0](https://github.com/muaz-khan/RTCMultiConnection/wiki/Configure-v3.0)
+
+
+## Scalable Broadcasting
+
+v3.0 now supports WebRTC scalable broadcasting. Two new API are introduced: `enableScalableBroadcast` and `singleBroadcastAttendees`.
+
+```javascript
+connection.enableScalableBroadcast = true; // by default, it is false.
+connection.singleBroadcastAttendees = 3;   // how many users are handled by each broadcaster
+```
+
+## Fix Echo
+
+```javascript
+connection.onstream = function(event) {
+	if(event.mediaElement) {
+		event.mediaElement.muted = true;
+		delete event.mediaElement;
+	}
+
+	if(event.stream.mediaElement) {
+		event.stream.mediaElement.muted = true;
+		delete event.stream.mediaElement;
+	}
+
+	var video = document.createElement('video');
+	if(event.type === 'local') {
+		video.muted = true;
+	}
+	video.src = URL.createObjectURL(event.stream);
+	connection.videosContainer.appendChild(video);
+}
+```
+
+Live Demos:
+
+* [Files-Scalable-Broadcast.html](https://rtcmulticonnection.herokuapp.com/demos/Files-Scalable-Broadcast.html)
+* [Video-Scalable-Broadcast.html](https://rtcmulticonnection.herokuapp.com/demos/Video-Scalable-Broadcast.html)
 
 ## License
 

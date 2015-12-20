@@ -1,3 +1,7 @@
+// Muaz Khan      - www.MuazKhan.com
+// MIT License    - www.WebRTC-Experiment.com/licence
+// Documentation  - github.com/muaz-khan/RTCMultiConnection
+
 var isUseHTTPs = !(!!process.env.PORT || !!process.env.IP);
 
 var server = require(isUseHTTPs ? 'https' : 'http'),
@@ -64,21 +68,25 @@ app = app.listen(process.env.PORT || 9001, process.env.IP || "0.0.0.0", function
 });
 
 require('./Signaling-Server.js')(app, function(socket) {
-    var params = socket.handshake.query;
+    try {
+        var params = socket.handshake.query;
 
-    // "socket" object is totally in your own hands!
-    // do whatever you want!
+        // "socket" object is totally in your own hands!
+        // do whatever you want!
 
-    // in your HTML page, you can access socket as following:
-    // connection.socketCustomEvent = 'custom-message';
-    // var socket = connection.getSocket();
-    // socket.emit(connection.socketCustomEvent, { test: true });
+        // in your HTML page, you can access socket as following:
+        // connection.socketCustomEvent = 'custom-message';
+        // var socket = connection.getSocket();
+        // socket.emit(connection.socketCustomEvent, { test: true });
 
-    if (!params.socketCustomEvent) {
-        params.socketCustomEvent = 'custom-message';
-    }
+        if (!params.socketCustomEvent) {
+            params.socketCustomEvent = 'custom-message';
+        }
 
-    socket.on(params.socketCustomEvent, function(message) {
-        socket.broadcast.emit(params.socketCustomEvent, message);
-    });
+        socket.on(params.socketCustomEvent, function(message) {
+            try {
+                socket.broadcast.emit(params.socketCustomEvent, message);
+            } catch (e) {}
+        });
+    } catch (e) {}
 });

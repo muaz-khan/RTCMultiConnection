@@ -373,7 +373,10 @@ function RTCMultiConnection(roomid) {
     connection.getUserMedia = connection.captureUserMedia = function(callback, session) {
         session = session || connection.session;
 
-        if (isData(session)) {
+        if (connection.dontCaptureUserMedia || isData(session)) {
+            if (callback) {
+                callback();
+            }
             return;
         }
 
@@ -1147,10 +1150,25 @@ function RTCMultiConnection(roomid) {
     };
 
     connection.setUserPreferences = function(userPreferences) {
+        if (connection.dontAttachStream) {
+            userPreferences.dontAttachLocalStream = true;
+        }
+
+        if (connection.dontGetRemoteStream) {
+            userPreferences.dontGetRemoteStream = true;
+        }
+
         return userPreferences;
     };
 
     connection.updateExtraData = function() {
         socket.emit('extra-data-updated', connection.extra);
     };
+
+    connection.enableScalableBroadcast = false;
+    connection.singleBroadcastAttendees = 3; // each broadcast should serve only 3 users
+
+    connection.dontCaptureUserMedia = false;
+    connection.dontAttachStream = false;
+    connection.dontGetRemoteStream = false;
 }

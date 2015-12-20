@@ -1,5 +1,16 @@
 function SocketConnection(connection, connectCallback) {
-    var socket = io.connect((connection.socketURL || '/') + '?userid=' + connection.userid + '&msgEvent=' + connection.socketMessageEvent + '&socketCustomEvent=' + connection.socketCustomEvent, connection.socketOptions);
+    var parameters = '';
+
+    parameters += '?userid=' + connection.userid;
+    parameters += '&msgEvent=' + connection.socketMessageEvent;
+    parameters += '&socketCustomEvent=' + connection.socketCustomEvent;
+
+    if (connection.enableScalableBroadcast) {
+        parameters += '&enableScalableBroadcast=true';
+        parameters += '&singleBroadcastAttendees=' + connection.singleBroadcastAttendees;
+    }
+
+    var socket = io.connect((connection.socketURL || '/') + parameters, connection.socketOptions);
 
     var mPeer = connection.multiPeersHandler;
 
@@ -262,5 +273,11 @@ function SocketConnection(connection, connectCallback) {
             extra: connection.peers[userid] ? connection.peers[userid].extra || {} : {}
         });
     });
+
+    socket.on('logs', function(log) {
+        if (!connection.enableLogs) return;
+        console.debug('server-logs', log);
+    });
+
     return socket;
 }

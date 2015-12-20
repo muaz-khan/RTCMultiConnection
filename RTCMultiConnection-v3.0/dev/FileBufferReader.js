@@ -9,12 +9,25 @@ function FileBufferReader() {
     fbr.users = {};
 
     fbr.readAsArrayBuffer = function(file, earlyCallback, extra) {
+        if (!file.slice) {
+            console.warn('Not a real File object.', file);
+            return;
+        }
+
+        extra = extra || {
+            userid: 0
+        };
+        extra.fileName = file.name;
+
+        if (file.uuid) {
+            extra.fileUniqueId = file.uuid;
+        }
+
         var options = {
+            uuid: file.uuid || 0,
             file: file,
             earlyCallback: earlyCallback,
-            extra: extra || {
-                userid: 0
-            }
+            extra: extra
         };
 
         fbrHelper.readAsArrayBuffer(fbr, options);
@@ -202,7 +215,7 @@ function FileBufferReaderHelper() {
 
         var file = options.file;
         if (!file.uuid) {
-            file.uuid = (Math.random() * 100).toString().replace(/\./g, '');
+            file.uuid = options.fileUniqueId || (Math.random() * 100).toString().replace(/\./g, '');
         }
 
         var chunkSize = options.chunkSize || 15 * 1000;
@@ -226,10 +239,11 @@ function FileBufferReaderHelper() {
             uuid: file.uuid,
             maxChunks: maxChunks,
             size: file.size,
-            name: file.name,
+            name: file.name || options.extra.fileName,
             type: file.type,
             lastModifiedDate: !!file.lastModifiedDate ? file.lastModifiedDate.toString() : '',
-            start: true
+            start: true,
+            extra: options
         });
 
         var blob, reader = new FileReader();
@@ -250,11 +264,12 @@ function FileBufferReaderHelper() {
                             uuid: file.uuid,
                             maxChunks: maxChunks,
                             size: file.size,
-                            name: file.name,
+                            name: file.name || options.extra.fileName,
                             lastModifiedDate: !!file.lastModifiedDate ? file.lastModifiedDate.toString() : '',
                             url: URL.createObjectURL(file),
                             type: file.type,
-                            end: true
+                            end: true,
+                            extra: options
                         });
                     }
                 });
@@ -279,9 +294,10 @@ function FileBufferReaderHelper() {
                     maxChunks: maxChunks,
 
                     size: file.size,
-                    name: file.name,
+                    name: file.name || options.extra.fileName,
                     lastModifiedDate: !!file.lastModifiedDate ? file.lastModifiedDate.toString() : '',
-                    type: file.type
+                    type: file.type,
+                    extra: options
                 });
 
                 currentPosition++;
@@ -352,6 +368,7 @@ window.FileSelector = function() {
 
 function FileBufferReceiver(fbr) {
     var packets = {};
+    var missedChunks = [];
 
     function receive(chunk, callback) {
         if (!chunk.uuid) {
@@ -363,11 +380,34 @@ function FileBufferReceiver(fbr) {
 
         if (chunk.start && !packets[chunk.uuid]) {
             packets[chunk.uuid] = [];
+
+            if (!!missedChunks[chunk.uuid]) {
+                packets[chunk.uuid].push(chunk.buffer);
+
+                // need to order "missedChunks" here
+                missedChunks[chunk.uuid].forEach(function(chunk) {
+                    receive(chunk, callback);
+                });
+
+                delete missedChunks[chunk.uuid];
+            }
+
             if (fbr.onBegin) fbr.onBegin(chunk);
         }
 
         if (!chunk.end && chunk.buffer) {
-            packets[chunk.uuid].push(chunk.buffer);
+            if (!packets[chunk.uuid]) {
+                // seems {start:true} is skipped or lost or unordered.
+                if (!missedChunks[chunk.uuid]) {
+                    missedChunks[chunk.uuid] = [];
+                }
+                missedChunks[chunk.uuid].push(chunk);
+                return;
+            }
+
+            if (packets[chunk.uuid].indexOf(chunk.buffer) == -1) {
+                packets[chunk.uuid].push(chunk.buffer);
+            }
         }
 
         if (chunk.end) {
@@ -386,7 +426,8 @@ function FileBufferReceiver(fbr) {
             });
             blob = merge(blob, chunk);
             blob.url = URL.createObjectURL(blob);
-            blob.uuid = chunk.uuid;
+            blob.uuid = chunk.uuid || blob.extra.fileUniqueId;
+            blob.name = blob.name || blob.extra.fileName;
 
             if (!blob.size) console.error('Something went wrong. Blob Size is 0.');
 
