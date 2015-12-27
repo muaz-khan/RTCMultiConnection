@@ -172,10 +172,12 @@ function PeerInitiator(config) {
         config.onPeerStateChanged({
             iceConnectionState: peer.iceConnectionState,
             iceGatheringState: peer.iceGatheringState,
-            signalingState: peer.signalingState
+            signalingState: peer.signalingState,
+            extra: that.extra,
+            userid: that.remoteUserId
         });
 
-        if (peer.iceConnectionState.search(/disconnected|closed/gi) !== -1) {
+        if (peer.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1) {
             if (peer.firedOnce) return;
             peer.firedOnce = true;
 
@@ -186,8 +188,11 @@ function PeerInitiator(config) {
 
             if (that.connectionDescription && config.rtcMultiConnection.userid == that.connectionDescription.sender && !!config.rtcMultiConnection.autoReDialOnFailure) {
                 setTimeout(function() {
-                    config.rtcMultiConnection.rejoin(that.connectionDescription);
-                }, 2000);
+                    if (peer.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1) {
+                        config.rtcMultiConnection.rejoin(that.connectionDescription);
+                        peer.firedOnce = false;
+                    }
+                }, 5000);
             }
         }
     };

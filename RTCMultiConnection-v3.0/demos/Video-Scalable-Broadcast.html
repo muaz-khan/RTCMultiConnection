@@ -149,7 +149,7 @@
             // initializing RTCMultiConnection constructor.
             function initRTCMultiConnection(userid) {
                 var connection = new RTCMultiConnection();
-                document.getElementById('broadcast-id').value = connection.userid;
+                document.getElementById('broadcast-id').value = connection.token();
                 connection.body = document.getElementById('videos-container');
                 connection.channel = connection.sessionid = connection.userid = userid || connection.userid;
                 connection.sdpConstraints.mandatory = {

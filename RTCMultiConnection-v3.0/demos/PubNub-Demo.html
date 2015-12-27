@@ -144,7 +144,7 @@
 
             var connection = new RTCMultiConnection();
 
-            document.getElementById('room-id').value = connection.userid;
+            document.getElementById('room-id').value = connection.token();
 
             connection.setCustomSocketHandler(PubNubConnection);
 

@@ -9,7 +9,7 @@ if (typeof mozRTCPeerConnection !== 'undefined') {
 } else if (typeof window.RTCPeerConnection !== 'undefined') {
     RTCPeerConnection = window.RTCPeerConnection;
 } else {
-    throw 'WebRTC 1.0 (RTCPeerConnection) API are NOT available in this browser.';
+    console.error('WebRTC 1.0 (RTCPeerConnection) API seems NOT available in this browser.');
 }
 
 function setSdpConstraints(config) {

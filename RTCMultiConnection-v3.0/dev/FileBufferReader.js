@@ -17,6 +17,17 @@ function FileBufferReader() {
         extra = extra || {
             userid: 0
         };
+
+        if (file.extra) {
+            if (typeof file.extra === 'string') {
+                extra.extra = file.extra;
+            } else {
+                for (var e in file.extra) {
+                    extra[e] = file.extra[e];
+                }
+            }
+        }
+
         extra.fileName = file.name;
 
         if (file.uuid) {

@@ -10,12 +10,10 @@ function RTCMultiConnection(roomid) {
     mPeer.onGettingLocalMedia = function(stream) {
         setStreamEndHandler(stream);
 
-        getMediaElement(stream, function(mediaElement) {
+        getRMCMediaElement(stream, function(mediaElement) {
             mediaElement.id = stream.streamid;
             mediaElement.muted = true;
             mediaElement.volume = 0;
-
-            stream.mediaElement = mediaElement;
 
             if (connection.attachStreams.indexOf(stream) === -1) {
                 connection.attachStreams.push(stream);
@@ -44,9 +42,8 @@ function RTCMultiConnection(roomid) {
     };
 
     mPeer.onGettingRemoteMedia = function(stream, remoteUserId) {
-        getMediaElement(stream, function(mediaElement) {
+        getRMCMediaElement(stream, function(mediaElement) {
             mediaElement.id = stream.streamid;
-            stream.mediaElement = mediaElement;
 
             if (typeof StreamsHandler !== 'undefined') {
                 StreamsHandler.setHandlers(stream, false, connection);
@@ -77,7 +74,7 @@ function RTCMultiConnection(roomid) {
                 userid: remoteUserId,
                 extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},
                 streamid: stream.streamid,
-                mediaElement: stream.mediaElement
+                mediaElement: connection.streamEvents[stream.streamid].mediaElement
             };
         }
 
@@ -208,7 +205,7 @@ function RTCMultiConnection(roomid) {
 
             var oldUserId = connection.userid;
             connection.userid = connection.sessionid = localUserid || connection.sessionid;
-            connection.userid = connection.userid + '';
+            connection.userid += '';
 
             socket.emit('changed-uuid', connection.userid);
 
@@ -229,7 +226,7 @@ function RTCMultiConnection(roomid) {
     connection.open = function(localUserid, isPublicModerator) {
         var oldUserId = connection.userid;
         connection.userid = connection.sessionid = localUserid || connection.sessionid;
-        connection.userid = connection.userid + '';
+        connection.userid += '';
 
         connection.isInitiator = true;
 
@@ -257,26 +254,28 @@ function RTCMultiConnection(roomid) {
     };
 
     connection.rejoin = function(connectionDescription) {
-        if (!connectionDescription) {
-            connectionDescription = {
-                remoteUserId: connection.sessionid,
-                message: {
-                    newParticipationRequest: true,
-                    isOneWay: typeof connection.session.oneway != 'undefined' ? connection.session.oneway : connection.direction == 'one-way',
-                    isDataOnly: isData(connection.session),
-                    localPeerSdpConstraints: connection.mediaConstraints,
-                    remotePeerSdpConstraints: connection.mediaConstraints
-                },
-                sender: connection.userid,
-                password: false
-            };
+        if (connection.isInitiator) {
+            return;
         }
 
+        var extra = {};
+
         if (connection.peers[connectionDescription.remoteUserId]) {
+            extra = connection.peers[connectionDescription.remoteUserId].extra;
+            if (connection.peers[connectionDescription.remoteUserId].peer) {
+                connection.peers[connectionDescription.remoteUserId].peer = null;
+            }
             delete connection.peers[connectionDescription.remoteUserId];
         }
 
-        mPeer.onNegotiationNeeded(connectionDescription);
+        if (connectionDescription && connectionDescription.remoteUserId) {
+            connection.join(connectionDescription.remoteUserId);
+
+            connection.onReConnecting({
+                userid: connectionDescription.remoteUserId,
+                extra: extra
+            });
+        }
     };
 
     connection.join = connection.connect = function(remoteUserId, options) {
@@ -554,7 +553,7 @@ function RTCMultiConnection(roomid) {
         mandatory: {}
     };
 
-    connection.iceServers = IceServersHandler.getIceServers();
+    connection.iceServers = IceServersHandler.getIceServers(connection);
 
     connection.candidates = {
         host: true,
@@ -858,7 +857,7 @@ function RTCMultiConnection(roomid) {
                     type: 'local',
                     userid: connection.userid,
                     extra: connection.extra,
-                    mediaElement: stream.mediaElement
+                    mediaElement: connection.streamEvents[stream.streamid].mediaElement
                 };
             }
             connection.onstreamended(streamEvent);
@@ -1171,4 +1170,10 @@ function RTCMultiConnection(roomid) {
     connection.dontCaptureUserMedia = false;
     connection.dontAttachStream = false;
     connection.dontGetRemoteStream = false;
+
+    connection.onReConnecting = function(event) {
+        if (connection.enableLogs) {
+            console.info('ReConnecting with', event.userid, '...');
+        }
+    }
 }

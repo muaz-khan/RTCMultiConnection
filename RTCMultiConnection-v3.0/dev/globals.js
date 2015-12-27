@@ -111,7 +111,7 @@ function getRandomString() {
 
 // Get HTMLAudioElement/HTMLVideoElement accordingly
 
-function getMediaElement(stream, callback) {
+function getRMCMediaElement(stream, callback) {
     var isAudioOnly = false;
     if (!stream.getVideoTracks().length) {
         isAudioOnly = true;
@@ -120,7 +120,7 @@ function getMediaElement(stream, callback) {
     var mediaElement = document.createElement(isAudioOnly ? 'audio' : 'video');
 
     if (isPluginRTC) {
-        (document.body || document.documentElement).insertBefore(mediaElement, body.firstChild);
+        connection.videosContainer.insertBefore(mediaElement, connection.videosContainer.firstChild);
 
         setTimeout(function() {
             Plugin.attachMediaStream(mediaElement, stream);
@@ -139,47 +139,15 @@ function getMediaElement(stream, callback) {
     // Firefox don't yet support onended for any stream (remote/local)
     if (isFirefox) {
         mediaElement.addEventListener('ended', function() {
-            stream.onended();
+            if (stream.onended) {
+                stream.onended();
+            }
+            fireEvent(stream, 'ended', stream.type);
         }, false);
     }
 
     mediaElement.play();
     callback(mediaElement);
-}
-
-var loadedIceFrame;
-
-function loadIceFrame(callback, skip) {
-    if (loadedIceFrame) {
-        return;
-    }
-    if (!skip) {
-        return loadIceFrame(callback, true);
-    }
-
-    loadedIceFrame = true;
-
-    var iframe = document.createElement('iframe');
-    iframe.onload = function() {
-        iframe.isLoaded = true;
-
-        listenEventHandler('message', iFrameLoaderCallback);
-
-        function iFrameLoaderCallback(event) {
-            if (!event.data || !event.data.iceServers) {
-                return;
-            }
-            callback(event.data.iceServers);
-
-            // this event listener is no more needed
-            window.removeEventListener('message', iFrameLoaderCallback);
-        }
-
-        iframe.contentWindow.postMessage('get-ice-servers', '*');
-    };
-    iframe.src = 'https://cdn.webrtc-experiment.com/getIceServers/';
-    iframe.style.display = 'none';
-    (document.body || document.documentElement).appendChild(iframe);
 }
 
 // if IE

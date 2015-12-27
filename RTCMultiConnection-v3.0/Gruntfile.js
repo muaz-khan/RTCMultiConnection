@@ -25,6 +25,7 @@ module.exports = function(grunt) {
                     'dev/MultiPeersHandler.js',
 
                     'dev/globals.js',
+                    'dev/Plugin.EveryWhere.js',
 
                     'dev/RTCPeerConnection.js',
                     'dev/OnIceCandidateHandler.js',
@@ -36,7 +37,6 @@ module.exports = function(grunt) {
 
                     'dev/DetectRTC.js',
                     'dev/getScreenId.js', // or Screen-Capturing.js
-                    'dev/Plugin.EveryWhere.js',
 
                     'dev/TextSenderReceiver.js',
                     'dev/FileProgressBarHandler.js',

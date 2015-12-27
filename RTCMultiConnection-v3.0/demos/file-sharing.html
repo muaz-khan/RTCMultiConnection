@@ -226,6 +226,8 @@
             };
 
             connection.onclose = function(e) {
+                incrementOrDecrementUsers();
+
                 if(connection.connectedWith[e.userid]) return;
 
                 appendLog('Data connection has been closed between you and <b>' + e.userid + '</b>. Re-Connecting..');
@@ -240,12 +242,13 @@
             setFileProgressBarHandlers(connection);
 
             connection.onUserStatusChanged = function(user) {
-                incrementOrDecrementUsers(user);
+                incrementOrDecrementUsers();
             };
 
             connection.onleave = function(user) {
                 user.status = 'offline';
                 connection.onUserStatusChanged(user);
+                incrementOrDecrementUsers();
             };
 
             var message = 'Connecting room:<br><b>' + connection.channel + '</b>';
@@ -274,8 +277,11 @@
                 div.title = file.name;
                 div.innerHTML = '<label>0%</label> <progress></progress>';
 
-                if (file.remoteUserId) {
+                if (file.userid == connection.userid) {
                     div.innerHTML += ' (Sharing with:' + file.remoteUserId + ')';
+                }
+                else {
+                    div.innerHTML += ' (Receiving from:' + file.remoteUserId + ')';
                 }
 
                 connection.filesContainer.insertBefore(div, connection.filesContainer.firstChild);
@@ -383,21 +389,8 @@
 
         var numberOfUsers = document.getElementById('number-of-users');
 
-        function incrementOrDecrementUsers(user) {
-            if (!numberOfUsers.getAttribute('data-users')) {
-                numberOfUsers.setAttribute('data-users', '');
-            }
-            if (numberOfUsers.getAttribute('data-users').indexOf(user.userid) !== -1 && user.status === 'offline') {
-                numberOfUsers.innerHTML = parseInt(numberOfUsers.innerHTML) - 1;
-
-                if (parseInt(numberOfUsers.innerHTML) < 0) {
-                    numberOfUsers.innerHTML = 0;
-                }
-                return;
-            }
-
-            numberOfUsers.innerHTML = parseInt(numberOfUsers.innerHTML) + 1;
-            numberOfUsers.setAttribute('data-users', numberOfUsers.getAttribute('data-users') + ',' + user.userid);
+        function incrementOrDecrementUsers() {
+            numberOfUsers.innerHTML = connection ? connection.getAllParticipants().length : 0;
         }
 
         var logsDiv = document.getElementById('logs');

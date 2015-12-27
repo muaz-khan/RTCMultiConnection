@@ -100,7 +100,7 @@
 
             var connection = new RTCMultiConnection();
 
-            document.getElementById('room-id').value = connection.userid;
+            document.getElementById('room-id').value = connection.token();
 
             connection.enableFileSharing = true; // by default, it is "false".
 

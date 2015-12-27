@@ -182,13 +182,7 @@ function MultiPeers(connection) {
                     self.onNegotiationCompleted(remoteUserId, states);
                 }
 
-                if (states.iceConnectionState.search(/disconnected|closed/gi) !== -1) {
-                    if (!!connection.enableLogs) {
-                        console.error('Peer connection is closed between you & ', remoteUserId);
-                    }
-                }
-
-                if (states.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1) {
+                if (states.iceConnectionState.search(/closed|failed/gi) !== -1) {
                     self.onUserLeft(remoteUserId);
                     self.disconnectWith(remoteUserId);
                 }
@@ -433,7 +427,14 @@ function MultiPeers(connection) {
         });
     };
 
-    this.onPeerStateChanged = function(states) {};
+    this.onPeerStateChanged = function(state) {
+        if (connection.enableLogs) {
+            if (state.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1) {
+                console.error('Peer connection is closed between you & ', state.userid, state.extra, 'state:', state.iceConnectionState);
+            }
+        }
+    };
+
     this.onNegotiationStarted = function(remoteUserId, states) {};
     this.onNegotiationCompleted = function(remoteUserId, states) {};
 

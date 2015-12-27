@@ -895,6 +895,11 @@ connection.enableScalableBroadcast = true; // by default, it is false.
 connection.singleBroadcastAttendees = 3;   // how many users are handled by each broadcaster
 ```
 
+Live Demos:
+
+* [Files-Scalable-Broadcast.html](https://rtcmulticonnection.herokuapp.com/demos/Files-Scalable-Broadcast.html)
+* [Video-Scalable-Broadcast.html](https://rtcmulticonnection.herokuapp.com/demos/Video-Scalable-Broadcast.html)
+
 ## Fix Echo
 
 ```javascript
@@ -902,11 +907,6 @@ connection.onstream = function(event) {
 	if(event.mediaElement) {
 		event.mediaElement.muted = true;
 		delete event.mediaElement;
-	}
-
-	if(event.stream.mediaElement) {
-		event.stream.mediaElement.muted = true;
-		delete event.stream.mediaElement;
 	}
 
 	var video = document.createElement('video');
@@ -917,11 +917,6 @@ connection.onstream = function(event) {
 	connection.videosContainer.appendChild(video);
 }
 ```
-
-Live Demos:
-
-* [Files-Scalable-Broadcast.html](https://rtcmulticonnection.herokuapp.com/demos/Files-Scalable-Broadcast.html)
-* [Video-Scalable-Broadcast.html](https://rtcmulticonnection.herokuapp.com/demos/Video-Scalable-Broadcast.html)
 
 ## License
 

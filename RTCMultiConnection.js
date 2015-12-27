@@ -1,4 +1,4 @@
-// Last time updated at Friday, November 13th, 2015, 12:26:01 PM 
+// Last time updated at Tuesday, December 22nd, 2015, 4:53:01 PM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -3914,7 +3914,7 @@
     } else if (typeof window.RTCPeerConnection !== 'undefined') {
         RTCPeerConnection = window.RTCPeerConnection;
     } else {
-        throw 'WebRTC 1.0 (RTCPeerConnection) API are NOT available in this browser.';
+        console.error('WebRTC 1.0 (RTCPeerConnection) API seems NOT available in this browser.');
     }
 
     function setSdpConstraints(config) {

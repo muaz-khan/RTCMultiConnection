@@ -129,7 +129,7 @@
 
             connection.socketCustomEvent = connection.channel;
 
-            document.getElementById('room-id').value = connection.userid;
+            document.getElementById('room-id').value = connection.token();
 
             connection.session = {
                 audio: true,

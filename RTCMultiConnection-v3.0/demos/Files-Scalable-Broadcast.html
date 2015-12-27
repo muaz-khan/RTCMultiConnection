@@ -121,7 +121,7 @@
             connection.enableFileSharing = true;
             connection.chunkSize = 60 * 1000;
 
-            document.getElementById('broadcast-id').value = connection.userid;
+            document.getElementById('broadcast-id').value = connection.token();
             connection.filesContainer = document.getElementById('files-container');
             connection.sdpConstraints.mandatory = {
                 OfferToReceiveAudio: false,

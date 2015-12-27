@@ -113,11 +113,11 @@ var StreamsHandler = (function() {
         };
 
         function graduallyIncreaseVolume() {
-            if (!stream.mediaElement) {
+            if (!connection.streamEvents[stream.streamid].mediaElement) {
                 return;
             }
 
-            var mediaElement = stream.mediaElement;
+            var mediaElement = connection.streamEvents[stream.streamid].mediaElement;
             mediaElement.volume = 0;
             afterEach(200, 5, function() {
                 mediaElement.volume += .20;

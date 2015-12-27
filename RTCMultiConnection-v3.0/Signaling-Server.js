@@ -125,7 +125,7 @@ module.exports = exports = function(app, socketCallback) {
         function onMessageCallback(message) {
             try {
                 if (!listOfUsers[message.sender]) {
-                    socket.emit('logs', 'user-not-exists: ' + message.sender);
+                    socket.emit('user-not-found', message.sender);
                     return;
                 }
 
@@ -135,7 +135,7 @@ module.exports = exports = function(app, socketCallback) {
 
                     if (!listOfUsers[message.remoteUserId]) {
                         listOfUsers[message.remoteUserId] = {
-                            socket: listOfUsers[message.remoteUserId].socket,
+                            socket: null,
                             connectedWith: {},
                             isPublic: false,
                             extra: {}
@@ -143,7 +143,10 @@ module.exports = exports = function(app, socketCallback) {
                     }
 
                     listOfUsers[message.remoteUserId].connectedWith[message.sender] = socket;
-                    listOfUsers[message.remoteUserId].socket.emit('user-connected', message.sender);
+
+                    if (listOfUsers[message.remoteUserId].socket) {
+                        listOfUsers[message.remoteUserId].socket.emit('user-connected', message.sender);
+                    }
                 }
 
                 if (listOfUsers[message.sender].connectedWith[message.remoteUserId] && listOfUsers[socket.userid]) {
@@ -207,10 +210,8 @@ module.exports = exports = function(app, socketCallback) {
                     };
                 }
 
-                onMessageCallback(message);
-
                 // if someone tries to join a person who is absent
-                if (!listOfUsers[message.sender].connectedWith[message.remoteUserId] && message.message.newParticipationRequest) {
+                if (message.message.newParticipationRequest) {
                     var waitFor = 120; // 2 minutes
                     var invokedTimes = 0;
                     (function repeater() {
@@ -220,11 +221,18 @@ module.exports = exports = function(app, socketCallback) {
                             return;
                         }
 
-                        if (!!listOfUsers[message.remoteUserId]) {
+                        if (listOfUsers[message.remoteUserId] && listOfUsers[message.remoteUserId].socket) {
                             onMessageCallback(message);
-                        } else setTimeout(repeater, 1000);
+                            return;
+                        }
+
+                        setTimeout(repeater, 1000);
                     })();
+
+                    return;
                 }
+
+                onMessageCallback(message);
             } catch (e) {}
         });
 

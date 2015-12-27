@@ -126,7 +126,7 @@ function SocketConnection(connection, connectCallback) {
             connection.addNewBroadcaster(message.sender);
         }
 
-        if (message.message.newParticipationRequest) {
+        if (message.message.newParticipationRequest && message.sender !== connection.userid) {
             if (connection.peers[message.sender]) {
                 if (connection.peers[message.sender].peer) {
                     connection.peers[message.sender].peer.close();
@@ -192,8 +192,6 @@ function SocketConnection(connection, connectCallback) {
     });
 
     socket.on('user-left', function(userid) {
-        if (socket.dontFireUserDisconnected) return;
-
         onUserLeft(userid);
 
         connection.onUserStatusChanged({
@@ -215,10 +213,6 @@ function SocketConnection(connection, connectCallback) {
 
         socket.emit('extra-data-updated', connection.extra);
 
-        if (!connection.isInitiator && socket.dontFireUserDisconnected && connection.getAllParticipants().length) {
-            return;
-        }
-
         if (connectCallback) connectCallback(socket);
     });
 
@@ -227,8 +221,6 @@ function SocketConnection(connection, connectCallback) {
             console.info('socket.io connection is closed');
             console.warn('socket.io reconnecting');
         }
-
-        socket.dontFireUserDisconnected = true;
     });
 
     socket.on('join-with-password', function(remoteUserId) {
@@ -244,8 +236,6 @@ function SocketConnection(connection, connectCallback) {
     });
 
     socket.on('user-disconnected', function(remoteUserId) {
-        if (socket.dontFireUserDisconnected) return;
-
         if (remoteUserId === connection.userid) {
             return;
         }
