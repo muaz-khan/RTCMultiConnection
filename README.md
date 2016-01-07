@@ -9,6 +9,10 @@
 
 Fetch latest code:
 
+**Download via Github** (as `ZIP` or `.js`): [https://github.com/muaz-khan/RTCMultiConnection/releases](https://github.com/muaz-khan/RTCMultiConnection/releases)
+
+Or:
+
 ```
 sudo npm install rtcmulticonnection-v3
 
