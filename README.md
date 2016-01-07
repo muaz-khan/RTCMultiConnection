@@ -944,6 +944,37 @@ connection.onstream = function(event) {
 }
 ```
 
+## How to use getStats?
+
+* https://github.com/muaz-khan/getStats
+
+```javascript
+connection.multiPeersHandler.onPeerStateChanged = function(state) {
+    if (state.iceConnectionState.search(/disconnected|closed|failed/gi) === -1 && !connection.isConnected) {
+        connection.isConnected = true;
+
+        var peer = connection.peers[state.userid].peer;
+        getStats(peer, function(result) {
+            if (!result || !result.connectionType) return;
+
+            // "relay" means TURN server
+            // "srflx" or "prflx" means STUN server
+            // "host" means neither STUN, nor TURN
+            console.debug('Incoming stream is using:', result.connectionType.remote.candidateType);
+            console.debug('Outgoing stream is using:', result.connectionType.local.candidateType);
+
+            // user external ip-addresses
+            console.debug('Remote user ip-address:', result.connectionType.remote.ipAddress);
+            console.debug('Local user ip-address:', result.connectionType.local.ipAddress);
+
+            // UDP is a real media port; TCP is a fallback.
+            console.debug('Peers are connected on port:', result.connectionType.transport);
+        }, 5000);
+        return;
+    }
+};
+```
+
 ## RTCMultiConnection v2.2.2 Demos
 
 | Experiment Name        | Demo           | Source Code |
