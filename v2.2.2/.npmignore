@@ -3,6 +3,7 @@ bower_components
 
 *.tar.gz
 lib-cov
+v2.2.2
 
 .*.swp
 ._*
