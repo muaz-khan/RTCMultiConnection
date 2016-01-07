@@ -1,7 +1,19 @@
-# Node
 node_modules
-
-# bower
 bower_components
 
-docs
+*.tar.gz
+lib-cov
+v2.2.2
+
+.*.swp
+._*
+.DS_Store
+.git
+.hg
+.npmrc
+.lock-wscript
+.svn
+.wafpickle-*
+config.gypi
+CVS
+npm-debug.log

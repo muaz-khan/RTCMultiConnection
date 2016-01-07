@@ -158,6 +158,11 @@ module.exports = exports = function(app, socketCallback) {
 
         var numberOfPasswordTries = 0;
         socket.on(socketMessageEvent, function(message, callback) {
+            if (message.remoteUserId && message.remoteUserId === socket.userid) {
+                // remoteUserId MUST be unique
+                return;
+            }
+
             try {
                 if (message.remoteUserId && message.remoteUserId != 'system' && message.message.newParticipationRequest) {
                     if (listOfUsers[message.remoteUserId] && listOfUsers[message.remoteUserId].password) {
