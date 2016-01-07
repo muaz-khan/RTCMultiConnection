@@ -335,7 +335,13 @@ function MultiPeers(connection) {
                         userPreferences: message.userPreferences
                     }, remoteUserId);
                 },
-                onLocalMediaError: this.onLocalMediaError,
+                onLocalMediaError: function(error) {
+                    self.onLocalMediaError(error);
+                    self.onNegotiationNeeded({
+                        readyForOffer: true,
+                        userPreferences: message.userPreferences
+                    }, remoteUserId);
+                },
                 localMediaConstraints: localMediaConstraints
             });
         }

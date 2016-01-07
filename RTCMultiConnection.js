@@ -1,4 +1,4 @@
-// Last time updated at Thursday, January 7th, 2016, 5:11:18 PM 
+// Last time updated at Thursday, January 7th, 2016, 10:14:16 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -83,7 +83,7 @@
                     userid: remoteUserId,
                     extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},
                     streamid: stream.streamid,
-                    mediaElement: connection.streamEvents[stream.streamid].mediaElement
+                    mediaElement: connection.streamEvents[stream.streamid] ? connection.streamEvents[stream.streamid].mediaElement : null
                 };
             }
 
@@ -434,7 +434,12 @@
                             callback(stream);
                         }
                     },
-                    onLocalMediaError: mPeer.onLocalMediaError,
+                    onLocalMediaError: function(error) {
+                        mPeer.onLocalMediaError(error);
+                        if (callback) {
+                            callback();
+                        }
+                    },
                     localMediaConstraints: localMediaConstraints || {
                         audio: !!session.audio ? connection.mediaConstraints.audio : false,
                         video: !!session.video ? connection.mediaConstraints.video : false
@@ -709,7 +714,14 @@
 
                         connection.renegotiate();
                     },
-                    onLocalMediaError: mPeer.onLocalMediaError,
+                    onLocalMediaError: function(error) {
+                        mPeer.onLocalMediaError(error);
+                        if (callback) {
+                            return callback();
+                        }
+
+                        connection.renegotiate();
+                    },
                     localMediaConstraints: localMediaConstraints || {
                         audio: session.audio ? connection.mediaConstraints.audio : false,
                         video: session.video ? connection.mediaConstraints.video : false
@@ -820,7 +832,13 @@
 
                         connection.replaceTrack(stream);
                     },
-                    onLocalMediaError: mPeer.onLocalMediaError,
+                    onLocalMediaError: function(error) {
+                        mPeer.onLocalMediaError(error);
+
+                        if (callback) {
+                            callback();
+                        }
+                    },
                     localMediaConstraints: localMediaConstraints || {
                         audio: session.audio ? connection.mediaConstraints.audio : false,
                         video: session.video ? connection.mediaConstraints.video : false
@@ -866,7 +884,7 @@
                         type: 'local',
                         userid: connection.userid,
                         extra: connection.extra,
-                        mediaElement: connection.streamEvents[stream.streamid].mediaElement
+                        mediaElement: connection.streamEvents[stream.streamid] ? connection.streamEvents[stream.streamid].mediaElement : null
                     };
                 }
                 connection.onstreamended(streamEvent);
@@ -1799,7 +1817,13 @@
                             userPreferences: message.userPreferences
                         }, remoteUserId);
                     },
-                    onLocalMediaError: this.onLocalMediaError,
+                    onLocalMediaError: function(error) {
+                        self.onLocalMediaError(error);
+                        self.onNegotiationNeeded({
+                            readyForOffer: true,
+                            userPreferences: message.userPreferences
+                        }, remoteUserId);
+                    },
                     localMediaConstraints: localMediaConstraints
                 });
             }

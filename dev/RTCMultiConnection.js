@@ -74,7 +74,7 @@ function RTCMultiConnection(roomid) {
                 userid: remoteUserId,
                 extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},
                 streamid: stream.streamid,
-                mediaElement: connection.streamEvents[stream.streamid].mediaElement
+                mediaElement: connection.streamEvents[stream.streamid] ? connection.streamEvents[stream.streamid].mediaElement : null
             };
         }
 
@@ -425,7 +425,12 @@ function RTCMultiConnection(roomid) {
                         callback(stream);
                     }
                 },
-                onLocalMediaError: mPeer.onLocalMediaError,
+                onLocalMediaError: function(error) {
+                    mPeer.onLocalMediaError(error);
+                    if (callback) {
+                        callback();
+                    }
+                },
                 localMediaConstraints: localMediaConstraints || {
                     audio: !!session.audio ? connection.mediaConstraints.audio : false,
                     video: !!session.video ? connection.mediaConstraints.video : false
@@ -700,7 +705,14 @@ function RTCMultiConnection(roomid) {
 
                     connection.renegotiate();
                 },
-                onLocalMediaError: mPeer.onLocalMediaError,
+                onLocalMediaError: function(error) {
+                    mPeer.onLocalMediaError(error);
+                    if (callback) {
+                        return callback();
+                    }
+
+                    connection.renegotiate();
+                },
                 localMediaConstraints: localMediaConstraints || {
                     audio: session.audio ? connection.mediaConstraints.audio : false,
                     video: session.video ? connection.mediaConstraints.video : false
@@ -811,7 +823,13 @@ function RTCMultiConnection(roomid) {
 
                     connection.replaceTrack(stream);
                 },
-                onLocalMediaError: mPeer.onLocalMediaError,
+                onLocalMediaError: function(error) {
+                    mPeer.onLocalMediaError(error);
+
+                    if (callback) {
+                        callback();
+                    }
+                },
                 localMediaConstraints: localMediaConstraints || {
                     audio: session.audio ? connection.mediaConstraints.audio : false,
                     video: session.video ? connection.mediaConstraints.video : false
@@ -857,7 +875,7 @@ function RTCMultiConnection(roomid) {
                     type: 'local',
                     userid: connection.userid,
                     extra: connection.extra,
-                    mediaElement: connection.streamEvents[stream.streamid].mediaElement
+                    mediaElement: connection.streamEvents[stream.streamid] ? connection.streamEvents[stream.streamid].mediaElement : null
                 };
             }
             connection.onstreamended(streamEvent);
