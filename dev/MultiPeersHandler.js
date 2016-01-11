@@ -237,15 +237,23 @@ function MultiPeers(connection) {
         connection.peers[remoteUserId] = new PeerInitiator(localConfig);
     };
 
-    this.replaceTrack = function(track, remoteUserId) {
+    this.replaceTrack = function(track, remoteUserId, isVideoTrack) {
         if (!connection.peers[remoteUserId]) {
             throw 'This peer (' + remoteUserId + ') does not exists.';
         }
 
         var peer = connection.peers[remoteUserId].peer;
 
-        if (!!peer.getSenders && typeof peer.getSenders === 'function' && peer.getSenders()[0] && peer.getSenders()[0].replaceTrack) {
-            peer.getSenders()[0].replaceTrack(track);
+        if (!!peer.getSenders && typeof peer.getSenders === 'function' && peer.getSenders().length) {
+            peer.getSenders().forEach(function(rtpSender) {
+                if (isVideoTrack && rtpSender.track instanceof VideoStreamTrack) {
+                    rtpSender.replaceTrack(track);
+                }
+
+                if (!isVideoTrack && rtpSender.track instanceof AudioStreamTrack) {
+                    rtpSender.replaceTrack(track);
+                }
+            });
             return;
         }
 

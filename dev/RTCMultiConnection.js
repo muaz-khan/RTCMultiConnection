@@ -524,6 +524,12 @@ function RTCMultiConnection(roomid) {
                     }],
                     mandatory: {}
                 };
+
+                if (isFirefox) {
+                    connection.mediaConstraints.audio = {
+                        deviceId: device.id
+                    };
+                }
             }
 
             if (device.kind === 'videoinput') {
@@ -533,6 +539,12 @@ function RTCMultiConnection(roomid) {
                     }],
                     mandatory: {}
                 };
+
+                if (isFirefox) {
+                    connection.mediaConstraints.video = {
+                        deviceId: device.id
+                    };
+                }
             }
         })
     });
@@ -762,18 +774,18 @@ function RTCMultiConnection(roomid) {
         });
     };
 
-    function replaceTrack(track, remoteUserId) {
+    function replaceTrack(track, remoteUserId, isVideoTrack) {
         if (remoteUserId) {
-            mPeer.replaceTrack(track, remoteUserId);
+            mPeer.replaceTrack(track, remoteUserId, isVideoTrack);
             return;
         }
 
         connection.peers.getAllParticipants().forEach(function(participant) {
-            mPeer.replaceTrack(track, participant);
+            mPeer.replaceTrack(track, participant, isVideoTrack);
         });
     }
 
-    connection.replaceTrack = function(session) {
+    connection.replaceTrack = function(session, remoteUserId, isVideoTrack) {
         session = session || {};
 
         if (!RTCPeerConnection.prototype.getSenders) {
@@ -782,12 +794,12 @@ function RTCMultiConnection(roomid) {
         }
 
         if (session instanceof MediaStreamTrack) {
-            replaceTrack(session);
+            replaceTrack(session, remoteUserId, isVideoTrack);
             return;
         }
 
         if (session instanceof MediaStream) {
-            replaceTrack(session.getVideoTracks()[0]);
+            replaceTrack(session.getVideoTracks()[0], remoteUserId, isVideoTrack);
             return;
         }
 
@@ -821,7 +833,7 @@ function RTCMultiConnection(roomid) {
                         return callback();
                     }
 
-                    connection.replaceTrack(stream);
+                    connection.replaceTrack(stream, remoteUserId, isVideoTrack || session.video || session.screen);
                 },
                 onLocalMediaError: function(error) {
                     mPeer.onLocalMediaError(error);

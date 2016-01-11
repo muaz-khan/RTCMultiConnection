@@ -1,4 +1,4 @@
-// Last time updated at Thursday, January 7th, 2016, 10:14:16 PM 
+// Last time updated at Monday, January 11th, 2016, 4:20:40 PM 
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -533,6 +533,12 @@
                         }],
                         mandatory: {}
                     };
+
+                    if (isFirefox) {
+                        connection.mediaConstraints.audio = {
+                            deviceId: device.id
+                        };
+                    }
                 }
 
                 if (device.kind === 'videoinput') {
@@ -542,6 +548,12 @@
                         }],
                         mandatory: {}
                     };
+
+                    if (isFirefox) {
+                        connection.mediaConstraints.video = {
+                            deviceId: device.id
+                        };
+                    }
                 }
             })
         });
@@ -771,18 +783,18 @@
             });
         };
 
-        function replaceTrack(track, remoteUserId) {
+        function replaceTrack(track, remoteUserId, isVideoTrack) {
             if (remoteUserId) {
-                mPeer.replaceTrack(track, remoteUserId);
+                mPeer.replaceTrack(track, remoteUserId, isVideoTrack);
                 return;
             }
 
             connection.peers.getAllParticipants().forEach(function(participant) {
-                mPeer.replaceTrack(track, participant);
+                mPeer.replaceTrack(track, participant, isVideoTrack);
             });
         }
 
-        connection.replaceTrack = function(session) {
+        connection.replaceTrack = function(session, remoteUserId, isVideoTrack) {
             session = session || {};
 
             if (!RTCPeerConnection.prototype.getSenders) {
@@ -791,12 +803,12 @@
             }
 
             if (session instanceof MediaStreamTrack) {
-                replaceTrack(session);
+                replaceTrack(session, remoteUserId, isVideoTrack);
                 return;
             }
 
             if (session instanceof MediaStream) {
-                replaceTrack(session.getVideoTracks()[0]);
+                replaceTrack(session.getVideoTracks()[0], remoteUserId, isVideoTrack);
                 return;
             }
 
@@ -830,7 +842,7 @@
                             return callback();
                         }
 
-                        connection.replaceTrack(stream);
+                        connection.replaceTrack(stream, remoteUserId, isVideoTrack || session.video || session.screen);
                     },
                     onLocalMediaError: function(error) {
                         mPeer.onLocalMediaError(error);
@@ -1719,15 +1731,23 @@
             connection.peers[remoteUserId] = new PeerInitiator(localConfig);
         };
 
-        this.replaceTrack = function(track, remoteUserId) {
+        this.replaceTrack = function(track, remoteUserId, isVideoTrack) {
             if (!connection.peers[remoteUserId]) {
                 throw 'This peer (' + remoteUserId + ') does not exists.';
             }
 
             var peer = connection.peers[remoteUserId].peer;
 
-            if (!!peer.getSenders && typeof peer.getSenders === 'function' && peer.getSenders()[0] && peer.getSenders()[0].replaceTrack) {
-                peer.getSenders()[0].replaceTrack(track);
+            if (!!peer.getSenders && typeof peer.getSenders === 'function' && peer.getSenders().length) {
+                peer.getSenders().forEach(function(rtpSender) {
+                    if (isVideoTrack && rtpSender.track instanceof VideoStreamTrack) {
+                        rtpSender.replaceTrack(track);
+                    }
+
+                    if (!isVideoTrack && rtpSender.track instanceof AudioStreamTrack) {
+                        rtpSender.replaceTrack(track);
+                    }
+                });
                 return;
             }
 
