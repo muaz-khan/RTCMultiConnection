@@ -254,7 +254,7 @@ function RTCMultiConnection(roomid) {
     };
 
     connection.rejoin = function(connectionDescription) {
-        if (connection.isInitiator) {
+        if (connection.isInitiator || !connectionDescription || !Object.keys(connectionDescription).length) {
             return;
         }
 
@@ -381,7 +381,7 @@ function RTCMultiConnection(roomid) {
 
         if (session.audio || session.video || session.screen) {
             if (session.screen) {
-                getScreenConstraints(function(error, screen_constraints) {
+                connection.getScreenConstraints(function(error, screen_constraints) {
                     if (error) {
                         throw error;
                     }
@@ -674,7 +674,7 @@ function RTCMultiConnection(roomid) {
 
         if (!session.audio || session.video || session.screen) {
             if (session.screen) {
-                getScreenConstraints(function(error, screen_constraints) {
+                connection.getScreenConstraints(function(error, screen_constraints) {
                     if (error) {
                         return alert(error);
                     }
@@ -810,7 +810,7 @@ function RTCMultiConnection(roomid) {
 
         if (!session.audio || session.video || session.screen) {
             if (session.screen) {
-                getScreenConstraints(function(error, screen_constraints) {
+                connection.getScreenConstraints(function(error, screen_constraints) {
                     if (error) {
                         return alert(error);
                     }
@@ -1206,5 +1206,23 @@ function RTCMultiConnection(roomid) {
         if (connection.enableLogs) {
             console.info('ReConnecting with', event.userid, '...');
         }
+    };
+
+    connection.beforeAddingStream = function(stream) {
+        return stream;
+    };
+
+    connection.beforeRemovingStream = function(stream) {
+        return stream;
+    };
+
+    if (typeof isChromeExtensionAvailable !== 'undefined') {
+        connection.checkIfChromeExtensionAvailable = isChromeExtensionAvailable;
     }
+
+    if (typeof isFirefoxExtensionAvailable !== 'undefined') {
+        connection.checkIfChromeExtensionAvailable = isFirefoxExtensionAvailable;
+    }
+
+    connection.getScreenConstraints = getScreenConstraints;
 }

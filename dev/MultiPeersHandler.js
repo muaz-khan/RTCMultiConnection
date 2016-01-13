@@ -187,7 +187,9 @@ function MultiPeers(connection) {
                     self.disconnectWith(remoteUserId);
                 }
             },
-            processSdp: connection.processSdp
+            processSdp: connection.processSdp,
+            beforeAddingStream: connection.beforeAddingStream,
+            beforeRemovingStream: connection.beforeRemovingStream
         };
     };
 
@@ -207,14 +209,14 @@ function MultiPeers(connection) {
             return;
         }
 
-        userPreferences = connection.setUserPreferences(userPreferences);
+        userPreferences = connection.setUserPreferences(userPreferences, remoteUserId);
 
         var localConfig = this.getLocalConfig(null, remoteUserId, userPreferences);
         connection.peers[remoteUserId] = new PeerInitiator(localConfig);
     };
 
     this.createAnsweringPeer = function(remoteSdp, remoteUserId, userPreferences) {
-        userPreferences = connection.setUserPreferences(userPreferences || {});
+        userPreferences = connection.setUserPreferences(userPreferences || {}, remoteUserId);
 
         var localConfig = this.getLocalConfig(remoteSdp, remoteUserId, userPreferences);
         connection.peers[remoteUserId] = new PeerInitiator(localConfig);

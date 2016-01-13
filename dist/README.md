@@ -1,6 +1,8 @@
 <a href="https://github.com/muaz-khan/RTCMultiConnection"><img src="https://i.imgur.com/MFfRBSM.png" /></a>
 
-## RTCMultiConnection - WebRTC JavaScript Library
+## RTCMultiConnection
+
+> A WebRTC JavaScript Library
 
 * [RTCMultiConnection v3.0 Live Demos](https://rtcmulticonnection.herokuapp.com/)
 * [RTCMultiConnection v2.2.2 Live Demos](https://www.webrtc-experiment.com/RTCMultiConnection/)
@@ -52,7 +54,10 @@ nohup nodejs server.js > /dev/null 2>&1 &
 
 ## Link Script Files
 
-All files from `/dist` directory are available on CDN: `https://cdn.webrtc-experiment.com:443/`
+All files from `/dist` directory are available both on CDN as well as releases page: 
+
+* `https://cdn.webrtc-experiment.com:443/rmc.js`
+* https://github.com/muaz-khan/RTCMultiConnection/releases
 
 ```html
 <script src="/RTCMultiConnection.min.js"></script>

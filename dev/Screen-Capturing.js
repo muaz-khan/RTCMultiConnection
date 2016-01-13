@@ -161,7 +161,9 @@ function getChromeExtensionStatus(extensionid, callback) {
 function getScreenConstraints(callback) {
     var firefoxScreenConstraints = {
         mozMediaSource: 'screen',
-        mediaSource: 'screen'
+        mediaSource: 'screen',
+        width: 15360,
+        height: 8640
     };
 
     if (isFirefox) return callback(null, firefoxScreenConstraints);
@@ -173,11 +175,14 @@ function getScreenConstraints(callback) {
             var screen_constraints = {
                 mandatory: {
                     chromeMediaSource: chromeMediaSource,
-                    maxWidth: screen.width > 1920 ? screen.width : 1920,
-                    maxHeight: screen.height > 1080 ? screen.height : 1080,
+                    // minWidth: 15360,
+                    maxWidth: 15360,
+                    // minHeight: 15360,
+                    maxHeight: 8640,
                     minFrameRate: 30,
                     maxFrameRate: 64,
                     minAspectRatio: 1.77,
+                    // maxAspectRatio: 1.77,
                     googLeakyBucket: true,
                     googTemporalLayeredScreencast: true
                 },

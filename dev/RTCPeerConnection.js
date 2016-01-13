@@ -128,7 +128,8 @@ function PeerInitiator(config) {
 
             config.removeStreams.forEach(function(streamToRemove, index) {
                 if (stream === streamToRemove) {
-                    if (!!peer.removeStream) {
+                    stream = config.beforeRemovingStream(stream);
+                    if (stream && !!peer.removeStream) {
                         peer.removeStream(stream);
                     }
 
@@ -165,7 +166,10 @@ function PeerInitiator(config) {
             return;
         }
 
-        peer.addStream(localStream);
+        localStream = config.beforeAddingStream(localStream);
+        if (localStream) {
+            peer.addStream(localStream);
+        }
     });
 
     peer.oniceconnectionstatechange = peer.onsignalingstatechange = function() {

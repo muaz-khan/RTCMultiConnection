@@ -70,9 +70,22 @@ module.exports = function(grunt) {
             },
             my_target: {
                 files: {
-                    'RTCMultiConnection.min.js': ['RTCMultiConnection.js']
+                    'RTCMultiConnection.min.js': ['RTCMultiConnection.js'],
+                    'dist/rmc3.min.js': ['RTCMultiConnection.js'],
+                    'dist/rmc3.fbr.min.js': ['dev/FileBufferReader.js'],
                 }
             }
+        },
+        copy: {
+            main: {
+                options: {
+                    flatten: true
+                },
+                files: {
+                    'dist/rmc3.js': ['RTCMultiConnection.js'],
+                    'dist/rmc3.fbr.js': ['dev/FileBufferReader.js'],
+                },
+            },
         },
         jsbeautifier: {
             files: ['RTCMultiConnection.js', 'dev/*.js', 'Gruntfile.js', 'Signaling-Server.js', 'server.js'],
@@ -133,5 +146,5 @@ module.exports = function(grunt) {
 
     // set default tasks to run when grunt is called without parameters
     // http://gruntjs.com/api/grunt.task
-    grunt.registerTask('default', ['concat', 'replace', 'jsbeautifier', 'uglify', 'clean']);
+    grunt.registerTask('default', ['concat', 'replace', 'jsbeautifier', 'uglify', 'clean', 'copy']);
 };

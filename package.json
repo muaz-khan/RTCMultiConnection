@@ -1,7 +1,7 @@
 {
   "name": "rtcmulticonnection-v3",
   "preferGlobal": false,
-  "version": "3.2.81",
+  "version": "3.2.82",
   "author": {
     "name": "Muaz Khan",
     "email": "muazkh@gmail.com",
@@ -26,7 +26,7 @@
     "firefox",
     "opera",
     "ie",
-    "internet-explorer",		
+    "internet-explorer",
     "android",
     "rtcweb",
     "rtcmulticonnection.js",
@@ -50,13 +50,14 @@
   "_from": "rtcmulticonnection-v3@",
   "devDependencies": {
     "grunt": "latest",
+    "grunt-bump": "latest",
     "grunt-cli": "latest",
-    "load-grunt-tasks": "latest",
     "grunt-contrib-clean": "latest",
     "grunt-contrib-concat": "latest",
+    "grunt-contrib-copy": "latest",
     "grunt-contrib-uglify": "latest",
     "grunt-jsbeautifier": "latest",
     "grunt-replace": "latest",
-    "grunt-bump": "latest"
+    "load-grunt-tasks": "latest"
   }
 }
