@@ -441,14 +441,11 @@ function MultiPeers(connection) {
             extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},
             channel: channel
         });
+        connection.observers.all();
     };
 
     this.onPeerStateChanged = function(state) {
-        if (connection.enableLogs) {
-            if (state.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1) {
-                console.error('Peer connection is closed between you & ', state.userid, state.extra, 'state:', state.iceConnectionState);
-            }
-        }
+        connection.onPeerStateChanged(state);
     };
 
     this.onNegotiationStarted = function(remoteUserId, states) {};

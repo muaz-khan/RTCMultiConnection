@@ -39,6 +39,8 @@ function RTCMultiConnection(roomid) {
 
             connection.onstream(connection.streamEvents[stream.streamid]);
         });
+
+        connection.observers.all();
     };
 
     mPeer.onGettingRemoteMedia = function(stream, remoteUserId) {
@@ -370,6 +372,8 @@ function RTCMultiConnection(roomid) {
     };
 
     connection.getUserMedia = connection.captureUserMedia = function(callback, session) {
+        connection.observers.all();
+
         session = session || connection.session;
 
         if (connection.dontCaptureUserMedia || isData(session)) {
@@ -488,12 +492,44 @@ function RTCMultiConnection(roomid) {
         socket.emit('changed-uuid', connection.userid);
     };
 
+    connection.observers = {
+        extra: function() {
+            observeObject(connection.extra, function(changes) {
+                socket.emit('extra-data-updated', connection.extra);
+            });
+        },
+        attachStreams: function() {
+            observeObject(connection.attachStreams, function(changes) {
+                changes.forEach(function(change) {
+                    if (change.type === 'add') {
+                        setStreamEndHandler(change.object[change.name]);
+                    }
+
+                    if (change.type === 'remove' || change.type === 'delete') {
+                        if (connection.removeStreams.indexOf(change.object[change.name]) === -1) {
+                            connection.removeStreams.push(change.object[change.name]);
+                        }
+                    }
+
+                    connection.attachStreams = removeNullEntries(connection.attachStreams);
+                    connection.removeStreams = removeNullEntries(connection.removeStreams);
+                    connection.observers.all();
+                });
+            });
+        },
+        all: function() {
+            this.extra();
+            this.attachStreams();
+
+            if (socket) {
+                socket.emit('extra-data-updated', connection.extra);
+            }
+        }
+    };
     connection.extra = {};
-    if (Object.observe) {
-        Object.observe(connection.extra, function(changes) {
-            socket.emit('extra-data-updated', connection.extra);
-        });
-    }
+    connection.attachStreams = [];
+    connection.removeStreams = [];
+    connection.observers.all();
 
     connection.session = {
         audio: true,
@@ -634,8 +670,6 @@ function RTCMultiConnection(roomid) {
     };
 
     connection.direction = 'many-to-many';
-    connection.attachStreams = [];
-    connection.removeStreams = [];
 
     Array.prototype.getStreamById = function(streamid) {
         var stream;
@@ -876,6 +910,7 @@ function RTCMultiConnection(roomid) {
 
             connection.attachStreams = removeNullEntries(connection.attachStreams);
             connection.removeStreams = removeNullEntries(connection.removeStreams);
+            connection.observers.all();
 
             // connection.renegotiate();
 
@@ -894,25 +929,6 @@ function RTCMultiConnection(roomid) {
 
             delete connection.streamEvents[stream.streamid];
         }, false);
-    }
-
-    if (Object.observe) {
-        Object.observe(connection.attachStreams, function(changes) {
-            changes.forEach(function(change) {
-                if (change.type === 'add') {
-                    setStreamEndHandler(change.object[change.name]);
-                }
-
-                if (change.type === 'remove' || change.type === 'delete') {
-                    if (connection.removeStreams.indexOf(change.object[change.name]) === -1) {
-                        connection.removeStreams.push(change.object[change.name]);
-                    }
-                }
-
-                connection.attachStreams = removeNullEntries(connection.attachStreams);
-                connection.removeStreams = removeNullEntries(connection.removeStreams);
-            });
-        });
     }
 
     connection.onMediaError = function(error) {
@@ -1224,5 +1240,28 @@ function RTCMultiConnection(roomid) {
         connection.checkIfChromeExtensionAvailable = isFirefoxExtensionAvailable;
     }
 
-    connection.getScreenConstraints = getScreenConstraints;
+    if (typeof getChromeExtensionStatus !== 'undefined') {
+        connection.getChromeExtensionStatus = getChromeExtensionStatus;
+    }
+
+    connection.getScreenConstraints = function(callback) {
+        getScreenConstraints(function(error, screen_constraints) {
+            if (!error) {
+                screen_constraints = connection.modifyScreenConstraints(screen_constraints);
+                callback(error, screen_constraints);
+            }
+        });
+    };
+
+    connection.modifyScreenConstraints = function(screen_constraints) {
+        return screen_constraints;
+    };
+
+    connection.onPeerStateChanged = function(state) {
+        if (connection.enableLogs) {
+            if (state.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1) {
+                console.error('Peer connection is closed between you & ', state.userid, state.extra, 'state:', state.iceConnectionState);
+            }
+        }
+    };
 }

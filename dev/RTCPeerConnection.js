@@ -173,11 +173,16 @@ function PeerInitiator(config) {
     });
 
     peer.oniceconnectionstatechange = peer.onsignalingstatechange = function() {
+        var extra = that.extra;
+        if (config.rtcMultiConnection.peers[that.remoteUserId]) {
+            extra = config.rtcMultiConnection.peers[that.remoteUserId].extra || extra;
+        }
+
         config.onPeerStateChanged({
             iceConnectionState: peer.iceConnectionState,
             iceGatheringState: peer.iceGatheringState,
             signalingState: peer.signalingState,
-            extra: that.extra,
+            extra: extra,
             userid: that.remoteUserId
         });
 

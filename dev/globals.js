@@ -212,3 +212,16 @@ if (typeof MediaStream !== 'undefined' && !('stop' in MediaStream.prototype)) {
         fireEvent(this, 'ended');
     };
 }
+
+var lastChanges = '';
+
+function observeObject(obj, callback) {
+    if (!Object.observe) return;
+
+    Object.observe(obj, function(changes) {
+        var jsonStringified = JSON.stringify(changes);
+        if (lastChanges == jsonStringified) return;
+        lastChanges = jsonStringified;
+        callback(changes);
+    });
+}
