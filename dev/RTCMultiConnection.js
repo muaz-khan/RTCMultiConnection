@@ -44,6 +44,8 @@ function RTCMultiConnection(roomid) {
     };
 
     mPeer.onGettingRemoteMedia = function(stream, remoteUserId) {
+        setStreamEndHandler(stream, 'remote-stream');
+
         getRMCMediaElement(stream, function(mediaElement) {
             mediaElement.id = stream.streamid;
 
@@ -101,12 +103,17 @@ function RTCMultiConnection(roomid) {
                 stream.stop();
             });
 
-            connection.peers[remoteUserId].peer.close();
-            connection.peers[remoteUserId].peer = null;
+            if (connection.peers[remoteUserId]) {
+                connection.peers[remoteUserId].peer.close();
+
+                if (connection.peers[remoteUserId]) {
+                    connection.peers[remoteUserId].peer = null;
+                }
+            }
 
             connection.onleave({
                 userid: remoteUserId,
-                extra: connection.peers[remoteUserId].extra
+                extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {}
             });
         }
 
@@ -895,22 +902,26 @@ function RTCMultiConnection(roomid) {
         });
     };
 
-    function setStreamEndHandler(stream) {
+    function setStreamEndHandler(stream, isRemote) {
+        isRemote = !!isRemote;
+
         if (stream.alreadySetEndHandler) {
             return;
         }
         stream.alreadySetEndHandler = true;
 
         stream.addEventListener('ended', function() {
-            delete connection.attachStreams[connection.attachStreams.indexOf(stream)];
+            if (!isRemote) {
+                delete connection.attachStreams[connection.attachStreams.indexOf(stream)];
 
-            if (connection.removeStreams.indexOf(stream) === -1) {
-                connection.removeStreams.push(stream);
+                if (connection.removeStreams.indexOf(stream) === -1) {
+                    connection.removeStreams.push(stream);
+                }
+
+                connection.attachStreams = removeNullEntries(connection.attachStreams);
+                connection.removeStreams = removeNullEntries(connection.removeStreams);
+                connection.observers.all();
             }
-
-            connection.attachStreams = removeNullEntries(connection.attachStreams);
-            connection.removeStreams = removeNullEntries(connection.removeStreams);
-            connection.observers.all();
 
             // connection.renegotiate();
 
@@ -919,7 +930,7 @@ function RTCMultiConnection(roomid) {
                 streamEvent = {
                     stream: stream,
                     streamid: stream.streamid,
-                    type: 'local',
+                    type: isRemote ? 'remote' : 'local',
                     userid: connection.userid,
                     extra: connection.extra,
                     mediaElement: connection.streamEvents[stream.streamid] ? connection.streamEvents[stream.streamid].mediaElement : null
@@ -1018,6 +1029,10 @@ function RTCMultiConnection(roomid) {
 
     if (typeof BandwidthHandler !== 'undefined') {
         connection.BandwidthHandler = BandwidthHandler;
+    }
+
+    if (typeof StreamsHandler !== 'undefined') {
+        connection.StreamsHandler = StreamsHandler;
     }
 
     connection.bandwidth = {
@@ -1259,7 +1274,7 @@ function RTCMultiConnection(roomid) {
 
     connection.onPeerStateChanged = function(state) {
         if (connection.enableLogs) {
-            if (state.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1) {
+            if (state.iceConnectionState.search(/closed|failed/gi) !== -1) {
                 console.error('Peer connection is closed between you & ', state.userid, state.extra, 'state:', state.iceConnectionState);
             }
         }

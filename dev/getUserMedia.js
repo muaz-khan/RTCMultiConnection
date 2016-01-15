@@ -1,5 +1,9 @@
 // getUserMediaHandler.js
 
+if (typeof webrtcUtils !== 'undefined') {
+    webrtcUtils.enableLogs = false;
+}
+
 function setStreamType(constraints, stream) {
     if (constraints.mandatory && constraints.mandatory.chromeMediaSource) {
         stream.isScreen = true;
@@ -67,8 +71,6 @@ function getUserMediaHandler(options) {
             return;
         }
 
-        navigator.getMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-
         if (typeof DetectRTC !== 'undefined') {
             if (!DetectRTC.hasMicrophone) {
                 options.localMediaConstraints.audio = false;
@@ -79,10 +81,10 @@ function getUserMediaHandler(options) {
             }
         }
 
-        navigator.getMedia(options.localMediaConstraints, function(stream) {
+        navigator.mediaDevices.getUserMedia(options.localMediaConstraints).then(function(stream) {
             stream.streamid = stream.id || getRandomString();
             streaming(stream);
-        }, function(error) {
+        }).catch(function(error) {
             options.onLocalMediaError(error, options.localMediaConstraints);
         });
     }

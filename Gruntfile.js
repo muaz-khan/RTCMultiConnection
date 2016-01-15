@@ -32,6 +32,7 @@ module.exports = function(grunt) {
                     'dev/IceServersHandler.js',
                     'dev/BandwidthHandler.js',
 
+                    'dev/gumadapter.js',
                     'dev/getUserMedia.js',
                     'dev/StreamsHandler.js',
 

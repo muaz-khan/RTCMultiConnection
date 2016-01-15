@@ -160,8 +160,8 @@ function getChromeExtensionStatus(extensionid, callback) {
 // this function explains how to use above methods/objects
 function getScreenConstraints(callback) {
     var firefoxScreenConstraints = {
-        mozMediaSource: 'screen',
-        mediaSource: 'screen',
+        mozMediaSource: 'window',
+        mediaSource: 'window',
         width: 15360,
         height: 8640
     };

@@ -178,6 +178,27 @@ function PeerInitiator(config) {
             extra = config.rtcMultiConnection.peers[that.remoteUserId].extra || extra;
         }
 
+        if (!peer) {
+            that.removeAllRemoteStreams();
+            return;
+        }
+
+        if (peer.iceConnectionState.search(/closed|failed/gi) !== -1) {
+            if (peer.firedOnce) return;
+            peer.firedOnce = true;
+
+            that.removeAllRemoteStreams();
+            if (that.connectionDescription && config.rtcMultiConnection.userid == that.connectionDescription.sender && !!config.rtcMultiConnection.autoReDialOnFailure) {
+                if (config.rtcMultiConnection.isInitiator) return;
+                setTimeout(function() {
+                    config.rtcMultiConnection.rejoin(that.connectionDescription);
+                    if (peer) {
+                        peer.firedOnce = false;
+                    }
+                }, 5000);
+            }
+        }
+
         config.onPeerStateChanged({
             iceConnectionState: peer.iceConnectionState,
             iceGatheringState: peer.iceGatheringState,
@@ -185,25 +206,6 @@ function PeerInitiator(config) {
             extra: extra,
             userid: that.remoteUserId
         });
-
-        if (peer.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1) {
-            if (peer.firedOnce) return;
-            peer.firedOnce = true;
-
-            for (var id in allRemoteStreams) {
-                config.onRemoteStreamRemoved(allRemoteStreams[id]);
-            }
-            allRemoteStreams = {};
-
-            if (that.connectionDescription && config.rtcMultiConnection.userid == that.connectionDescription.sender && !!config.rtcMultiConnection.autoReDialOnFailure) {
-                setTimeout(function() {
-                    if (peer.iceConnectionState.search(/disconnected|closed|failed/gi) !== -1) {
-                        config.rtcMultiConnection.rejoin(that.connectionDescription);
-                        peer.firedOnce = false;
-                    }
-                }, 5000);
-            }
-        }
     };
 
     var sdpConstraints = {
@@ -375,11 +377,39 @@ function PeerInitiator(config) {
 
     peer.nativeClose = peer.close;
     peer.close = function() {
-        if (peer && peer.iceConnectionState === 'connected') {
-            peer.nativeClose();
-            peer = null;
+        if (!peer) {
+            that.removeAllRemoteStreams();
+            return;
         }
+
+        config.rtcMultiConnection.multiPeersHandler.onNegotiationNeeded({
+            userLeft: true,
+            autoCloseEntireSession: !!config.rtcMultiConnection.autoCloseEntireSession
+        }, that.remoteUserId);
+
+        try {
+            if (peer.iceConnectionState.search(/closed|failed/gi) === -1) {
+                peer.getRemoteStreams().forEach(function(stream) {
+                    stream.stop();
+                });
+            }
+            peer.nativeClose();
+        } catch (e) {}
+
+        peer = null;
     };
+
+    this.removeAllRemoteStreams = function() {
+        for (var id in allRemoteStreams) {
+            config.onRemoteStreamRemoved(allRemoteStreams[id]);
+        }
+        allRemoteStreams = {};
+
+        that.streams.forEach(function(stream) {
+            stream.stop();
+        });
+        that.streams = [];
+    }
 
     this.peer = peer;
 }
