@@ -43,7 +43,7 @@ function SocketConnection(connection, connectCallback) {
 
             var action = message.message.action;
 
-            if (action === 'ended') {
+            if (action === 'ended' || action === 'stream-removed') {
                 connection.onstreamended(stream);
                 return;
             }

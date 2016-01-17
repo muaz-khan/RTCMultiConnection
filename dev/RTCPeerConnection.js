@@ -59,7 +59,9 @@ var isIE = !!document.documentMode;
 var isPluginRTC = isSafari || isIE;
 
 function PeerInitiator(config) {
-    this.extra = config.remoteSdp ? config.remoteSdp.extra : config.rtcMultiConnection.extra;
+    var connection = config.rtcMultiConnection;
+
+    this.extra = config.remoteSdp ? config.remoteSdp.extra : connection.extra;
     this.remoteUserId = config.remoteUserId;
     this.streams = [];
     this.channels = [];
@@ -143,6 +145,13 @@ function PeerInitiator(config) {
         });
     }
 
+    if (connection.DetectRTC.browser.name === 'Firefox') {
+        peer.removeStream = function(stream) {
+            stream.mute();
+            connection.StreamsHandler.onSyncNeeded(stream.streamid, 'stream-removed');
+        };
+    }
+
     peer.onicecandidate = function(event) {
         if (!event.candidate) return;
         config.onLocalCandidate({
@@ -174,8 +183,8 @@ function PeerInitiator(config) {
 
     peer.oniceconnectionstatechange = peer.onsignalingstatechange = function() {
         var extra = that.extra;
-        if (config.rtcMultiConnection.peers[that.remoteUserId]) {
-            extra = config.rtcMultiConnection.peers[that.remoteUserId].extra || extra;
+        if (connection.peers[that.remoteUserId]) {
+            extra = connection.peers[that.remoteUserId].extra || extra;
         }
 
         if (!peer) {
@@ -188,10 +197,10 @@ function PeerInitiator(config) {
             peer.firedOnce = true;
 
             that.removeAllRemoteStreams();
-            if (that.connectionDescription && config.rtcMultiConnection.userid == that.connectionDescription.sender && !!config.rtcMultiConnection.autoReDialOnFailure) {
-                if (config.rtcMultiConnection.isInitiator) return;
+            if (that.connectionDescription && connection.userid == that.connectionDescription.sender && !!connection.autoReDialOnFailure) {
+                if (connection.isInitiator) return;
                 setTimeout(function() {
-                    config.rtcMultiConnection.rejoin(that.connectionDescription);
+                    connection.rejoin(that.connectionDescription);
                     if (peer) {
                         peer.firedOnce = false;
                     }
@@ -258,13 +267,13 @@ function PeerInitiator(config) {
 
     this.addRemoteSdp = function(remoteSdp) {
         peer.setRemoteDescription(new RTCSessionDescription(remoteSdp), function() {}, function(error) {
-            if (!!config.rtcMultiConnection.enableLogs) {
+            if (!!connection.enableLogs) {
                 console.error(JSON.stringify(error, null, '\t'));
             }
 
-            if (!!config.rtcMultiConnection.autoReDialOnFailure) {
+            if (!!connection.autoReDialOnFailure) {
                 setTimeout(function() {
-                    config.rtcMultiConnection.rejoin(that.connectionDescription);
+                    connection.rejoin(that.connectionDescription);
                 }, 2000);
             }
         });
@@ -359,20 +368,20 @@ function PeerInitiator(config) {
             renegotiatingPeer: !!config.renegotiatingPeer || false,
             connectionDescription: that.connectionDescription,
             dontGetRemoteStream: !!config.dontGetRemoteStream,
-            extra: config.rtcMultiConnection ? config.rtcMultiConnection.extra : {},
+            extra: connection ? connection.extra : {},
             streamsToShare: streamsToShare,
             isFirefoxOffered: isFirefox
         });
     }, function(error) {
-        if (!!config.rtcMultiConnection.enableLogs) {
+        if (!!connection.enableLogs) {
             console.error('sdp-error', error);
         }
 
-        if (!!config.rtcMultiConnection.autoReDialOnFailure && !isFirefox && !isFirefoxOffered) {
-            setTimeout(function() {
-                config.rtcMultiConnection.rejoin(that.connectionDescription);
-            }, 2000);
-        }
+        if (!connection.autoReDialOnFailure || !connection.isInitiator || !isFirefox || !isFirefoxOffered) return;
+
+        setTimeout(function() {
+            connection.rejoin(that.connectionDescription);
+        }, 5000);
     }, defaults.sdpConstraints);
 
     peer.nativeClose = peer.close;
@@ -382,9 +391,9 @@ function PeerInitiator(config) {
             return;
         }
 
-        config.rtcMultiConnection.multiPeersHandler.onNegotiationNeeded({
+        connection.multiPeersHandler.onNegotiationNeeded({
             userLeft: true,
-            autoCloseEntireSession: !!config.rtcMultiConnection.autoCloseEntireSession
+            autoCloseEntireSession: !!connection.autoCloseEntireSession
         }, that.remoteUserId);
 
         try {

@@ -175,14 +175,11 @@ function getScreenConstraints(callback) {
             var screen_constraints = {
                 mandatory: {
                     chromeMediaSource: chromeMediaSource,
-                    // minWidth: 15360,
                     maxWidth: 15360,
-                    // minHeight: 15360,
                     maxHeight: 8640,
                     minFrameRate: 30,
                     maxFrameRate: 64,
                     minAspectRatio: 1.77,
-                    // maxAspectRatio: 1.77,
                     googLeakyBucket: true,
                     googTemporalLayeredScreencast: true
                 },

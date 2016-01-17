@@ -15,10 +15,31 @@ function setStreamType(constraints, stream) {
         stream.isAudio = true;
     }
 }
+
 var currentUserMediaRequest = {
     streams: [],
     mutex: false,
-    queueRequests: []
+    queueRequests: [],
+    remove: function(idInstance) {
+        this.mutex = false;
+
+        var stream = this.streams[idInstance];
+        if (!stream) {
+            return;
+        }
+
+        stream = stream.stream;
+
+        var options = stream.currentUserMediaRequestOptions;
+
+        if (this.queueRequests.indexOf(options)) {
+            delete this.queueRequests[this.queueRequests.indexOf(options)];
+            this.queueRequests = removeNullEntries(this.queueRequests);
+        }
+
+        this.streams[idInstance].stream = null;
+        delete this.streams[idInstance];
+    }
 };
 
 function getUserMediaHandler(options) {
@@ -82,7 +103,8 @@ function getUserMediaHandler(options) {
         }
 
         navigator.mediaDevices.getUserMedia(options.localMediaConstraints).then(function(stream) {
-            stream.streamid = stream.id || getRandomString();
+            stream.streamid = stream.streamid || stream.id || getRandomString();
+            stream.idInstance = idInstance;
             streaming(stream);
         }).catch(function(error) {
             options.onLocalMediaError(error, options.localMediaConstraints);

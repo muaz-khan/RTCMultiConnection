@@ -64,7 +64,7 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.84/rmc3.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.86/rmc3.min.js"></script>
 ```
 
 If you're sharing files, you also need to link:
@@ -76,7 +76,7 @@ If you're sharing files, you also need to link:
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.fbr.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.84/rmc3.fbr.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.86/rmc3.fbr.min.js"></script>
 ```
 
 > You can link multiple files from `dev` directory. Order doesn't matters.
@@ -247,6 +247,38 @@ var remoteUserId = 'single-remote-userid';
 var videoTrack = yourVideoStream.getVideoTracks()[0];
 connection.replaceTrack(videoTrack, remoteUserId);
 ```
+
+### `resetTrack`
+
+If you replaced a video or audio track, RTCMultiConnection keeps record of old track, and allows you move-back-to previous track:
+
+```javascript
+connection.resetTrack(null, true);
+```
+
+It takes following arguments:
+
+1. `[Array of user-ids]` or `"single-user-id"` or `null`
+2. Is video track (boolean): Either `true` or `false`. `null` means replace all last tracks.
+
+```javascript
+// with single user
+connection.resetTrack('specific-userid', true);
+
+// with multiple users
+connection.resetTrack(['first-user', 'second-user'], true);
+
+// NULL means all users
+connection.resetTrack(null, true);
+
+// reset only audio
+connection.resetTrack(null, false);
+
+// to reset all last-tracks (both audio and video)
+connection.resetTrack();
+```
+
+> Means that you can reset all tracks that are replaced recently.
 
 ### `onUserStatusChanged`
 
@@ -985,6 +1017,40 @@ connection.multiPeersHandler.onPeerStateChanged = function(state) {
             console.debug('Peers are connected on port:', result.connectionType.transport);
         }, 5000);
         return;
+    }
+};
+```
+
+## How to mute/unmute?
+
+You can compare `muteType` for `onmute` event; and `unmuteType` for `onunmute` event.
+
+```javascript
+connection.onmute = function(e) {
+    if (!e.mediaElement) {
+        return;
+    }
+
+    if (e.muteType === 'both' || e.muteType === 'video') {
+        e.mediaElement.src = null;
+        e.mediaElement.pause();
+        e.mediaElement.poster = e.snapshot || 'https://cdn.webrtc-experiment.com/images/muted.png';
+    } else if (e.muteType === 'audio') {
+        e.mediaElement.muted = true;
+    }
+};
+
+connection.onunmute = function(e) {
+    if (!e.mediaElement) {
+        return;
+    }
+
+    if (e.unmuteType === 'both' || e.unmuteType === 'video') {
+        e.mediaElement.poster = null;
+        e.mediaElement.src = URL.createObjectURL(e.stream);
+        e.mediaElement.play();
+    } else if (e.unmuteType === 'audio') {
+        e.mediaElement.muted = false;
     }
 };
 ```

@@ -111,7 +111,7 @@ function getRandomString() {
 
 // Get HTMLAudioElement/HTMLVideoElement accordingly
 
-function getRMCMediaElement(stream, callback) {
+function getRMCMediaElement(stream, callback, connection) {
     var isAudioOnly = false;
     if (!stream.getVideoTracks().length) {
         isAudioOnly = true;
@@ -132,17 +132,43 @@ function getRMCMediaElement(stream, callback) {
 
     // "mozSrcObject" is always preferred over "src"!!
     mediaElement[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : window.URL.createObjectURL(stream);
-
     mediaElement.controls = true;
 
     // http://goo.gl/WZ5nFl
     // Firefox don't yet support onended for any stream (remote/local)
     if (isFirefox) {
         mediaElement.addEventListener('ended', function() {
-            if (stream.onended) {
-                stream.onended();
+            fireEvent(stream, 'ended', stream);
+            currentUserMediaRequest.remove(stream.idInstance);
+
+            if (stream.type === 'local') {
+                StreamsHandler.onSyncNeeded(stream.streamid, 'ended');
+
+                connection.attachStreams.forEach(function(aStream, idx) {
+                    if (stream.streamid === aStream.streamid) {
+                        delete connection.attachStreams[idx];
+                    }
+                });
+
+                var newStreamsArray = [];
+                connection.attachStreams.forEach(function(aStream) {
+                    if (aStream) {
+                        newStreamsArray.push(aStream);
+                    }
+                });
+                connection.attachStreams = newStreamsArray;
+                connection.observers.all();
+
+                var streamEvent = connection.streamEvents[stream.streamid];
+
+                if (streamEvent) {
+                    connection.onstreamended(streamEvent);
+                    return;
+                }
+                if (this.parentNode) {
+                    this.parentNode.removeChild(this);
+                }
             }
-            fireEvent(stream, 'ended', stream.type);
         }, false);
     }
 
@@ -211,6 +237,17 @@ if (typeof MediaStream !== 'undefined' && !('stop' in MediaStream.prototype)) {
 
         fireEvent(this, 'ended');
     };
+}
+
+if (typeof MediaStream !== 'undefined') {
+    // MediaStream.getTracks() maybe?
+    if (!('getAudioTracks' in MediaStream.prototype) || typeof MediaStream.prototype.getAudioTracks !== 'function') {
+        MediaStream.prototype.getAudioTracks = function() {}
+    }
+
+    if (!('getVideoTracks' in MediaStream.prototype) || typeof MediaStream.prototype.getVideoTracks !== 'function') {
+        MediaStream.prototype.getVideoTracks = function() {}
+    }
 }
 
 var lastChanges = '';

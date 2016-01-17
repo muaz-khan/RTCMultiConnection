@@ -56,7 +56,7 @@ var StreamsHandler = (function() {
                 StreamsHandler.onSyncNeeded(stream.streamid, 'mute', type);
             }
 
-            connection.streamEvents[stream.streamid].muteType = type;
+            connection.streamEvents[stream.streamid].muteType = type || 'both';
 
             fireEvent(stream, 'mute', type);
         };
@@ -107,7 +107,7 @@ var StreamsHandler = (function() {
                 StreamsHandler.onSyncNeeded(stream.streamid, 'unmute', type);
             }
 
-            connection.streamEvents[stream.streamid].unmuteType = type;
+            connection.streamEvents[stream.streamid].unmuteType = type || 'both';
 
             fireEvent(stream, 'unmute', type);
         };

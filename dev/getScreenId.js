@@ -30,7 +30,9 @@ getScreenId(function (error, sourceId, screen_constraints) {
             callback(null, 'firefox', {
                 video: {
                     mozMediaSource: 'window',
-                    mediaSource: 'window'
+                    mediaSource: 'window',
+                    width: 15360,
+                    height: 8640
                 }
             });
             return;
@@ -64,8 +66,13 @@ getScreenId(function (error, sourceId, screen_constraints) {
             video: {
                 mandatory: {
                     chromeMediaSource: error ? 'screen' : 'desktop',
-                    maxWidth: window.screen.width > 1920 ? window.screen.width : 1920,
-                    maxHeight: window.screen.height > 1080 ? window.screen.height : 1080
+                    maxWidth: 15360,
+                    maxHeight: 8640,
+                    minFrameRate: 30,
+                    maxFrameRate: 64,
+                    minAspectRatio: 1.77,
+                    googLeakyBucket: true,
+                    googTemporalLayeredScreencast: true
                 },
                 optional: []
             }
@@ -136,7 +143,9 @@ getScreenId(function (error, sourceId, screen_constraints) {
             callback(null, 'firefox', {
                 video: {
                     mozMediaSource: 'window',
-                    mediaSource: 'window'
+                    mediaSource: 'window',
+                    width: 15360,
+                    height: 8640
                 }
             });
             return;
@@ -170,8 +179,13 @@ getScreenId(function (error, sourceId, screen_constraints) {
             video: {
                 mandatory: {
                     chromeMediaSource: error ? 'screen' : 'desktop',
-                    maxWidth: window.screen.width > 1920 ? window.screen.width : 1920,
-                    maxHeight: window.screen.height > 1080 ? window.screen.height : 1080
+                    maxWidth: 15360,
+                    maxHeight: 8640,
+                    minFrameRate: 30,
+                    maxFrameRate: 64,
+                    minAspectRatio: 1.77,
+                    googLeakyBucket: true,
+                    googTemporalLayeredScreencast: true
                 },
                 optional: []
             }
