@@ -1,4 +1,4 @@
-// Last time updated at Thursday, November 19th, 2015, 4:19:18 PM 
+// Last time updated at Tuesday, January 19th, 2016, 3:18:28 PM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -3149,8 +3149,8 @@
 
     var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
     var isFirefox = typeof window.InstallTrigger !== 'undefined';
-    var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
-    var isChrome = !!window.chrome && !isOpera;
+    var isSafari = (Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0 && navigator.userAgent.match(/(dwx_ios)/) == null);
+    var isChrome = (!!window.chrome && !isOpera) || (Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0 && navigator.userAgent.match(/(dwx_ios)/) != null);
     var isIE = !!document.documentMode;
 
     var isPluginRTC = isSafari || isIE;
@@ -4995,9 +4995,17 @@
             MediaDevices = [];
             navigator.enumerateDevices(function(devices) {
                 devices.forEach(function(_device) {
+                    var properties = Object.getOwnPropertyNames(_device);
                     var device = {};
-                    for (var d in _device) {
-                        device[d] = _device[d];
+                    if (isMobile.iOS()) {
+                        for (var index in properties) {
+                            var value = properties[index];
+                            device[value] = _device[value];
+                        }
+                    } else {
+                        for (var d in _device) {
+                            device[d] = _device[d];
+                        }
                     }
 
                     var skip;

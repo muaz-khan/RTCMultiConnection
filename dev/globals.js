@@ -20,8 +20,8 @@ function convertToAudioStream(mediaStream) {
 
 var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
 var isFirefox = typeof window.InstallTrigger !== 'undefined';
-var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
-var isChrome = !!window.chrome && !isOpera;
+var isSafari = (Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0 && navigator.userAgent.match(/(dwx_ios)/) == null);
+var isChrome = (!!window.chrome && !isOpera) || (Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0 && navigator.userAgent.match(/(dwx_ios)/) != null);
 var isIE = !!document.documentMode;
 
 var isPluginRTC = isSafari || isIE;

@@ -3,3 +3,10 @@ node_modules
 
 # bower
 bower_components
+.idea/.name
+.idea/encodings.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/RTCMultiConnection.iml
+.idea/vcs.xml
+.idea/workspace.xml

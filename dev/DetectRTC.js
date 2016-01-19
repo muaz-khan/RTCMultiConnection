@@ -357,9 +357,17 @@
         MediaDevices = [];
         navigator.enumerateDevices(function(devices) {
             devices.forEach(function(_device) {
+                var properties = Object.getOwnPropertyNames(_device);
                 var device = {};
-                for (var d in _device) {
-                    device[d] = _device[d];
+                if (isMobile.iOS()) {
+                    for (var index in properties) {
+                        var value = properties[index];
+                        device[value] = _device[value];
+                    }
+                } else {
+                    for (var d in _device) {
+                        device[d] = _device[d];
+                    }
                 }
 
                 var skip;
