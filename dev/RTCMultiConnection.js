@@ -1239,7 +1239,7 @@ function RTCMultiConnection(roomid) {
 
     // default value is 15k because Firefox's receiving limit is 16k!
     // however 64k works chrome-to-chrome
-    connection.chunkSize = 15 * 1000;
+    connection.chunkSize = 65 * 1000;
 
     connection.maxParticipantsAllowed = 1000;
 

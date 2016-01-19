@@ -1,7 +1,7 @@
 {
   "name": "rtcmulticonnection-v3",
   "preferGlobal": false,
-  "version": "3.2.86",
+  "version": "3.2.87",
   "author": {
     "name": "Muaz Khan",
     "email": "muazkh@gmail.com",
@@ -49,15 +49,16 @@
   "homepage": "https://rtcmulticonnection.herokuapp.com/",
   "_from": "rtcmulticonnection-v3@",
   "devDependencies": {
-    "grunt": "latest",
-    "grunt-bump": "latest",
-    "grunt-cli": "latest",
-    "grunt-contrib-clean": "latest",
-    "grunt-contrib-concat": "latest",
-    "grunt-contrib-copy": "latest",
-    "grunt-contrib-uglify": "latest",
-    "grunt-jsbeautifier": "latest",
-    "grunt-replace": "latest",
-    "load-grunt-tasks": "latest"
+    "grunt": "0.4.5",
+    "grunt-cli": "0.1.13",
+    "load-grunt-tasks": "3.4.0",
+    "grunt-contrib-concat": "0.5.1",
+    "grunt-contrib-jshint": "0.11.3",
+    "grunt-contrib-uglify": "0.11.0",
+    "grunt-jsbeautifier": "0.2.10",
+    "grunt-bump": "0.7.0",
+    "grunt-contrib-clean": "0.6.0",
+    "grunt-contrib-copy": "0.8.2",
+    "grunt-replace": "0.11.0"
   }
 }

@@ -1,4 +1,4 @@
-// Last time updated at Sunday, January 17th, 2016, 5:28:51 PM 
+// Last time updated: 2016-01-19 9:53:08 AM UTC
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -1248,7 +1248,7 @@
 
         // default value is 15k because Firefox's receiving limit is 16k!
         // however 64k works chrome-to-chrome
-        connection.chunkSize = 15 * 1000;
+        connection.chunkSize = 65 * 1000;
 
         connection.maxParticipantsAllowed = 1000;
 
@@ -2025,7 +2025,7 @@
             }, {
                 userid: connection.userid,
                 // extra: connection.extra,
-                chunkSize: connection.chunkSize || 0
+                chunkSize: isFirefox ? 15 * 1000 : connection.chunkSize || 0
             });
         };
 
@@ -2050,7 +2050,13 @@
         };
 
         this.onDataChannelOpened = function(channel, remoteUserId) {
+            // keep last channel only; we are not expecting parallel/channels channels
+            if (connection.peers[remoteUserId].channels.length) {
+                return;
+            }
+
             connection.peers[remoteUserId].channels.push(channel);
+
             connection.onopen({
                 userid: remoteUserId,
                 extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},

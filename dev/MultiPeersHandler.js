@@ -412,7 +412,7 @@ function MultiPeers(connection) {
         }, {
             userid: connection.userid,
             // extra: connection.extra,
-            chunkSize: connection.chunkSize || 0
+            chunkSize: isFirefox ? 15 * 1000 : connection.chunkSize || 0
         });
     };
 
@@ -437,7 +437,13 @@ function MultiPeers(connection) {
     };
 
     this.onDataChannelOpened = function(channel, remoteUserId) {
+        // keep last channel only; we are not expecting parallel/channels channels
+        if (connection.peers[remoteUserId].channels.length) {
+            return;
+        }
+
         connection.peers[remoteUserId].channels.push(channel);
+
         connection.onopen({
             userid: remoteUserId,
             extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},

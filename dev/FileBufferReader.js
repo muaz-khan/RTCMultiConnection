@@ -38,7 +38,8 @@ function FileBufferReader() {
             uuid: file.uuid || 0,
             file: file,
             earlyCallback: earlyCallback,
-            extra: extra
+            extra: extra,
+            chunkSize: extra.chunkSize
         };
 
         fbrHelper.readAsArrayBuffer(fbr, options);
