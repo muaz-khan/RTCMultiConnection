@@ -224,7 +224,10 @@ function MultiPeers(connection) {
 
     this.renegotiatePeer = function(remoteUserId, userPreferences, remoteSdp) {
         if (!connection.peers[remoteUserId]) {
-            throw 'This peer (' + remoteUserId + ') does not exists.';
+            if (connection.enableLogs) {
+                console.warn('This peer (' + remoteUserId + ') does not exists.');
+            }
+            return;
         }
 
         if (!userPreferences) {

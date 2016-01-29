@@ -162,7 +162,7 @@ function getScreenConstraints(callback) {
     var firefoxScreenConstraints = {
         mozMediaSource: 'window',
         mediaSource: 'window',
-        width: 15360,
+        width: 29999,
         height: 8640
     };
 
@@ -175,11 +175,11 @@ function getScreenConstraints(callback) {
             var screen_constraints = {
                 mandatory: {
                     chromeMediaSource: chromeMediaSource,
-                    maxWidth: 15360,
+                    maxWidth: 29999,
                     maxHeight: 8640,
                     minFrameRate: 30,
-                    maxFrameRate: 64,
-                    minAspectRatio: 1.77,
+                    maxFrameRate: 128,
+                    minAspectRatio: 1.77, // 2.39
                     googLeakyBucket: true,
                     googTemporalLayeredScreencast: true
                 },

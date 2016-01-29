@@ -39,7 +39,7 @@ module.exports = function(grunt) {
                     'dev/StreamsHandler.js',
 
                     'dev/DetectRTC.js',
-                    'dev/getScreenId.js', // or Screen-Capturing.js
+                    'dev/getScreenId.js', // or getScreenId.js or Screen-Capturing.js
 
                     'dev/TextSenderReceiver.js',
                     'dev/FileProgressBarHandler.js',

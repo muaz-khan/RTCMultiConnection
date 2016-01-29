@@ -31,7 +31,7 @@ getScreenId(function (error, sourceId, screen_constraints) {
                 video: {
                     mozMediaSource: 'window',
                     mediaSource: 'window',
-                    width: 15360,
+                    width: 29999,
                     height: 8640
                 }
             });
@@ -66,11 +66,11 @@ getScreenId(function (error, sourceId, screen_constraints) {
             video: {
                 mandatory: {
                     chromeMediaSource: error ? 'screen' : 'desktop',
-                    maxWidth: 15360,
+                    maxWidth: 29999,
                     maxHeight: 8640,
                     minFrameRate: 30,
-                    maxFrameRate: 64,
-                    minAspectRatio: 1.77,
+                    maxFrameRate: 128,
+                    minAspectRatio: 1.77, // 2.39
                     googLeakyBucket: true,
                     googTemporalLayeredScreencast: true
                 },
@@ -144,7 +144,7 @@ getScreenId(function (error, sourceId, screen_constraints) {
                 video: {
                     mozMediaSource: 'window',
                     mediaSource: 'window',
-                    width: 15360,
+                    width: 29999,
                     height: 8640
                 }
             });
@@ -179,11 +179,11 @@ getScreenId(function (error, sourceId, screen_constraints) {
             video: {
                 mandatory: {
                     chromeMediaSource: error ? 'screen' : 'desktop',
-                    maxWidth: 15360,
+                    maxWidth: 29999,
                     maxHeight: 8640,
                     minFrameRate: 30,
-                    maxFrameRate: 64,
-                    minAspectRatio: 1.77,
+                    maxFrameRate: 128,
+                    minAspectRatio: 1.77, // 2.39
                     googLeakyBucket: true,
                     googTemporalLayeredScreencast: true
                 },

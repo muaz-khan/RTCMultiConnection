@@ -64,7 +64,7 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.87/rmc3.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.88/rmc3.min.js"></script>
 ```
 
 If you're sharing files, you also need to link:
@@ -76,7 +76,7 @@ If you're sharing files, you also need to link:
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.fbr.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.87/rmc3.fbr.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.88/rmc3.fbr.min.js"></script>
 ```
 
 > You can link multiple files from `dev` directory. Order doesn't matters.
@@ -282,11 +282,31 @@ connection.resetTrack();
 
 ### `onUserStatusChanged`
 
-This even allows you show online/offline statuses of the user:
+This event allows you show online/offline statuses of the user:
 
 ```javascript
 connection.onUserStatusChanged = function(status) {
 	document.getElementById(event.userid).src = status === 'online' ? 'online.gif' : 'offline.gif';
+};
+```
+
+You can even manually call above method from `onopen`, `onstream` and similar events to get the most accurate result possible:
+
+```javascript
+connection.onopen = connection.stream = function(event) {
+    connection.onUserStatusChanged({
+        userid: event.userid,
+        extra: event.extra,
+        status: 'online'
+    });
+};
+
+connection.onleave = connection.streamended = connection.onclose = function(event) {
+    connection.onUserStatusChanged({
+        userid: event.userid,
+        extra: event.extra,
+        status: 'offline'
+    });
 };
 ```
 
@@ -347,7 +367,7 @@ connection.getUserMediaHandler(options);
 
 Its defined here:
 
-* [getUserMedia.js#L20](https://github.com/muaz-khan/RTCMultiConnection/blob/master/RTCMultiConnection-v3.0/dev/getUserMedia.js#L20)
+* [getUserMedia.js#L20](https://github.com/muaz-khan/RTCMultiConnection/tree/master/devgetUserMedia.js#L20)
 
 ## `becomePublicModerator`
 
@@ -459,7 +479,7 @@ connection.checkPresence('roomid', function(isRoomEists, roomid) {
 
 ## `onReadyForOffer`
 
-This even is fired as soon as callee says "I am ready for offer. I enabled camera. Please create offer and share.".
+This event is fired as soon as callee says "I am ready for offer. I enabled camera. Please create offer and share.".
 
 ```javascript
 connection.onReadyForOffer = function(remoteUserId, userPreferences) {
@@ -538,8 +558,8 @@ connection.getAllParticipants().forEach(function(remoteUserId) {
 	var user = connection.peers[remoteUserId];
 	console.log(user.extra);
 
-	user.peer.connection.close();
-	alert(user.peer.connection === webkitRTCPeerConnection);
+	user.peer.close();
+	alert(user.peer === webkitRTCPeerConnection);
 });
 ```
 
@@ -561,7 +581,7 @@ This method allows you skip Socket.io and force Firebase or PubNub or WebSockets
 connection.setCustomSocketHandler(FirebaseConnection);
 ```
 
-Please check [`FirebaseConnection`](https://github.com/muaz-khan/RTCMultiConnection/blob/master/RTCMultiConnection-v3.0/dev/FirebaseConnection.js) or [`PubNubConnection.js`](https://github.com/muaz-khan/RTCMultiConnection/blob/master/RTCMultiConnection-v3.0/dev/PubNubConnection.js) to understand how it works.
+Please check [`FirebaseConnection`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/devFirebaseConnection.js) or [`PubNubConnection.js`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/devPubNubConnection.js) to understand how it works.
 
 ## `enableLogs`
 
@@ -1055,6 +1075,55 @@ connection.onunmute = function(e) {
 };
 ```
 
+## HD Streaming
+
+```javascript
+connection.bandwidth = {
+    audio: 128,
+    video: 1024,
+    screen: 1024
+};
+
+var videoConstraints = {
+    mandatory: {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        minAspectRatio: 1.77,
+        minFrameRate: 3,
+        maxFrameRate: 64
+    },
+    optional: []
+};
+
+connection.mediaConstraints.video = videoConstraints;
+```
+
+## Default devices?
+
+By default, RTCMultiConnection tries to use last available microphone and camera. However you can disable this behavior and ask to use default devices instead:
+
+```javascript
+// pass second parameter to force options
+var connection = new RTCMultiConnection(roomId, {
+    useDefaultDevices: true
+});
+```
+
+## Auto open or join?
+
+By default, you always have to call `open` or `join` or `openOrJoin` methods manually. However you can force RTCMultiConnection to auto open/join room as soon as constructor is initialized.
+
+```javascript
+// pass second parameter to force options
+var connection = new RTCMultiConnection(roomId, {
+    autoOpenOrJoin: true
+});
+```
+
+For low-latency audio:
+
+* https://twitter.com/WebRTCWeb/status/499102787733450753
+
 ## RTCMultiConnection v2.2.2 Demos
 
 | Experiment Name        | Demo           | Source Code |
@@ -1107,6 +1176,10 @@ connection.onunmute = function(e) {
 v2.2.2 is available here:
 
 * https://github.com/muaz-khan/RTCMultiConnection/tree/master/v2.2.2
+
+## Twitter
+
+* https://twitter.com/WebRTCWeb i.e. @WebRTCWeb
 
 ## License
 

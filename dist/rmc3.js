@@ -1,4 +1,4 @@
-// Last time updated: 2016-01-19 9:53:08 AM UTC
+// Last time updated: 2016-01-29 6:36:02 AM UTC
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -9,7 +9,9 @@
 
     // RTCMultiConnection.js
 
-    function RTCMultiConnection(roomid) {
+    function RTCMultiConnection(roomid, forceOptions) {
+        forceOptions = forceOptions || {};
+
         var connection = this;
 
         connection.channel = connection.sessionid = (roomid || location.href.replace(/\/|:|#|\?|\$|\^|%|\.|`|~|!|\+|@|\[|\||]|\|*. /g, '').split('\n').join('').split('\r').join('')) + '';
@@ -382,9 +384,6 @@
             });
 
             connection.attachStreams.forEach(function(stream) {
-                stream.addEventListener('ended', function() {
-                    connection.renegotiate(remoteUserId || connection.sessionid);
-                }, false);
                 stream.stop();
             });
         };
@@ -461,7 +460,7 @@
             }
         };
 
-        function beforeUnload(shiftModerationControlOnLeave) {
+        function beforeUnload(shiftModerationControlOnLeave, dontCloseSocket) {
             if (!connection.closeBeforeUnload) {
                 return;
             }
@@ -476,7 +475,7 @@
                 }
             });
 
-            if (socket) {
+            if (socket && !dontCloseSocket) {
                 if (typeof socket.disconnect !== 'undefined') {
                     connection.autoReDialOnFailure = false; // Prevent reconnection     
                     socket.disconnect();
@@ -556,58 +555,132 @@
 
         connection.enableFileSharing = false;
 
+        // all values in kbps
+        connection.bandwidth = {
+            screen: 512,
+            audio: 128,
+            video: 512
+        };
+
+        connection.processSdp = function(sdp) {
+            sdp = BandwidthHandler.setApplicationSpecificBandwidth(sdp, connection.bandwidth, !!connection.session.screen);
+            sdp = BandwidthHandler.setVideoBitrates(sdp, {
+                min: connection.bandwidth.video * 8 * 1024,
+                max: connection.bandwidth.video * 8 * 1024
+            });
+            sdp = BandwidthHandler.setOpusAttributes(sdp, {
+                maxaveragebitrate: connection.bandwidth.audio * 8 * 1024,
+                maxplaybackrate: connection.bandwidth.audio * 8 * 1024,
+                stereo: 1,
+                maxptime: 3
+            });
+            return sdp;
+        };
+
+        if (typeof BandwidthHandler !== 'undefined') {
+            connection.BandwidthHandler = BandwidthHandler;
+        }
+
         connection.mediaConstraints = {
             audio: {
                 mandatory: {},
-                optional: []
+                optional: [{
+                    bandwidth: connection.bandwidth.audio * 8 * 1024 || 128 * 8 * 1024
+                }]
             },
             video: {
                 mandatory: {},
-                optional: []
+                optional: [{
+                    bandwidth: connection.bandwidth.audio * 8 * 1024 || 128 * 8 * 1024
+                }, {
+                    googLeakyBucket: true
+                }]
             }
         };
 
-        DetectRTC.load(function() {
-            // it will force RTCMultiConnection to capture last-devices
-            // i.e. if external microphone is attached to system, we should prefer it over built-in devices.
-            DetectRTC.MediaDevices.forEach(function(device) {
-                if (device.kind === 'audioinput') {
-                    connection.mediaConstraints.audio = {
-                        optional: [{
-                            sourceId: device.id
-                        }, {
-                            bandwidth: connection.bandwidth.audio || 128 * 8 * 1000
-                        }],
-                        mandatory: {}
-                    };
+        if (isFirefox) {
+            connection.mediaConstraints = {
+                audio: true,
+                video: true
+            };
+        }
 
+        if (!forceOptions.useDefaultDevices) {
+            DetectRTC.load(function() {
+                var lastAudioDevice, lastVideoDevice;
+                // it will force RTCMultiConnection to capture last-devices
+                // i.e. if external microphone is attached to system, we should prefer it over built-in devices.
+                DetectRTC.MediaDevices.forEach(function(device) {
+                    if (device.kind === 'audioinput' && connection.mediaConstraints.audio !== false) {
+                        lastAudioDevice = device;
+                    }
+
+                    if (device.kind === 'videoinput' && connection.mediaConstraints.video !== false) {
+                        lastVideoDevice = device;
+                    }
+                });
+
+                if (lastAudioDevice) {
                     if (isFirefox) {
+                        if (connection.mediaConstraints.audio !== true) {
+                            connection.mediaConstraints.audio.deviceId = lastAudioDevice.id;
+                        } else {
+                            connection.mediaConstraints.audio = {
+                                deviceId: lastAudioDevice.id
+                            }
+                        }
+                        return;
+                    }
+
+                    if (connection.mediaConstraints.audio == true) {
                         connection.mediaConstraints.audio = {
-                            deviceId: device.id
-                        };
+                            mandatory: {},
+                            optional: []
+                        }
                     }
+
+                    if (!connection.mediaConstraints.audio.optional) {
+                        connection.mediaConstraints.audio.optional = [];
+                    }
+
+                    var optional = [{
+                        sourceId: lastAudioDevice.id
+                    }];
+
+                    connection.mediaConstraints.audio.optional = optional.concat(connection.mediaConstraints.audio.optional);
                 }
 
-                if (device.kind === 'videoinput') {
-                    connection.mediaConstraints.video = {
-                        optional: [{
-                            sourceId: device.id
-                        }, {
-                            googLeakyBucket: true
-                        }, {
-                            bandwidth: connection.bandwidth.video || 256 * 8 * 1000
-                        }],
-                        mandatory: {}
-                    };
-
+                if (lastVideoDevice) {
                     if (isFirefox) {
-                        connection.mediaConstraints.video = {
-                            deviceId: device.id
-                        };
+                        if (connection.mediaConstraints.video !== true) {
+                            connection.mediaConstraints.video.deviceId = lastVideoDevice.id;
+                        } else {
+                            connection.mediaConstraints.video = {
+                                deviceId: lastVideoDevice.id
+                            }
+                        }
+                        return;
                     }
+
+                    if (connection.mediaConstraints.video == true) {
+                        connection.mediaConstraints.video = {
+                            mandatory: {},
+                            optional: []
+                        }
+                    }
+
+                    if (!connection.mediaConstraints.video.optional) {
+                        connection.mediaConstraints.video.optional = [];
+                    }
+
+                    var optional = [{
+                        sourceId: lastVideoDevice.id
+                    }];
+
+                    connection.mediaConstraints.video.optional = optional.concat(connection.mediaConstraints.video.optional);
                 }
-            })
-        });
+            });
+        }
 
         connection.sdpConstraints = {
             mandatory: {
@@ -666,12 +739,14 @@
             if (!!connection.enableLogs) {
                 console.warn('Data connection has been closed between you & ', event.userid);
             }
+            connection.renegotiate(event.userid);
         };
 
         connection.onerror = function(error) {
             if (!!connection.enableLogs) {
                 console.error(error.userid, 'data-error', error);
             }
+            connection.renegotiate(event.userid);
         };
 
         connection.onmessage = function(event) {
@@ -685,7 +760,7 @@
         };
 
         connection.close = connection.disconnect = connection.leave = function() {
-            beforeUnload(false);
+            beforeUnload(false, true);
         };
 
         connection.onstream = function(e) {
@@ -992,6 +1067,11 @@
                         mediaElement: connection.streamEvents[stream.streamid] ? connection.streamEvents[stream.streamid].mediaElement : null
                     };
                 }
+
+                if (streamEvent.userid === connection.userid && streamEvent.type === 'remote') {
+                    return;
+                }
+
                 connection.onstreamended(streamEvent);
 
                 delete connection.streamEvents[stream.streamid];
@@ -1073,29 +1153,9 @@
             }, remoteUserId);
         };
 
-        connection.processSdp = function(sdp) {
-            sdp = BandwidthHandler.setApplicationSpecificBandwidth(sdp, connection.bandwidth, !!connection.session.screen);
-            sdp = BandwidthHandler.setVideoBitrates(sdp, {
-                min: connection.bandwidth.video,
-                max: connection.bandwidth.video
-            });
-            sdp = BandwidthHandler.setOpusAttributes(sdp);
-            return sdp;
-        };
-
-        if (typeof BandwidthHandler !== 'undefined') {
-            connection.BandwidthHandler = BandwidthHandler;
-        }
-
         if (typeof StreamsHandler !== 'undefined') {
             connection.StreamsHandler = StreamsHandler;
         }
-
-        connection.bandwidth = {
-            screen: 300, // 300kbps minimum
-            audio: 50,
-            video: 256
-        };
 
         connection.onleave = function(userid) {};
 
@@ -1335,6 +1395,26 @@
                 }
             }
         };
+
+        connection.isOnline = true;
+
+        listenEventHandler('online', function() {
+            connection.isOnline = true;
+        });
+
+        listenEventHandler('offline', function() {
+            connection.isOnline = false;
+        });
+
+        connection.getExtraData = function(remoteUserId) {
+            if (!remoteUserId) throw 'remoteUserId is required.';
+            if (!connection.peers[remoteUserId]) return {};
+            return connection.peers[remoteUserId].extra;
+        };
+
+        if (!!forceOptions.autoOpenOrJoin) {
+            connection.openOrJoin(connection.sessionid);
+        }
     }
 
     function SocketConnection(connection, connectCallback) {
@@ -1837,7 +1917,10 @@
 
         this.renegotiatePeer = function(remoteUserId, userPreferences, remoteSdp) {
             if (!connection.peers[remoteUserId]) {
-                throw 'This peer (' + remoteUserId + ') does not exists.';
+                if (connection.enableLogs) {
+                    console.warn('This peer (' + remoteUserId + ') does not exists.');
+                }
+                return;
             }
 
             if (!userPreferences) {
@@ -2309,12 +2392,40 @@
     /*global MediaStream:true */
     if (typeof MediaStream !== 'undefined' && !('stop' in MediaStream.prototype)) {
         MediaStream.prototype.stop = function() {
+            if (!this.getAudioTracks && !!this.getTracks) {
+                this.getAudioTracks = function() {
+                    var array = [];
+                    this.getTracks.forEach(function(track) {
+                        if (track.kind.toString().indexOf('audio') !== -1) {
+                            array.push(track);
+                        }
+                    });
+                    return array;
+                };
+            }
+
+            if (!this.getVideoTracks && !!this.getTracks) {
+                this.getVideoTracks = function() {
+                    var array = [];
+                    this.getTracks.forEach(function(track) {
+                        if (track.kind.toString().indexOf('video') !== -1) {
+                            array.push(track);
+                        }
+                    });
+                    return array;
+                };
+            }
+
             this.getAudioTracks().forEach(function(track) {
-                track.stop();
+                if (!!track.stop) {
+                    track.stop();
+                }
             });
 
             this.getVideoTracks().forEach(function(track) {
-                track.stop();
+                if (!!track.stop) {
+                    track.stop();
+                }
             });
 
             fireEvent(this, 'ended');
@@ -2728,7 +2839,6 @@
             }
 
             if (!peer) {
-                that.removeAllRemoteStreams();
                 return;
             }
 
@@ -2736,9 +2846,8 @@
                 if (peer.firedOnce) return;
                 peer.firedOnce = true;
 
-                that.removeAllRemoteStreams();
                 if (that.connectionDescription && connection.userid == that.connectionDescription.sender && !!connection.autoReDialOnFailure) {
-                    if (connection.isInitiator) return;
+                    if (peer && peer.localDescription && peer.localDescription.type === 'offer') return;
                     setTimeout(function() {
                         connection.rejoin(that.connectionDescription);
                         if (peer) {
@@ -2784,7 +2893,7 @@
             event.stream.streamid = event.stream.id;
             if (!event.stream.stop) {
                 event.stream.stop = function() {
-                    fireEvent(event.stream, 'ended', event);
+                    fireEvent(this, 'ended');
                 };
             }
             allRemoteStreams[event.stream.id] = event.stream;
@@ -2812,6 +2921,7 @@
                 }
 
                 if (!!connection.autoReDialOnFailure) {
+                    if (peer && peer.localDescription && peer.localDescription.type === 'offer') return;
                     setTimeout(function() {
                         connection.rejoin(that.connectionDescription);
                     }, 2000);
@@ -2917,7 +3027,8 @@
                 console.error('sdp-error', error);
             }
 
-            if (!connection.autoReDialOnFailure || !connection.isInitiator || !isFirefox || !isFirefoxOffered) return;
+            if (!connection.autoReDialOnFailure || !isFirefox || !isFirefoxOffered) return;
+            if (peer && peer.localDescription && peer.localDescription.type === 'offer') return;
 
             setTimeout(function() {
                 connection.rejoin(that.connectionDescription);
@@ -2927,7 +3038,6 @@
         peer.nativeClose = peer.close;
         peer.close = function() {
             if (!peer) {
-                that.removeAllRemoteStreams();
                 return;
             }
 
@@ -2947,18 +3057,6 @@
 
             peer = null;
         };
-
-        this.removeAllRemoteStreams = function() {
-            for (var id in allRemoteStreams) {
-                config.onRemoteStreamRemoved(allRemoteStreams[id]);
-            }
-            allRemoteStreams = {};
-
-            that.streams.forEach(function(stream) {
-                stream.stop();
-            });
-            that.streams = [];
-        }
 
         this.peer = peer;
     }
@@ -3772,7 +3870,7 @@
         function setHandlers(stream, syncAction, connection) {
             if (typeof syncAction == 'undefined' || syncAction == true) {
                 stream.addEventListener('ended', function() {
-                    StreamsHandler.onSyncNeeded(stream.streamid, 'ended');
+                    StreamsHandler.onSyncNeeded(this.streamid, 'ended');
                 }, false);
             }
 
@@ -4850,7 +4948,7 @@
                     video: {
                         mozMediaSource: 'window',
                         mediaSource: 'window',
-                        width: 15360,
+                        width: 29999,
                         height: 8640
                     }
                 });
@@ -4885,11 +4983,11 @@
                 video: {
                     mandatory: {
                         chromeMediaSource: error ? 'screen' : 'desktop',
-                        maxWidth: 15360,
+                        maxWidth: 29999,
                         maxHeight: 8640,
                         minFrameRate: 30,
-                        maxFrameRate: 64,
-                        minAspectRatio: 1.77,
+                        maxFrameRate: 128,
+                        minAspectRatio: 1.77, // 2.39
                         googLeakyBucket: true,
                         googTemporalLayeredScreencast: true
                     },
@@ -4963,7 +5061,7 @@
                     video: {
                         mozMediaSource: 'window',
                         mediaSource: 'window',
-                        width: 15360,
+                        width: 29999,
                         height: 8640
                     }
                 });
@@ -4998,11 +5096,11 @@
                 video: {
                     mandatory: {
                         chromeMediaSource: error ? 'screen' : 'desktop',
-                        maxWidth: 15360,
+                        maxWidth: 29999,
                         maxHeight: 8640,
                         minFrameRate: 30,
-                        maxFrameRate: 64,
-                        minAspectRatio: 1.77,
+                        maxFrameRate: 128,
+                        minAspectRatio: 1.77, // 2.39
                         googLeakyBucket: true,
                         googTemporalLayeredScreencast: true
                     },

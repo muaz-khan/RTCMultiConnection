@@ -1,4 +1,4 @@
-// Last time updated at Tuesday, December 22nd, 2015, 4:53:01 PM 
+// Last time updated at Friday, January 29th, 2016, 11:21:18 AM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -6040,7 +6040,11 @@
 
                 if (isFirefox) {
                     // firefox supports both audio/video recording in single webm file
-                    if (session.video) {
+                    if (self.stream.getAudioTracks().length && self.stream.getVideoTracks().length) {
+                        self.videoRecorder = RecordRTC(self.stream, {
+                            type: 'video'
+                        });
+                    } else if (session.video) {
                         self.videoRecorder = RecordRTC(self.stream, {
                             type: 'video'
                         });
@@ -6050,17 +6054,36 @@
                         });
                     }
                 } else if (isChrome) {
-                    // chrome supports recording in two separate files: WAV and WebM
-                    if (session.video) {
+                    // chrome >= 48 supports MediaRecorder API
+                    // MediaRecorder API can record remote audio+video streams as well!
+
+                    if (isMediaRecorderCompatible() && connection.DetectRTC.browser.version >= 50 && self.stream.getAudioTracks().length && self.stream.getVideoTracks().length) {
                         self.videoRecorder = RecordRTC(self.stream, {
                             type: 'video'
                         });
-                    }
+                    } else if (isMediaRecorderCompatible() && connection.DetectRTC.browser.version >= 50) {
+                        if (session.video) {
+                            self.videoRecorder = RecordRTC(self.stream, {
+                                type: 'video'
+                            });
+                        } else if (session.audio) {
+                            self.audioRecorder = RecordRTC(self.stream, {
+                                type: 'audio'
+                            });
+                        }
+                    } else {
+                        // chrome supports recording in two separate files: WAV and WebM
+                        if (session.video) {
+                            self.videoRecorder = RecordRTC(self.stream, {
+                                type: 'video'
+                            });
+                        }
 
-                    if (session.audio) {
-                        self.audioRecorder = RecordRTC(self.stream, {
-                            type: 'audio'
-                        });
+                        if (session.audio) {
+                            self.audioRecorder = RecordRTC(self.stream, {
+                                type: 'audio'
+                            });
+                        }
                     }
                 }
 

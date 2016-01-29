@@ -188,7 +188,6 @@ function PeerInitiator(config) {
         }
 
         if (!peer) {
-            that.removeAllRemoteStreams();
             return;
         }
 
@@ -196,9 +195,8 @@ function PeerInitiator(config) {
             if (peer.firedOnce) return;
             peer.firedOnce = true;
 
-            that.removeAllRemoteStreams();
             if (that.connectionDescription && connection.userid == that.connectionDescription.sender && !!connection.autoReDialOnFailure) {
-                if (connection.isInitiator) return;
+                if (peer && peer.localDescription && peer.localDescription.type === 'offer') return;
                 setTimeout(function() {
                     connection.rejoin(that.connectionDescription);
                     if (peer) {
@@ -244,7 +242,7 @@ function PeerInitiator(config) {
         event.stream.streamid = event.stream.id;
         if (!event.stream.stop) {
             event.stream.stop = function() {
-                fireEvent(event.stream, 'ended', event);
+                fireEvent(this, 'ended');
             };
         }
         allRemoteStreams[event.stream.id] = event.stream;
@@ -272,6 +270,7 @@ function PeerInitiator(config) {
             }
 
             if (!!connection.autoReDialOnFailure) {
+                if (peer && peer.localDescription && peer.localDescription.type === 'offer') return;
                 setTimeout(function() {
                     connection.rejoin(that.connectionDescription);
                 }, 2000);
@@ -377,7 +376,8 @@ function PeerInitiator(config) {
             console.error('sdp-error', error);
         }
 
-        if (!connection.autoReDialOnFailure || !connection.isInitiator || !isFirefox || !isFirefoxOffered) return;
+        if (!connection.autoReDialOnFailure || !isFirefox || !isFirefoxOffered) return;
+        if (peer && peer.localDescription && peer.localDescription.type === 'offer') return;
 
         setTimeout(function() {
             connection.rejoin(that.connectionDescription);
@@ -387,7 +387,6 @@ function PeerInitiator(config) {
     peer.nativeClose = peer.close;
     peer.close = function() {
         if (!peer) {
-            that.removeAllRemoteStreams();
             return;
         }
 
@@ -407,18 +406,6 @@ function PeerInitiator(config) {
 
         peer = null;
     };
-
-    this.removeAllRemoteStreams = function() {
-        for (var id in allRemoteStreams) {
-            config.onRemoteStreamRemoved(allRemoteStreams[id]);
-        }
-        allRemoteStreams = {};
-
-        that.streams.forEach(function(stream) {
-            stream.stop();
-        });
-        that.streams = [];
-    }
 
     this.peer = peer;
 }
