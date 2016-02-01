@@ -1098,6 +1098,10 @@ var videoConstraints = {
 connection.mediaConstraints.video = videoConstraints;
 ```
 
+For low-latency audio:
+
+* https://twitter.com/WebRTCWeb/status/499102787733450753
+
 ## Default devices?
 
 By default, RTCMultiConnection tries to use last available microphone and camera. However you can disable this behavior and ask to use default devices instead:
@@ -1119,10 +1123,6 @@ var connection = new RTCMultiConnection(roomId, {
     autoOpenOrJoin: true
 });
 ```
-
-For low-latency audio:
-
-* https://twitter.com/WebRTCWeb/status/499102787733450753
 
 ## RTCMultiConnection v2.2.2 Demos
 

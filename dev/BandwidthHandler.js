@@ -10,6 +10,11 @@ var BandwidthHandler = (function() {
             return sdp;
         }
 
+        // skip android/iphone
+        if (!!navigator.userAgent.match(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i)) {
+            return;
+        }
+
         if (isScreen) {
             if (!bandwidth.screen) {
                 console.warn('It seems that you are not using bandwidth for screen. Screen sharing is expected to fail.');

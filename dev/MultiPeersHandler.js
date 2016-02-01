@@ -225,7 +225,7 @@ function MultiPeers(connection) {
     this.renegotiatePeer = function(remoteUserId, userPreferences, remoteSdp) {
         if (!connection.peers[remoteUserId]) {
             if (connection.enableLogs) {
-                console.warn('This peer (' + remoteUserId + ') does not exists.');
+                console.error('This peer (' + remoteUserId + ') does not exists. Renegotiation skipped.');
             }
             return;
         }
@@ -364,6 +364,33 @@ function MultiPeers(connection) {
         if (message.readyForOffer) {
             connection.onReadyForOffer(remoteUserId, message.userPreferences);
         }
+    };
+
+    this.connectNewParticipantWithAllBroadcasters = function(newParticipantId, userPreferences, broadcastersList) {
+        broadcastersList = broadcastersList.split('|-,-|');
+        if (!broadcastersList.length) {
+            return;
+        }
+
+        var firstBroadcaster = broadcastersList[0];
+
+        self.onNegotiationNeeded({
+            newParticipant: newParticipantId,
+            userPreferences: userPreferences || false
+        }, firstBroadcaster);
+
+        delete broadcastersList[0];
+
+        var array = [];
+        broadcastersList.forEach(function(broadcaster) {
+            if (broadcaster) {
+                array.push(broadcaster);
+            }
+        });
+
+        setTimeout(function() {
+            self.connectNewParticipantWithAllBroadcasters(newParticipantId, userPreferences, array.join('|-,-|'));
+        }, 10 * 1000);
     };
 
     this.onGettingRemoteMedia = function(stream, remoteUserId) {};

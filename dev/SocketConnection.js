@@ -59,7 +59,7 @@ function SocketConnection(connection, connectCallback) {
             }
 
             mPeer.onNegotiationNeeded({
-                allParticipants: connection.peers.getAllParticipants(message.sender)
+                allParticipants: connection.getAllParticipants(message.sender)
             }, message.sender);
             return;
         }
@@ -73,11 +73,7 @@ function SocketConnection(connection, connectCallback) {
         }
 
         if (message.message === 'dropPeerConnection') {
-            if (connection.peers[message.sender]) {
-                connection.peers[message.sender].peer.close();
-                connection.peers[message.sender].peer = null;
-                delete connection.peers[message.sender];
-            }
+            connection.deletePeer(message.sender);
             return;
         }
 
@@ -128,11 +124,7 @@ function SocketConnection(connection, connectCallback) {
 
         if (message.message.newParticipationRequest && message.sender !== connection.userid) {
             if (connection.peers[message.sender]) {
-                if (connection.peers[message.sender].peer) {
-                    connection.peers[message.sender].peer.close();
-                    connection.peers[message.sender].peer = null;
-                }
-                delete connection.peers[message.sender];
+                connection.deletePeer(message.sender);
             }
 
             var userPreferences = {
@@ -246,10 +238,7 @@ function SocketConnection(connection, connectCallback) {
             extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra || {} : {}
         });
 
-        if (connection.peers[remoteUserId] && connection.peers[remoteUserId].peer) {
-            connection.peers[remoteUserId].peer.close();
-            delete connection.peers[remoteUserId];
-        }
+        connection.deletePeer(remoteUserId);
     });
 
     socket.on('user-connected', function(userid) {

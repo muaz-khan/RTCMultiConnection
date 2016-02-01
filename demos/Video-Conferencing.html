@@ -66,7 +66,7 @@
         </section>
 
         <!-- <script src="/RTCMultiConnection.min.js"></script> -->
-        <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
+        <script src="https://cdn.webrtc-experiment.com/rmc3.min.js"></script>
 
         <!-- socket.io for signaling -->
         <script src="/socket.io/socket.io.js"></script>
@@ -112,6 +112,10 @@
             var videosContainer = document.getElementById('videos-container');
             connection.onstream = function(event) {
                 videosContainer.appendChild(event.mediaElement);
+
+                setTimeout(function() {
+                    event.mediaElement.play();
+                }, 5000);
             };
         </script>
 

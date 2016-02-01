@@ -102,40 +102,16 @@ function RTCMultiConnection(roomid, forceOptions) {
     };
 
     function onUserLeft(remoteUserId) {
-        if (connection.peers[remoteUserId] && connection.peers[remoteUserId].peer) {
-            connection.peers[remoteUserId].streams.forEach(function(stream) {
-                stream.stop();
-            });
-
-            if (connection.peers[remoteUserId]) {
-                connection.peers[remoteUserId].peer.close();
-
-                if (connection.peers[remoteUserId]) {
-                    connection.peers[remoteUserId].peer = null;
-                }
-            }
-
-            connection.onleave({
-                userid: remoteUserId,
-                extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {}
-            });
-        }
-
-        delete connection.peers[remoteUserId];
+        connection.deletePeer(remoteUserId);
     }
+
     mPeer.onUserLeft = onUserLeft;
     mPeer.disconnectWith = function(remoteUserId, callback) {
         if (socket) {
             socket.emit('disconnect-with', remoteUserId, callback || function() {});
         }
 
-        if (connection.peers[remoteUserId]) {
-            if (connection.peers[remoteUserId].peer) {
-                connection.peers[remoteUserId].peer.close();
-            }
-
-            delete connection.peers[remoteUserId];
-        }
+        connection.deletePeer(remoteUserId);
     };
 
     connection.broadcasters = [];
@@ -266,6 +242,45 @@ function RTCMultiConnection(roomid, forceOptions) {
         socket.emit('become-a-public-moderator');
     };
 
+    connection.deletePeer = function(remoteUserId) {
+        if (!remoteUserId) {
+            return;
+        }
+
+        connection.onleave({
+            userid: remoteUserId,
+            extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {}
+        });
+
+        if (!!connection.peers[remoteUserId]) {
+            connection.peers[remoteUserId].streams.forEach(function(stream) {
+                stream.stop();
+            });
+
+            var peer = connection.peers[remoteUserId].peer;
+            if (peer && peer.iceConnectionState !== 'closed') {
+                try {
+                    peer.close();
+                } catch (e) {}
+            }
+
+            connection.peers[remoteUserId].peer = null;
+            delete connection.peers[remoteUserId];
+        }
+
+        if (connection.broadcasters.indexOf(remoteUserId) !== -1) {
+            var newArray = [];
+            connection.broadcasters.forEach(function(broadcaster) {
+                if (broadcaster !== remoteUserId) {
+                    newArray.push(broadcaster);
+                }
+            });
+            connection.broadcasters = newArray;
+
+            keepNextBroadcasterOnServer();
+        }
+    }
+
     connection.rejoin = function(connectionDescription) {
         if (connection.isInitiator || !connectionDescription || !Object.keys(connectionDescription).length) {
             return;
@@ -275,10 +290,7 @@ function RTCMultiConnection(roomid, forceOptions) {
 
         if (connection.peers[connectionDescription.remoteUserId]) {
             extra = connection.peers[connectionDescription.remoteUserId].extra;
-            if (connection.peers[connectionDescription.remoteUserId].peer) {
-                connection.peers[connectionDescription.remoteUserId].peer = null;
-            }
-            delete connection.peers[connectionDescription.remoteUserId];
+            connection.deletePeer(connectionDescription.remoteUserId);
         }
 
         if (connectionDescription && connectionDescription.remoteUserId) {
@@ -368,10 +380,7 @@ function RTCMultiConnection(roomid, forceOptions) {
 
         connection.peers.getAllParticipants(remoteUserId || connection.sessionid).forEach(function(participant) {
             mPeer.onNegotiationNeeded('dropPeerConnection', participant);
-
-            connection.peers[participant].peer.close();
-            connection.peers[participant].peer = null;
-            delete connection.peers[participant];
+            connection.deletePeer(participant);
         });
 
         connection.attachStreams.forEach(function(stream) {
@@ -455,10 +464,10 @@ function RTCMultiConnection(roomid, forceOptions) {
         if (!connection.closeBeforeUnload) {
             return;
         }
+
         connection.peers.getAllParticipants().forEach(function(participant) {
             mPeer.onNegotiationNeeded({
-                userLeft: true,
-                autoCloseEntireSession: !!connection.autoCloseEntireSession
+                userLeft: true
             }, participant);
 
             if (connection.peers[participant] && connection.peers[participant].peer) {
@@ -468,24 +477,10 @@ function RTCMultiConnection(roomid, forceOptions) {
 
         if (socket && !dontCloseSocket) {
             if (typeof socket.disconnect !== 'undefined') {
-                connection.autoReDialOnFailure = false; // Prevent reconnection     
                 socket.disconnect();
             }
             socket = null;
         }
-
-        // equivalent of connection.isInitiator
-        if (!connection.broadcasters.length || !!connection.autoCloseEntireSession) return;
-
-        var firstBroadcaster = connection.broadcasters[0];
-        var otherBroadcasters = [];
-        connection.broadcasters.forEach(function(broadcaster) {
-            if (broadcaster !== firstBroadcaster) {
-                otherBroadcasters.push(broadcaster);
-            }
-        });
-
-        connection.shiftModerationControl(firstBroadcaster, otherBroadcasters, typeof shiftModerationControlOnLeave != 'undefined' ? shiftModerationControlOnLeave : true);
 
         connection.broadcasters = [];
         connection.isInitiator = false;
@@ -554,6 +549,10 @@ function RTCMultiConnection(roomid, forceOptions) {
     };
 
     connection.processSdp = function(sdp) {
+        if (isMobileDevice || isFirefox) {
+            return sdp;
+        }
+
         sdp = BandwidthHandler.setApplicationSpecificBandwidth(sdp, connection.bandwidth, !!connection.session.screen);
         sdp = BandwidthHandler.setVideoBitrates(sdp, {
             min: connection.bandwidth.video * 8 * 1024,
@@ -730,14 +729,12 @@ function RTCMultiConnection(roomid, forceOptions) {
         if (!!connection.enableLogs) {
             console.warn('Data connection has been closed between you & ', event.userid);
         }
-        connection.renegotiate(event.userid);
     };
 
     connection.onerror = function(error) {
         if (!!connection.enableLogs) {
             console.error(error.userid, 'data-error', error);
         }
-        connection.renegotiate(event.userid);
     };
 
     connection.onmessage = function(event) {
@@ -757,6 +754,11 @@ function RTCMultiConnection(roomid, forceOptions) {
     connection.onstream = function(e) {
         var parentNode = connection.videosContainer;
         parentNode.insertBefore(e.mediaElement, parentNode.firstChild);
+
+        if (!isMobileDevice) return;
+        setTimeout(function() {
+            e.mediaElement.play();
+        }, 5000);
     };
 
     connection.onstreamended = function(e) {
@@ -1076,16 +1078,33 @@ function RTCMultiConnection(roomid, forceOptions) {
     };
 
     connection.addNewBroadcaster = function(broadcasterId, userPreferences) {
-        connection.broadcasters.forEach(function(broadcaster) {
-            mPeer.onNegotiationNeeded({
-                newParticipant: broadcasterId,
-                userPreferences: userPreferences || false
-            }, broadcaster);
-        });
+        if (connection.broadcasters.length) {
+            setTimeout(function() {
+                mPeer.connectNewParticipantWithAllBroadcasters(broadcasterId, userPreferences, connection.broadcasters.join('|-,-|'));
+            }, 10 * 1000);
+        }
 
         if (!connection.session.oneway && connection.direction === 'many-to-many' && connection.broadcasters.indexOf(broadcasterId) === -1) {
             connection.broadcasters.push(broadcasterId);
+            keepNextBroadcasterOnServer();
         }
+    };
+
+    connection.autoCloseEntireSession = false;
+
+    function keepNextBroadcasterOnServer() {
+        if (!connection.isInitiator) return;
+
+        var firstBroadcaster = connection.broadcasters[0];
+        var otherBroadcasters = [];
+        connection.broadcasters.forEach(function(broadcaster) {
+            if (broadcaster !== firstBroadcaster) {
+                otherBroadcasters.push(broadcaster);
+            }
+        });
+
+        if (connection.autoCloseEntireSession) return;
+        connection.shiftModerationControl(firstBroadcaster, otherBroadcasters, true);
     };
 
     connection.filesContainer = connection.videosContainer = document.body || document.documentElement;
@@ -1095,8 +1114,6 @@ function RTCMultiConnection(roomid, forceOptions) {
     if (typeof FileProgressBarHandler !== 'undefined') {
         FileProgressBarHandler.handle(connection);
     }
-
-    connection.autoCloseEntireSession = false;
 
     if (typeof TranslationHandler !== 'undefined') {
         TranslationHandler.handle(connection);
@@ -1214,8 +1231,8 @@ function RTCMultiConnection(roomid, forceOptions) {
         console.warn(remoteUserId, 'is password protected. Your max password tries exceeded the limit.');
     };
 
-    connection.getAllParticipants = function() {
-        return connection.peers.getAllParticipants();
+    connection.getAllParticipants = function(sender) {
+        return connection.peers.getAllParticipants(sender);
     };
 
     if (typeof StreamsHandler !== 'undefined') {
@@ -1256,7 +1273,6 @@ function RTCMultiConnection(roomid, forceOptions) {
     };
 
     connection.getRemoteStreams = mPeer.getRemoteStreams;
-    connection.autoReDialOnFailure = true;
 
     var skipStreams = ['selectFirst', 'selectAll', 'forEach'];
 

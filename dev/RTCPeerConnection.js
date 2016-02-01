@@ -191,21 +191,6 @@ function PeerInitiator(config) {
             return;
         }
 
-        if (peer.iceConnectionState.search(/closed|failed/gi) !== -1) {
-            if (peer.firedOnce) return;
-            peer.firedOnce = true;
-
-            if (that.connectionDescription && connection.userid == that.connectionDescription.sender && !!connection.autoReDialOnFailure) {
-                if (peer && peer.localDescription && peer.localDescription.type === 'offer') return;
-                setTimeout(function() {
-                    connection.rejoin(that.connectionDescription);
-                    if (peer) {
-                        peer.firedOnce = false;
-                    }
-                }, 5000);
-            }
-        }
-
         config.onPeerStateChanged({
             iceConnectionState: peer.iceConnectionState,
             iceGatheringState: peer.iceGatheringState,
@@ -242,7 +227,9 @@ function PeerInitiator(config) {
         event.stream.streamid = event.stream.id;
         if (!event.stream.stop) {
             event.stream.stop = function() {
-                fireEvent(this, 'ended');
+                if (isFirefox) {
+                    fireEvent(this, 'ended');
+                }
             };
         }
         allRemoteStreams[event.stream.id] = event.stream;
@@ -267,13 +254,6 @@ function PeerInitiator(config) {
         peer.setRemoteDescription(new RTCSessionDescription(remoteSdp), function() {}, function(error) {
             if (!!connection.enableLogs) {
                 console.error(JSON.stringify(error, null, '\t'));
-            }
-
-            if (!!connection.autoReDialOnFailure) {
-                if (peer && peer.localDescription && peer.localDescription.type === 'offer') return;
-                setTimeout(function() {
-                    connection.rejoin(that.connectionDescription);
-                }, 2000);
             }
         });
     };
@@ -375,13 +355,6 @@ function PeerInitiator(config) {
         if (!!connection.enableLogs) {
             console.error('sdp-error', error);
         }
-
-        if (!connection.autoReDialOnFailure || !isFirefox || !isFirefoxOffered) return;
-        if (peer && peer.localDescription && peer.localDescription.type === 'offer') return;
-
-        setTimeout(function() {
-            connection.rejoin(that.connectionDescription);
-        }, 5000);
     }, defaults.sdpConstraints);
 
     peer.nativeClose = peer.close;
@@ -405,6 +378,7 @@ function PeerInitiator(config) {
         } catch (e) {}
 
         peer = null;
+        that.peer = null;
     };
 
     this.peer = peer;
