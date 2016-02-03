@@ -149,6 +149,8 @@
 
             document.getElementById('room-id').value = connection.token();
 
+            connection.socketMessageEvent = 'pubnub-demo';
+
             connection.setCustomSocketHandler(PubNubConnection);
 
             connection.enableFileSharing = true; // by default, it is "false".

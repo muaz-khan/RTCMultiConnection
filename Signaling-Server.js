@@ -245,6 +245,13 @@ module.exports = exports = function(app, socketCallback) {
             try {
                 var message = shiftedModerationControls[socket.userid];
 
+                if (message) {
+                    delete shiftedModerationControls[message.userid];
+                    onMessageCallback(message);
+                }
+            } catch (e) {}
+
+            try {
                 // inform all connected users
                 if (listOfUsers[socket.userid]) {
                     for (var s in listOfUsers[socket.userid].connectedWith) {
@@ -256,14 +263,9 @@ module.exports = exports = function(app, socketCallback) {
                         }
                     }
                 }
-
-                if (message) {
-                    onMessageCallback(message);
-                    delete shiftedModerationControls[message.userid];
-                }
-
-                delete listOfUsers[socket.userid];
             } catch (e) {}
+
+            delete listOfUsers[socket.userid];
         });
 
         if (socketCallback) {

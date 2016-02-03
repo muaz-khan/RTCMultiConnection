@@ -52,7 +52,7 @@ module.exports = exports = function(socket, singleBroadcastAttendees) {
         } catch (e) {}
     });
 
-    socket.on('message', function(message) {
+    socket.on('scalable-broadcast-message', function(message) {
         socket.broadcast.emit('message', message);
     });
 

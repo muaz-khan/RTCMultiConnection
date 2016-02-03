@@ -1,4 +1,4 @@
-// Last time updated: 2016-02-01 7:46:56 AM UTC
+// Last time updated: 2016-02-03 12:35:55 PM UTC
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -455,8 +455,15 @@
                             callback(stream);
                         }
                     },
-                    onLocalMediaError: function(error) {
-                        mPeer.onLocalMediaError(error);
+                    onLocalMediaError: function(error, constraints) {
+                        mPeer.onLocalMediaError(error, constraints);
+
+                        if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
+                            constraints.video = false;
+                            invokeGetUserMedia(constraints, getUserMedia_callback);
+                            return;
+                        }
+
                         if (callback) {
                             callback();
                         }
@@ -864,8 +871,15 @@
 
                         connection.renegotiate();
                     },
-                    onLocalMediaError: function(error) {
-                        mPeer.onLocalMediaError(error);
+                    onLocalMediaError: function(error, constraints) {
+                        mPeer.onLocalMediaError(error, constraints);
+
+                        if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
+                            constraints.video = false;
+                            invokeGetUserMedia(constraints, callback);
+                            return;
+                        }
+
                         if (callback) {
                             return callback();
                         }
@@ -982,8 +996,14 @@
 
                         connection.replaceTrack(stream, remoteUserId, isVideoTrack || session.video || session.screen);
                     },
-                    onLocalMediaError: function(error) {
-                        mPeer.onLocalMediaError(error);
+                    onLocalMediaError: function(error, constraints) {
+                        mPeer.onLocalMediaError(error, constraints);
+
+                        if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
+                            constraints.video = false;
+                            invokeGetUserMedia(constraints, callback);
+                            return;
+                        }
 
                         if (callback) {
                             callback();
@@ -1080,9 +1100,9 @@
             }, false);
         }
 
-        connection.onMediaError = function(error) {
+        connection.onMediaError = function(error, constraints) {
             if (!!connection.enableLogs) {
-                console.error(error);
+                console.error(error, constraints);
             }
         };
 
@@ -1093,7 +1113,7 @@
                 }, 10 * 1000);
             }
 
-            if (!connection.session.oneway && connection.direction === 'many-to-many' && connection.broadcasters.indexOf(broadcasterId) === -1) {
+            if (!connection.session.oneway && !connection.session.broadcast && connection.direction === 'many-to-many' && connection.broadcasters.indexOf(broadcasterId) === -1) {
                 connection.broadcasters.push(broadcasterId);
                 keepNextBroadcasterOnServer();
             }
@@ -1103,6 +1123,10 @@
 
         function keepNextBroadcasterOnServer() {
             if (!connection.isInitiator) return;
+
+            if (connection.session.oneway || connection.session.broadcast || connection.direction !== 'many-to-many') {
+                return;
+            }
 
             var firstBroadcaster = connection.broadcasters[0];
             var otherBroadcasters = [];
@@ -2029,34 +2053,44 @@
                     localMediaConstraints.video = connection.mediaConstraints.video;
                 }
 
-                getUserMediaHandler({
-                    onGettingLocalMedia: function(localStream) {
-                        self.onGettingLocalMedia(localStream);
+                function invokeGetUserMedia(mediaConstraints) {
+                    getUserMediaHandler({
+                        onGettingLocalMedia: function(localStream) {
+                            self.onGettingLocalMedia(localStream);
 
-                        var streamsToShare = {};
-                        connection.attachStreams.forEach(function(stream) {
-                            streamsToShare[stream.streamid] = {
-                                isAudio: !!stream.isAudio,
-                                isVideo: !!stream.isVideo,
-                                isScreen: !!stream.isScreen
-                            };
-                        });
-                        message.userPreferences.streamsToShare = streamsToShare;
+                            var streamsToShare = {};
+                            connection.attachStreams.forEach(function(stream) {
+                                streamsToShare[stream.streamid] = {
+                                    isAudio: !!stream.isAudio,
+                                    isVideo: !!stream.isVideo,
+                                    isScreen: !!stream.isScreen
+                                };
+                            });
+                            message.userPreferences.streamsToShare = streamsToShare;
 
-                        self.onNegotiationNeeded({
-                            readyForOffer: true,
-                            userPreferences: message.userPreferences
-                        }, remoteUserId);
-                    },
-                    onLocalMediaError: function(error) {
-                        self.onLocalMediaError(error);
-                        self.onNegotiationNeeded({
-                            readyForOffer: true,
-                            userPreferences: message.userPreferences
-                        }, remoteUserId);
-                    },
-                    localMediaConstraints: localMediaConstraints
-                });
+                            self.onNegotiationNeeded({
+                                readyForOffer: true,
+                                userPreferences: message.userPreferences
+                            }, remoteUserId);
+                        },
+                        onLocalMediaError: function(error, constraints) {
+                            self.onLocalMediaError(error, constraints);
+
+                            if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
+                                constraints.video = false;
+                                invokeGetUserMedia(constraints);
+                                return;
+                            }
+
+                            self.onNegotiationNeeded({
+                                readyForOffer: true,
+                                userPreferences: message.userPreferences
+                            }, remoteUserId);
+                        },
+                        localMediaConstraints: mediaConstraints
+                    });
+                }
+                invokeGetUserMedia(localMediaConstraints);
             }
 
             if (message.readyForOffer) {
@@ -2094,11 +2128,8 @@
         this.onGettingRemoteMedia = function(stream, remoteUserId) {};
         this.onRemovingRemoteMedia = function(stream, remoteUserId) {};
         this.onGettingLocalMedia = function(localStream) {};
-        this.onLocalMediaError = function(error) {
-            if (!!connection.enableLogs) {
-                console.error('onLocalMediaError', JSON.stringify(error, null, '\t'));
-            }
-            connection.onMediaError(error);
+        this.onLocalMediaError = function(error, constraints) {
+            connection.onMediaError(error, constraints);
         };
 
         var fbr;
@@ -3047,11 +3078,6 @@
             if (!peer) {
                 return;
             }
-
-            connection.multiPeersHandler.onNegotiationNeeded({
-                userLeft: true,
-                autoCloseEntireSession: !!connection.autoCloseEntireSession
-            }, that.remoteUserId);
 
             try {
                 if (peer.iceConnectionState.search(/closed|failed/gi) === -1) {

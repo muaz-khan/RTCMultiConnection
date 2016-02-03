@@ -446,8 +446,15 @@ function RTCMultiConnection(roomid, forceOptions) {
                         callback(stream);
                     }
                 },
-                onLocalMediaError: function(error) {
-                    mPeer.onLocalMediaError(error);
+                onLocalMediaError: function(error, constraints) {
+                    mPeer.onLocalMediaError(error, constraints);
+
+                    if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
+                        constraints.video = false;
+                        invokeGetUserMedia(constraints, getUserMedia_callback);
+                        return;
+                    }
+
                     if (callback) {
                         callback();
                     }
@@ -855,8 +862,15 @@ function RTCMultiConnection(roomid, forceOptions) {
 
                     connection.renegotiate();
                 },
-                onLocalMediaError: function(error) {
-                    mPeer.onLocalMediaError(error);
+                onLocalMediaError: function(error, constraints) {
+                    mPeer.onLocalMediaError(error, constraints);
+
+                    if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
+                        constraints.video = false;
+                        invokeGetUserMedia(constraints, callback);
+                        return;
+                    }
+
                     if (callback) {
                         return callback();
                     }
@@ -973,8 +987,14 @@ function RTCMultiConnection(roomid, forceOptions) {
 
                     connection.replaceTrack(stream, remoteUserId, isVideoTrack || session.video || session.screen);
                 },
-                onLocalMediaError: function(error) {
-                    mPeer.onLocalMediaError(error);
+                onLocalMediaError: function(error, constraints) {
+                    mPeer.onLocalMediaError(error, constraints);
+
+                    if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
+                        constraints.video = false;
+                        invokeGetUserMedia(constraints, callback);
+                        return;
+                    }
 
                     if (callback) {
                         callback();
@@ -1071,9 +1091,9 @@ function RTCMultiConnection(roomid, forceOptions) {
         }, false);
     }
 
-    connection.onMediaError = function(error) {
+    connection.onMediaError = function(error, constraints) {
         if (!!connection.enableLogs) {
-            console.error(error);
+            console.error(error, constraints);
         }
     };
 
@@ -1084,7 +1104,7 @@ function RTCMultiConnection(roomid, forceOptions) {
             }, 10 * 1000);
         }
 
-        if (!connection.session.oneway && connection.direction === 'many-to-many' && connection.broadcasters.indexOf(broadcasterId) === -1) {
+        if (!connection.session.oneway && !connection.session.broadcast && connection.direction === 'many-to-many' && connection.broadcasters.indexOf(broadcasterId) === -1) {
             connection.broadcasters.push(broadcasterId);
             keepNextBroadcasterOnServer();
         }
@@ -1094,6 +1114,10 @@ function RTCMultiConnection(roomid, forceOptions) {
 
     function keepNextBroadcasterOnServer() {
         if (!connection.isInitiator) return;
+
+        if (connection.session.oneway || connection.session.broadcast || connection.direction !== 'many-to-many') {
+            return;
+        }
 
         var firstBroadcaster = connection.broadcasters[0];
         var otherBroadcasters = [];

@@ -363,11 +363,6 @@ function PeerInitiator(config) {
             return;
         }
 
-        connection.multiPeersHandler.onNegotiationNeeded({
-            userLeft: true,
-            autoCloseEntireSession: !!connection.autoCloseEntireSession
-        }, that.remoteUserId);
-
         try {
             if (peer.iceConnectionState.search(/closed|failed/gi) === -1) {
                 peer.getRemoteStreams().forEach(function(stream) {

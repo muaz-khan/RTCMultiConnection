@@ -331,34 +331,44 @@ function MultiPeers(connection) {
                 localMediaConstraints.video = connection.mediaConstraints.video;
             }
 
-            getUserMediaHandler({
-                onGettingLocalMedia: function(localStream) {
-                    self.onGettingLocalMedia(localStream);
+            function invokeGetUserMedia(mediaConstraints) {
+                getUserMediaHandler({
+                    onGettingLocalMedia: function(localStream) {
+                        self.onGettingLocalMedia(localStream);
 
-                    var streamsToShare = {};
-                    connection.attachStreams.forEach(function(stream) {
-                        streamsToShare[stream.streamid] = {
-                            isAudio: !!stream.isAudio,
-                            isVideo: !!stream.isVideo,
-                            isScreen: !!stream.isScreen
-                        };
-                    });
-                    message.userPreferences.streamsToShare = streamsToShare;
+                        var streamsToShare = {};
+                        connection.attachStreams.forEach(function(stream) {
+                            streamsToShare[stream.streamid] = {
+                                isAudio: !!stream.isAudio,
+                                isVideo: !!stream.isVideo,
+                                isScreen: !!stream.isScreen
+                            };
+                        });
+                        message.userPreferences.streamsToShare = streamsToShare;
 
-                    self.onNegotiationNeeded({
-                        readyForOffer: true,
-                        userPreferences: message.userPreferences
-                    }, remoteUserId);
-                },
-                onLocalMediaError: function(error) {
-                    self.onLocalMediaError(error);
-                    self.onNegotiationNeeded({
-                        readyForOffer: true,
-                        userPreferences: message.userPreferences
-                    }, remoteUserId);
-                },
-                localMediaConstraints: localMediaConstraints
-            });
+                        self.onNegotiationNeeded({
+                            readyForOffer: true,
+                            userPreferences: message.userPreferences
+                        }, remoteUserId);
+                    },
+                    onLocalMediaError: function(error, constraints) {
+                        self.onLocalMediaError(error, constraints);
+
+                        if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
+                            constraints.video = false;
+                            invokeGetUserMedia(constraints);
+                            return;
+                        }
+
+                        self.onNegotiationNeeded({
+                            readyForOffer: true,
+                            userPreferences: message.userPreferences
+                        }, remoteUserId);
+                    },
+                    localMediaConstraints: mediaConstraints
+                });
+            }
+            invokeGetUserMedia(localMediaConstraints);
         }
 
         if (message.readyForOffer) {
@@ -396,11 +406,8 @@ function MultiPeers(connection) {
     this.onGettingRemoteMedia = function(stream, remoteUserId) {};
     this.onRemovingRemoteMedia = function(stream, remoteUserId) {};
     this.onGettingLocalMedia = function(localStream) {};
-    this.onLocalMediaError = function(error) {
-        if (!!connection.enableLogs) {
-            console.error('onLocalMediaError', JSON.stringify(error, null, '\t'));
-        }
-        connection.onMediaError(error);
+    this.onLocalMediaError = function(error, constraints) {
+        connection.onMediaError(error, constraints);
     };
 
     var fbr;

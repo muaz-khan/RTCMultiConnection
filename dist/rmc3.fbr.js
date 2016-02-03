@@ -170,14 +170,6 @@ function FileBufferReaderHelper() {
                 };
             }
 
-            if (chunk.end) {
-                for (var f in options.file) {
-                    if (![chunk[f]]) {
-                        chunk[f] = options.file[f];
-                    }
-                }
-            }
-
             options.extra = options.extra || {
                 userid: 0
             };

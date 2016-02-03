@@ -151,6 +151,8 @@
 
             document.getElementById('room-id').value = connection.token();
 
+            connection.socketMessageEvent = 'firebase-demo';
+
             connection.setCustomSocketHandler(FirebaseConnection);
 
             connection.enableFileSharing = true; // by default, it is "false".

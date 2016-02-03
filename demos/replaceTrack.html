@@ -62,7 +62,8 @@
                 <button id="open-or-join-room">Auto Open Or Join Room</button>
 
                 <br><br>
-                <button id="replace-video-with-screen">Click to replace your video with Screen Track!</button>
+                <button id="replace-video-with-screen">replaceTrack</button>
+                <button id="reset-track" disabled>resetTrack</button>
             </div>
 
             <div id="videos-container"></div>
@@ -100,6 +101,14 @@
 
             var connection = new RTCMultiConnection();
 
+            // by default, socket.io server is assumed to be deployed on your own URL
+            connection.socketURL = '/';
+
+            // comment-out below line if you do not have your own socket.io server
+            // connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+
+            connection.socketMessageEvent = 'replaceTrack-demo';
+
             document.getElementById('room-id').value = connection.token();
 
             connection.session = {
@@ -126,6 +135,14 @@
                     screen: true,
                     oneway: true
                 });
+                document.getElementById('reset-track').disabled = false;
+            };
+            document.getElementById('reset-track').onclick = function() {
+                this.disabled = true;
+
+                // null: means reset-track with all users
+                // true: means reset video tracks
+                connection.resetTrack(null, true);
             };
         </script>
 

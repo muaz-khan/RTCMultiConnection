@@ -135,7 +135,7 @@
 
             // using single socket for RTCMultiConnection signaling
             var onMessageCallbacks = {};
-            socket.on('message', function(data) {
+            socket.on('scalable-broadcast-message', function(data) {
                 if (data.sender == connection.userid) return;
                 if (onMessageCallbacks[data.channel]) {
                     onMessageCallbacks[data.channel](data.message);
@@ -163,7 +163,7 @@
                     if (config.onopen) setTimeout(config.onopen, 1000);
                     return {
                         send: function(message) {
-                            socket.emit('message', {
+                            socket.emit('scalable-broadcast-message', {
                                 sender: connection.userid,
                                 channel: channel,
                                 message: message
