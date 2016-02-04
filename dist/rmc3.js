@@ -1,4 +1,4 @@
-// Last time updated: 2016-02-03 12:35:55 PM UTC
+// Last time updated: 2016-02-04 11:01:06 AM UTC
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -251,6 +251,10 @@
             socket.emit('become-a-public-moderator');
         };
 
+        connection.dontMakeMeModerator = function() {
+            socket.emit('dont-make-me-moderator');
+        };
+
         connection.deletePeer = function(remoteUserId) {
             if (!remoteUserId) {
                 return;
@@ -479,6 +483,10 @@
         function beforeUnload(shiftModerationControlOnLeave, dontCloseSocket) {
             if (!connection.closeBeforeUnload) {
                 return;
+            }
+
+            if (connection.isInitiator === true) {
+                connection.dontMakeMeModerator();
             }
 
             connection.peers.getAllParticipants().forEach(function(participant) {

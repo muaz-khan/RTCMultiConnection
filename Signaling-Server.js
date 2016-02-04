@@ -57,6 +57,13 @@ module.exports = exports = function(app, socketCallback) {
             } catch (e) {}
         });
 
+        socket.on('dont-make-me-moderator', function() {
+            try {
+                if (!listOfUsers[socket.userid]) return;
+                listOfUsers[socket.userid].isPublic = false;
+            } catch (e) {}
+        });
+
         socket.on('get-public-moderators', function(userIdStartsWith, callback) {
             try {
                 userIdStartsWith = userIdStartsWith || '';

@@ -4,9 +4,10 @@
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
+
     <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
 
-    <title>WebRTC Scalable Video Broadcast using RTCMultiConnection</title>
+    <title>WebRTC Scalable Media Broadcast using RTCMultiConnection</title>
 
     <meta name="description" content="This module simply initializes socket.io and configures it in a way that single audio/video/screen stream can be shared/relayed over unlimited users without any bandwidth/CPU usage issues. Everything happens peer-to-peer!" />
     <meta name="keywords" content="WebRTC,RTCMultiConnection,Demos,Experiments,Samples,Examples" />
@@ -85,7 +86,7 @@
     <article>
 
         <header style="text-align: center;">
-            <h1><a href="https://github.com/muaz-khan/WebRTC-Scalable-Broadcast">WebRTC Scalable Video Broadcast</a> using <a href="https://github.com/muaz-khan/RTCMultiConnection">RTCMultiConnection</a></h1>
+            <h1><a href="https://github.com/muaz-khan/WebRTC-Scalable-Broadcast">WebRTC Scalable Media Broadcast</a> using <a href="https://github.com/muaz-khan/RTCMultiConnection">RTCMultiConnection</a></h1>
             <p>
                 <a href="https://rtcmulticonnection.herokuapp.com/">HOME</a>
                 <span> &copy; </span>
@@ -104,10 +105,10 @@
                 <input type="text" id="broadcast-id" placeholder="broadcast-id" value="room-xyz">
                 <select id="broadcast-options">
                     <option>Audio+Video</option>
-                    <option title="Works only in Firefox.">Audio+Screen</option>
+                    <option>Audio+Screen</option>
                     <option>Audio</option>
                     <option>Video</option>
-                    <option title="Screen capturing requries HTTPs. Please run this demo on HTTPs to make sure it can capture your screens.">Screen</option>
+                    <option>Screen</option>
                 </select>
                 <button id="open-or-join">Open or Join Broadcast</button>
             </div>
@@ -119,103 +120,88 @@
             This module simply initializes socket.io and configures it in a way that single audio/video/screen stream can be shared/relayed over unlimited users without any <a href="https://www.webrtc-experiment.com/docs/RTP-usage.html">bandwidth/CPU usage issues</a>. Everything happens peer-to-peer!
 
             <br><br>
-            Share files with unlimited users using p2p methods! <a href="/demos/Files-Scalable-Broadcast.html">Files Scalable Broadcast</a> or <a href="/demos/Scalable-Broadcast.html">all-in-one scalable broadcast</a>.
+            Share files with unlimited users using p2p methods! <a href="/demos/Files-Scalable-Broadcast.html">Files Scalable Broadcast</a>
         </blockquote>
 
         <script src="/socket.io/socket.io.js"></script>
-        <script src="https://cdn.webrtc-experiment.com/RTCMultiConnection.js"></script>
+        
+        <!-- <script src="/RTCMultiConnection.min.js"></script> -->
+        <script src="https://cdn.webrtc-experiment.com/rmc3.min.js"></script>
+
         <script>
-            var singleBroadcastAttendees = 2;
-            var parameters = '';
-
-            parameters += '?enableScalableBroadcast=true';
-            parameters += '&singleBroadcastAttendees=' + singleBroadcastAttendees;
-
-            var socket = io.connect('/' + parameters);
-
-            // using single socket for RTCMultiConnection signaling
-            var onMessageCallbacks = {};
-            socket.on('scalable-broadcast-message', function(data) {
-                if (data.sender == connection.userid) return;
-                if (onMessageCallbacks[data.channel]) {
-                    onMessageCallbacks[data.channel](data.message);
-                };
+            var connection = new RTCMultiConnection(null, {
+                useDefaultDevices: true // if we don't need to force selection of specific devices
             });
 
-            socket.on('logs', function(log) {
-                document.querySelector('h1').innerHTML = log.replace(/</g, '----').replace(/>/g, '___').replace(/----/g, '(<span style="color:red;">').replace(/___/g, '</span>)');
-            });
+            // its mandatory in v3.0
+            connection.enableScalableBroadcast = true;
 
-            // initializing RTCMultiConnection constructor.
-            function initRTCMultiConnection(userid) {
-                var connection = new RTCMultiConnection();
-                document.getElementById('broadcast-id').value = connection.token();
-                connection.body = document.getElementById('videos-container');
-                connection.channel = connection.sessionid = connection.userid = userid || connection.userid;
-                connection.sdpConstraints.mandatory = {
-                    OfferToReceiveAudio: false,
-                    OfferToReceiveVideo: true
-                };
-                // using socket.io for signaling
-                connection.openSignalingChannel = function(config) {
-                    var channel = config.channel || this.channel;
-                    onMessageCallbacks[channel] = config.onmessage;
-                    if (config.onopen) setTimeout(config.onopen, 1000);
-                    return {
-                        send: function(message) {
-                            socket.emit('scalable-broadcast-message', {
-                                sender: connection.userid,
-                                channel: channel,
-                                message: message
-                            });
-                        },
-                        channel: channel
+            // each broadcast should serve only 3 users
+            connection.singleBroadcastAttendees = 3;
+
+            // we don't need to keep room-opened
+            // scalable-broadcast.js will handle stuff itself.
+            connection.autoCloseEntireSession = true;
+
+            // by default, socket.io server is assumed to be deployed on your own URL
+            connection.socketURL = '/';
+
+            // comment-out below line if you do not have your own socket.io server
+            // connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+
+            connection.socketMessageEvent = 'scalable-media-broadcast-demo';
+
+            // document.getElementById('broadcast-id').value = connection.userid;
+
+            // user need to connect server, so that others can reach him.
+            connection.connectSocket(function(socket) {
+                socket.on('logs', function(log) {
+                    document.querySelector('h1').innerHTML = log.replace(/</g, '----').replace(/>/g, '___').replace(/----/g, '(<span style="color:red;">').replace(/___/g, '</span>)');
+                });
+
+                // this event is emitted when a broadcast is already created.
+                socket.on('join-broadcaster', function(broadcaster, typeOfStreams) {
+                    connection.session = typeOfStreams;
+                    connection.sdpConstraints.mandatory = {
+                        OfferToReceiveVideo: !!connection.session.video,
+                        OfferToReceiveAudio: !!connection.session.audio
                     };
-                };
-                connection.onMediaError = function(error) {
-                    alert(JSON.stringify(error));
-                };
-                return connection;
-            }
+                    connection.join(broadcaster.userid);
+                });
 
-            // this RTCMultiConnection object is used to connect with existing users
-            var connection = initRTCMultiConnection();
-
-            connection.getExternalIceServers = false;
-
-            connection.onstream = function(event) {
-                connection.body.appendChild(event.mediaElement);
-
-                if (connection.isInitiator == false && !connection.broadcastingConnection) {
-                    // "connection.broadcastingConnection" global-level object is used
-                    // instead of using a closure object, i.e. "privateConnection"
-                    // because sometimes out of browser-specific bugs, browser 
-                    // can emit "onaddstream" event even if remote user didn't attach any stream.
-                    // such bugs happen often in chrome.
-                    // "connection.broadcastingConnection" prevents multiple initializations.
-
-                    // if current user is broadcast viewer
-                    // he should create a separate RTCMultiConnection object as well.
-                    // because node.js server can allot him other viewers for
-                    // remote-stream-broadcasting.
-                    connection.broadcastingConnection = initRTCMultiConnection(connection.userid);
-
-                    // to fix unexpected chrome/firefox bugs out of sendrecv/sendonly/etc. issues.
-                    connection.broadcastingConnection.onstream = function() {};
-
-                    connection.broadcastingConnection.session = connection.session;
-                    connection.broadcastingConnection.attachStreams.push(event.stream); // broadcast remote stream
-                    connection.broadcastingConnection.dontCaptureUserMedia = true;
-
-                    // forwarder should always use this!
-                    connection.broadcastingConnection.sdpConstraints.mandatory = {
+                // this event is emitted when a broadcast is absent.
+                socket.on('start-broadcasting', function(typeOfStreams) {
+                    // host i.e. sender should always use this!
+                    connection.sdpConstraints.mandatory = {
                         OfferToReceiveVideo: false,
                         OfferToReceiveAudio: false
                     };
+                    connection.session = typeOfStreams;
 
-                    connection.broadcastingConnection.open({
-                        dontTransmit: true
-                    });
+                    // "open" method here will capture media-stream
+                    // we can skip this function always; it is totally optional here.
+                    // we can use "connection.getUserMediaHandler" instead
+                    connection.open(connection.userid);
+                });
+            });
+
+            window.onbeforeunload = function() {
+                // Firefox is ugly.
+                document.getElementById('open-or-join').disabled = false;
+            };
+
+            connection.videosContainer = document.getElementById('videos-container');
+            connection.onstream = function(event) {
+                connection.videosContainer.appendChild(event.mediaElement);
+
+                if (connection.isInitiator == false) {
+                    // he is merely relaying the media
+                    connection.dontCaptureUserMedia = true;
+                    connection.attachStreams = [event.stream];
+                    connection.sdpConstraints.mandatory = {
+                        OfferToReceiveAudio: false,
+                        OfferToReceiveVideo: false
+                    };
                 }
             };
 
@@ -239,54 +225,23 @@
                     oneway: true
                 };
 
-                socket.emit('join-broadcast', {
-                    broadcastid: broadcastid,
-                    userid: connection.userid,
-                    typeOfStreams: connection.session
+                var socket = connection.getSocket();
+
+                socket.emit('check-broadcast-presence', broadcastid, function(isBroadcastExists) {
+                    if(!isBroadcastExists) {
+                        // the first person (i.e. real-broadcaster) MUST set his user-id
+                        connection.userid = broadcastid;
+                    }
+
+                    socket.emit('join-broadcast', {
+                        broadcastid: broadcastid,
+                        userid: connection.userid,
+                        typeOfStreams: connection.session
+                    });
                 });
             };
 
-            // this event is emitted when a broadcast is already created.
-            socket.on('join-broadcaster', function(broadcaster, typeOfStreams) {
-                connection.session = typeOfStreams;
-                connection.channel = connection.sessionid = broadcaster.userid;
-
-                connection.sdpConstraints.mandatory = {
-                    OfferToReceiveVideo: !!connection.session.video,
-                    OfferToReceiveAudio: !!connection.session.audio
-                };
-
-                connection.join({
-                    sessionid: broadcaster.userid,
-                    userid: broadcaster.userid,
-                    extra: {},
-                    session: connection.session
-                });
-            });
-
-            // this event is emitted when a broadcast is absent.
-            socket.on('start-broadcasting', function(typeOfStreams) {
-                // host i.e. sender should always use this!
-                connection.sdpConstraints.mandatory = {
-                    OfferToReceiveVideo: false,
-                    OfferToReceiveAudio: false
-                };
-                connection.session = typeOfStreams;
-                connection.open({
-                    dontTransmit: true
-                });
-
-                if (connection.broadcastingConnection) {
-                    // if new person is given the initiation/host/moderation control
-                    connection.broadcastingConnection.close();
-                    connection.broadcastingConnection = null;
-                }
-            });
-
-            window.onbeforeunload = function() {
-                // Firefox is weird!
-                document.getElementById('open-or-join').disabled = false;
-            };
+            
         </script>
 
         <section class="experiment own-widgets latest-commits">
@@ -312,6 +267,7 @@
         <script>
             window.useThisGithubPath = 'muaz-khan/RTCMultiConnection';
         </script>
+
         <script src="https://cdn.webrtc-experiment.com/commits.js" async></script>
 
     </article>

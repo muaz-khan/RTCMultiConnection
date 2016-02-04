@@ -946,6 +946,63 @@ By default, it is `false`. Which means that RTCMultiConnection will always get r
 connection.dontGetRemoteStream = true;
 ```
 
+## `getScreenConstraints`
+
+This method allows you get full control over screen-parameters:
+
+```javascript
+connection.__getScreenConstraints = connection.getScreenConstraints;
+connection.getScreenConstraints = function(callback) {
+    connection.__getScreenConstraints(function(error, screen_constraints) {
+        if (connection.DetectRTC.browser.name === 'Chrome') {
+            delete screen_constraints.mandatory.minAspectRatio;
+            delete screen_constraints.mandatory.googLeakyBucket;
+            delete screen_constraints.mandatory.googTemporalLayeredScreencast;
+            delete screen_constraints.mandatory.maxWidth;
+            delete screen_constraints.mandatory.maxHeight;
+            delete screen_constraints.mandatory.minFrameRate;
+            delete screen_constraints.mandatory.maxFrameRate;
+        }
+        callback(error, screen_constraints);
+    });
+};
+```
+
+Or to more simplify it:
+
+```javascript
+connection.__getScreenConstraints = connection.getScreenConstraints;
+connection.getScreenConstraints = function(callback) {
+    connection.__getScreenConstraints(function(error, screen_constraints) {
+        if (connection.DetectRTC.browser.name === 'Chrome') {
+            screen_constraints.mandatory = {
+                chromeMediaSource: screen_constraints.mandatory.chromeMediaSource,
+                chromeMediaSourceId: screen_constraints.mandatory.chromeMediaSourceId
+            };
+        }
+        callback(error, screen_constraints);
+    });
+};
+```
+
+You can even delete width/height for Firefox:
+
+```javascript
+connection.__getScreenConstraints = connection.getScreenConstraints;
+connection.getScreenConstraints = function(callback) {
+    connection.__getScreenConstraints(function(error, screen_constraints) {
+        if (connection.DetectRTC.browser.name === 'Chrome') {
+            delete screen_constraints.mandatory.minAspectRatio;
+        }
+        if (connection.DetectRTC.browser.name === 'Firefox') {
+            delete screen_constraints.width;
+            delete screen_constraints.height;
+        }
+        callback(error, screen_constraints);
+    });
+};
+```
+
 ## Firebase?
 
 If you are willing to use Firebase instead of Socket.io there, open [GruntFile.js](https://github.com/muaz-khan/RTCMultiConnection/blob/master/RTCMultiConnection-v3.0/Gruntfile.js) and replace `SocketConnection.js` with `FirebaseConnection.js`.
@@ -993,6 +1050,7 @@ connection.singleBroadcastAttendees = 3;   // how many users are handled by each
 
 Live Demos:
 
+* [All-in-One Scalable Broadcast](https://rtcmulticonnection.herokuapp.com/demos/Scalable-Broadcast.html)
 * [Files-Scalable-Broadcast.html](https://rtcmulticonnection.herokuapp.com/demos/Files-Scalable-Broadcast.html)
 * [Video-Scalable-Broadcast.html](https://rtcmulticonnection.herokuapp.com/demos/Video-Scalable-Broadcast.html)
 

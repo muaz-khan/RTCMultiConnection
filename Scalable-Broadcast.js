@@ -56,6 +56,14 @@ module.exports = exports = function(socket, singleBroadcastAttendees) {
         socket.broadcast.emit('message', message);
     });
 
+    socket.on('check-broadcast-presence', function(braodcastId, callback) {
+        // we can pass number of viewers as well
+        try {
+            callback(!!listOfBroadcasts[braodcastId]);
+        }
+        catch(e) {}
+    });
+
     socket.on('disconnect', function() {
         try {
             if (!currentUser) return;

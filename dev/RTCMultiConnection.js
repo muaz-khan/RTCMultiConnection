@@ -242,6 +242,10 @@ function RTCMultiConnection(roomid, forceOptions) {
         socket.emit('become-a-public-moderator');
     };
 
+    connection.dontMakeMeModerator = function() {
+        socket.emit('dont-make-me-moderator');
+    };
+
     connection.deletePeer = function(remoteUserId) {
         if (!remoteUserId) {
             return;
@@ -470,6 +474,10 @@ function RTCMultiConnection(roomid, forceOptions) {
     function beforeUnload(shiftModerationControlOnLeave, dontCloseSocket) {
         if (!connection.closeBeforeUnload) {
             return;
+        }
+
+        if (connection.isInitiator === true) {
+            connection.dontMakeMeModerator();
         }
 
         connection.peers.getAllParticipants().forEach(function(participant) {
