@@ -7,7 +7,7 @@ function SocketConnection(connection, connectCallback) {
 
     if (connection.enableScalableBroadcast) {
         parameters += '&enableScalableBroadcast=true';
-        parameters += '&singleBroadcastAttendees=' + connection.singleBroadcastAttendees;
+        parameters += '&maxRelayLimitPerUser=' + (connection.maxRelayLimitPerUser || 2);
     }
 
     var socket = io.connect((connection.socketURL || '/') + parameters, connection.socketOptions);

@@ -128,7 +128,7 @@
             connection.socketMessageEvent = 'files-scalable-broadcast-demo';
 
             connection.enableScalableBroadcast = true;
-            connection.singleBroadcastAttendees = 1;
+            connection.maxRelayLimitPerUser = 1;
 
             connection.fileReceived = {};
             connection.enableFileSharing = true;
@@ -165,8 +165,8 @@
             // if broadcast is available, simply join it. i.e. "join-broadcaster" event should be emitted.
             // if broadcast is absent, simply create it. i.e. "start-broadcasting" event should be fired.
             document.getElementById('open-or-join').onclick = function() {
-                var broadcastid = document.getElementById('broadcast-id').value;
-                if (broadcastid.replace(/^\s+|\s+$/g, '').length <= 0) {
+                var broadcastId = document.getElementById('broadcast-id').value;
+                if (broadcastId.replace(/^\s+|\s+$/g, '').length <= 0) {
                     alert('Please enter broadcast-id');
                     document.getElementById('broadcast-id').focus();
                     return;
@@ -180,7 +180,7 @@
                 };
 
                 connection.socket.emit('join-broadcast', {
-                    broadcastid: broadcastid,
+                    broadcastId: broadcastId,
                     userid: connection.userid,
                     typeOfStreams: connection.session
                 });
@@ -191,14 +191,14 @@
                 document.getElementById('open-or-join').disabled = false;
 
                 // this event is emitted when a broadcast is already created.
-                connection.socket.on('join-broadcaster', function(broadcaster, typeOfStreams) {
-                    connection.session = typeOfStreams;
+                connection.socket.on('join-broadcaster', function(hintsToJoinBroadcast) {
+                    connection.session = hintsToJoinBroadcast.typeOfStreams;
                     connection.sdpConstraints.mandatory = {
                         OfferToReceiveVideo: !!connection.session.video,
                         OfferToReceiveAudio: !!connection.session.audio
                     };
 
-                    connection.join(broadcaster.userid);
+                    connection.join(hintsToJoinBroadcast.userid);
                 });
 
                 // this event is emitted when a broadcast is absent.

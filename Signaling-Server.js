@@ -26,8 +26,7 @@ module.exports = exports = function(app, socketCallback) {
             if (!ScalableBroadcast) {
                 ScalableBroadcast = require('./Scalable-Broadcast.js');
             }
-            var singleBroadcastAttendees = params.singleBroadcastAttendees;
-            ScalableBroadcast(socket, singleBroadcastAttendees);
+            ScalableBroadcast(socket, params.maxRelayLimitPerUser);
         }
 
         socket.userid = params.userid;

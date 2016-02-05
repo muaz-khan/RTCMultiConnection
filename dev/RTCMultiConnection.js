@@ -1382,7 +1382,7 @@ function RTCMultiConnection(roomid, forceOptions) {
     };
 
     connection.enableScalableBroadcast = false;
-    connection.singleBroadcastAttendees = 3; // each broadcast should serve only 3 users
+    connection.maxRelayLimitPerUser = 3; // each broadcast should serve only 3 users
 
     connection.dontCaptureUserMedia = false;
     connection.dontAttachStream = false;

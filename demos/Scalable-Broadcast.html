@@ -129,8 +129,8 @@
             // its mandatory in v3.0
             connection.enableScalableBroadcast = true;
 
-            // each broadcast should serve only 3 users
-            connection.singleBroadcastAttendees = 3;
+            // each broadcast should serve only 1 users
+            connection.maxRelayLimitPerUser = 1;
 
             // we don't need to keep room-opened
             // scalable-broadcast.js will handle stuff itself.
@@ -153,13 +153,34 @@
                 });
 
                 // this event is emitted when a broadcast is already created.
-                socket.on('join-broadcaster', function(broadcaster, typeOfStreams) {
-                    connection.session = typeOfStreams;
+                socket.on('join-broadcaster', function(hintsToJoinBroadcast) {
+                    connection.session = hintsToJoinBroadcast.typeOfStreams;
                     connection.sdpConstraints.mandatory = {
                         OfferToReceiveVideo: !!connection.session.video,
                         OfferToReceiveAudio: !!connection.session.audio
                     };
-                    connection.join(broadcaster.userid);
+                    connection.join(hintsToJoinBroadcast.userid);
+                });
+
+                socket.on('rejoin-broadcast', function(broadcastId) {
+                    connection.attachStreams = [];
+                    socket.emit('check-broadcast-presence', broadcastId, function(isBroadcastExists) {
+                        if(!isBroadcastExists) {
+                            // the first person (i.e. real-broadcaster) MUST set his user-id
+                            connection.userid = broadcastId;
+                        }
+
+                        socket.emit('join-broadcast', {
+                            broadcastId: broadcastId,
+                            userid: connection.userid,
+                            typeOfStreams: connection.session
+                        });
+                    });
+                });
+
+                socket.on('broadcast-stopped', function(broadcastId) {
+                    // alert('Broadcast has been stopped.');
+                    location.reload();
                 });
 
                 // this event is emitted when a broadcast is absent.
@@ -192,7 +213,7 @@
                     delete event.mediaElement;
                 }
 
-                connection.isUpperNodeLeft = false;
+                connection.isUpperUserLeft = false;
                 videoPreview.src = URL.createObjectURL(event.stream);
                 videoPreview.play();
 
@@ -212,6 +233,15 @@
                         OfferToReceiveAudio: false,
                         OfferToReceiveVideo: false
                     };
+
+                    var socket = connection.getSocket();
+                    socket.emit('can-relay-broadcast');
+
+                    connection.getAllParticipants().forEach(function(p) {
+                        if(p !== event.userid) {
+                            connection.disconnectWith(p);
+                        }
+                    });
                 }
             };
 
@@ -219,8 +249,8 @@
             // if broadcast is available, simply join it. i.e. "join-broadcaster" event should be emitted.
             // if broadcast is absent, simply create it. i.e. "start-broadcasting" event should be fired.
             document.getElementById('open-or-join').onclick = function() {
-                var broadcastid = document.getElementById('broadcast-id').value;
-                if (broadcastid.replace(/^\s+|\s+$/g, '').length <= 0) {
+                var broadcastId = document.getElementById('broadcast-id').value;
+                if (broadcastId.replace(/^\s+|\s+$/g, '').length <= 0) {
                     alert('Please enter broadcast-id');
                     document.getElementById('broadcast-id').focus();
                     return;
@@ -236,14 +266,14 @@
 
                 var socket = connection.getSocket();
 
-                socket.emit('check-broadcast-presence', broadcastid, function(isBroadcastExists) {
+                socket.emit('check-broadcast-presence', broadcastId, function(isBroadcastExists) {
                     if(!isBroadcastExists) {
                         // the first person (i.e. real-broadcaster) MUST set his user-id
-                        connection.userid = broadcastid;
+                        connection.userid = broadcastId;
                     }
 
                     socket.emit('join-broadcast', {
-                        broadcastid: broadcastid,
+                        broadcastId: broadcastId,
                         userid: connection.userid,
                         typeOfStreams: connection.session
                     });
@@ -255,10 +285,14 @@
             connection.onleave = function(event) {
                 if(event.userid !== videoPreview.userid) return;
 
-                connection.isUpperNodeLeft = true;
+                var socket = connection.getSocket();
+                socket.emit('can-not-relay-broadcast');
+
+                connection.isUpperUserLeft = true;
 
                 if(allRecordedBlobs.length) {
                     ConcatenateBlobs(allRecordedBlobs, 'video/webm', function(resultingBlob) {
+                        if(!connection.isUpperUserLeft) return;
                         videoPreview.src = URL.createObjectURL(resultingBlob);
                         videoPreview.play();
 
@@ -269,6 +303,8 @@
                     var recorder = connection.currentRecorder;
                     connection.currentRecorder = null;
                     recorder.stopRecording(function() {
+                        if(!connection.isUpperUserLeft) return;
+
                         videoPreview.src = URL.createObjectURL(recorder.blob);
                         videoPreview.play();
                     });
@@ -290,14 +326,14 @@
                 connection.currentRecorder.startRecording();
 
                 setTimeout(function() {
-                    if(connection.isUpperNodeLeft) {
+                    if(connection.isUpperUserLeft || !connection.currentRecorder) {
                         return;
                     }
 
                     connection.currentRecorder.stopRecording(function() {
                         allRecordedBlobs.push(connection.currentRecorder.blob);
 
-                        if(connection.isUpperNodeLeft) {
+                        if(connection.isUpperUserLeft) {
                             return;
                         }
 

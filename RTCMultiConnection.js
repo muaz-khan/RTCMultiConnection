@@ -1,4 +1,4 @@
-// Last time updated: 2016-02-05 9:33:13 AM UTC
+// Last time updated: 2016-02-05 3:31:15 PM UTC
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -1391,7 +1391,7 @@
         };
 
         connection.enableScalableBroadcast = false;
-        connection.singleBroadcastAttendees = 3; // each broadcast should serve only 3 users
+        connection.maxRelayLimitPerUser = 3; // each broadcast should serve only 3 users
 
         connection.dontCaptureUserMedia = false;
         connection.dontAttachStream = false;
@@ -1474,7 +1474,7 @@
 
         if (connection.enableScalableBroadcast) {
             parameters += '&enableScalableBroadcast=true';
-            parameters += '&singleBroadcastAttendees=' + connection.singleBroadcastAttendees;
+            parameters += '&maxRelayLimitPerUser=' + (connection.maxRelayLimitPerUser || 2);
         }
 
         var socket = io.connect((connection.socketURL || '/') + parameters, connection.socketOptions);

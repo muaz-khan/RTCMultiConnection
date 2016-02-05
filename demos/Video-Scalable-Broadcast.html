@@ -125,11 +125,11 @@
         <script src="/socket.io/socket.io.js"></script>
         <script src="https://cdn.webrtc-experiment.com/RTCMultiConnection.js"></script>
         <script>
-            var singleBroadcastAttendees = 2;
+            var maxRelayLimitPerUser = 2;
             var parameters = '';
 
             parameters += '?enableScalableBroadcast=true';
-            parameters += '&singleBroadcastAttendees=' + singleBroadcastAttendees;
+            parameters += '&maxRelayLimitPerUser=' + maxRelayLimitPerUser;
 
             var socket = io.connect('/' + parameters);
 
@@ -247,9 +247,9 @@
             };
 
             // this event is emitted when a broadcast is already created.
-            socket.on('join-broadcaster', function(broadcaster, typeOfStreams) {
-                connection.session = typeOfStreams;
-                connection.channel = connection.sessionid = broadcaster.userid;
+            socket.on('join-broadcaster', function(hintsToJoinBroadcast) {
+                connection.session = hintsToJoinBroadcast.typeOfStreams;
+                connection.channel = connection.sessionid = hintsToJoinBroadcast.userid;
 
                 connection.sdpConstraints.mandatory = {
                     OfferToReceiveVideo: !!connection.session.video,
@@ -257,8 +257,8 @@
                 };
 
                 connection.join({
-                    sessionid: broadcaster.userid,
-                    userid: broadcaster.userid,
+                    sessionid: hintsToJoinBroadcast.userid,
+                    userid: hintsToJoinBroadcast.userid,
                     extra: {},
                     session: connection.session
                 });
