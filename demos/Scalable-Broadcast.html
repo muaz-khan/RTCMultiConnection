@@ -196,6 +196,8 @@
                 videoPreview.src = URL.createObjectURL(event.stream);
                 videoPreview.play();
 
+                videoPreview.userid = event.userid;
+
                 if(event.type === 'local') {
                     videoPreview.muted = true;
                 }
@@ -248,7 +250,11 @@
                 });
             };
 
-            connection.onstreamended = /*videoPreview.onended = */function(event) {
+            connection.onstreamended = function() {};
+
+            connection.onleave = function(event) {
+                if(event.userid !== videoPreview.userid) return;
+
                 connection.isUpperNodeLeft = true;
 
                 if(allRecordedBlobs.length) {
