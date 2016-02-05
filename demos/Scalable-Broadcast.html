@@ -15,7 +15,8 @@
     <style>
         video {
             object-fit: fill;
-            width: 30%;
+            width: 100%;
+            max-width: 100%;
         }
         button,
         input,
@@ -75,10 +76,6 @@
         input, input:focus, input:active {
             background: white;    
         }
-
-        video {
-            width: 30%;
-        }
     </style>
 </head>
 
@@ -103,17 +100,10 @@
         <section class="experiment">
             <div class="make-center">
                 <input type="text" id="broadcast-id" placeholder="broadcast-id" value="room-xyz">
-                <select id="broadcast-options">
-                    <option>Audio+Video</option>
-                    <option>Audio+Screen</option>
-                    <option>Audio</option>
-                    <option>Video</option>
-                    <option>Screen</option>
-                </select>
                 <button id="open-or-join">Open or Join Broadcast</button>
             </div>
 
-            <div id="videos-container"></div>
+            <video id="video-preview" controls loop></video>
         </section>
 
         <blockquote>
@@ -127,6 +117,9 @@
         
         <!-- <script src="/RTCMultiConnection.min.js"></script> -->
         <script src="https://cdn.webrtc-experiment.com/rmc3.min.js"></script>
+
+        <script src="https://cdn.webrtc-experiment.com/RecordRTC.js"></script>
+        <script src="https://cdn.webrtc-experiment.com/ConcatenateBlobs.js"></script>
 
         <script>
             var connection = new RTCMultiConnection(null, {
@@ -190,11 +183,26 @@
                 document.getElementById('open-or-join').disabled = false;
             };
 
-            connection.videosContainer = document.getElementById('videos-container');
-            connection.onstream = function(event) {
-                connection.videosContainer.appendChild(event.mediaElement);
+            var videoPreview = document.getElementById('video-preview');
 
-                if (connection.isInitiator == false) {
+            connection.onstream = function(event) {
+                if(event.mediaElement) {
+                    event.mediaElement.pause();
+                    event.mediaElement.src = null;
+                    delete event.mediaElement;
+                }
+
+                connection.isUpperNodeLeft = false;
+                videoPreview.src = URL.createObjectURL(event.stream);
+                videoPreview.play();
+
+                if(event.type === 'local') {
+                    videoPreview.muted = true;
+                }
+
+                if (connection.isInitiator == false && event.type === 'remote') {
+                    repeatedlyRecordStream(event.stream);
+
                     // he is merely relaying the media
                     connection.dontCaptureUserMedia = true;
                     connection.attachStreams = [event.stream];
@@ -219,9 +227,8 @@
                 this.disabled = true;
 
                 connection.session = {
-                    video: document.getElementById('broadcast-options').value.indexOf('Video') !== -1,
-                    screen: document.getElementById('broadcast-options').value.indexOf('Screen') !== -1,
-                    audio: document.getElementById('broadcast-options').value.indexOf('Audio') !== -1,
+                    audio: true,
+                    video: true,
                     oneway: true
                 };
 
@@ -241,6 +248,58 @@
                 });
             };
 
+            connection.onstreamended = /*videoPreview.onended = */function(event) {
+                connection.isUpperNodeLeft = true;
+
+                if(allRecordedBlobs.length) {
+                    ConcatenateBlobs(allRecordedBlobs, 'video/webm', function(resultingBlob) {
+                        videoPreview.src = URL.createObjectURL(resultingBlob);
+                        videoPreview.play();
+
+                        allRecordedBlobs = [];
+                    });
+                }
+                else if(connection.currentRecorder) {
+                    var recorder = connection.currentRecorder;
+                    connection.currentRecorder = null;
+                    recorder.stopRecording(function() {
+                        videoPreview.src = URL.createObjectURL(recorder.blob);
+                        videoPreview.play();
+                    });
+                }
+
+                if(connection.currentRecorder) {
+                    connection.currentRecorder.stopRecording();
+                    connection.currentRecorder = null;
+                }
+            };
+
+            var allRecordedBlobs = [];
+
+            function repeatedlyRecordStream(stream) {
+                connection.currentRecorder = RecordRTC(stream, {
+                    type: 'video'
+                });
+
+                connection.currentRecorder.startRecording();
+
+                setTimeout(function() {
+                    if(connection.isUpperNodeLeft) {
+                        return;
+                    }
+
+                    connection.currentRecorder.stopRecording(function() {
+                        allRecordedBlobs.push(connection.currentRecorder.blob);
+
+                        if(connection.isUpperNodeLeft) {
+                            return;
+                        }
+
+                        connection.currentRecorder = null;
+                        repeatedlyRecordStream(stream);
+                    });
+                }, 30 * 1000);
+            };
             
         </script>
 

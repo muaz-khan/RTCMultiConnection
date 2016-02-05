@@ -180,8 +180,7 @@ function getScreenConstraints(callback) {
                     minFrameRate: 30,
                     maxFrameRate: 128,
                     minAspectRatio: 1.77, // 2.39
-                    googLeakyBucket: true,
-                    googTemporalLayeredScreencast: true
+                    googLeakyBucket: true
                 },
                 optional: []
             };

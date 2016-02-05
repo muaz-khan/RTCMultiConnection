@@ -1186,6 +1186,50 @@ var connection = new RTCMultiConnection(roomId, {
 });
 ```
 
+## Wanna use H264 for video?
+
+```html
+<script src="/dev/CodecsHandler.js"></script>
+<script>
+// in your HTML file
+connection.processSdp = function(sdp) {
+    // modify sdp to remove vp8/vp9
+    sdp = CodecsHandler.removeVPX(sdp);
+    return sdp;
+};
+</script>
+```
+
+## Disable Video NACK
+
+```html
+<script src="/dev/CodecsHandler.js"></script>
+<script>
+// in your HTML file
+connection.processSdp = function(sdp) {
+    // Disable NACK to test IDR recovery
+    sdp = CodecsHandler.disableNACK(sdp);
+    return sdp;
+};
+</script>
+```
+
+## Prioritize Codecs
+
+```html
+<script src="/dev/CodecsHandler.js"></script>
+<script>
+// in your HTML file
+if(connection.DetectRTC.browser.name === 'Firefox') {
+    connection.getAllParticipants().forEach(function(p) {
+        var peer = connection.peers[p].peer;
+
+        CodecsHandler.prioritize('audio/opus', peer);
+    });
+}
+</script>
+```
+
 ## RTCMultiConnection v2.2.2 Demos
 
 | Experiment Name        | Demo           | Source Code |

@@ -1,4 +1,4 @@
-// Last time updated: 2016-02-04 11:01:06 AM UTC
+// Last time updated: 2016-02-05 9:33:13 AM UTC
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -5035,8 +5035,7 @@
                         minFrameRate: 30,
                         maxFrameRate: 128,
                         minAspectRatio: 1.77, // 2.39
-                        googLeakyBucket: true,
-                        googTemporalLayeredScreencast: true
+                        googLeakyBucket: true
                     },
                     optional: []
                 }
@@ -5148,8 +5147,7 @@
                         minFrameRate: 30,
                         maxFrameRate: 128,
                         minAspectRatio: 1.77, // 2.39
-                        googLeakyBucket: true,
-                        googTemporalLayeredScreencast: true
+                        googLeakyBucket: true
                     },
                     optional: []
                 }
