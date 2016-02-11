@@ -790,14 +790,6 @@ function RTCMultiConnection(roomid, forceOptions) {
 
     connection.direction = 'many-to-many';
 
-    Array.prototype.getStreamById = function(streamid) {
-        var stream;
-        this.forEach(function(_stream) {
-            if (_stream.streamid == streamid) stream = _stream;
-        });
-        return stream;
-    };
-
     connection.removeStream = function(streamid) {
         var stream;
         connection.attachStreams.forEach(function(localStream) {
@@ -1278,16 +1270,6 @@ function RTCMultiConnection(roomid, forceOptions) {
                 }, participant);
             });
         };
-    }
-
-    connection.getAllVideos = function(remoteUserId) {
-        var videos = [];
-        Array.prototype.slice.call(document.querySelectorAll('video')).forEach(function(video) {
-            if (video.getAttribute('data-userid') === remoteUserId) {
-                videos.push(video);
-            }
-        });
-        return videos;
     }
 
     connection.connectSocket = function(callback) {

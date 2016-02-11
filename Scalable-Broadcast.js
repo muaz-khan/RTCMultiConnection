@@ -103,6 +103,14 @@ module.exports = exports = function(socket, maxRelayLimitPerUser) {
             if(!user) return;
 
             if(user.isBroadcastInitiator === true) {
+                consoleLog({
+                    'initiator-left': true,
+                    'userid': user.userid,
+                    'broadcastId': user.broadcastId,
+                    'isBroadcastInitiator': user.isBroadcastInitiator,
+                    'relayReceivers': Object.keys(user.relayReceivers)
+                });
+
                 // need to stop entire broadcast?
                 for(var n in users) {
                     var _user = users[n];
@@ -131,9 +139,6 @@ module.exports = exports = function(socket, maxRelayLimitPerUser) {
             }
 
             if(user.relayReceivers.length && user.isBroadcastInitiator === false) {
-                // todo: this causes "Maximum call stack size exceeded"
-                // need to find alternative solution
-                makeAllNestedUsersCanNotRelay(user.relayReceivers);
                 askNestedUsersToRejoin(user.relayReceivers);
             }
 
@@ -149,31 +154,12 @@ function askNestedUsersToRejoin(relayReceivers) {
         var usersToAskRejoin = [];
 
         relayReceivers.forEach(function(receiver) {
-            receiver.socket.emit('rejoin-broadcast', receiver.broadcastId);
-
-            if(receiver.relayReceivers.length) {
-                askNestedUsersToRejoin(receiver.relayReceivers);
-            }
-        });
-    }
-    catch(e) {
-        consoleLog(e);
-    }
-}
-
-function makeAllNestedUsersCanNotRelay(relayReceivers) {
-    try {
-        relayReceivers.forEach(function(receiver) {
-            if(users[receiver.userid]) {
+            if(!!users[receiver.userid]) {
                 users[receiver.userid].canRelay = false;
                 users[receiver.userid].receivingFrom = null;
+                receiver.socket.emit('rejoin-broadcast', receiver.broadcastId);
             }
-
-            if(receiver.relayReceivers.length) {
-                setTimeout(function() {
-                    makeAllNestedUsersCanNotRelay(receiver.relayReceivers);
-                }, 2000);
-            }
+            
         });
     }
     catch(e) {
@@ -225,8 +211,8 @@ function getFirstAvailableBraodcater(broadcastId, maxRelayLimitPerUser) {
     }
 }
 
-function consoleLog(arg) {
-    return; // comment this line for development testings
+function consoleLog() {
+    // return; // comment this line for development testings
 
-    console.log(arg);
+    console.log(arguments);
 }

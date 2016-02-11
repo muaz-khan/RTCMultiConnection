@@ -114,9 +114,14 @@
         </blockquote>
 
         <script src="/socket.io/socket.io.js"></script>
+
+        <script>
+            // skipping xirsys servers
+            window.getExternalIceServers = false;
+        </script>
         
         <!-- <script src="/RTCMultiConnection.min.js"></script> -->
-        <script src="https://cdn.webrtc-experiment.com/rmc3.min.js"></script>
+        <script src="/dist/rmc3.min.js"></script>
 
         <script src="https://cdn.webrtc-experiment.com/RecordRTC.js"></script>
         <script src="https://cdn.webrtc-experiment.com/ConcatenateBlobs.js"></script>
@@ -180,7 +185,9 @@
 
                 socket.on('broadcast-stopped', function(broadcastId) {
                     // alert('Broadcast has been stopped.');
-                    location.reload();
+                    // location.reload();
+                    console.error('broadcast-stopped', broadcastId);
+                    alert('This broadcast has been stopped.');
                 });
 
                 // this event is emitted when a broadcast is absent.
@@ -207,9 +214,12 @@
             var videoPreview = document.getElementById('video-preview');
 
             connection.onstream = function(event) {
+                if(connection.isInitiator && event.type !== 'local') {
+                    return;
+                }
+
                 if(event.mediaElement) {
                     event.mediaElement.pause();
-                    event.mediaElement.src = null;
                     delete event.mediaElement;
                 }
 
@@ -238,8 +248,15 @@
                     socket.emit('can-relay-broadcast');
 
                     connection.getAllParticipants().forEach(function(p) {
-                        if(p !== event.userid) {
-                            connection.disconnectWith(p);
+                        if(p + '' != event.userid + '') {
+                            var peer = connection.peers[p].peer;
+                            peer.getLocalStreams().forEach(function(localStream) {
+                                peer.removeStream(localStream);
+                            });
+                            peer.addStream(event.stream);
+                            connection.dontAttachStream = true;
+                            connection.renegotiate(p);
+                            connection.dontAttachStream = false;
                         }
                     });
                 }

@@ -1,4 +1,4 @@
-// Last time updated: 2016-02-05 3:31:15 PM UTC
+// Last time updated: 2016-02-11 6:44:44 AM UTC
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -799,14 +799,6 @@
 
         connection.direction = 'many-to-many';
 
-        Array.prototype.getStreamById = function(streamid) {
-            var stream;
-            this.forEach(function(_stream) {
-                if (_stream.streamid == streamid) stream = _stream;
-            });
-            return stream;
-        };
-
         connection.removeStream = function(streamid) {
             var stream;
             connection.attachStreams.forEach(function(localStream) {
@@ -1287,16 +1279,6 @@
                     }, participant);
                 });
             };
-        }
-
-        connection.getAllVideos = function(remoteUserId) {
-            var videos = [];
-            Array.prototype.slice.call(document.querySelectorAll('video')).forEach(function(video) {
-                if (video.getAttribute('data-userid') === remoteUserId) {
-                    videos.push(video);
-                }
-            });
-            return videos;
         }
 
         connection.connectSocket = function(callback) {

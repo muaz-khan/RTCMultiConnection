@@ -30,6 +30,9 @@ module.exports = function(grunt) {
                     'dev/Plugin.EveryWhere.js',
 
                     'dev/RTCPeerConnection.js',
+                    // 'dev/ios-hacks.js',      // to support ios
+                    // 'dev/CodecsHandler.js',  // to force H264 or codecs other than opus
+
                     'dev/OnIceCandidateHandler.js',
                     'dev/IceServersHandler.js',
                     'dev/BandwidthHandler.js',
