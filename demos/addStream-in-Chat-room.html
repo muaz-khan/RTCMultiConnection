@@ -158,7 +158,16 @@
 
             connection.enableFileSharing = true; // by default, it is "false".
 
-            connection.attachStreams.push(new webkitMediaStream());
+            if(typeof webkitMediaStream !== 'undefined') {
+                connection.attachStreams.push(new webkitMediaStream());
+            }
+            else if(typeof MediaStream !== 'undefined'){
+                connection.attachStreams.push(new MediaStream());
+            }
+            else {
+                console.error('Neither Chrome nor Firefox. This demo may NOT work.');
+            }
+
             connection.dontCaptureUserMedia = true;
             connection.session = {
                 data: true,
@@ -185,7 +194,7 @@
             connection.onopen = function() {
                 if(connection.alreadyOpened) return;
                 connection.alreadyOpened = true;
-                
+
                 document.getElementById('share-file').disabled = false;
                 document.getElementById('input-text-chat').disabled = false;
                 document.getElementById('btn-addStream').disabled = false;

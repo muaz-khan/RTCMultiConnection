@@ -1,4 +1,4 @@
-// Last time updated: 2016-02-11 6:44:44 AM UTC
+// Last time updated: 2016-02-13 7:21:53 AM UTC
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -277,8 +277,10 @@
                     } catch (e) {}
                 }
 
-                connection.peers[remoteUserId].peer = null;
-                delete connection.peers[remoteUserId];
+                if (connection.peers[remoteUserId]) {
+                    connection.peers[remoteUserId].peer = null;
+                    delete connection.peers[remoteUserId];
+                }
             }
 
             if (connection.broadcasters.indexOf(remoteUserId) !== -1) {
@@ -289,7 +291,6 @@
                     }
                 });
                 connection.broadcasters = newArray;
-
                 keepNextBroadcasterOnServer();
             }
         }
@@ -950,7 +951,7 @@
             session = session || {};
 
             if (!RTCPeerConnection.prototype.getSenders) {
-                this.addStream(session);
+                connection.addStream(session);
                 return;
             }
 
@@ -960,7 +961,13 @@
             }
 
             if (session instanceof MediaStream) {
-                replaceTrack(session.getVideoTracks()[0], remoteUserId, isVideoTrack);
+                if (session.getVideoTracks().length) {
+                    replaceTrack(session.getVideoTracks()[0], remoteUserId, true);
+                }
+
+                if (session.getAudioTracks().length) {
+                    replaceTrack(session.getAudioTracks()[0], remoteUserId, false);
+                }
                 return;
             }
 
@@ -1798,7 +1805,6 @@
 
             return {
                 streamsToShare: userPreferences.streamsToShare || {},
-                session: connection.session,
                 rtcMultiConnection: connection,
                 connectionDescription: userPreferences.connectionDescription,
                 remoteUserId: remoteUserId,
@@ -1806,13 +1812,8 @@
                 remotePeerSdpConstraints: userPreferences.remotePeerSdpConstraints,
                 dontGetRemoteStream: !!userPreferences.dontGetRemoteStream,
                 dontAttachLocalStream: !!userPreferences.dontAttachLocalStream,
-                optionalArgument: connection.optionalArgument,
-                iceServers: connection.iceServers,
                 renegotiatingPeer: !!userPreferences.renegotiatingPeer,
                 peerRef: userPreferences.peerRef,
-                enableDataChannels: !!connection.session.data,
-                localStreams: connection.attachStreams,
-                removeStreams: connection.removeStreams,
                 onLocalSdp: function(localSdp) {
                     self.onNegotiationNeeded(localSdp, remoteUserId);
                 },
@@ -1867,12 +1868,11 @@
 
                     if (isPluginRTC) {
                         var mediaElement = document.createElement('video');
-                        var body = (document.body || document.documentElement);
+                        var body = connection.videosContainer;
                         body.insertBefore(mediaElement, body.firstChild);
 
                         setTimeout(function() {
                             Plugin.attachMediaStream(mediaElement, stream);
-
                             self.onGettingRemoteMedia(mediaElement, remoteUserId);
                         }, 3000);
                         return;
@@ -1898,10 +1898,7 @@
                         self.onUserLeft(remoteUserId);
                         self.disconnectWith(remoteUserId);
                     }
-                },
-                processSdp: connection.processSdp,
-                beforeAddingStream: connection.beforeAddingStream,
-                beforeRemovingStream: connection.beforeRemovingStream
+                }
             };
         };
 
@@ -2192,7 +2189,6 @@
             }
 
             connection.peers[remoteUserId].channels.push(channel);
-
             connection.onopen({
                 userid: remoteUserId,
                 extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},
@@ -2502,6 +2498,7 @@
 
     function observeObject(obj, callback) {
         if (!Object.observe) return;
+        if (isMobileDevice) return;
 
         Object.observe(obj, function(changes) {
             var jsonStringified = JSON.stringify(changes);
@@ -2815,15 +2812,15 @@
         }
 
         var localStreams = [];
-        config.localStreams.forEach(function(stream) {
+        connection.attachStreams.forEach(function(stream) {
             if (!!stream) localStreams.push(stream);
         });
 
         if (!renegotiatingPeer) {
             peer = new RTCPeerConnection(navigator.onLine ? {
-                iceServers: config.iceServers,
+                iceServers: connection.iceServers,
                 iceTransports: 'all'
-            } : null, config.optionalArgument);
+            } : null, connection.optionalArgument);
         } else {
             peer = config.peerRef;
 
@@ -2834,9 +2831,9 @@
                     }
                 });
 
-                config.removeStreams.forEach(function(streamToRemove, index) {
+                connection.removeStreams.forEach(function(streamToRemove, index) {
                     if (stream === streamToRemove) {
-                        stream = config.beforeRemovingStream(stream);
+                        stream = connection.beforeRemovingStream(stream);
                         if (stream && !!peer.removeStream) {
                             peer.removeStream(stream);
                         }
@@ -2881,7 +2878,7 @@
                 return;
             }
 
-            localStream = config.beforeAddingStream(localStream);
+            localStream = connection.beforeAddingStream(localStream);
             if (localStream) {
                 peer.addStream(localStream);
             }
@@ -2957,6 +2954,7 @@
         };
 
         this.addRemoteSdp = function(remoteSdp) {
+            remoteSdp.sdp = connection.processSdp(remoteSdp.sdp);
             peer.setRemoteDescription(new RTCSessionDescription(remoteSdp), function() {}, function(error) {
                 if (!!connection.enableLogs) {
                     console.error(JSON.stringify(error, null, '\t'));
@@ -2970,7 +2968,7 @@
             isOfferer = false;
         }
 
-        if (config.enableDataChannels === true) {
+        if (connection.session.data === true) {
             createDataChannel();
         }
 
@@ -3027,10 +3025,10 @@
             peer.channel = channel;
         }
 
-        if (config.session.audio == 'two-way' || config.session.video == 'two-way' || config.session.screen == 'two-way') {
+        if (connection.session.audio == 'two-way' || connection.session.video == 'two-way' || connection.session.screen == 'two-way') {
             defaults.sdpConstraints = setSdpConstraints({
-                OfferToReceiveAudio: config.session.audio == 'two-way' || (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.OfferToReceiveAudio),
-                OfferToReceiveVideo: config.session.video == 'two-way' || config.session.screen == 'two-way' || (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.OfferToReceiveAudio)
+                OfferToReceiveAudio: connection.session.audio == 'two-way' || (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.OfferToReceiveAudio),
+                OfferToReceiveVideo: connection.session.video == 'two-way' || connection.session.screen == 'two-way' || (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.OfferToReceiveAudio)
             });
         }
 
@@ -3044,7 +3042,7 @@
         });
 
         peer[isOfferer ? 'createOffer' : 'createAnswer'](function(localSdp) {
-            localSdp.sdp = config.processSdp(localSdp.sdp);
+            localSdp.sdp = connection.processSdp(localSdp.sdp);
             peer.setLocalDescription(localSdp);
             config.onLocalSdp({
                 type: localSdp.type,

@@ -268,8 +268,10 @@ function RTCMultiConnection(roomid, forceOptions) {
                 } catch (e) {}
             }
 
-            connection.peers[remoteUserId].peer = null;
-            delete connection.peers[remoteUserId];
+            if (connection.peers[remoteUserId]) {
+                connection.peers[remoteUserId].peer = null;
+                delete connection.peers[remoteUserId];
+            }
         }
 
         if (connection.broadcasters.indexOf(remoteUserId) !== -1) {
@@ -280,7 +282,6 @@ function RTCMultiConnection(roomid, forceOptions) {
                 }
             });
             connection.broadcasters = newArray;
-
             keepNextBroadcasterOnServer();
         }
     }
@@ -941,7 +942,7 @@ function RTCMultiConnection(roomid, forceOptions) {
         session = session || {};
 
         if (!RTCPeerConnection.prototype.getSenders) {
-            this.addStream(session);
+            connection.addStream(session);
             return;
         }
 
@@ -951,7 +952,13 @@ function RTCMultiConnection(roomid, forceOptions) {
         }
 
         if (session instanceof MediaStream) {
-            replaceTrack(session.getVideoTracks()[0], remoteUserId, isVideoTrack);
+            if (session.getVideoTracks().length) {
+                replaceTrack(session.getVideoTracks()[0], remoteUserId, true);
+            }
+
+            if (session.getAudioTracks().length) {
+                replaceTrack(session.getAudioTracks()[0], remoteUserId, false);
+            }
             return;
         }
 

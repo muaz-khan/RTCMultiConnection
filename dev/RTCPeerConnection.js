@@ -109,15 +109,15 @@ function PeerInitiator(config) {
     }
 
     var localStreams = [];
-    config.localStreams.forEach(function(stream) {
+    connection.attachStreams.forEach(function(stream) {
         if (!!stream) localStreams.push(stream);
     });
 
     if (!renegotiatingPeer) {
         peer = new RTCPeerConnection(navigator.onLine ? {
-            iceServers: config.iceServers,
+            iceServers: connection.iceServers,
             iceTransports: 'all'
-        } : null, config.optionalArgument);
+        } : null, connection.optionalArgument);
     } else {
         peer = config.peerRef;
 
@@ -128,9 +128,9 @@ function PeerInitiator(config) {
                 }
             });
 
-            config.removeStreams.forEach(function(streamToRemove, index) {
+            connection.removeStreams.forEach(function(streamToRemove, index) {
                 if (stream === streamToRemove) {
-                    stream = config.beforeRemovingStream(stream);
+                    stream = connection.beforeRemovingStream(stream);
                     if (stream && !!peer.removeStream) {
                         peer.removeStream(stream);
                     }
@@ -175,7 +175,7 @@ function PeerInitiator(config) {
             return;
         }
 
-        localStream = config.beforeAddingStream(localStream);
+        localStream = connection.beforeAddingStream(localStream);
         if (localStream) {
             peer.addStream(localStream);
         }
@@ -251,6 +251,7 @@ function PeerInitiator(config) {
     };
 
     this.addRemoteSdp = function(remoteSdp) {
+        remoteSdp.sdp = connection.processSdp(remoteSdp.sdp);
         peer.setRemoteDescription(new RTCSessionDescription(remoteSdp), function() {}, function(error) {
             if (!!connection.enableLogs) {
                 console.error(JSON.stringify(error, null, '\t'));
@@ -264,7 +265,7 @@ function PeerInitiator(config) {
         isOfferer = false;
     }
 
-    if (config.enableDataChannels === true) {
+    if (connection.session.data === true) {
         createDataChannel();
     }
 
@@ -321,10 +322,10 @@ function PeerInitiator(config) {
         peer.channel = channel;
     }
 
-    if (config.session.audio == 'two-way' || config.session.video == 'two-way' || config.session.screen == 'two-way') {
+    if (connection.session.audio == 'two-way' || connection.session.video == 'two-way' || connection.session.screen == 'two-way') {
         defaults.sdpConstraints = setSdpConstraints({
-            OfferToReceiveAudio: config.session.audio == 'two-way' || (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.OfferToReceiveAudio),
-            OfferToReceiveVideo: config.session.video == 'two-way' || config.session.screen == 'two-way' || (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.OfferToReceiveAudio)
+            OfferToReceiveAudio: connection.session.audio == 'two-way' || (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.OfferToReceiveAudio),
+            OfferToReceiveVideo: connection.session.video == 'two-way' || connection.session.screen == 'two-way' || (config.remoteSdp && config.remoteSdp.remotePeerSdpConstraints && config.remoteSdp.remotePeerSdpConstraints.OfferToReceiveAudio)
         });
     }
 
@@ -338,7 +339,7 @@ function PeerInitiator(config) {
     });
 
     peer[isOfferer ? 'createOffer' : 'createAnswer'](function(localSdp) {
-        localSdp.sdp = config.processSdp(localSdp.sdp);
+        localSdp.sdp = connection.processSdp(localSdp.sdp);
         peer.setLocalDescription(localSdp);
         config.onLocalSdp({
             type: localSdp.type,

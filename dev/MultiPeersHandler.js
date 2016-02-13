@@ -86,7 +86,6 @@ function MultiPeers(connection) {
 
         return {
             streamsToShare: userPreferences.streamsToShare || {},
-            session: connection.session,
             rtcMultiConnection: connection,
             connectionDescription: userPreferences.connectionDescription,
             remoteUserId: remoteUserId,
@@ -94,13 +93,8 @@ function MultiPeers(connection) {
             remotePeerSdpConstraints: userPreferences.remotePeerSdpConstraints,
             dontGetRemoteStream: !!userPreferences.dontGetRemoteStream,
             dontAttachLocalStream: !!userPreferences.dontAttachLocalStream,
-            optionalArgument: connection.optionalArgument,
-            iceServers: connection.iceServers,
             renegotiatingPeer: !!userPreferences.renegotiatingPeer,
             peerRef: userPreferences.peerRef,
-            enableDataChannels: !!connection.session.data,
-            localStreams: connection.attachStreams,
-            removeStreams: connection.removeStreams,
             onLocalSdp: function(localSdp) {
                 self.onNegotiationNeeded(localSdp, remoteUserId);
             },
@@ -155,12 +149,11 @@ function MultiPeers(connection) {
 
                 if (isPluginRTC) {
                     var mediaElement = document.createElement('video');
-                    var body = (document.body || document.documentElement);
+                    var body = connection.videosContainer;
                     body.insertBefore(mediaElement, body.firstChild);
 
                     setTimeout(function() {
                         Plugin.attachMediaStream(mediaElement, stream);
-
                         self.onGettingRemoteMedia(mediaElement, remoteUserId);
                     }, 3000);
                     return;
@@ -186,10 +179,7 @@ function MultiPeers(connection) {
                     self.onUserLeft(remoteUserId);
                     self.disconnectWith(remoteUserId);
                 }
-            },
-            processSdp: connection.processSdp,
-            beforeAddingStream: connection.beforeAddingStream,
-            beforeRemovingStream: connection.beforeRemovingStream
+            }
         };
     };
 
@@ -480,7 +470,6 @@ function MultiPeers(connection) {
         }
 
         connection.peers[remoteUserId].channels.push(channel);
-
         connection.onopen({
             userid: remoteUserId,
             extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},

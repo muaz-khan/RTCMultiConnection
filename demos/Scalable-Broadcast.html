@@ -5,7 +5,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
 
-    <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
+    <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css"> 
 
     <title>WebRTC Scalable Media Broadcast using RTCMultiConnection</title>
 
@@ -159,6 +159,8 @@
 
                 // this event is emitted when a broadcast is already created.
                 socket.on('join-broadcaster', function(hintsToJoinBroadcast) {
+                    console.log('join-broadcaster', hintsToJoinBroadcast);
+
                     connection.session = hintsToJoinBroadcast.typeOfStreams;
                     connection.sdpConstraints.mandatory = {
                         OfferToReceiveVideo: !!connection.session.video,
@@ -168,6 +170,8 @@
                 });
 
                 socket.on('rejoin-broadcast', function(broadcastId) {
+                    console.log('rejoin-broadcast', broadcastId);
+
                     connection.attachStreams = [];
                     socket.emit('check-broadcast-presence', broadcastId, function(isBroadcastExists) {
                         if(!isBroadcastExists) {
@@ -192,6 +196,8 @@
 
                 // this event is emitted when a broadcast is absent.
                 socket.on('start-broadcasting', function(typeOfStreams) {
+                    console.log('start-broadcasting', typeOfStreams);
+
                     // host i.e. sender should always use this!
                     connection.sdpConstraints.mandatory = {
                         OfferToReceiveVideo: false,
@@ -234,8 +240,6 @@
                 }
 
                 if (connection.isInitiator == false && event.type === 'remote') {
-                    repeatedlyRecordStream(event.stream);
-
                     // he is merely relaying the media
                     connection.dontCaptureUserMedia = true;
                     connection.attachStreams = [event.stream];
@@ -247,18 +251,39 @@
                     var socket = connection.getSocket();
                     socket.emit('can-relay-broadcast');
 
-                    connection.getAllParticipants().forEach(function(p) {
-                        if(p + '' != event.userid + '') {
-                            var peer = connection.peers[p].peer;
-                            peer.getLocalStreams().forEach(function(localStream) {
-                                peer.removeStream(localStream);
-                            });
-                            peer.addStream(event.stream);
-                            connection.dontAttachStream = true;
-                            connection.renegotiate(p);
-                            connection.dontAttachStream = false;
-                        }
-                    });
+                    if(connection.DetectRTC.browser.name === 'Chrome') {
+                        connection.getAllParticipants().forEach(function(p) {
+                            if(p + '' != event.userid + '') {
+                                var peer = connection.peers[p].peer;
+                                peer.getLocalStreams().forEach(function(localStream) {
+                                    peer.removeStream(localStream);
+                                });
+                                peer.addStream(event.stream);
+                                connection.dontAttachStream = true;
+                                connection.renegotiate(p);
+                                connection.dontAttachStream = false;
+                            }
+                        });
+                    }
+
+                    if(connection.DetectRTC.browser.name === 'Firefox') {
+                        // Firefox is NOT supporting removeStream method
+                        // that's why using alternative hack.
+                        // NOTE: Firefox seems unable to replace-tracks of the remote-media-stream
+                        // need to ask all deeper nodes to rejoin
+                        connection.getAllParticipants().forEach(function(p) {
+                            if(p + '' != event.userid + '') {
+                                connection.replaceTrack(event.stream, p);
+                            }
+                        });
+                    }
+
+                    // Firefox is UN_UN_UABLE to record remote MediaStream
+                    // WebAudio solution merely records audio
+                    // so recording MUST_MUST be skipped for Firefox.
+                    if(connection.DetectRTC.browser.name === 'Chrome') {
+                        repeatedlyRecordStream(event.stream);
+                    }
                 }
             };
 
@@ -288,6 +313,8 @@
                         // the first person (i.e. real-broadcaster) MUST set his user-id
                         connection.userid = broadcastId;
                     }
+
+                    console.log('check-broadcast-presence', broadcastId, isBroadcastExists);
 
                     socket.emit('join-broadcast', {
                         broadcastId: broadcastId,

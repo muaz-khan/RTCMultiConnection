@@ -284,6 +284,7 @@ var lastChanges = '';
 
 function observeObject(obj, callback) {
     if (!Object.observe) return;
+    if (isMobileDevice) return;
 
     Object.observe(obj, function(changes) {
         var jsonStringified = JSON.stringify(changes);
