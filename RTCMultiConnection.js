@@ -1,4 +1,4 @@
-// Last time updated at Tuesday, January 19th, 2016, 3:18:28 PM 
+// Last time updated at Tuesday, February 16th, 2016, 12:42:11 PM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -2652,7 +2652,7 @@
 
                     rtcMultiSession.defaultSocket = defaultSocket;
 
-                    if (!defaultSocket.__push) {
+                    if (defaultSocket !== null && !defaultSocket.__push) {
                         defaultSocket.__push = defaultSocket.send;
                         defaultSocket.send = function(message) {
                             message.userid = message.userid || connection.userid;

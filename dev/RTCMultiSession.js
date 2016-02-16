@@ -1643,7 +1643,7 @@ function RTCMultiSession(connection, callbackForSignalingReady) {
 
                 rtcMultiSession.defaultSocket = defaultSocket;
 
-                if (!defaultSocket.__push) {
+                if (defaultSocket !== null && !defaultSocket.__push) {
                     defaultSocket.__push = defaultSocket.send;
                     defaultSocket.send = function(message) {
                         message.userid = message.userid || connection.userid;
