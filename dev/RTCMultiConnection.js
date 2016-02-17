@@ -1434,6 +1434,38 @@ function RTCMultiConnection(roomid, forceOptions) {
         connection.isOnline = false;
     });
 
+    connection.isLowBandwidth = false;
+    if (navigator && navigator.connection && navigator.connection.type) {
+        connection.isLowBandwidth = navigator.connection.type.toString().toLowerCase().search(/wifi|cell/g) !== -1;
+        if (connection.isLowBandwidth) {
+            connection.bandwidth = {
+                audio: 30,
+                video: 30,
+                screen: 30
+            };
+
+            if (connection.mediaConstraints.audio && connection.mediaConstraints.audio.optional.length) {
+                var newArray = [];
+                connection.mediaConstraints.audio.optional.forEach(function(opt) {
+                    if (typeof opt.bandwidth === 'undefined') {
+                        newArray.push(opt);
+                    }
+                });
+                connection.mediaConstraints.audio.optional = newArray;
+            }
+
+            if (connection.mediaConstraints.video && connection.mediaConstraints.video.optional.length) {
+                var newArray = [];
+                connection.mediaConstraints.video.optional.forEach(function(opt) {
+                    if (typeof opt.bandwidth === 'undefined') {
+                        newArray.push(opt);
+                    }
+                });
+                connection.mediaConstraints.video.optional = newArray;
+            }
+        }
+    }
+
     connection.getExtraData = function(remoteUserId) {
         if (!remoteUserId) throw 'remoteUserId is required.';
         if (!connection.peers[remoteUserId]) return {};

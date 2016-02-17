@@ -1,5 +1,4 @@
 // IceServersHandler.js
-// note: "urls" doesn't works in old-firefox.
 
 var iceFrame, loadedIceFrame;
 
@@ -18,8 +17,6 @@ function loadIceFrame(callback, skip) {
         function iFrameLoaderCallback(event) {
             if (!event.data || !event.data.iceServers) return;
             callback(event.data.iceServers);
-
-            // this event listener is no more needed
             window.removeEventListener('message', iFrameLoaderCallback);
         }
 
@@ -30,7 +27,7 @@ function loadIceFrame(callback, skip) {
     (document.body || document.documentElement).appendChild(iframe);
 }
 
-if (typeof window.getExternalIceServers === 'undefined' || window.getExternalIceServers == true) {
+if (typeof window.getExternalIceServers !== 'undefined' && window.getExternalIceServers == true) {
     loadIceFrame(function(externalIceServers) {
         if (!externalIceServers || !externalIceServers.length) return;
         window.RMCExternalIceServers = externalIceServers;
@@ -45,13 +42,11 @@ var IceServersHandler = (function() {
     function getIceServers(connection) {
         var iceServers = [];
 
-        // Firefox <= 37 doesn't understands "urls"
-
         iceServers.push({
             urls: 'stun:stun.l.google.com:19302'
-        });
-
-        iceServers.push({
+        }, {
+            urls: 'stun:mmt-stun.verkstad.net'
+        }, {
             urls: 'stun:stun.anyfirewall.com:3478'
         });
 
@@ -62,25 +57,26 @@ var IceServersHandler = (function() {
         });
 
         iceServers.push({
-            urls: 'turn:turn.anyfirewall.com:443?transport=tcp',
+            urls: 'turn:turn.anyfirewall.com:443',
             credential: 'webrtc',
             username: 'webrtc'
+        });
+
+        // copyright of mmt-turn.verkstad: Ericsson
+        iceServers.push({
+            urls: 'turn:mmt-turn.verkstad.net',
+            username: 'webrtc',
+            credential: 'secret'
         });
 
         if (window.RMCExternalIceServers) {
             iceServers = window.RMCExternalIceServers.concat(iceServers);
             connection.iceServers = iceServers;
-        } else if (typeof window.getExternalIceServers === 'undefined' || window.getExternalIceServers == true) {
+        } else if (typeof window.getExternalIceServers !== 'undefined' && window.getExternalIceServers == true) {
             window.iceServersLoadCallback = function() {
                 iceServers = window.RMCExternalIceServers.concat(iceServers);
                 connection.iceServers = iceServers;
             };
-        } else {
-            iceServers.push({
-                urls: 'turn:turn.anyfirewall.com:443?transport=udp',
-                credential: 'webrtc',
-                username: 'webrtc'
-            });
         }
 
         return iceServers;

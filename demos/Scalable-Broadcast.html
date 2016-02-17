@@ -124,8 +124,6 @@
         <script src="/dist/rmc3.min.js"></script>
 
         <script src="https://cdn.webrtc-experiment.com/RecordRTC.js"></script>
-        <script src="https://cdn.webrtc-experiment.com/ConcatenateBlobs.js"></script>
-
         <script>
             var connection = new RTCMultiConnection(null, {
                 useDefaultDevices: true // if we don't need to force selection of specific devices
@@ -134,7 +132,7 @@
             // its mandatory in v3.0
             connection.enableScalableBroadcast = true;
 
-            // each broadcast should serve only 1 users
+            // each relaying-user should serve only 1 users
             connection.maxRelayLimitPerUser = 1;
 
             // we don't need to keep room-opened
@@ -278,9 +276,9 @@
                         });
                     }
 
-                    // Firefox is UN_UN_UABLE to record remote MediaStream
+                    // Firefox seems UN_ABLE to record remote MediaStream
                     // WebAudio solution merely records audio
-                    // so recording MUST_MUST be skipped for Firefox.
+                    // so recording is skipped for Firefox.
                     if(connection.DetectRTC.browser.name === 'Chrome') {
                         repeatedlyRecordStream(event.stream);
                     }
@@ -335,13 +333,11 @@
                 connection.isUpperUserLeft = true;
 
                 if(allRecordedBlobs.length) {
-                    ConcatenateBlobs(allRecordedBlobs, 'video/webm', function(resultingBlob) {
-                        if(!connection.isUpperUserLeft) return;
-                        videoPreview.src = URL.createObjectURL(resultingBlob);
-                        videoPreview.play();
-
-                        allRecordedBlobs = [];
-                    });
+                    // playing lats recorded blob
+                    var lastBlob = allRecordedBlobs[allRecordedBlobs.length - 1];
+                    videoPreview.src = URL.createObjectURL(lastBlob);
+                    videoPreview.play();
+                    allRecordedBlobs = [];
                 }
                 else if(connection.currentRecorder) {
                     var recorder = connection.currentRecorder;
@@ -384,7 +380,7 @@
                         connection.currentRecorder = null;
                         repeatedlyRecordStream(stream);
                     });
-                }, 30 * 1000);
+                }, 30 * 1000); // 30-seconds
             };
             
         </script>

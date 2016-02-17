@@ -1,4 +1,4 @@
-// Last time updated: 2016-02-13 7:21:53 AM UTC
+// Last time updated: 2016-02-17 4:59:46 PM UTC
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -1443,6 +1443,38 @@
             connection.isOnline = false;
         });
 
+        connection.isLowBandwidth = false;
+        if (navigator && navigator.connection && navigator.connection.type) {
+            connection.isLowBandwidth = navigator.connection.type.toString().toLowerCase().search(/wifi|cell/g) !== -1;
+            if (connection.isLowBandwidth) {
+                connection.bandwidth = {
+                    audio: 30,
+                    video: 30,
+                    screen: 30
+                };
+
+                if (connection.mediaConstraints.audio && connection.mediaConstraints.audio.optional.length) {
+                    var newArray = [];
+                    connection.mediaConstraints.audio.optional.forEach(function(opt) {
+                        if (typeof opt.bandwidth === 'undefined') {
+                            newArray.push(opt);
+                        }
+                    });
+                    connection.mediaConstraints.audio.optional = newArray;
+                }
+
+                if (connection.mediaConstraints.video && connection.mediaConstraints.video.optional.length) {
+                    var newArray = [];
+                    connection.mediaConstraints.video.optional.forEach(function(opt) {
+                        if (typeof opt.bandwidth === 'undefined') {
+                            newArray.push(opt);
+                        }
+                    });
+                    connection.mediaConstraints.video.optional = newArray;
+                }
+            }
+        }
+
         connection.getExtraData = function(remoteUserId) {
             if (!remoteUserId) throw 'remoteUserId is required.';
             if (!connection.peers[remoteUserId]) return {};
@@ -2226,7 +2258,6 @@
 
     // detect node-webkit
     var isNodeWebkit = !!(window.process && (typeof window.process === 'object') && window.process.versions && window.process.versions['node-webkit']);
-
 
     var chromeVersion = 50;
     var matchArray = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
@@ -3140,7 +3171,6 @@
     })();
 
     // IceServersHandler.js
-    // note: "urls" doesn't works in old-firefox.
 
     var iceFrame, loadedIceFrame;
 
@@ -3159,8 +3189,6 @@
             function iFrameLoaderCallback(event) {
                 if (!event.data || !event.data.iceServers) return;
                 callback(event.data.iceServers);
-
-                // this event listener is no more needed
                 window.removeEventListener('message', iFrameLoaderCallback);
             }
 
@@ -3171,7 +3199,7 @@
         (document.body || document.documentElement).appendChild(iframe);
     }
 
-    if (typeof window.getExternalIceServers === 'undefined' || window.getExternalIceServers == true) {
+    if (typeof window.getExternalIceServers !== 'undefined' && window.getExternalIceServers == true) {
         loadIceFrame(function(externalIceServers) {
             if (!externalIceServers || !externalIceServers.length) return;
             window.RMCExternalIceServers = externalIceServers;
@@ -3186,13 +3214,11 @@
         function getIceServers(connection) {
             var iceServers = [];
 
-            // Firefox <= 37 doesn't understands "urls"
-
             iceServers.push({
                 urls: 'stun:stun.l.google.com:19302'
-            });
-
-            iceServers.push({
+            }, {
+                urls: 'stun:mmt-stun.verkstad.net'
+            }, {
                 urls: 'stun:stun.anyfirewall.com:3478'
             });
 
@@ -3203,25 +3229,26 @@
             });
 
             iceServers.push({
-                urls: 'turn:turn.anyfirewall.com:443?transport=tcp',
+                urls: 'turn:turn.anyfirewall.com:443',
                 credential: 'webrtc',
                 username: 'webrtc'
+            });
+
+            // copyright of mmt-turn.verkstad: Ericsson
+            iceServers.push({
+                urls: 'turn:mmt-turn.verkstad.net',
+                username: 'webrtc',
+                credential: 'secret'
             });
 
             if (window.RMCExternalIceServers) {
                 iceServers = window.RMCExternalIceServers.concat(iceServers);
                 connection.iceServers = iceServers;
-            } else if (typeof window.getExternalIceServers === 'undefined' || window.getExternalIceServers == true) {
+            } else if (typeof window.getExternalIceServers !== 'undefined' && window.getExternalIceServers == true) {
                 window.iceServersLoadCallback = function() {
                     iceServers = window.RMCExternalIceServers.concat(iceServers);
                     connection.iceServers = iceServers;
                 };
-            } else {
-                iceServers.push({
-                    urls: 'turn:turn.anyfirewall.com:443?transport=udp',
-                    credential: 'webrtc',
-                    username: 'webrtc'
-                });
             }
 
             return iceServers;

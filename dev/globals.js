@@ -13,7 +13,6 @@ var isMobileDevice = !!navigator.userAgent.match(/Android|iPhone|iPad|iPod|Black
 // detect node-webkit
 var isNodeWebkit = !!(window.process && (typeof window.process === 'object') && window.process.versions && window.process.versions['node-webkit']);
 
-
 var chromeVersion = 50;
 var matchArray = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
 if (isChrome && matchArray && matchArray[2]) {
