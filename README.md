@@ -1,8 +1,8 @@
-<a href="https://github.com/muaz-khan/RTCMultiConnection"><img src="https://i.imgur.com/MFfRBSM.png" /></a> / <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki Pages</a> / <a href="http://www.rtcmulticonnection.org/docs/">Documentation</a> / <a href="http://www.rtcmulticonnection.org/FAQ/">FAQ</a> / <a href="https://www.webrtc-experiment.com/RTCMultiConnection/">Demos</a> / <a href="http://www.rtcmulticonnection.org/changes-log/">Changes Log</a>
+<a href=""><img src="https://i.imgur.com/MFfRBSM.png" /></a> / <a href="wiki">Wiki Pages</a> / <a href="http://www.rtcmulticonnection.org/docs/">Documentation</a> / <a href="http://www.rtcmulticonnection.org/FAQ/">FAQ</a> / <a href="https://www.webrtc-experiment.com/RTCMultiConnection/">Demos</a> / <a href="http://www.rtcmulticonnection.org/changes-log/">Changes Log</a>
 
 ## WebRTC Library  [![npm](https://img.shields.io/npm/v/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![Build Status: Linux](https://travis-ci.org/muaz-khan/RTCMultiConnection.png?branch=master)](https://travis-ci.org/muaz-khan/RTCMultiConnection)
 
-* [RTCMultiConnection-v3.0](https://github.com/muaz-khan/RTCMultiConnection/tree/master/RTCMultiConnection-v3.0) is latest Beta [![npm](https://img.shields.io/npm/v/rtcmulticonnection-v3.svg)](https://npmjs.org/package/rtcmulticonnection-v3) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection-v3.svg)](https://npmjs.org/package/rtcmulticonnection-v3)
+* [RTCMultiConnection-v3.0](tree/master/RTCMultiConnection-v3.0) is latest Beta [![npm](https://img.shields.io/npm/v/rtcmulticonnection-v3.svg)](https://npmjs.org/package/rtcmulticonnection-v3) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection-v3.svg)](https://npmjs.org/package/rtcmulticonnection-v3)
 * RTCMultiConnection-v3.0 demo: [https://rtcmulticonnection.herokuapp.com/](https://rtcmulticonnection.herokuapp.com/)
 
 ```
@@ -61,22 +61,22 @@ RTCMultiConnection is a <a href="https://www.webrtc-experiment.com/">WebRTC</a> 
 
 It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licenced</a>, which means that you can use it in any commercial/non-commercial product, free of cost.
 
-# [Wiki Pages](https://github.com/muaz-khan/RTCMultiConnection/wiki)
+# [Wiki Pages](wiki)
 
-* [List of Breaking Changes](https://github.com/muaz-khan/RTCMultiConnection/wiki/Breaking-Changes)
-* [Coding Tricks](https://github.com/muaz-khan/RTCMultiConnection/wiki/Coding-Tricks)
-* [Switch Between Cameras](https://github.com/muaz-khan/RTCMultiConnection/wiki/Switch-between-cameras)
-* [Bandwidth Management](https://github.com/muaz-khan/RTCMultiConnection/wiki/Bandwidth-Management)
-* [Channels and Sessions Management](https://github.com/muaz-khan/RTCMultiConnection/wiki/Channels-and-Sessions)
-* [How to send Custom/Private messages?](https://github.com/muaz-khan/RTCMultiConnection/wiki/Custom-Messages)
-* [Custom Private Servers](https://github.com/muaz-khan/RTCMultiConnection/wiki/Custom-Private-Servers)
-* [How to link RTCMultiConnection.js?](https://github.com/muaz-khan/RTCMultiConnection/wiki/How-to-link-RTCMultiConnection.js%3F)
-* [How to fix echo?](https://github.com/muaz-khan/RTCMultiConnection/wiki/How-to-fix-echo%3F)
-* [How to share Part-of-Screen?](https://github.com/muaz-khan/RTCMultiConnection/wiki/Part-of-Screen-Sharing)
-* [How to detect Presence of the users & sessions?](https://github.com/muaz-khan/RTCMultiConnection/wiki/Presence-Detection)
-* [How to share screen?](https://github.com/muaz-khan/RTCMultiConnection/wiki/Screen-Sharing)
-* [How to secure your RTCMultiConnection codes?](https://github.com/muaz-khan/RTCMultiConnection/wiki/Security)
-* [Use WebSync Signaling Server in any RTCMultiConnection demo](https://github.com/muaz-khan/RTCMultiConnection/wiki/WebSync-Signaling-Server)
+* [List of Breaking Changes](wiki/Breaking-Changes)
+* [Coding Tricks](wiki/Coding-Tricks)
+* [Switch Between Cameras](wiki/Switch-between-cameras)
+* [Bandwidth Management](wiki/Bandwidth-Management)
+* [Channels and Sessions Management](wiki/Channels-and-Sessions)
+* [How to send Custom/Private messages?](wiki/Custom-Messages)
+* [Custom Private Servers](wiki/Custom-Private-Servers)
+* [How to link RTCMultiConnection.js?](wiki/How-to-link-RTCMultiConnection.js%3F)
+* [How to fix echo?](wiki/How-to-fix-echo%3F)
+* [How to share Part-of-Screen?](wiki/Part-of-Screen-Sharing)
+* [How to detect Presence of the users & sessions?](wiki/Presence-Detection)
+* [How to share screen?](wiki/Screen-Sharing)
+* [How to secure your RTCMultiConnection codes?](wiki/Security)
+* [Use WebSync Signaling Server in any RTCMultiConnection demo](wiki/WebSync-Signaling-Server)
 
 ```
 bower install rtcmulticonnection
@@ -196,20 +196,20 @@ document.getElementById('joinRoom').onclick = function() {
 
 | Experiment Name        | Demo           | Source Code |
 | ------------- |-------------|-------------|
-| AppRTC like RTCMultiConnection demo! | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/AppRTC-Look.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/AppRTC-Look.html) |
+| AppRTC like RTCMultiConnection demo! | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/AppRTC-Look.html) | [Source](tree/master/demos/AppRTC-Look.html) |
 | MultiRTC! RTCMultiConnection all-in-one demo! | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/MultiRTC/) | [Source](https://github.com/muaz-khan/WebRTC-Experiment/tree/master/MultiRTC-simple) |
 | Collaborative Canvas Designer | [Demo](https://www.webrtc-experiment.com/Canvas-Designer/) | [Source](https://github.com/muaz-khan/Canvas-Designer) |
 | Conversation.js - Skype like library | [Demo](https://www.webrtc-experiment.com/Conversationjs/) | [Source](https://github.com/muaz-khan/Conversation.js) |
-| All-in-One test | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/all-in-one.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/all-in-one.html) |
-| Multi-Broadcasters and Many Viewers | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/Multi-Broadcasters-and-Many-Viewers.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Multi-Broadcasters-and-Many-Viewers.html) |
-| Select Broadcaster at runtime | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/select-broadcaster-at-runtime.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/select-broadcaster-at-runtime.html) |
-| OneWay Screen & Two-Way Audio | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/OneWay-Screen-TwoWay-Audio.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/OneWay-Screen-TwoWay-Audio.html) |
-| Stream Mp3 Live | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/stream-mp3-live.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/stream-mp3-live.html) |
-| Socket.io auto Open/Join rooms | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/socketio-auto-open-join-room.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/socketio-auto-open-join-room.html) |
-| Screen Sharing & Cropping | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/cropped-screen-sharing.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/cropped-screen-sharing.html) |
-| Share Part of Screen without cropping it | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/RTCMultiConnection.sharePartOfScreen.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/RTCMultiConnection.sharePartOfScreen.html) |
-| getMediaDevices/enumerateDevices | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/getMediaDevices.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/getMediaDevices.html) |
-| Renegotiation & Mute/UnMute/Stop | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/Renegotiation.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Renegotiation.html) |
+| All-in-One test | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/all-in-one.html) | [Source](tree/master/demos/all-in-one.html) |
+| Multi-Broadcasters and Many Viewers | [Demo](Multi-Broadcasters-and-Many-Viewers.html) | [Source](tree/master/demos/Multi-Broadcasters-and-Many-Viewers.html) |
+| Select Broadcaster at runtime | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/select-broadcaster-at-runtime.html) | [Source](tree/master/demos/select-broadcaster-at-runtime.html) |
+| OneWay Screen & Two-Way Audio | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/OneWay-Screen-TwoWay-Audio.html) | [Source](tree/master/demos/OneWay-Screen-TwoWay-Audio.html) |
+| Stream Mp3 Live | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/stream-mp3-live.html) | [Source](tree/master/demos/stream-mp3-live.html) |
+| Socket.io auto Open/Join rooms | [Demo](socketio-auto-open-join-room.html) | [Source](tree/master/demos/socketio-auto-open-join-room.html) |
+| Screen Sharing & Cropping | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/cropped-screen-sharing.html) | [Source](tree/master/demos/cropped-screen-sharing.html) |
+| Share Part of Screen without cropping it | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/RTCMultiConnection.sharePartOfScreen.html) | [Source](tree/master/demos/RTCMultiConnection.sharePartOfScreen.html) |
+| getMediaDevices/enumerateDevices | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/getMediaDevices.html) | [Source](tree/master/demos/getMediaDevices.html) |
+| Renegotiation & Mute/UnMute/Stop | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/Renegotiation.html) | [Source](tree/master/demos/Renegotiation.html) |
 | Video-Conferencing | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/videoconferencing.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/videoconferencing.html) |
 | Video Broadcasting | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/video-broadcasting.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/video-broadcasting.html) |
 | Many-to-One Broadcast | [Demo](https://www.webrtc-experiment.com/RTCMultiConnection/many-to-one-broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/many-to-one-broadcast.html) |
