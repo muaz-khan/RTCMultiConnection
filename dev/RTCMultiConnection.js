@@ -491,11 +491,8 @@ function RTCMultiConnection(roomid, forceOptions) {
             }
         });
 
-        if (socket && !dontCloseSocket) {
-            if (typeof socket.disconnect !== 'undefined') {
-                socket.disconnect();
-            }
-            socket = null;
+        if (!dontCloseSocket) {
+            connection.closeSocket();
         }
 
         connection.broadcasters = [];
@@ -600,6 +597,8 @@ function RTCMultiConnection(roomid, forceOptions) {
                 bandwidth: connection.bandwidth.audio * 8 * 1024 || 128 * 8 * 1024
             }, {
                 googLeakyBucket: true
+            }, {
+                facingMode: 'user'
             }]
         }
     };
@@ -611,7 +610,7 @@ function RTCMultiConnection(roomid, forceOptions) {
         };
     }
 
-    if (!forceOptions.useDefaultDevices) {
+    if (!forceOptions.useDefaultDevices && !isMobileDevice) {
         DetectRTC.load(function() {
             var lastAudioDevice, lastVideoDevice;
             // it will force RTCMultiConnection to capture last-devices
@@ -1281,6 +1280,14 @@ function RTCMultiConnection(roomid, forceOptions) {
 
     connection.connectSocket = function(callback) {
         connectSocket(callback);
+    };
+
+    connection.closeSocket = function() {
+        if (!socket) return;
+        if (typeof socket.disconnect !== 'undefined') {
+            socket.disconnect();
+        }
+        socket = null;
     };
 
     connection.getSocket = function(callback) {

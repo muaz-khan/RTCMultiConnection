@@ -1,4 +1,4 @@
-// Last time updated: 2016-02-17 4:59:46 PM UTC
+// Last time updated: 2016-02-23 3:05:59 PM UTC
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -500,11 +500,8 @@
                 }
             });
 
-            if (socket && !dontCloseSocket) {
-                if (typeof socket.disconnect !== 'undefined') {
-                    socket.disconnect();
-                }
-                socket = null;
+            if (!dontCloseSocket) {
+                connection.closeSocket();
             }
 
             connection.broadcasters = [];
@@ -609,6 +606,8 @@
                     bandwidth: connection.bandwidth.audio * 8 * 1024 || 128 * 8 * 1024
                 }, {
                     googLeakyBucket: true
+                }, {
+                    facingMode: 'user'
                 }]
             }
         };
@@ -620,7 +619,7 @@
             };
         }
 
-        if (!forceOptions.useDefaultDevices) {
+        if (!forceOptions.useDefaultDevices && !isMobileDevice) {
             DetectRTC.load(function() {
                 var lastAudioDevice, lastVideoDevice;
                 // it will force RTCMultiConnection to capture last-devices
@@ -1290,6 +1289,14 @@
 
         connection.connectSocket = function(callback) {
             connectSocket(callback);
+        };
+
+        connection.closeSocket = function() {
+            if (!socket) return;
+            if (typeof socket.disconnect !== 'undefined') {
+                socket.disconnect();
+            }
+            socket = null;
         };
 
         connection.getSocket = function(callback) {

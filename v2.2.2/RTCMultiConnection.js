@@ -1,4 +1,4 @@
-// Last time updated at Friday, January 29th, 2016, 11:21:18 AM 
+// Last time updated at Friday, February 19th, 2016, 2:56:28 PM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -360,10 +360,10 @@
                 }
                 warn(Firefox_Screen_Capturing_Warning);
 
-                screen_constraints.video = merge(screen_constraints.video.mandatory, {
+                screen_constraints.video = {
                     mozMediaSource: 'window', // mozMediaSource is redundant here
                     mediaSource: 'window' // 'screen' || 'window'
-                });
+                };
 
                 // Firefox is supporting audio+screen from single getUserMedia request
                 // audio+video+screen will become audio+screen for Firefox

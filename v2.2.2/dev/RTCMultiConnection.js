@@ -341,10 +341,10 @@ window.RTCMultiConnection = function(channel) {
             }
             warn(Firefox_Screen_Capturing_Warning);
 
-            screen_constraints.video = merge(screen_constraints.video.mandatory, {
+            screen_constraints.video = {
                 mozMediaSource: 'window', // mozMediaSource is redundant here
                 mediaSource: 'window' // 'screen' || 'window'
-            });
+            };
 
             // Firefox is supporting audio+screen from single getUserMedia request
             // audio+video+screen will become audio+screen for Firefox

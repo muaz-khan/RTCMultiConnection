@@ -148,7 +148,7 @@
             connection.sharePartOfScreen = function(element) {
                 html2canvas(element, {
                     onrendered: function(canvas) {
-                        var screenshot = canvas.toDataURL('image/webp', 1);
+                        var screenshot = canvas.toDataURL('image/png', 1);
                         if(screenshot === lastSharedScreenShot) {
                             connection.sharePartOfScreen(element);
                             return;
