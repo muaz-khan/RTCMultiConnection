@@ -6,9 +6,17 @@ var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Const
 var isChrome = !!window.chrome && !isOpera;
 var isIE = !!document.documentMode;
 
-var isPluginRTC = isSafari || isIE;
-
 var isMobileDevice = !!navigator.userAgent.match(/Android|iPhone|iPad|iPod|BlackBerry|IEMobile/i);
+
+if (typeof cordova !== 'undefined') {
+    isMobileDevice = true;
+}
+
+if (navigator && navigator.userAgent && navigator.userAgent.indexOf('Crosswalk') !== -1) {
+    isMobileDevice = true;
+}
+
+var isPluginRTC = !isMobileDevice && (isSafari || isIE);
 
 // detect node-webkit
 var isNodeWebkit = !!(window.process && (typeof window.process === 'object') && window.process.versions && window.process.versions['node-webkit']);

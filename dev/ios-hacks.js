@@ -1,6 +1,6 @@
 // ios-hacks.js
 
-document.addEventListener('deviceready', function() {
+function setCordovaAPIs() {
     if (typeof cordova === 'undefined' || typeof cordova.plugins === 'undefined' || typeof cordova.plugins.iosrtc === 'undefined') return;
     if (!window.device || window.device.platform !== 'iOS') return;
 
@@ -13,4 +13,7 @@ document.addEventListener('deviceready', function() {
 
     iosrtc.debug.enable('iosrtc*');
     iosrtc.registerGlobals();
-}, false);
+}
+
+document.addEventListener('deviceready', setCordovaAPIs, false);
+setCordovaAPIs();

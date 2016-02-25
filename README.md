@@ -13,6 +13,14 @@
 
 Fetch latest code:
 
+```
+git clone https://github.com/muaz-khan/RTCMultiConnection.git ./RTCMultiConnection
+cd RTCMultiConnection
+sudo npm install --save-dev
+```
+
+Or:
+
 **Download via Github** (as `ZIP` or `.js`): [https://github.com/muaz-khan/RTCMultiConnection/releases](https://github.com/muaz-khan/RTCMultiConnection/releases)
 
 Or:
@@ -68,7 +76,7 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.91/rmc3.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.92/rmc3.min.js"></script>
 ```
 
 If you're sharing files, you also need to link:
@@ -80,7 +88,7 @@ If you're sharing files, you also need to link:
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.fbr.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.91/rmc3.fbr.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.92/rmc3.fbr.min.js"></script>
 ```
 
 > You can link multiple files from `dev` directory. Order doesn't matters.
@@ -1188,16 +1196,8 @@ var connection = new RTCMultiConnection(roomId, {
 
 ## Wanna use H264 for video?
 
-```html
-<script src="/dev/CodecsHandler.js"></script>
-<script>
-// in your HTML file
-connection.processSdp = function(sdp) {
-    // modify sdp to remove vp8/vp9
-    sdp = CodecsHandler.removeVPX(sdp);
-    return sdp;
-};
-</script>
+```javascript
+connection.codecs.video = 'H264';
 ```
 
 ## Disable Video NACK
@@ -1212,6 +1212,18 @@ connection.processSdp = function(sdp) {
     return sdp;
 };
 </script>
+```
+
+## Wanna use VP8 for video?
+
+```javascript
+connection.codecs.video = 'VP8';
+```
+
+## Wanna use G722 for audio?
+
+```javascript
+connection.codecs.audio = 'G722';
 ```
 
 ## Prioritize Codecs

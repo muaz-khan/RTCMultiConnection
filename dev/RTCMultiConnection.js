@@ -561,27 +561,45 @@ function RTCMultiConnection(roomid, forceOptions) {
         video: 512
     };
 
+    connection.codecs = {
+        audio: 'opus',
+        video: 'VP9'
+    };
+
     connection.processSdp = function(sdp) {
         if (isMobileDevice || isFirefox) {
             return sdp;
         }
 
-        sdp = BandwidthHandler.setApplicationSpecificBandwidth(sdp, connection.bandwidth, !!connection.session.screen);
-        sdp = BandwidthHandler.setVideoBitrates(sdp, {
+        sdp = CodecsHandler.setApplicationSpecificBandwidth(sdp, connection.bandwidth, !!connection.session.screen);
+        sdp = CodecsHandler.setVideoBitrates(sdp, {
             min: connection.bandwidth.video * 8 * 1024,
             max: connection.bandwidth.video * 8 * 1024
         });
-        sdp = BandwidthHandler.setOpusAttributes(sdp, {
+        sdp = CodecsHandler.setOpusAttributes(sdp, {
             maxaveragebitrate: connection.bandwidth.audio * 8 * 1024,
             maxplaybackrate: connection.bandwidth.audio * 8 * 1024,
             stereo: 1,
             maxptime: 3
         });
+
+        if (connection.codecs.video === 'VP9') {
+            sdp = CodecsHandler.preferVP9(sdp);
+        }
+
+        if (connection.codecs.video === 'H264') {
+            sdp = CodecsHandler.removeVPX(sdp);
+        }
+
+        if (connection.codecs.audio === 'G722') {
+            sdp = CodecsHandler.removeNonG722(sdp);
+        }
+
         return sdp;
     };
 
-    if (typeof BandwidthHandler !== 'undefined') {
-        connection.BandwidthHandler = BandwidthHandler;
+    if (typeof CodecsHandler !== 'undefined') {
+        connection.BandwidthHandler = connection.CodecsHandler = CodecsHandler;
     }
 
     connection.mediaConstraints = {
