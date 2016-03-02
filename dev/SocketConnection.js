@@ -10,7 +10,13 @@ function SocketConnection(connection, connectCallback) {
         parameters += '&maxRelayLimitPerUser=' + (connection.maxRelayLimitPerUser || 2);
     }
 
-    var socket = io.connect((connection.socketURL || '/') + parameters, connection.socketOptions);
+    var socket;
+
+    try {
+        socket = io((connection.socketURL || '/') + parameters);
+    } catch (e) {
+        socket = io.connect((connection.socketURL || '/') + parameters, connection.socketOptions);
+    }
 
     var mPeer = connection.multiPeersHandler;
 

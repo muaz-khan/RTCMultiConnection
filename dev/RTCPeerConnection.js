@@ -54,10 +54,6 @@ function onPluginRTCInitialized(pluginRTCObject) {
 }
 if (typeof PluginRTC !== 'undefined') onPluginRTCInitialized(PluginRTC);
 
-var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
-var isIE = !!document.documentMode;
-var isPluginRTC = isSafari || isIE;
-
 function PeerInitiator(config) {
     var connection = config.rtcMultiConnection;
 

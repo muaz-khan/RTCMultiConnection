@@ -3,22 +3,31 @@
 // Documentation  - github.com/muaz-khan/RTCMultiConnection
 
 module.exports = exports = function(app, socketCallback) {
-    var io = require('socket.io').listen(app, {
-        log: false,
-        origins: '*:*'
-    });
-
-    io.set('transports', [
-        'websocket', // 'disconnect' EVENT will work only with 'websocket'
-        'xhr-polling',
-        'jsonp-polling'
-    ]);
-
     var listOfUsers = {};
     var shiftedModerationControls = {};
     var ScalableBroadcast;
 
-    io.sockets.on('connection', function(socket) {
+    var io = require('socket.io');
+
+    try {
+        io = io(app);
+        io.on('connection', onConnection);
+    } catch (e) {
+        io = io.listen(app, {
+            log: false,
+            origins: '*:*'
+        });
+
+        io.set('transports', [
+            'websocket', // 'disconnect' EVENT will work only with 'websocket'
+            'xhr-polling',
+            'jsonp-polling'
+        ]);
+
+        io.sockets.on('connection', onConnection);
+    }
+
+    function onConnection(socket) {
         var params = socket.handshake.query;
         var socketMessageEvent = params.msgEvent || 'RTCMultiConnection-Message';
 
@@ -277,5 +286,5 @@ module.exports = exports = function(app, socketCallback) {
         if (socketCallback) {
             socketCallback(socket);
         }
-    });
+    }
 };

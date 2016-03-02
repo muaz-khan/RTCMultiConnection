@@ -28,9 +28,10 @@ module.exports = function(grunt) {
 
                     'dev/globals.js',
                     'dev/Plugin.EveryWhere.js',
+                    'dev/DetectRTC.js',
 
-                    'dev/RTCPeerConnection.js',
                     'dev/ios-hacks.js', // to support ios
+                    'dev/RTCPeerConnection.js',
                     'dev/CodecsHandler.js', // to force H264 or codecs other than opus
 
                     'dev/OnIceCandidateHandler.js',
@@ -40,7 +41,6 @@ module.exports = function(grunt) {
                     'dev/getUserMedia.js',
                     'dev/StreamsHandler.js',
 
-                    'dev/DetectRTC.js',
                     'dev/getScreenId.js', // or getScreenId.js or Screen-Capturing.js
 
                     'dev/TextSenderReceiver.js',

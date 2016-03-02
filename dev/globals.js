@@ -10,10 +10,12 @@ var isMobileDevice = !!navigator.userAgent.match(/Android|iPhone|iPad|iPod|Black
 
 if (typeof cordova !== 'undefined') {
     isMobileDevice = true;
+    isChrome = true;
 }
 
 if (navigator && navigator.userAgent && navigator.userAgent.indexOf('Crosswalk') !== -1) {
     isMobileDevice = true;
+    isChrome = true;
 }
 
 var isPluginRTC = !isMobileDevice && (isSafari || isIE);

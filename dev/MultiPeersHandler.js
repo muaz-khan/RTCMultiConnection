@@ -293,7 +293,7 @@ function MultiPeers(connection) {
         }
 
         if (message.enableMedia) {
-            if (connection.attachStreams.length) {
+            if (connection.attachStreams.length || connection.dontCaptureUserMedia) {
                 var streamsToShare = {};
                 connection.attachStreams.forEach(function(stream) {
                     streamsToShare[stream.streamid] = {

@@ -27,9 +27,13 @@ Or:
 
 ```
 sudo npm install rtcmulticonnection-v3
+cd node_modules
+cd rtcmulticonnection-v3 # you MUST go to this directory
+node server.js
 
 # or MOST preferred one
-mkdir RTCMultiConnection-v3.0 && cd RTCMultiConnection-v3.0
+mkdir RTCMultiConnection-v3.0
+cd RTCMultiConnection-v3.0
 wget http://dl.webrtc-experiment.com/rtcmulticonnection-v3.tar.gz
 tar -zxvf rtcmulticonnection-v3.tar.gz
 ls -a
@@ -76,7 +80,7 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.92/rmc3.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.93/rmc3.min.js"></script>
 ```
 
 If you're sharing files, you also need to link:
@@ -88,7 +92,7 @@ If you're sharing files, you also need to link:
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.fbr.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.92/rmc3.fbr.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.93/rmc3.fbr.min.js"></script>
 ```
 
 > You can link multiple files from `dev` directory. Order doesn't matters.
@@ -379,7 +383,7 @@ connection.getUserMediaHandler(options);
 
 Its defined here:
 
-* [getUserMedia.js#L20](https://github.com/muaz-khan/RTCMultiConnection/tree/master/devgetUserMedia.js#L20)
+* [getUserMedia.js#L20](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dev/getUserMedia.js#L20)
 
 ## `becomePublicModerator`
 
@@ -593,7 +597,7 @@ This method allows you skip Socket.io and force Firebase or PubNub or WebSockets
 connection.setCustomSocketHandler(FirebaseConnection);
 ```
 
-Please check [`FirebaseConnection`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/devFirebaseConnection.js) or [`PubNubConnection.js`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/devPubNubConnection.js) to understand how it works.
+Please check [`FirebaseConnection`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dev/FirebaseConnection.js) or [`PubNubConnection.js`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dev/PubNubConnection.js) to understand how it works.
 
 ## `enableLogs`
 
@@ -1240,6 +1244,129 @@ if(connection.DetectRTC.browser.name === 'Firefox') {
     });
 }
 </script>
+```
+
+## iOS/Android
+
+RTCMultiConnection-v3.0 supports `cordova` based iOS/android apps.
+
+```
+sudo npm install cordova -g
+sudo npm install xcode -g
+
+cordova create ./mobileApp org.mobileApp mobileApp
+cd mobileApp
+
+cordova plugin add cordova-plugin-iosrtc
+cd hooks
+wget https://raw.githubusercontent.com/eface2face/cordova-plugin-iosrtc/master/extra/hooks/iosrtc-swift-support.js
+
+sudo chmod +x iosrtc-swift-support.js
+
+cd ..
+```
+
+Now modify `config.xml` for this section:
+
+```xml
+<platform name="ios">
+    <hook type="after_platform_add" src="hooks/iosrtc-swift-support.js" />
+</platform>
+```
+
+Further commands:
+
+```
+cordova platform add ios@3.9.2
+
+cordova build ios
+cordova build android
+```
+
+Prerequisites:
+
+1. xcode `7.2.1` (required)
+2. cordova android plugin `5.1.0` (suggested)
+3. cordova ios plugin `3.9.2` --- note: MUST be this version (don't use newer ones)
+
+Check xcode-build-version: `xcodebuild -version`
+
+Make sure that terminal is using latest xcode:
+
+```
+xcode-select --print-path
+
+sudo xcode-select -switch /Applications/Xcode5.1.1/Xcode.app
+```
+
+`config.xml` hints:
+
+Modify `platform/android/AndroidManifest.xml` for `<uses-permission android:name="android.permission.CAMERA"/>`. Now getUserMedia API will work in Android.
+
+An example `AndroidManifest.xml` file:
+
+```xml
+<?xml version='1.0' encoding='utf-8'?>
+<manifest android:hardwareAccelerated="true" android:versionCode="1" android:versionName="0.0.1" package="com.yourApp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <supports-screens android:anyDensity="true" android:largeScreens="true" android:normalScreens="true" android:resizeable="true" android:smallScreens="true" android:xlargeScreens="true" />
+    <application android:hardwareAccelerated="true" android:icon="@drawable/icon" android:label="@string/app_name" android:supportsRtl="true">
+        <activity android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale" android:label="@string/activity_name" android:launchMode="singleTop" android:name="MainActivity" android:theme="@android:style/Theme.DeviceDefault.NoActionBar" android:windowSoftInputMode="adjustResize">
+            <intent-filter android:label="@string/launcher_name">
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+    <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="23" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+</manifest>
+```
+
+An example `config.xml` file (make sure that `icon.png` has valid path):
+
+```xml
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.yourApp" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>yourApp</name>
+    <icon src="www/icon.png" />
+    <description>yourApp</description>
+    <author email="yourApp@gmail.com" href="http://www.yourApp.com">You</author>
+    <content src="index.html" />
+    <plugin name="cordova-plugin-whitelist" spec="1" />
+    <access uri="*" subdomains="true" origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="geo:*" />
+    <allow-navigation href="https://*/*" />
+    <platform name="android">
+        <allow-intent href="market:*" />
+    </platform>
+    <platform name="ios">
+        <allow-intent href="itms:*" />
+        <allow-intent href="itms-apps:*" />
+        <hook type="after_platform_add" src="hooks/iosrtc-swift-support.js" />
+        <config-file target="*-Info.plist" parent="CFBundleURLTypes">
+            <array>
+                <key>NSAppTransportSecurity</key>
+                <dict><key>NSAllowsArbitraryLoads</key><true/></dict>
+            </array>
+        </config-file>
+    </platform>
+    <preference name="xwalkVersion" value="16+" />
+    <preference name="xwalkCommandLine" value="--disable-pull-to-refresh-effect --allow-file-access-from-files --disable-web-security" />
+    <preference name="xwalkMode" value="embedded" />
+    <preference name="xwalkMultipleApk" value="true" />
+    <preference name="BackgroundColor" value="0xFFFF0000" />
+    <preference name="xwalkUserAgent" value="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36" />
+    <preference name="AndroidPersistentFileLocation" value="Internal" />
+</widget>
 ```
 
 ## RTCMultiConnection v2.2.2 Demos

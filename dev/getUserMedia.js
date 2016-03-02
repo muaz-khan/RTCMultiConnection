@@ -92,16 +92,6 @@ function getUserMediaHandler(options) {
             return;
         }
 
-        if (typeof DetectRTC !== 'undefined') {
-            if (!DetectRTC.hasMicrophone) {
-                options.localMediaConstraints.audio = false;
-            }
-
-            if (!DetectRTC.hasWebcam) {
-                options.localMediaConstraints.video = false;
-            }
-        }
-
         navigator.mediaDevices.getUserMedia(options.localMediaConstraints).then(function(stream) {
             stream.streamid = stream.streamid || stream.id || getRandomString();
             stream.idInstance = idInstance;
