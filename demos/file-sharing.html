@@ -272,7 +272,20 @@
            height: 64px;
            position: absolute;
            bottom: 5px;
-           right: 5px;
+           right: 15px;
+           z-index: 9999;
+         }
+
+         .chrome-web-store-icon {
+          background-repeat: no-repeat;
+           background-position: center center;
+           background-size: 64px 64px;
+           background-image: url(https://cdn.webrtc-experiment.com/images/chrome-web-store-icon.png);
+           width: 64px;
+           height: 64px;
+           position: absolute;
+           bottom: 5px;
+           right: 90px;
            z-index: 9999;
          }
 
@@ -312,7 +325,7 @@
             right: 50px;
           }
 
-          .android-app-icon {
+          .android-app-icon, .chrome-web-store-icon {
             display: none;
           }
         }
@@ -344,6 +357,9 @@
         Create or join a room & select file using "+" button.
       </p>
     </div>
+
+    <a class="chrome-web-store-icon" href="https://chrome.google.com/webstore/detail/webrtc-file-sharing/nbnncbdkhpmbnkfngmkdbepoemljbnfo" target="_blank" title="Install Chrome Desktop Extension"></a>
+
     <a class="android-app-icon" href="https://play.google.com/store/apps/details?id=com.webrtc.experiment" target="_blank" title="Install Android App"></a>
 
     <!-- <script src="/RTCMultiConnection.min.js"></script> -->

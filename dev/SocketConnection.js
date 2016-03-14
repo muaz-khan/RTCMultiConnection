@@ -259,6 +259,22 @@ function SocketConnection(connection, connectCallback) {
         });
     });
 
+    socket.on('closed-entire-session', function(sessionid, extra) {
+        connection.leave();
+        connection.onEntireSessionClosed({
+            sessionid: sessionid,
+            userid: sessionid,
+            extra: extra
+        });
+    });
+
+    socket.on('userid-already-taken', function(useridAlreadyTaken, yourNewUserId) {
+        connection.isInitiator = false;
+        connection.userid = yourNewUserId;
+
+        connection.onUserIdAlreadyTaken(useridAlreadyTaken, yourNewUserId);
+    })
+
     socket.on('logs', function(log) {
         if (!connection.enableLogs) return;
         console.debug('server-logs', log);

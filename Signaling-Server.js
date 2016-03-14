@@ -38,8 +38,15 @@ module.exports = exports = function(app, socketCallback) {
             ScalableBroadcast(socket, params.maxRelayLimitPerUser);
         }
 
-        socket.userid = params.userid;
+        if (!!listOfUsers[params.userid]) {
+            params.dontUpdateUserId = true;
 
+            var useridAlreadyTaken = params.userid;
+            params.userid = (Math.random() * 1000).toString().replace('.', '');
+            socket.emit('userid-already-taken', useridAlreadyTaken, params.userid);
+        }
+
+        socket.userid = params.userid;
         listOfUsers[socket.userid] = {
             socket: socket,
             connectedWith: {},
@@ -90,7 +97,12 @@ module.exports = exports = function(app, socketCallback) {
             } catch (e) {}
         });
 
-        socket.on('changed-uuid', function(newUserId) {
+        socket.on('changed-uuid', function(newUserId, callback) {
+            if (params.dontUpdateUserId) {
+                delete params.dontUpdateUserId;
+                return;
+            }
+
             try {
                 if (listOfUsers[socket.userid] && listOfUsers[socket.userid].socket.id == socket.userid) {
                     if (newUserId === socket.userid) return;
@@ -99,6 +111,8 @@ module.exports = exports = function(app, socketCallback) {
                     listOfUsers[newUserId] = listOfUsers[oldUserId];
                     listOfUsers[newUserId].socket.userid = socket.userid = newUserId;
                     delete listOfUsers[oldUserId];
+
+                    callback();
                     return;
                 }
 
@@ -109,6 +123,8 @@ module.exports = exports = function(app, socketCallback) {
                     isPublic: false,
                     extra: {}
                 };
+
+                callback();
             } catch (e) {}
         });
 
@@ -137,6 +153,24 @@ module.exports = exports = function(app, socketCallback) {
             } catch (e) {}
         });
 
+        socket.on('close-entire-session', function(callback) {
+            try {
+                var connectedWith = listOfUsers[socket.userid].connectedWith;
+                Object.keys(connectedWith).forEach(function(key) {
+                    if (connectedWith[key] && connectedWith[key].emit) {
+                        try {
+                            connectedWith[key].emit('closed-entire-session', socket.userid, listOfUsers[socket.userid].extra);
+                        } catch (e) {}
+                    }
+                });
+
+                delete shiftedModerationControls[socket.userid];
+                callback();
+            } catch (e) {
+                throw e;
+            }
+        });
+
         function onMessageCallback(message) {
             try {
                 if (!listOfUsers[message.sender]) {
@@ -144,7 +178,7 @@ module.exports = exports = function(app, socketCallback) {
                     return;
                 }
 
-                if (!listOfUsers[message.sender].connectedWith[message.remoteUserId] && !!listOfUsers[message.remoteUserId]) {
+                if (!message.message.userLeft && !listOfUsers[message.sender].connectedWith[message.remoteUserId] && !!listOfUsers[message.remoteUserId]) {
                     listOfUsers[message.sender].connectedWith[message.remoteUserId] = listOfUsers[message.remoteUserId].socket;
                     listOfUsers[message.sender].socket.emit('user-connected', message.remoteUserId);
 

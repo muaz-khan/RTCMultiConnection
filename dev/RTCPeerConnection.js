@@ -58,7 +58,7 @@ function PeerInitiator(config) {
     var connection = config.rtcMultiConnection;
 
     this.extra = config.remoteSdp ? config.remoteSdp.extra : connection.extra;
-    this.remoteUserId = config.remoteUserId;
+    this.userid = config.userid;
     this.streams = [];
     this.channels = [];
     this.connectionDescription = config.connectionDescription;
@@ -179,8 +179,8 @@ function PeerInitiator(config) {
 
     peer.oniceconnectionstatechange = peer.onsignalingstatechange = function() {
         var extra = that.extra;
-        if (connection.peers[that.remoteUserId]) {
-            extra = connection.peers[that.remoteUserId].extra || extra;
+        if (connection.peers[that.userid]) {
+            extra = connection.peers[that.userid].extra || extra;
         }
 
         if (!peer) {
@@ -192,7 +192,7 @@ function PeerInitiator(config) {
             iceGatheringState: peer.iceGatheringState,
             signalingState: peer.signalingState,
             extra: extra,
-            userid: that.remoteUserId
+            userid: that.userid
         });
     };
 

@@ -88,7 +88,7 @@ function MultiPeers(connection) {
             streamsToShare: userPreferences.streamsToShare || {},
             rtcMultiConnection: connection,
             connectionDescription: userPreferences.connectionDescription,
-            remoteUserId: remoteUserId,
+            userid: remoteUserId,
             localPeerSdpConstraints: userPreferences.localPeerSdpConstraints,
             remotePeerSdpConstraints: userPreferences.remotePeerSdpConstraints,
             dontGetRemoteStream: !!userPreferences.dontGetRemoteStream,

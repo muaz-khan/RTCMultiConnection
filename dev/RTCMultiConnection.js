@@ -489,6 +489,8 @@ function RTCMultiConnection(roomid, forceOptions) {
             if (connection.peers[participant] && connection.peers[participant].peer) {
                 connection.peers[participant].peer.close();
             }
+
+            delete connection.peers[participant];
         });
 
         if (!dontCloseSocket) {
@@ -503,9 +505,9 @@ function RTCMultiConnection(roomid, forceOptions) {
     window.addEventListener('beforeunload', beforeUnload, false);
 
     connection.userid = getRandomString();
-    connection.changeUserId = function(newUserId) {
+    connection.changeUserId = function(newUserId, callback) {
         connection.userid = newUserId || getRandomString();
-        socket.emit('changed-uuid', connection.userid);
+        socket.emit('changed-uuid', connection.userid, callback || function() {});
     };
 
     connection.observers = {
@@ -784,6 +786,32 @@ function RTCMultiConnection(roomid, forceOptions) {
         beforeUnload(false, true);
     };
 
+    connection.closeEntireSession = function(callback) {
+        callback = callback || function() {};
+        socket.emit('close-entire-session', function looper() {
+            if (connection.getAllParticipants().length) {
+                setTimeout(looper, 100);
+                return;
+            }
+
+            connection.onEntireSessionClosed({
+                sessionid: connection.sessionid,
+                userid: connection.userid,
+                extra: connection.extra
+            });
+
+            connection.changeUserId(null, function() {
+                connection.close();
+                callback();
+            });
+        });
+    };
+
+    connection.onEntireSessionClosed = function(event) {
+        if (!connection.enableLogs) return;
+        console.info('Entire session is closed: ', event.sessionid, event.extra);
+    };
+
     connection.onstream = function(e) {
         var parentNode = connection.videosContainer;
         parentNode.insertBefore(e.mediaElement, parentNode.firstChild);
@@ -829,9 +857,21 @@ function RTCMultiConnection(roomid, forceOptions) {
         }
     };
 
-    connection.addStream = function(session) {
+    connection.addStream = function(session, remoteUserId) {
+        if (!!session.getAudioTracks) {
+            if (connection.attachStreams.indexOf(session) === -1) {
+                if (!session.streamid) {
+                    session.streamid = session.id;
+                }
+
+                connection.attachStreams.push(session);
+            }
+            connection.renegotiate(remoteUserId);
+            return;
+        }
+
         if (isData(session)) {
-            connection.renegotiate();
+            connection.renegotiate(remoteUserId);
             return;
         }
 
@@ -878,7 +918,7 @@ function RTCMultiConnection(roomid, forceOptions) {
                         return callback();
                     }
 
-                    connection.renegotiate();
+                    connection.renegotiate(remoteUserId);
                 },
                 onLocalMediaError: function(error, constraints) {
                     mPeer.onLocalMediaError(error, constraints);
@@ -893,7 +933,7 @@ function RTCMultiConnection(roomid, forceOptions) {
                         return callback();
                     }
 
-                    connection.renegotiate();
+                    connection.renegotiate(remoteUserId);
                 },
                 localMediaConstraints: localMediaConstraints || {
                     audio: session.audio ? connection.mediaConstraints.audio : false,
@@ -1500,4 +1540,12 @@ function RTCMultiConnection(roomid, forceOptions) {
     if (!!forceOptions.autoOpenOrJoin) {
         connection.openOrJoin(connection.sessionid);
     }
+
+    connection.onUserIdAlreadyTaken = function(useridAlreadyTaken, yourNewUserId) {
+        if (connection.enableLogs) {
+            console.warn('Userid already taken.', useridAlreadyTaken, 'Your new userid:', yourNewUserId);
+        }
+
+        connection.join(useridAlreadyTaken);
+    };
 }

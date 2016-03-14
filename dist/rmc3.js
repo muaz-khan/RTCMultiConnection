@@ -1,4 +1,4 @@
-// Last time updated: 2016-03-02 9:37:16 AM UTC
+// Last time updated: 2016-03-14 12:12:30 PM UTC
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -498,6 +498,8 @@
                 if (connection.peers[participant] && connection.peers[participant].peer) {
                     connection.peers[participant].peer.close();
                 }
+
+                delete connection.peers[participant];
             });
 
             if (!dontCloseSocket) {
@@ -512,9 +514,9 @@
         window.addEventListener('beforeunload', beforeUnload, false);
 
         connection.userid = getRandomString();
-        connection.changeUserId = function(newUserId) {
+        connection.changeUserId = function(newUserId, callback) {
             connection.userid = newUserId || getRandomString();
-            socket.emit('changed-uuid', connection.userid);
+            socket.emit('changed-uuid', connection.userid, callback || function() {});
         };
 
         connection.observers = {
@@ -793,6 +795,32 @@
             beforeUnload(false, true);
         };
 
+        connection.closeEntireSession = function(callback) {
+            callback = callback || function() {};
+            socket.emit('close-entire-session', function looper() {
+                if (connection.getAllParticipants().length) {
+                    setTimeout(looper, 100);
+                    return;
+                }
+
+                connection.onEntireSessionClosed({
+                    sessionid: connection.sessionid,
+                    userid: connection.userid,
+                    extra: connection.extra
+                });
+
+                connection.changeUserId(null, function() {
+                    connection.close();
+                    callback();
+                });
+            });
+        };
+
+        connection.onEntireSessionClosed = function(event) {
+            if (!connection.enableLogs) return;
+            console.info('Entire session is closed: ', event.sessionid, event.extra);
+        };
+
         connection.onstream = function(e) {
             var parentNode = connection.videosContainer;
             parentNode.insertBefore(e.mediaElement, parentNode.firstChild);
@@ -838,9 +866,21 @@
             }
         };
 
-        connection.addStream = function(session) {
+        connection.addStream = function(session, remoteUserId) {
+            if (!!session.getAudioTracks) {
+                if (connection.attachStreams.indexOf(session) === -1) {
+                    if (!session.streamid) {
+                        session.streamid = session.id;
+                    }
+
+                    connection.attachStreams.push(session);
+                }
+                connection.renegotiate(remoteUserId);
+                return;
+            }
+
             if (isData(session)) {
-                connection.renegotiate();
+                connection.renegotiate(remoteUserId);
                 return;
             }
 
@@ -887,7 +927,7 @@
                             return callback();
                         }
 
-                        connection.renegotiate();
+                        connection.renegotiate(remoteUserId);
                     },
                     onLocalMediaError: function(error, constraints) {
                         mPeer.onLocalMediaError(error, constraints);
@@ -902,7 +942,7 @@
                             return callback();
                         }
 
-                        connection.renegotiate();
+                        connection.renegotiate(remoteUserId);
                     },
                     localMediaConstraints: localMediaConstraints || {
                         audio: session.audio ? connection.mediaConstraints.audio : false,
@@ -1509,6 +1549,14 @@
         if (!!forceOptions.autoOpenOrJoin) {
             connection.openOrJoin(connection.sessionid);
         }
+
+        connection.onUserIdAlreadyTaken = function(useridAlreadyTaken, yourNewUserId) {
+            if (connection.enableLogs) {
+                console.warn('Userid already taken.', useridAlreadyTaken, 'Your new userid:', yourNewUserId);
+            }
+
+            connection.join(useridAlreadyTaken);
+        };
     }
 
     function SocketConnection(connection, connectCallback) {
@@ -1772,6 +1820,22 @@
             });
         });
 
+        socket.on('closed-entire-session', function(sessionid, extra) {
+            connection.leave();
+            connection.onEntireSessionClosed({
+                sessionid: sessionid,
+                userid: sessionid,
+                extra: extra
+            });
+        });
+
+        socket.on('userid-already-taken', function(useridAlreadyTaken, yourNewUserId) {
+            connection.isInitiator = false;
+            connection.userid = yourNewUserId;
+
+            connection.onUserIdAlreadyTaken(useridAlreadyTaken, yourNewUserId);
+        })
+
         socket.on('logs', function(log) {
             if (!connection.enableLogs) return;
             console.debug('server-logs', log);
@@ -1870,7 +1934,7 @@
                 streamsToShare: userPreferences.streamsToShare || {},
                 rtcMultiConnection: connection,
                 connectionDescription: userPreferences.connectionDescription,
-                remoteUserId: remoteUserId,
+                userid: remoteUserId,
                 localPeerSdpConstraints: userPreferences.localPeerSdpConstraints,
                 remotePeerSdpConstraints: userPreferences.remotePeerSdpConstraints,
                 dontGetRemoteStream: !!userPreferences.dontGetRemoteStream,
@@ -3794,7 +3858,7 @@
         var connection = config.rtcMultiConnection;
 
         this.extra = config.remoteSdp ? config.remoteSdp.extra : connection.extra;
-        this.remoteUserId = config.remoteUserId;
+        this.userid = config.userid;
         this.streams = [];
         this.channels = [];
         this.connectionDescription = config.connectionDescription;
@@ -3915,8 +3979,8 @@
 
         peer.oniceconnectionstatechange = peer.onsignalingstatechange = function() {
             var extra = that.extra;
-            if (connection.peers[that.remoteUserId]) {
-                extra = connection.peers[that.remoteUserId].extra || extra;
+            if (connection.peers[that.userid]) {
+                extra = connection.peers[that.userid].extra || extra;
             }
 
             if (!peer) {
@@ -3928,7 +3992,7 @@
                 iceGatheringState: peer.iceGatheringState,
                 signalingState: peer.signalingState,
                 extra: extra,
-                userid: that.remoteUserId
+                userid: that.userid
             });
         };
 

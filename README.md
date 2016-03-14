@@ -80,7 +80,7 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.93/rmc3.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.94/rmc3.min.js"></script>
 ```
 
 If you're sharing files, you also need to link:
@@ -92,7 +92,7 @@ If you're sharing files, you also need to link:
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.fbr.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.93/rmc3.fbr.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.94/rmc3.fbr.min.js"></script>
 ```
 
 > You can link multiple files from `dev` directory. Order doesn't matters.
@@ -111,7 +111,7 @@ Either via `config.json` file:
 or override in your HTML code:
 
 ```javascript
-connection.socketURL = 'http://yourdomain.com:8080/';
+connection.socketURL = 'http:s//yourdomain.com:9001/';
 
 // if your server is already having "message" event
 // then you can use something else, unique.
@@ -142,6 +142,26 @@ Here is a demo explaining how to use above `socketURL`:
 ```javascript
 // node.js code
 require('./Signaling-Server.js')(httpServerHandlerOrPort);
+```
+
+If you're using [expressjs](http://stackoverflow.com/a/35985109/552182):
+
+```javascript
+var fs = require('fs');
+
+var options = {
+    key: fs.readFileSync('fake-keys/privatekey.pem'),
+    cert: fs.readFileSync('fake-keys/certificate.pem')
+};
+
+var express = require("express"),
+    http = require("https"), // Use HTTPs here -------------
+    app = express(),
+    server = http.createServer(options, app);
+
+server.listen(3000);
+
+require('./Signaling-Server.js')(server);
 ```
 
 ## Migrating from older versions?
@@ -867,6 +887,11 @@ Change userid and update userid among all connected peers:
 
 ```javascript
 connection.changeUserId('new-userid');
+
+// or callback to check if userid is successfully changed
+connection.changeUserId('new-userid', function() {
+    alert('Your userid is successfully changed to: ' + connection.userid);
+});
 ```
 
 ## `closeBeforeUnload`
@@ -877,6 +902,56 @@ It is `true` by default. If you are handling `window.onbeforeunload` yourself, t
 connection.closeBeforeUnload = false;
 window.onbeforeunlaod = function() {
 	connection.close();
+};
+```
+
+## `closeEntireSession`
+
+You can skip using `autoCloseEntireSession`. You can keep session/room opened whenever/wherever required and dynamically close the entire room using this method.
+
+```javascript
+connection.closeEntireSession();
+
+// or callback
+connection.closeEntireSession(function() {
+    alert('Entire session has been closed.');
+});
+
+// or before leaving a page
+connection.closeBeforeUnload = false;
+window.onbeforeunlaod = function() {
+    connection.closeEntireSession();
+};
+```
+
+## `onUserIdAlreadyTaken`
+
+This event is fired if two users tries to open same room.
+
+```javascript
+connection.onUserIdAlreadyTaken = function(useridAlreadyTaken, yourNewUserId) {
+    if (connection.enableLogs) {
+        console.warn('Userid already taken.', useridAlreadyTaken, 'Your new userid:', yourNewUserId);
+    }
+
+    connection.join(useridAlreadyTaken);
+};
+```
+
+Above event gets fired out of this code:
+
+```javascript
+moderator1.open('same-roomid');
+moderator2.open('same-roomid');
+```
+
+## `onEntireSessionClosed`
+
+You can tell users that room-moderator closed entire session:
+
+```javascript
+connection.onEntireSessionClosed = function(event) {
+    console.info('Entire session is closed: ', event.sessionid, event.extra);
 };
 ```
 
@@ -1249,6 +1324,27 @@ if(connection.DetectRTC.browser.name === 'Firefox') {
 ## iOS/Android
 
 RTCMultiConnection-v3.0 supports `cordova` based iOS/android apps.
+
+Copy/paste entire [`rmc3.min.js`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dist/rmc3.min.js) file inside `deviceready` callback:
+
+```javascript
+// please read below comments:
+// normally you can place below code in your www/js/index.js file
+document.addEventListener('deviceready', function() {
+    // copy/paste entire/all code from "rmc3.min.js" file
+    // here --- exact here
+    // paste inside this callback
+    // if you will NOT do this, RTCMultiConnection will fail on cordova-based apps
+    // again, you MUST NOT link rmc3.min.js
+    // instead copy/paste all the codes here
+
+    // you can put your custom-ui-codes here
+    // e.g.
+    // var connection = new RTCMultiConnection();
+}, false);
+```
+
+Installations:
 
 ```
 sudo npm install cordova -g
