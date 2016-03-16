@@ -27,7 +27,7 @@ module.exports = function(grunt) {
                     'dev/MultiPeersHandler.js',
 
                     'dev/globals.js',
-                    'dev/Plugin.EveryWhere.js',
+                    // 'dev/Plugin.EveryWhere.js',
                     'dev/DetectRTC.js',
 
                     'dev/ios-hacks.js', // to support ios

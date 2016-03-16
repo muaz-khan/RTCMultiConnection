@@ -38,7 +38,8 @@ module.exports = exports = function(app, socketCallback) {
             ScalableBroadcast(socket, params.maxRelayLimitPerUser);
         }
 
-        if (!!listOfUsers[params.userid]) {
+        // temporarily disabled
+        if (false && !!listOfUsers[params.userid]) {
             params.dontUpdateUserId = true;
 
             var useridAlreadyTaken = params.userid;

@@ -30,8 +30,11 @@ sudo npm install rtcmulticonnection-v3
 cd node_modules
 cd rtcmulticonnection-v3 # you MUST go to this directory
 node server.js
+```
 
-# or MOST preferred one
+Or MOST preferred one:
+
+```
 mkdir RTCMultiConnection-v3.0
 cd RTCMultiConnection-v3.0
 wget http://dl.webrtc-experiment.com/rtcmulticonnection-v3.tar.gz
@@ -41,20 +44,24 @@ ls -a
 
 * [rtcmulticonnection-v3.tar.gz](http://dl.webrtc-experiment.com/rtcmulticonnection-v3.tar.gz)
 
+Windows users can use 7Zip or WinRAR to extract the TAR file.
+
 To TEST:
 
 ```
-npm start
-
-# or
 node server.js
+```
 
-# if fails,
+If fails:
+
+```
 lsof -n -i4TCP:9001 | grep LISTEN
 kill process-ID
+```
 
-# or kill specific port
-# it may require "sudo" privileges
+Or kill specific port. It may require "sudo" privileges:
+
+```
 fuser -vk 9001/tcp
 ```
 
@@ -64,6 +71,26 @@ Now open: `https://localhost:9001/`
 
 ```
 nohup nodejs server.js > /dev/null 2>&1 &
+```
+
+Or:
+
+```
+nohup nodejs server.js &
+```
+
+Or use `forever`:
+
+```
+npm install forever -g
+forever start server.js
+```
+
+To auto-start `server.js` on system-reboot (i.e. when Mac/Linux system shuts down or reboots):
+
+```
+npm install forever-service
+forever-service start server.js
 ```
 
 ## Link Script Files
@@ -80,7 +107,7 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.94/rmc3.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.95/rmc3.min.js"></script>
 ```
 
 If you're sharing files, you also need to link:
@@ -92,23 +119,25 @@ If you're sharing files, you also need to link:
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.fbr.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.94/rmc3.fbr.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.95/rmc3.fbr.min.js"></script>
 ```
 
 > You can link multiple files from `dev` directory. Order doesn't matters.
 
 ## Set different socket URL
 
-Either via `config.json` file:
+By default, RTCMultiConnection uses default port of your domain.
+
+You can use custom ports either via `config.json` file:
 
 ```json
 {
-  "socketURL": "/",
+  "socketURL": "http:s//yourdomain.com:9001/",
   "socketMessageEvent": "RTCMultiConnection-Message"
 }
 ```
 
-or override in your HTML code:
+Or simply override in your HTML code:
 
 ```javascript
 connection.socketURL = 'http:s//yourdomain.com:9001/';
@@ -127,7 +156,7 @@ connection.socketMessageEvent = 'unique-message';
 }
 ```
 
-or
+Or:
 
 ```javascript
 connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
@@ -144,7 +173,7 @@ Here is a demo explaining how to use above `socketURL`:
 require('./Signaling-Server.js')(httpServerHandlerOrPort);
 ```
 
-If you're using [expressjs](http://stackoverflow.com/a/35985109/552182):
+If you're using [express.js](http://stackoverflow.com/a/35985109/552182):
 
 ```javascript
 var fs = require('fs');
@@ -1121,11 +1150,6 @@ Please don't forget to use your own PubNub keys.
 
 Demo: [https://rtcmulticonnection.herokuapp.com/demos/PubNub-Demo.html](https://rtcmulticonnection.herokuapp.com/demos/PubNub-Demo.html)
 
-## Configure v3.0
-
-* [wiki/Configure-v3.0](https://github.com/muaz-khan/RTCMultiConnection/wiki/Configure-v3.0)
-
-
 ## Scalable Broadcasting
 
 v3.0 now supports WebRTC scalable broadcasting. Two new API are introduced: `enableScalableBroadcast` and `singleBroadcastAttendees`.
@@ -1321,15 +1345,59 @@ if(connection.DetectRTC.browser.name === 'Firefox') {
 </script>
 ```
 
+## Tips & Tricks
+
+`Object.observe` has been removed since `v3.2.95`. So you've to manually update-extra-data or set stream-end-handlers:
+
+```javascript
+connection.extra.something = 'something';
+connection.updateExtraData();
+```
+
+When attaching external streams:
+
+```javascript
+connection.attachStreams.push(yourExternalStrea);
+connection.setStreamEndHandler(yourExternalStrea);
+```
+
+Change userid using this method:
+
+```javascript
+connection.changeUserId('your-new-userid');
+```
+
 ## iOS/Android
 
 RTCMultiConnection-v3.0 supports `cordova` based iOS/android apps.
 
 Copy/paste entire [`rmc3.min.js`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dist/rmc3.min.js) file inside `deviceready` callback:
 
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>CordovaApp using RTCMultiConnection-v3</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <!-- your UI code -->
+
+    <!-- scripts are placed on footer -->
+    <script src="cordova.js"></script>
+
+    <!-- NEVER link rmc3.min.js here -->
+    <!-- instead copy/paste code from rmc3.min.js into below "index.js" file -->
+    <script src="js/index.js"></script>
+</body>
+</html>
+```
+
+`www/js/index.js`:
+
+
 ```javascript
 // please read below comments:
-// normally you can place below code in your www/js/index.js file
 document.addEventListener('deviceready', function() {
     // copy/paste entire/all code from "rmc3.min.js" file
     // here --- exact here
@@ -1517,6 +1585,23 @@ An example `config.xml` file (make sure that `icon.png` has valid path):
 v2.2.2 is available here:
 
 * https://github.com/muaz-khan/RTCMultiConnection/tree/master/v2.2.2
+
+# [Wiki Pages](https://github.com/muaz-khan/RTCMultiConnection/wiki)
+
+* [List of Breaking Changes](https://github.com/muaz-khan/RTCMultiConnection/wiki/Breaking-Changes)
+* [Coding Tricks](https://github.com/muaz-khan/RTCMultiConnection/wiki/Coding-Tricks)
+* [Switch Between Cameras](https://github.com/muaz-khan/RTCMultiConnection/wiki/Switch-between-cameras)
+* [Bandwidth Management](https://github.com/muaz-khan/RTCMultiConnection/wiki/Bandwidth-Management)
+* [Channels and Sessions Management](https://github.com/muaz-khan/RTCMultiConnection/wiki/Channels-and-Sessions)
+* [How to send Custom/Private messages?](https://github.com/muaz-khan/RTCMultiConnection/wiki/Custom-Messages)
+* [Custom Private Servers](https://github.com/muaz-khan/RTCMultiConnection/wiki/Custom-Private-Servers)
+* [How to link RTCMultiConnection.js?](https://github.com/muaz-khan/RTCMultiConnection/wiki/How-to-link-RTCMultiConnection.js%3F)
+* [How to fix echo?](https://github.com/muaz-khan/RTCMultiConnection/wiki/How-to-fix-echo%3F)
+* [How to share Part-of-Screen?](https://github.com/muaz-khan/RTCMultiConnection/wiki/Part-of-Screen-Sharing)
+* [How to detect Presence of the users & sessions?](https://github.com/muaz-khan/RTCMultiConnection/wiki/Presence-Detection)
+* [How to share screen?](https://github.com/muaz-khan/RTCMultiConnection/wiki/Screen-Sharing)
+* [How to secure your RTCMultiConnection codes?](https://github.com/muaz-khan/RTCMultiConnection/wiki/Security)
+* [Use WebSync Signaling Server in any RTCMultiConnection demo](https://github.com/muaz-khan/RTCMultiConnection/wiki/WebSync-Signaling-Server)
 
 ## Twitter
 

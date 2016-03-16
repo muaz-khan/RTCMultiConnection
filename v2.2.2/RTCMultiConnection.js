@@ -1,4 +1,4 @@
-// Last time updated at Friday, February 19th, 2016, 2:56:28 PM 
+// Last time updated at Wednesday, March 16th, 2016, 11:18:45 AM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -327,12 +327,29 @@
                     sourceId: connection._mediaSources.audio
                 });
             }
+            if (connection._mediaSources.audiooutput) {
+                constraints.audio.optional.push({
+                    sourceId: connection._mediaSources.audiooutput
+                });
+            }
+            if (connection._mediaSources.audioinput) {
+                constraints.audio.optional.push({
+                    sourceId: connection._mediaSources.audioinput
+                });
+            }
 
             // if custom video device is selected
             if (connection._mediaSources.video) {
                 constraints.video = {
                     optional: [{
                         sourceId: connection._mediaSources.video
+                    }]
+                };
+            }
+            if (connection._mediaSources.videoinput) {
+                constraints.video = {
+                    optional: [{
+                        sourceId: connection._mediaSources.videoinput
                     }]
                 };
             }

@@ -20,6 +20,10 @@ if (navigator && navigator.userAgent && navigator.userAgent.indexOf('Crosswalk')
 
 var isPluginRTC = !isMobileDevice && (isSafari || isIE);
 
+if (isPluginRTC && typeof URL !== 'undefined') {
+    URL.createObjectURL = function() {};
+}
+
 // detect node-webkit
 var isNodeWebkit = !!(window.process && (typeof window.process === 'object') && window.process.versions && window.process.versions['node-webkit']);
 
@@ -82,6 +86,8 @@ function setHarkEvents(connection, streamEvent) {
 }
 
 function setMuteHandlers(connection, streamEvent) {
+    if (!streamEvent.stream || !streamEvent.stream.addEventListener) return;
+
     streamEvent.stream.addEventListener('mute', function(event) {
         event = connection.streamEvents[event.target.streamid];
 
@@ -122,17 +128,17 @@ function getRandomString() {
 
 function getRMCMediaElement(stream, callback, connection) {
     var isAudioOnly = false;
-    if (!stream.getVideoTracks().length) {
+    if (!!stream.getVideoTracks && !stream.getVideoTracks().length) {
         isAudioOnly = true;
     }
 
     var mediaElement = document.createElement(isAudioOnly ? 'audio' : 'video');
 
-    if (isPluginRTC) {
+    if (isPluginRTC && window.PluginRTC) {
         connection.videosContainer.insertBefore(mediaElement, connection.videosContainer.firstChild);
 
         setTimeout(function() {
-            Plugin.attachMediaStream(mediaElement, stream);
+            window.PluginRTC.attachMediaStream(mediaElement, stream);
             callback(mediaElement);
         }, 1000);
 
@@ -166,7 +172,6 @@ function getRMCMediaElement(stream, callback, connection) {
                     }
                 });
                 connection.attachStreams = newStreamsArray;
-                connection.observers.all();
 
                 var streamEvent = connection.streamEvents[stream.streamid];
 
@@ -287,18 +292,4 @@ if (typeof MediaStream !== 'undefined') {
     if (!('getVideoTracks' in MediaStream.prototype) || typeof MediaStream.prototype.getVideoTracks !== 'function') {
         MediaStream.prototype.getVideoTracks = function() {}
     }
-}
-
-var lastChanges = '';
-
-function observeObject(obj, callback) {
-    if (!Object.observe) return;
-    if (isMobileDevice) return;
-
-    Object.observe(obj, function(changes) {
-        var jsonStringified = JSON.stringify(changes);
-        if (lastChanges == jsonStringified) return;
-        lastChanges = jsonStringified;
-        callback(changes);
-    });
 }

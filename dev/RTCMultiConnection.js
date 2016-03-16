@@ -11,7 +11,8 @@ function RTCMultiConnection(roomid, forceOptions) {
 
     mPeer.onGettingLocalMedia = function(stream) {
         stream.type = 'local';
-        setStreamEndHandler(stream);
+
+        connection.setStreamEndHandler(stream);
 
         getRMCMediaElement(stream, function(mediaElement) {
             mediaElement.id = stream.streamid;
@@ -42,13 +43,12 @@ function RTCMultiConnection(roomid, forceOptions) {
 
             connection.onstream(connection.streamEvents[stream.streamid]);
         }, connection);
-
-        connection.observers.all();
     };
 
     mPeer.onGettingRemoteMedia = function(stream, remoteUserId) {
         stream.type = 'remote';
-        setStreamEndHandler(stream, 'remote-stream');
+
+        connection.setStreamEndHandler(stream, 'remote-stream');
 
         getRMCMediaElement(stream, function(mediaElement) {
             mediaElement.id = stream.streamid;
@@ -394,8 +394,6 @@ function RTCMultiConnection(roomid, forceOptions) {
     };
 
     connection.getUserMedia = connection.captureUserMedia = function(callback, session) {
-        connection.observers.all();
-
         session = session || connection.session;
 
         if (connection.dontCaptureUserMedia || isData(session)) {
@@ -510,44 +508,9 @@ function RTCMultiConnection(roomid, forceOptions) {
         socket.emit('changed-uuid', connection.userid, callback || function() {});
     };
 
-    connection.observers = {
-        extra: function() {
-            observeObject(connection.extra, function(changes) {
-                socket.emit('extra-data-updated', connection.extra);
-            });
-        },
-        attachStreams: function() {
-            observeObject(connection.attachStreams, function(changes) {
-                changes.forEach(function(change) {
-                    if (change.type === 'add') {
-                        setStreamEndHandler(change.object[change.name]);
-                    }
-
-                    if (change.type === 'remove' || change.type === 'delete') {
-                        if (connection.removeStreams.indexOf(change.object[change.name]) === -1) {
-                            connection.removeStreams.push(change.object[change.name]);
-                        }
-                    }
-
-                    connection.attachStreams = removeNullEntries(connection.attachStreams);
-                    connection.removeStreams = removeNullEntries(connection.removeStreams);
-                    connection.observers.all();
-                });
-            });
-        },
-        all: function() {
-            this.extra();
-            this.attachStreams();
-
-            if (socket) {
-                socket.emit('extra-data-updated', connection.extra);
-            }
-        }
-    };
     connection.extra = {};
     connection.attachStreams = [];
     connection.removeStreams = [];
-    connection.observers.all();
 
     connection.session = {
         audio: true,
@@ -1105,14 +1068,15 @@ function RTCMultiConnection(roomid, forceOptions) {
         });
     };
 
-    function setStreamEndHandler(stream, isRemote) {
+    connection.setStreamEndHandler = function(stream, isRemote) {
+        if (!stream || !stream.addEventListener) return;
+
         isRemote = !!isRemote;
 
         if (stream.alreadySetEndHandler) {
             return;
         }
         stream.alreadySetEndHandler = true;
-        if (!stream || !stream.addEventListener) return;
 
         stream.addEventListener('ended', function() {
             if (stream.idInstance) {
@@ -1128,7 +1092,6 @@ function RTCMultiConnection(roomid, forceOptions) {
 
                 connection.attachStreams = removeNullEntries(connection.attachStreams);
                 connection.removeStreams = removeNullEntries(connection.removeStreams);
-                connection.observers.all();
             }
 
             // connection.renegotiate();
@@ -1153,7 +1116,7 @@ function RTCMultiConnection(roomid, forceOptions) {
 
             delete connection.streamEvents[stream.streamid];
         }, false);
-    }
+    };
 
     connection.onMediaError = function(error, constraints) {
         if (!!connection.enableLogs) {
@@ -1548,4 +1511,6 @@ function RTCMultiConnection(roomid, forceOptions) {
 
         connection.join(useridAlreadyTaken);
     };
+
+    connection.trickleIce = true;
 }

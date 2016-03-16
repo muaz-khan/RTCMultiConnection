@@ -147,14 +147,12 @@ function MultiPeers(connection) {
             onRemoteStream: function(stream) {
                 connection.peers[remoteUserId].streams.push(stream);
 
-                if (isPluginRTC) {
+                if (isPluginRTC && window.PluginRTC) {
                     var mediaElement = document.createElement('video');
                     var body = connection.videosContainer;
                     body.insertBefore(mediaElement, body.firstChild);
-
                     setTimeout(function() {
-                        Plugin.attachMediaStream(mediaElement, stream);
-                        self.onGettingRemoteMedia(mediaElement, remoteUserId);
+                        window.PluginRTC.attachMediaStream(mediaElement, stream);
                     }, 3000);
                     return;
                 }
@@ -321,50 +319,52 @@ function MultiPeers(connection) {
                 localMediaConstraints.video = connection.mediaConstraints.video;
             }
 
-            function invokeGetUserMedia(mediaConstraints) {
-                getUserMediaHandler({
-                    onGettingLocalMedia: function(localStream) {
-                        self.onGettingLocalMedia(localStream);
-
-                        var streamsToShare = {};
-                        connection.attachStreams.forEach(function(stream) {
-                            streamsToShare[stream.streamid] = {
-                                isAudio: !!stream.isAudio,
-                                isVideo: !!stream.isVideo,
-                                isScreen: !!stream.isScreen
-                            };
-                        });
-                        message.userPreferences.streamsToShare = streamsToShare;
-
-                        self.onNegotiationNeeded({
-                            readyForOffer: true,
-                            userPreferences: message.userPreferences
-                        }, remoteUserId);
-                    },
-                    onLocalMediaError: function(error, constraints) {
-                        self.onLocalMediaError(error, constraints);
-
-                        if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
-                            constraints.video = false;
-                            invokeGetUserMedia(constraints);
-                            return;
-                        }
-
-                        self.onNegotiationNeeded({
-                            readyForOffer: true,
-                            userPreferences: message.userPreferences
-                        }, remoteUserId);
-                    },
-                    localMediaConstraints: mediaConstraints
-                });
-            }
-            invokeGetUserMedia(localMediaConstraints);
+            invokeGetUserMedia(localMediaConstraints, message, remoteUserId);
         }
 
         if (message.readyForOffer) {
             connection.onReadyForOffer(remoteUserId, message.userPreferences);
         }
     };
+
+    function invokeGetUserMedia(mediaConstraints, message, remoteUserId) {
+        getUserMediaHandler({
+            onGettingLocalMedia: function(localStream) {
+                self.onGettingLocalMedia(localStream);
+
+                var streamsToShare = {};
+                connection.attachStreams.forEach(function(stream) {
+                    streamsToShare[stream.streamid] = {
+                        isAudio: !!stream.isAudio,
+                        isVideo: !!stream.isVideo,
+                        isScreen: !!stream.isScreen
+                    };
+                });
+                message.userPreferences.streamsToShare = streamsToShare;
+
+                self.onNegotiationNeeded({
+                    readyForOffer: true,
+                    userPreferences: message.userPreferences
+                }, remoteUserId);
+            },
+            onLocalMediaError: function(error, constraints) {
+                self.onLocalMediaError(error, constraints);
+
+                if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
+                    constraints.video = false;
+                    invokeGetUserMedia(constraints, message, remoteUserId);
+                    return;
+                }
+
+                self.onNegotiationNeeded({
+                    readyForOffer: true,
+                    userPreferences: message.userPreferences
+                }, remoteUserId);
+            },
+            localMediaConstraints: mediaConstraints
+        });
+    }
+
 
     this.connectNewParticipantWithAllBroadcasters = function(newParticipantId, userPreferences, broadcastersList) {
         broadcastersList = broadcastersList.split('|-,-|');
@@ -475,7 +475,6 @@ function MultiPeers(connection) {
             extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},
             channel: channel
         });
-        connection.observers.all();
     };
 
     this.onPeerStateChanged = function(state) {

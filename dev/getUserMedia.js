@@ -79,9 +79,9 @@ function getUserMediaHandler(options) {
     if (currentUserMediaRequest.streams[idInstance]) {
         streaming(currentUserMediaRequest.streams[idInstance].stream, true);
     } else {
-        if (isPluginRTC) {
+        if (isPluginRTC && window.PluginRTC) {
             var mediaElement = document.createElement('video');
-            Plugin.getUserMedia({
+            window.PluginRTC.getUserMedia({
                 audio: true,
                 video: true
             }, function(stream) {

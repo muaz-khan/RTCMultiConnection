@@ -26,6 +26,8 @@ var StreamsHandler = (function() {
     }
 
     function setHandlers(stream, syncAction, connection) {
+        if (!stream || !stream.addEventListener) return;
+
         if (typeof syncAction == 'undefined' || syncAction == true) {
             stream.addEventListener('ended', function() {
                 StreamsHandler.onSyncNeeded(this.streamid, 'ended');
