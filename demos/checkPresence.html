@@ -130,7 +130,16 @@
 
             connection.socketMessageEvent = 'checkPresence-demo';
 
-            document.getElementById('room-id').value = connection.token();
+            var roomid = '';
+            if (localStorage.getItem('rmc-room-id')) {
+                roomid = localStorage.getItem('rmc-room-id');
+            } else {
+                roomid = connection.token();
+            }
+            document.getElementById('room-id').value = roomid;
+            document.getElementById('room-id').onkeyup = function() {
+                localStorage.setItem('rmc-room-id', this.value);
+            };
 
             connection.session = {
                 audio: true,
@@ -142,9 +151,13 @@
                 OfferToReceiveVideo: true
             };
 
-            var videosContainer = document.getElementById('videos-container');
+            connection.videosContainer = document.getElementById('videos-container');
             connection.onstream = function(event) {
-                videosContainer.appendChild(event.mediaElement);
+                connection.videosContainer.appendChild(event.mediaElement);
+                event.mediaElement.play();
+                setTimeout(function() {
+                    event.mediaElement.play();
+                }, 5000);
             };
         </script>
 

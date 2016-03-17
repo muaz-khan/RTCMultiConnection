@@ -154,7 +154,16 @@
 
             connection.socketMessageEvent = 'textchat-plus-fileshare-demo';
 
-            document.getElementById('room-id').value = connection.token();
+            var roomid = '';
+            if (localStorage.getItem('rmc-room-id')) {
+                roomid = localStorage.getItem('rmc-room-id');
+            } else {
+                roomid = connection.token();
+            }
+            document.getElementById('room-id').value = roomid;
+            document.getElementById('room-id').onkeyup = function() {
+                localStorage.setItem('rmc-room-id', this.value);
+            };
 
             connection.enableFileSharing = true; // by default, it is "false".
 
@@ -210,7 +219,6 @@
                         });
                     });
                     connection.attachStreams = [];
-                    connection.observers.all();
                 }
 
                 connection.addStream({
@@ -235,7 +243,6 @@
                     });
 
                     connection.attachStreams = [];
-                    connection.observers.all();
                 }
 
                 connection.renegotiate();

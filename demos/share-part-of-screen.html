@@ -117,7 +117,16 @@
 
             connection.socketMessageEvent = 'part-of-screen-sharing-demo';
 
-            document.getElementById('room-id').value = connection.token();
+            var roomid = '';
+            if (localStorage.getItem('rmc-room-id')) {
+                roomid = localStorage.getItem('rmc-room-id');
+            } else {
+                roomid = connection.token();
+            }
+            document.getElementById('room-id').value = roomid;
+            document.getElementById('room-id').onkeyup = function() {
+                localStorage.setItem('rmc-room-id', this.value);
+            };
 
             connection.session = {
                 data: true

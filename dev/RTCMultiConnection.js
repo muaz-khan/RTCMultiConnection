@@ -778,8 +778,7 @@ function RTCMultiConnection(roomid, forceOptions) {
     connection.onstream = function(e) {
         var parentNode = connection.videosContainer;
         parentNode.insertBefore(e.mediaElement, parentNode.firstChild);
-
-        if (!isMobileDevice) return;
+        e.mediaElement.play();
         setTimeout(function() {
             e.mediaElement.play();
         }, 5000);

@@ -1,4 +1,4 @@
-// Last time updated: 2016-03-16 6:27:32 AM UTC
+// Last time updated: 2016-03-17 11:15:54 AM UTC
 
 // ______________________________
 // RTCMultiConnection-v3.0 (Beta)
@@ -787,8 +787,7 @@
         connection.onstream = function(e) {
             var parentNode = connection.videosContainer;
             parentNode.insertBefore(e.mediaElement, parentNode.firstChild);
-
-            if (!isMobileDevice) return;
+            e.mediaElement.play();
             setTimeout(function() {
                 e.mediaElement.play();
             }, 5000);
@@ -2544,58 +2543,51 @@
     }
 
     /*global MediaStream:true */
-    if (typeof MediaStream !== 'undefined' && !('stop' in MediaStream.prototype)) {
-        MediaStream.prototype.stop = function() {
-            if (!this.getAudioTracks && !!this.getTracks) {
-                this.getAudioTracks = function() {
-                    var array = [];
-                    this.getTracks.forEach(function(track) {
-                        if (track.kind.toString().indexOf('audio') !== -1) {
-                            array.push(track);
-                        }
-                    });
-                    return array;
-                };
-            }
-
-            if (!this.getVideoTracks && !!this.getTracks) {
-                this.getVideoTracks = function() {
-                    var array = [];
-                    this.getTracks.forEach(function(track) {
-                        if (track.kind.toString().indexOf('video') !== -1) {
-                            array.push(track);
-                        }
-                    });
-                    return array;
-                };
-            }
-
-            this.getAudioTracks().forEach(function(track) {
-                if (!!track.stop) {
-                    track.stop();
-                }
-            });
-
-            this.getVideoTracks().forEach(function(track) {
-                if (!!track.stop) {
-                    track.stop();
-                }
-            });
-
-            if (isFirefox) {
-                fireEvent(this, 'ended');
-            }
-        };
-    }
-
     if (typeof MediaStream !== 'undefined') {
-        // MediaStream.getTracks() maybe?
-        if (!('getAudioTracks' in MediaStream.prototype) || typeof MediaStream.prototype.getAudioTracks !== 'function') {
-            MediaStream.prototype.getAudioTracks = function() {}
+        if (!('getVideoTracks' in MediaStream.prototype)) {
+            MediaStream.prototype.getVideoTracks = function() {
+                if (!this.getTracks) {
+                    return [];
+                }
+
+                var tracks = [];
+                this.getTracks.forEach(function(track) {
+                    if (track.kind.toString().indexOf('video') !== -1) {
+                        tracks.push(track);
+                    }
+                });
+                return tracks;
+            };
+
+            MediaStream.prototype.getAudioTracks = function() {
+                if (!this.getTracks) {
+                    return [];
+                }
+
+                var tracks = [];
+                this.getTracks.forEach(function(track) {
+                    if (track.kind.toString().indexOf('audio') !== -1) {
+                        tracks.push(track);
+                    }
+                });
+                return tracks;
+            };
         }
 
-        if (!('getVideoTracks' in MediaStream.prototype) || typeof MediaStream.prototype.getVideoTracks !== 'function') {
-            MediaStream.prototype.getVideoTracks = function() {}
+        if (!('stop' in MediaStream.prototype)) {
+            MediaStream.prototype.stop = function() {
+                this.getAudioTracks().forEach(function(track) {
+                    if (!!track.stop) {
+                        track.stop();
+                    }
+                });
+
+                this.getVideoTracks().forEach(function(track) {
+                    if (!!track.stop) {
+                        track.stop();
+                    }
+                });
+            };
         }
     }
 
@@ -4444,6 +4436,35 @@
                 }
             });
         }
+
+        // chrome 50+ supports promises over "play" method
+        HTMLMediaElement.prototype.nativePlay = HTMLMediaElement.prototype.play;
+        HTMLMediaElement.prototype.play = function() {
+            var myself = this;
+            var promise = myself.nativePlay();
+            if (promise) {
+                promise.then(function() {
+                    // maybe it is Android
+                    setTimeout(function() {
+                        myself.nativePlay().then(function() {
+                            // skip
+                        }).catch(function() {
+                            alert('Video requires manual action to start the player.');
+                        });
+                    }, 1000);
+                }).catch(function() {
+                    // maybe it is iOS webview
+                    setTimeout(function() {
+                        myself.nativePlay().then(function() {
+                            // skip
+                        }).catch(function() {
+                            alert('Video requires manual action to start the player.');
+                        });
+                    }, 1000);
+                });
+            }
+        };
+
         // Proxy existing globals
         getUserMedia = window.navigator && window.navigator.getUserMedia;
     }

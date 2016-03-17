@@ -194,10 +194,10 @@
                 OfferToReceiveVideo: true
             };
 
-            var videosContainer = document.getElementById('videos-container');
+            connection.videosContainer = document.getElementById('videos-container');
             connection.onstream = function(event) {
-                videosContainer.appendChild(event.mediaElement);
-
+                connection.videosContainer.appendChild(event.mediaElement);
+                event.mediaElement.play();
                 setTimeout(function() {
                     event.mediaElement.play();
                 }, 5000);
