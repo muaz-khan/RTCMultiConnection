@@ -9,6 +9,18 @@ module.exports = function(grunt) {
 
     var banner = '// Last time updated: <%= grunt.template.today("UTC:yyyy-mm-dd h:MM:ss TT Z") %>\n\n';
 
+    banner += '// _____________________\n';
+    banner += '// RTCMultiConnection-v3\n\n';
+
+    banner += '// Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection\n\n';
+
+    banner += '// --------------------------------------------------\n';
+    banner += '// Muaz Khan     - www.MuazKhan.com\n';
+    banner += '// MIT License   - www.WebRTC-Experiment.com/licence\n';
+    banner += '// --------------------------------------------------\n\n';
+
+    banner += '\'use strict\';\n\n';
+
     // configure project
     grunt.initConfig({
         // make node configurations available

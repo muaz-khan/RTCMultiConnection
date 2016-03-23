@@ -1,7 +1,14 @@
-// Last time updated: 2016-03-17 11:15:54 AM UTC
+// Last time updated: 2016-03-23 2:23:55 PM UTC
 
-// ______________________________
-// RTCMultiConnection-v3.0 (Beta)
+// _____________________
+// RTCMultiConnection-v3
+
+// Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection
+
+// --------------------------------------------------
+// Muaz Khan     - www.MuazKhan.com
+// MIT License   - www.WebRTC-Experiment.com/licence
+// --------------------------------------------------
 
 'use strict';
 
@@ -1872,6 +1879,15 @@
                 if (remoteUserId) {
                     var remoteUser = connection.peers[remoteUserId];
                     if (remoteUser) {
+                        if (!remoteUser.channels.length) {
+                            connection.peers[remoteUserId].createDataChannel();
+                            connection.renegotiate(remoteUserId);
+                            setTimeout(function() {
+                                that.send(data, remoteUserId);
+                            }, 3000);
+                            return;
+                        }
+
                         remoteUser.channels.forEach(function(channel) {
                             channel.send(data);
                         });
@@ -1880,6 +1896,17 @@
                 }
 
                 this.getAllParticipants().forEach(function(participant) {
+                    if (!that[participant].channels.length) {
+                        connection.peers[participant].createDataChannel();
+                        connection.renegotiate(participant);
+                        setTimeout(function() {
+                            that[participant].channels.forEach(function(channel) {
+                                channel.send(data);
+                            });
+                        }, 3000);
+                        return;
+                    }
+
                     that[participant].channels.forEach(function(channel) {
                         channel.send(data);
                     });
@@ -1905,6 +1932,7 @@
                 dontAttachLocalStream: !!userPreferences.dontAttachLocalStream,
                 renegotiatingPeer: !!userPreferences.renegotiatingPeer,
                 peerRef: userPreferences.peerRef,
+                channels: userPreferences.channels || [],
                 onLocalSdp: function(localSdp) {
                     self.onNegotiationNeeded(localSdp, remoteUserId);
                 },
@@ -2034,6 +2062,7 @@
 
             userPreferences.renegotiatingPeer = true;
             userPreferences.peerRef = connection.peers[remoteUserId].peer;
+            userPreferences.channels = connection.peers[remoteUserId].channels;
 
             var localConfig = this.getLocalConfig(remoteSdp, remoteUserId, userPreferences);
 
@@ -2276,6 +2305,7 @@
         this.onDataChannelOpened = function(channel, remoteUserId) {
             // keep last channel only; we are not expecting parallel/channels channels
             if (connection.peers[remoteUserId].channels.length) {
+                connection.peers[remoteUserId].channels = [channel];
                 return;
             }
 
@@ -3615,10 +3645,10 @@
         this.extra = config.remoteSdp ? config.remoteSdp.extra : connection.extra;
         this.userid = config.userid;
         this.streams = [];
-        this.channels = [];
+        this.channels = config.channels || [];
         this.connectionDescription = config.connectionDescription;
 
-        var that = this;
+        var self = this;
 
         if (config.remoteSdp) {
             this.connectionDescription = config.remoteSdp.connectionDescription;
@@ -3691,7 +3721,7 @@
                         sdp: localSdp.sdp,
                         remotePeerSdpConstraints: config.remotePeerSdpConstraints || false,
                         renegotiatingPeer: !!config.renegotiatingPeer || false,
-                        connectionDescription: that.connectionDescription,
+                        connectionDescription: self.connectionDescription,
                         dontGetRemoteStream: !!config.dontGetRemoteStream,
                         extra: connection ? connection.extra : {},
                         streamsToShare: streamsToShare,
@@ -3730,9 +3760,9 @@
         });
 
         peer.oniceconnectionstatechange = peer.onsignalingstatechange = function() {
-            var extra = that.extra;
-            if (connection.peers[that.userid]) {
-                extra = connection.peers[that.userid].extra || extra;
+            var extra = self.extra;
+            if (connection.peers[self.userid]) {
+                extra = connection.peers[self.userid].extra || extra;
             }
 
             if (!peer) {
@@ -3744,7 +3774,7 @@
                 iceGatheringState: peer.iceGatheringState,
                 signalingState: peer.signalingState,
                 extra: extra,
-                userid: that.userid
+                userid: self.userid
             });
         };
 
@@ -3797,9 +3827,9 @@
             peer.addIceCandidate(new RTCIceCandidate(remoteCandidate));
         };
 
-        this.addRemoteSdp = function(remoteSdp) {
+        this.addRemoteSdp = function(remoteSdp, cb) {
             remoteSdp.sdp = connection.processSdp(remoteSdp.sdp);
-            peer.setRemoteDescription(new RTCSessionDescription(remoteSdp), function() {}, function(error) {
+            peer.setRemoteDescription(new RTCSessionDescription(remoteSdp), cb || function() {}, function(error) {
                 if (!!connection.enableLogs) {
                     console.error(JSON.stringify(error, null, '\t'), '\n', remoteSdp.type, remoteSdp.sdp);
                 }
@@ -3812,8 +3842,20 @@
             isOfferer = false;
         }
 
-        if (connection.session.data === true) {
-            createDataChannel();
+        this.createDataChannel = function() {
+            var channel = peer.createDataChannel('sctp', {});
+            setChannelEvents(channel);
+        };
+
+        if (connection.session.data === true && !renegotiatingPeer) {
+            if (!isOfferer) {
+                peer.ondatachannel = function(event) {
+                    var channel = event.channel;
+                    setChannelEvents(channel);
+                };
+            } else {
+                this.createDataChannel();
+            }
         }
 
         if (config.remoteSdp) {
@@ -3822,19 +3864,6 @@
             }
             defaults.sdpConstraints = setSdpConstraints(sdpConstraints);
             this.addRemoteSdp(config.remoteSdp);
-        }
-
-        function createDataChannel() {
-            if (!isOfferer) {
-                peer.ondatachannel = function(event) {
-                    var channel = event.channel;
-                    setChannelEvents(channel);
-                };
-                return;
-            }
-
-            var channel = peer.createDataChannel('RTCDataChannel', {});
-            setChannelEvents(channel);
         }
 
         function setChannelEvents(channel) {
@@ -3895,7 +3924,7 @@
                 sdp: localSdp.sdp,
                 remotePeerSdpConstraints: config.remotePeerSdpConstraints || false,
                 renegotiatingPeer: !!config.renegotiatingPeer || false,
-                connectionDescription: that.connectionDescription,
+                connectionDescription: self.connectionDescription,
                 dontGetRemoteStream: !!config.dontGetRemoteStream,
                 extra: connection ? connection.extra : {},
                 streamsToShare: streamsToShare,
@@ -3923,7 +3952,7 @@
             } catch (e) {}
 
             peer = null;
-            that.peer = null;
+            self.peer = null;
         };
 
         this.peer = peer;
@@ -4331,7 +4360,7 @@
     }
 
     function getExtenralIceFormatted() {
-        var iceServers;
+        var iceServers = [];
         window.RMCExternalIceServers.forEach(function(ice) {
             if (!ice.urls) {
                 ice.urls = ice.url;

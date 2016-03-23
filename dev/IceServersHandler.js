@@ -64,7 +64,7 @@ function getTURNObj(turnStr, username, credential) {
 }
 
 function getExtenralIceFormatted() {
-    var iceServers;
+    var iceServers = [];
     window.RMCExternalIceServers.forEach(function(ice) {
         if (!ice.urls) {
             ice.urls = ice.url;

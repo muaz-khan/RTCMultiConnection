@@ -62,6 +62,15 @@ function MultiPeers(connection) {
             if (remoteUserId) {
                 var remoteUser = connection.peers[remoteUserId];
                 if (remoteUser) {
+                    if (!remoteUser.channels.length) {
+                        connection.peers[remoteUserId].createDataChannel();
+                        connection.renegotiate(remoteUserId);
+                        setTimeout(function() {
+                            that.send(data, remoteUserId);
+                        }, 3000);
+                        return;
+                    }
+
                     remoteUser.channels.forEach(function(channel) {
                         channel.send(data);
                     });
@@ -70,6 +79,17 @@ function MultiPeers(connection) {
             }
 
             this.getAllParticipants().forEach(function(participant) {
+                if (!that[participant].channels.length) {
+                    connection.peers[participant].createDataChannel();
+                    connection.renegotiate(participant);
+                    setTimeout(function() {
+                        that[participant].channels.forEach(function(channel) {
+                            channel.send(data);
+                        });
+                    }, 3000);
+                    return;
+                }
+
                 that[participant].channels.forEach(function(channel) {
                     channel.send(data);
                 });
@@ -95,6 +115,7 @@ function MultiPeers(connection) {
             dontAttachLocalStream: !!userPreferences.dontAttachLocalStream,
             renegotiatingPeer: !!userPreferences.renegotiatingPeer,
             peerRef: userPreferences.peerRef,
+            channels: userPreferences.channels || [],
             onLocalSdp: function(localSdp) {
                 self.onNegotiationNeeded(localSdp, remoteUserId);
             },
@@ -224,6 +245,7 @@ function MultiPeers(connection) {
 
         userPreferences.renegotiatingPeer = true;
         userPreferences.peerRef = connection.peers[remoteUserId].peer;
+        userPreferences.channels = connection.peers[remoteUserId].channels;
 
         var localConfig = this.getLocalConfig(remoteSdp, remoteUserId, userPreferences);
 
@@ -466,6 +488,7 @@ function MultiPeers(connection) {
     this.onDataChannelOpened = function(channel, remoteUserId) {
         // keep last channel only; we are not expecting parallel/channels channels
         if (connection.peers[remoteUserId].channels.length) {
+            connection.peers[remoteUserId].channels = [channel];
             return;
         }
 
