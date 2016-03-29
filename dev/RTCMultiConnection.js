@@ -933,7 +933,7 @@ function RTCMultiConnection(roomid, forceOptions) {
         }
 
         if (streamid) {
-            var streams;
+            var stream;
             if (connection.streamEvents[streamid]) {
                 stream = connection.streamEvents[streamid].stream;
             }

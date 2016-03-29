@@ -1,4 +1,4 @@
-// Last time updated: 2016-03-29 11:03:20 AM UTC
+// Last time updated: 2016-03-29 5:03:57 PM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -949,7 +949,7 @@
             }
 
             if (streamid) {
-                var streams;
+                var stream;
                 if (connection.streamEvents[streamid]) {
                     stream = connection.streamEvents[streamid].stream;
                 }
