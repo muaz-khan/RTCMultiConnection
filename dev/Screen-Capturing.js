@@ -168,42 +168,40 @@ function getScreenConstraints(callback) {
 
     if (isFirefox) return callback(null, firefoxScreenConstraints);
 
-    getChromeExtensionStatus(function(status) {
-        isChromeExtensionAvailable(function(isAvailable) {
-            // this statement defines getUserMedia constraints
-            // that will be used to capture content of screen
-            var screen_constraints = {
-                mandatory: {
-                    chromeMediaSource: chromeMediaSource,
-                    maxWidth: 29999,
-                    maxHeight: 8640,
-                    minFrameRate: 30,
-                    maxFrameRate: 128,
-                    minAspectRatio: 1.77, // 2.39
-                    googLeakyBucket: true
-                },
-                optional: []
-            };
+    isChromeExtensionAvailable(function(isAvailable) {
+        // this statement defines getUserMedia constraints
+        // that will be used to capture content of screen
+        var screen_constraints = {
+            mandatory: {
+                chromeMediaSource: chromeMediaSource,
+                maxWidth: 29999,
+                maxHeight: 8640,
+                minFrameRate: 30,
+                maxFrameRate: 128,
+                minAspectRatio: 1.77, // 2.39
+                googLeakyBucket: true
+            },
+            optional: []
+        };
 
-            // this statement verifies chrome extension availability
-            // if installed and available then it will invoke extension API
-            // otherwise it will fallback to command-line based screen capturing API
-            if (chromeMediaSource == 'desktop' && !sourceId) {
-                getSourceId(function() {
-                    screen_constraints.mandatory.chromeMediaSourceId = sourceId;
-                    callback(sourceId == 'PermissionDeniedError' ? sourceId : null, screen_constraints);
-                    sourceId = null;
-                });
-                return;
-            }
-
-            // this statement sets gets 'sourceId" and sets "chromeMediaSourceId" 
-            if (chromeMediaSource == 'desktop') {
+        // this statement verifies chrome extension availability
+        // if installed and available then it will invoke extension API
+        // otherwise it will fallback to command-line based screen capturing API
+        if (chromeMediaSource == 'desktop' && !sourceId) {
+            getSourceId(function() {
                 screen_constraints.mandatory.chromeMediaSourceId = sourceId;
-            }
+                callback(sourceId == 'PermissionDeniedError' ? sourceId : null, screen_constraints);
+                sourceId = null;
+            });
+            return;
+        }
 
-            // now invoking native getUserMedia API
-            callback(null, screen_constraints);
-        })
+        // this statement sets gets 'sourceId" and sets "chromeMediaSourceId" 
+        if (chromeMediaSource == 'desktop') {
+            screen_constraints.mandatory.chromeMediaSourceId = sourceId;
+        }
+
+        // now invoking native getUserMedia API
+        callback(null, screen_constraints);
     });
 }

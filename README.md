@@ -38,7 +38,11 @@
 | Change Cameras/Microphonea | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Switch-Cameras.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Switch-Cameras.html) |
 | MultiRTC: Skype-like app | [Demo](https://rtcmulticonnection.herokuapp.com/demos/MultiRTC/) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/MultiRTC/) |
 
-Fetch latest code:
+## Install
+
+* NPM install: https://www.youtube.com/watch?v=EtsiYEW_T8Y
+
+Or fetch latest code via github:
 
 ```
 git clone https://github.com/muaz-khan/RTCMultiConnection.git ./RTCMultiConnection
@@ -46,11 +50,11 @@ cd RTCMultiConnection
 sudo npm install --save-dev
 ```
 
-Or:
+Or **Download via Github** (as `ZIP` or `.js`): 
 
-**Download via Github** (as `ZIP` or `.js`): [https://github.com/muaz-khan/RTCMultiConnection/releases](https://github.com/muaz-khan/RTCMultiConnection/releases)
+* [https://github.com/muaz-khan/RTCMultiConnection/releases](https://github.com/muaz-khan/RTCMultiConnection/releases)
 
-Or:
+Or NPM:
 
 ```
 sudo npm install rtcmulticonnection-v3
@@ -59,7 +63,7 @@ cd rtcmulticonnection-v3 # you MUST go to this directory
 node server.js
 ```
 
-Or MOST preferred one:
+Or MOST preferred one (wget/TAR):
 
 ```
 mkdir RTCMultiConnection-v3
@@ -79,7 +83,7 @@ To TEST:
 node server.js
 ```
 
-If fails:
+If above command fails:
 
 ```
 lsof -n -i4TCP:9001 | grep LISTEN
@@ -117,8 +121,20 @@ To auto-start `server.js` on system-reboot (i.e. when Mac/Linux system shuts dow
 
 ```
 npm install forever-service
-forever-service start server.js
+
+cd __path to your npm install__
+forever-service install ncustomAppName --script server.js
 ```
+
+Commands to interact with `service ncustomAppName Start`:
+
+```
+- "sudo service ncustomAppName start" Stop
+- "sudo service ncustomAppName stop" Status
+- "sudo service ncustomAppName status" Restart - "sudo service ncustomAppName restart"
+```
+
+More info about `forever-service` [here](http://stackoverflow.com/a/36027516/552182).
 
 ## Link Script Files
 
@@ -1629,6 +1645,7 @@ v2.2.2 is available here:
 * [How to share screen?](https://github.com/muaz-khan/RTCMultiConnection/wiki/Screen-Sharing)
 * [How to secure your RTCMultiConnection codes?](https://github.com/muaz-khan/RTCMultiConnection/wiki/Security)
 * [Use WebSync Signaling Server in any RTCMultiConnection demo](https://github.com/muaz-khan/RTCMultiConnection/wiki/WebSync-Signaling-Server)
+* [How to implement client-side (local) screen-sharing without involving any 3rd-party service or extension or addon](https://github.com/muaz-khan/RTCMultiConnection/wiki/Screen-Sharing-on-your-Local-Server)
 
 ## Twitter
 
