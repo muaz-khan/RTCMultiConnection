@@ -286,3 +286,37 @@ if (typeof MediaStream !== 'undefined') {
         };
     }
 }
+
+function isAudioPlusTab(connection, audioPlusTab) {
+    if (isFirefox && audioPlusTab !== false) {
+        return true;
+    }
+
+    if (!isChrome || chromeVersion < 50) return false;
+
+    if (typeof audioPlusTab === true) {
+        return true;
+    }
+
+    if (typeof audioPlusTab === 'undefined' && connection.session.audio && connection.session.screen && !connection.session.video) {
+        audioPlusTab = true;
+        return true;
+    }
+
+    return false;
+}
+
+function getAudioScreenConstraints(screen_constraints) {
+    if (isFirefox) {
+        return true;
+    }
+
+    if (!isChrome) return false;
+
+    return {
+        mandatory: {
+            chromeMediaSource: screen_constraints.mandatory.chromeMediaSource,
+            chromeMediaSourceId: screen_constraints.mandatory.chromeMediaSourceId
+        }
+    };
+}

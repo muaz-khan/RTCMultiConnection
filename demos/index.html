@@ -16,6 +16,38 @@
     
     <meta name="description" content="A javascript wrapper library supporting approximately all possible peer-to-peer features. It is having approximately all kinds of demo-applications." />
     <meta name="keywords" content="WebRTC,RTCMultiConnection,Demos,Experiments,Samples,Examples" />
+
+    <style>
+        .search-container {
+                text-align: left;
+                margin: -2em 5%;
+                margin-top: 0;
+            }
+            .search-container input {
+                background-color: transparent;
+            }
+            
+            .search-container td {
+                border: 0;
+                vertical-align: top;
+                padding: 0;
+                border-top: none;
+                border-right: none;
+            }
+    </style>
+    <link rel="alternate" type="application/rss+xml" title="Muaz Khan Feed" href="http://feeds.feedburner.com/muazkh">
+        <script type="application/ld+json">
+        {
+           "@context": "http://schema.org",
+           "@type": "WebSite",
+           "url": "https://www.webrtc-experiment.com/",
+           "potentialAction": {
+             "@type": "SearchAction",             
+             "target": "https://www.google.com/cse?q=WebRTC&r=m&cx=010995979085537571634%3Auujpel__q7e#gsc.tab=0&gsc.q={search_term_string}&gsc.page=1",
+             "query-input": "required name=search_term_string"
+           }
+        }
+    </script>
 </head>
 
 <body>
@@ -32,6 +64,10 @@
                 <a href="https://github.com/muaz-khan/RTCMultiConnection/issues?state=open" target="_blank">Latest issues</a> .
                 <a href="https://github.com/muaz-khan/RTCMultiConnection/commits/master" target="_blank">What's New?</a>
             </p>
+
+            <div class="search-container">
+                <gcse:search></gcse:search>
+            </div>
         </header>
 
         <div class="github-stargazers"></div>
@@ -90,7 +126,7 @@
                 </li>
 
                 <li>
-                    <a href="/demos/Audio+ScreenSharing.html">TwoWay Audio & OneWay Screen Sharing</a> (NOT-Functional YET)
+                    <a href="/demos/Audio+ScreenSharing.html">TwoWay Audio & TwoWay Screen Sharing</a>
                 </li>
 
                 <li>
@@ -202,6 +238,33 @@ node server.js
             <a href="https://github.com/muaz-khan" target="_blank">Github</a>
         </p>
     </footer>
+
+    <script>
+      (function() {
+        var cx = '010995979085537571634:okwrck5_p9q';
+        var gcse = document.createElement('script');
+        gcse.type = 'text/javascript';
+        gcse.async = true;
+        gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+            '//cse.google.com/cse.js?cx=' + cx;
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(gcse, s);
+      })();
+    </script>
+
+    <style>
+        .gsc-result .gs-title {
+            height: 1.4em!important;
+        }
+        input.gsc-search-button, input.gsc-search-button:hover, input.gsc-search-button:focus {
+            border-color: #090808!important;
+            background-color: #413E3E!important;
+            margin-left: -13px!important;
+            margin-top: 8px!important;
+            border-left: 0!important;
+            border-radius: 0!important;
+        }
+    </style>
 
 </body>
 

@@ -410,63 +410,15 @@ function RTCMultiConnection(roomid, forceOptions) {
                         throw error;
                     }
 
-                    invokeGetUserMedia({
+                    connection.invokeGetUserMedia({
+                        audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
                         video: screen_constraints,
                         isScreen: true
-                    }, session.audio || session.video ? invokeGetUserMedia : false);
+                    }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia : false);
                 });
             } else if (session.audio || session.video) {
-                invokeGetUserMedia();
+                connection.invokeGetUserMedia();
             }
-        }
-
-        function invokeGetUserMedia(localMediaConstraints, getUserMedia_callback) {
-            var isScreen = false;
-            if (localMediaConstraints) {
-                isScreen = localMediaConstraints.isScreen;
-                delete localMediaConstraints.isScreen;
-            }
-
-            getUserMediaHandler({
-                onGettingLocalMedia: function(stream) {
-                    stream.isAudio = stream.isVideo = stream.isScreen = false;
-
-                    if (isScreen) {
-                        stream.isScreen = true;
-                    } else if (session.audio && session.video) {
-                        stream.isVideo = true;
-                    } else if (session.audio) {
-                        stream.isAudio = true;
-                    }
-
-                    mPeer.onGettingLocalMedia(stream);
-
-                    if (getUserMedia_callback) {
-                        return getUserMedia_callback();
-                    }
-
-                    if (callback) {
-                        callback(stream);
-                    }
-                },
-                onLocalMediaError: function(error, constraints) {
-                    mPeer.onLocalMediaError(error, constraints);
-
-                    if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
-                        constraints.video = false;
-                        invokeGetUserMedia(constraints, getUserMedia_callback);
-                        return;
-                    }
-
-                    if (callback) {
-                        callback();
-                    }
-                },
-                localMediaConstraints: localMediaConstraints || {
-                    audio: !!session.audio ? connection.mediaConstraints.audio : false,
-                    video: !!session.video ? connection.mediaConstraints.video : false
-                }
-            });
         }
     };
 
@@ -844,65 +796,65 @@ function RTCMultiConnection(roomid, forceOptions) {
                         return alert(error);
                     }
 
-                    invokeGetUserMedia({
-                        video: screen_constraints
-                    }, session.audio || session.video ? invokeGetUserMedia : false);
+                    connection.invokeGetUserMedia({
+                        audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
+                        video: screen_constraints,
+                        isScreen: true
+                    }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia(null, gumCallback) : gumCallback);
                 });
             } else if (session.audio || session.video) {
-                invokeGetUserMedia();
+                connection.invokeGetUserMedia(null, gumCallback);
             }
         }
 
-        function invokeGetUserMedia(localMediaConstraints, callback) {
-            getUserMediaHandler({
-                onGettingLocalMedia: function(stream) {
-                    var videoConstraints = localMediaConstraints ? localMediaConstraints.video : connection.mediaConstraints;
-                    if (videoConstraints) {
-                        if (videoConstraints.mediaSource || videoConstraints.mozMediaSource) {
-                            stream.isScreen = true;
-                        } else if (videoConstraints.mandatory && videoConstraints.mandatory.chromeMediaSource) {
-                            stream.isScreen = true;
-                        }
-                    }
+        function gumCallback(stream) {
+            if (session.streamCallback) {
+                session.streamCallback(stream);
+            }
 
-                    if (!stream.isScreen) {
-                        stream.isVideo = stream.getVideoTracks().length;
-                        stream.isAudio = !stream.isVideo && stream.getAudioTracks().length;
-                    }
-
-                    mPeer.onGettingLocalMedia(stream);
-
-                    if (session.streamCallback) {
-                        session.streamCallback(stream);
-                    }
-
-                    if (callback) {
-                        return callback();
-                    }
-
-                    connection.renegotiate(remoteUserId);
-                },
-                onLocalMediaError: function(error, constraints) {
-                    mPeer.onLocalMediaError(error, constraints);
-
-                    if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
-                        constraints.video = false;
-                        invokeGetUserMedia(constraints, callback);
-                        return;
-                    }
-
-                    if (callback) {
-                        return callback();
-                    }
-
-                    connection.renegotiate(remoteUserId);
-                },
-                localMediaConstraints: localMediaConstraints || {
-                    audio: session.audio ? connection.mediaConstraints.audio : false,
-                    video: session.video ? connection.mediaConstraints.video : false
-                }
-            });
+            connection.renegotiate(remoteUserId);
         }
+    };
+
+    connection.invokeGetUserMedia = function(localMediaConstraints, callback, session) {
+        if (!session) {
+            session = connection.session;
+        }
+
+        getUserMediaHandler({
+            onGettingLocalMedia: function(stream) {
+                var videoConstraints = localMediaConstraints ? localMediaConstraints.video : connection.mediaConstraints;
+                if (videoConstraints) {
+                    if (videoConstraints.mediaSource || videoConstraints.mozMediaSource) {
+                        stream.isScreen = true;
+                    } else if (videoConstraints.mandatory && videoConstraints.mandatory.chromeMediaSource) {
+                        stream.isScreen = true;
+                    }
+                }
+
+                if (!stream.isScreen) {
+                    stream.isVideo = stream.getVideoTracks().length;
+                    stream.isAudio = !stream.isVideo && stream.getAudioTracks().length;
+                }
+
+                mPeer.onGettingLocalMedia(stream);
+
+                if (callback) {
+                    return callback();
+                }
+            },
+            onLocalMediaError: function(error, constraints) {
+                mPeer.onLocalMediaError(error, constraints);
+
+                if (callback) {
+                    callback();
+                }
+            },
+            localMediaConstraints: localMediaConstraints || {
+                audio: session.audio ? connection.mediaConstraints.audio : false,
+                video: session.video ? connection.mediaConstraints.video : false
+            }
+        });
     };
 
     function applyConstraints(stream, mediaConstraints) {
@@ -993,44 +945,19 @@ function RTCMultiConnection(roomid, forceOptions) {
                         return alert(error);
                     }
 
-                    invokeGetUserMedia({
-                        video: screen_constraints
-                    }, session.audio || session.video ? invokeGetUserMedia : false);
+                    connection.invokeGetUserMedia({
+                        audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
+                        video: screen_constraints,
+                        isScreen: true
+                    }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia(null, gumCallback) : gumCallback);
                 });
             } else if (session.audio || session.video) {
-                invokeGetUserMedia();
+                connection.invokeGetUserMedia(null, gumCallback);
             }
         }
 
-        function invokeGetUserMedia(localMediaConstraints, callback) {
-            getUserMediaHandler({
-                onGettingLocalMedia: function(stream) {
-                    mPeer.onGettingLocalMedia(stream);
-
-                    if (callback) {
-                        return callback();
-                    }
-
-                    connection.replaceTrack(stream, remoteUserId, isVideoTrack || session.video || session.screen);
-                },
-                onLocalMediaError: function(error, constraints) {
-                    mPeer.onLocalMediaError(error, constraints);
-
-                    if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
-                        constraints.video = false;
-                        invokeGetUserMedia(constraints, callback);
-                        return;
-                    }
-
-                    if (callback) {
-                        callback();
-                    }
-                },
-                localMediaConstraints: localMediaConstraints || {
-                    audio: session.audio ? connection.mediaConstraints.audio : false,
-                    video: session.video ? connection.mediaConstraints.video : false
-                }
-            });
+        function gumCallback(stream) {
+            connection.replaceTrack(stream, remoteUserId, isVideoTrack || session.video || session.screen);
         }
     };
 
@@ -1430,13 +1357,17 @@ function RTCMultiConnection(roomid, forceOptions) {
         connection.getChromeExtensionStatus = getChromeExtensionStatus;
     }
 
-    connection.getScreenConstraints = function(callback) {
+    connection.getScreenConstraints = function(callback, audioPlusTab) {
+        if (isAudioPlusTab(connection, audioPlusTab)) {
+            audioPlusTab = true;
+        }
+
         getScreenConstraints(function(error, screen_constraints) {
             if (!error) {
                 screen_constraints = connection.modifyScreenConstraints(screen_constraints);
                 callback(error, screen_constraints);
             }
-        });
+        }, audioPlusTab);
     };
 
     connection.modifyScreenConstraints = function(screen_constraints) {

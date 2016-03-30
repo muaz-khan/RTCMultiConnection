@@ -6,15 +6,15 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
 
-    <title>Audio + ScreenSharing using RTCMultiConnection-v3.0</title>
+    <title>Audio+ScreenSharing using RTCMultiConnection</title>
 
-    <meta name="description" content="Share audio along with screen using RTCMultiConnection v3.0" />
+    <meta name="description" content="OneWay Screen Sharing using RTCMultiConnection v3.0" />
     <meta name="keywords" content="WebRTC,RTCMultiConnection,Demos,Experiments,Samples,Examples" />
 
     <style>
         video {
             object-fit: fill;
-            width: 30%;
+            width: 100%;
         }
         button,
         input,
@@ -39,7 +39,7 @@
     <article>
 
         <header style="text-align: center;">
-            <h1>Audio + ScreenSharing using RTCMultiConnection-v3.0</h1>
+            <h1>Audio+ScreenSharing using RTCMultiConnection</h1>
             <p>
                 <a href="https://rtcmulticonnection.herokuapp.com/">HOME</a>
                 <span> &copy; </span>
@@ -63,9 +63,13 @@
             </div>
 
             <div id="videos-container"></div>
+
+            <br><br>
+            (Install <a href="https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk" target="_blank">Chrome</a> / or / <a href="https://www.webrtc-experiment.com/store/firefox-extension/enable-screen-capturing.xpi" target="_blank">Firefox</a> extension) - Extensions are <a href="https://github.com/muaz-khan?tab=repositories">open-sourced</a>!
+            <div id="videos-container"></div>
         </section>
 
-        <!-- <script src="/RTCMultiConnection.min.js"></script> -->
+        <!-- <script src="/dist/rmc3.min.js"></script> -->
         <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
 
         <!-- socket.io for signaling -->
@@ -103,7 +107,7 @@
             // comment-out below line if you do not have your own socket.io server
             // connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
 
-            connection.socketMessageEvent = 'audio-plus-screen-demo';
+            connection.socketMessageEvent = 'audio-plus-screen-sharing-demo';
 
             var roomid = '';
             if (localStorage.getItem('rmc-room-id')) {
@@ -117,8 +121,8 @@
             };
 
             connection.session = {
-                audio: 'two-way',
-                screen: 'one-way'
+                audio: true,
+                screen: true
             };
 
             connection.sdpConstraints.mandatory = {
@@ -130,6 +134,12 @@
             connection.onstream = function(event) {
                 connection.videosContainer.appendChild(event.mediaElement);
                 event.mediaElement.play();
+
+                if(event.type === 'remote') {
+                    event.mediaElement.muted = false;
+                    event.mediaElement.volume = 1;
+                }
+
                 setTimeout(function() {
                     event.mediaElement.play();
                 }, 5000);

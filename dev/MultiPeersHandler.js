@@ -341,52 +341,52 @@ function MultiPeers(connection) {
                 localMediaConstraints.video = connection.mediaConstraints.video;
             }
 
-            invokeGetUserMedia(localMediaConstraints, message, remoteUserId);
+            var session = connection.session;
+
+            if (!session.audio || session.video || session.screen) {
+                if (session.screen) {
+                    connection.getScreenConstraints(function(error, screen_constraints) {
+                        if (error) {
+                            alert(error);
+                        }
+
+                        connection.invokeGetUserMedia({
+                            audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
+                            video: screen_constraints,
+                            isScreen: true
+                        }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia(null, cb) : cb);
+                    });
+                } else if (session.audio || session.video) {
+                    connection.invokeGetUserMedia(null, cb);
+                }
+            }
         }
 
         if (message.readyForOffer) {
             connection.onReadyForOffer(remoteUserId, message.userPreferences);
         }
+
+        function cb(stream) {
+            gumCallback(stream, message, remoteUserId);
+        }
     };
 
-    function invokeGetUserMedia(mediaConstraints, message, remoteUserId) {
-        getUserMediaHandler({
-            onGettingLocalMedia: function(localStream) {
-                self.onGettingLocalMedia(localStream);
-
-                var streamsToShare = {};
-                connection.attachStreams.forEach(function(stream) {
-                    streamsToShare[stream.streamid] = {
-                        isAudio: !!stream.isAudio,
-                        isVideo: !!stream.isVideo,
-                        isScreen: !!stream.isScreen
-                    };
-                });
-                message.userPreferences.streamsToShare = streamsToShare;
-
-                self.onNegotiationNeeded({
-                    readyForOffer: true,
-                    userPreferences: message.userPreferences
-                }, remoteUserId);
-            },
-            onLocalMediaError: function(error, constraints) {
-                self.onLocalMediaError(error, constraints);
-
-                if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
-                    constraints.video = false;
-                    invokeGetUserMedia(constraints, message, remoteUserId);
-                    return;
-                }
-
-                self.onNegotiationNeeded({
-                    readyForOffer: true,
-                    userPreferences: message.userPreferences
-                }, remoteUserId);
-            },
-            localMediaConstraints: mediaConstraints
+    function gumCallback(stream, message, remoteUserId) {
+        var streamsToShare = {};
+        connection.attachStreams.forEach(function(stream) {
+            streamsToShare[stream.streamid] = {
+                isAudio: !!stream.isAudio,
+                isVideo: !!stream.isVideo,
+                isScreen: !!stream.isScreen
+            };
         });
-    }
+        message.userPreferences.streamsToShare = streamsToShare;
 
+        self.onNegotiationNeeded({
+            readyForOffer: true,
+            userPreferences: message.userPreferences
+        }, remoteUserId);
+    }
 
     this.connectNewParticipantWithAllBroadcasters = function(newParticipantId, userPreferences, broadcastersList) {
         broadcastersList = broadcastersList.split('|-,-|');

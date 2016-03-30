@@ -1,4 +1,4 @@
-// Last time updated: 2016-03-29 5:03:57 PM UTC
+// Last time updated: 2016-03-30 7:28:52 AM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -426,63 +426,15 @@
                             throw error;
                         }
 
-                        invokeGetUserMedia({
+                        connection.invokeGetUserMedia({
+                            audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
                             video: screen_constraints,
                             isScreen: true
-                        }, session.audio || session.video ? invokeGetUserMedia : false);
+                        }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia : false);
                     });
                 } else if (session.audio || session.video) {
-                    invokeGetUserMedia();
+                    connection.invokeGetUserMedia();
                 }
-            }
-
-            function invokeGetUserMedia(localMediaConstraints, getUserMedia_callback) {
-                var isScreen = false;
-                if (localMediaConstraints) {
-                    isScreen = localMediaConstraints.isScreen;
-                    delete localMediaConstraints.isScreen;
-                }
-
-                getUserMediaHandler({
-                    onGettingLocalMedia: function(stream) {
-                        stream.isAudio = stream.isVideo = stream.isScreen = false;
-
-                        if (isScreen) {
-                            stream.isScreen = true;
-                        } else if (session.audio && session.video) {
-                            stream.isVideo = true;
-                        } else if (session.audio) {
-                            stream.isAudio = true;
-                        }
-
-                        mPeer.onGettingLocalMedia(stream);
-
-                        if (getUserMedia_callback) {
-                            return getUserMedia_callback();
-                        }
-
-                        if (callback) {
-                            callback(stream);
-                        }
-                    },
-                    onLocalMediaError: function(error, constraints) {
-                        mPeer.onLocalMediaError(error, constraints);
-
-                        if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
-                            constraints.video = false;
-                            invokeGetUserMedia(constraints, getUserMedia_callback);
-                            return;
-                        }
-
-                        if (callback) {
-                            callback();
-                        }
-                    },
-                    localMediaConstraints: localMediaConstraints || {
-                        audio: !!session.audio ? connection.mediaConstraints.audio : false,
-                        video: !!session.video ? connection.mediaConstraints.video : false
-                    }
-                });
             }
         };
 
@@ -860,65 +812,65 @@
                             return alert(error);
                         }
 
-                        invokeGetUserMedia({
-                            video: screen_constraints
-                        }, session.audio || session.video ? invokeGetUserMedia : false);
+                        connection.invokeGetUserMedia({
+                            audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
+                            video: screen_constraints,
+                            isScreen: true
+                        }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia(null, gumCallback) : gumCallback);
                     });
                 } else if (session.audio || session.video) {
-                    invokeGetUserMedia();
+                    connection.invokeGetUserMedia(null, gumCallback);
                 }
             }
 
-            function invokeGetUserMedia(localMediaConstraints, callback) {
-                getUserMediaHandler({
-                    onGettingLocalMedia: function(stream) {
-                        var videoConstraints = localMediaConstraints ? localMediaConstraints.video : connection.mediaConstraints;
-                        if (videoConstraints) {
-                            if (videoConstraints.mediaSource || videoConstraints.mozMediaSource) {
-                                stream.isScreen = true;
-                            } else if (videoConstraints.mandatory && videoConstraints.mandatory.chromeMediaSource) {
-                                stream.isScreen = true;
-                            }
-                        }
+            function gumCallback(stream) {
+                if (session.streamCallback) {
+                    session.streamCallback(stream);
+                }
 
-                        if (!stream.isScreen) {
-                            stream.isVideo = stream.getVideoTracks().length;
-                            stream.isAudio = !stream.isVideo && stream.getAudioTracks().length;
-                        }
-
-                        mPeer.onGettingLocalMedia(stream);
-
-                        if (session.streamCallback) {
-                            session.streamCallback(stream);
-                        }
-
-                        if (callback) {
-                            return callback();
-                        }
-
-                        connection.renegotiate(remoteUserId);
-                    },
-                    onLocalMediaError: function(error, constraints) {
-                        mPeer.onLocalMediaError(error, constraints);
-
-                        if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
-                            constraints.video = false;
-                            invokeGetUserMedia(constraints, callback);
-                            return;
-                        }
-
-                        if (callback) {
-                            return callback();
-                        }
-
-                        connection.renegotiate(remoteUserId);
-                    },
-                    localMediaConstraints: localMediaConstraints || {
-                        audio: session.audio ? connection.mediaConstraints.audio : false,
-                        video: session.video ? connection.mediaConstraints.video : false
-                    }
-                });
+                connection.renegotiate(remoteUserId);
             }
+        };
+
+        connection.invokeGetUserMedia = function(localMediaConstraints, callback, session) {
+            if (!session) {
+                session = connection.session;
+            }
+
+            getUserMediaHandler({
+                onGettingLocalMedia: function(stream) {
+                    var videoConstraints = localMediaConstraints ? localMediaConstraints.video : connection.mediaConstraints;
+                    if (videoConstraints) {
+                        if (videoConstraints.mediaSource || videoConstraints.mozMediaSource) {
+                            stream.isScreen = true;
+                        } else if (videoConstraints.mandatory && videoConstraints.mandatory.chromeMediaSource) {
+                            stream.isScreen = true;
+                        }
+                    }
+
+                    if (!stream.isScreen) {
+                        stream.isVideo = stream.getVideoTracks().length;
+                        stream.isAudio = !stream.isVideo && stream.getAudioTracks().length;
+                    }
+
+                    mPeer.onGettingLocalMedia(stream);
+
+                    if (callback) {
+                        return callback();
+                    }
+                },
+                onLocalMediaError: function(error, constraints) {
+                    mPeer.onLocalMediaError(error, constraints);
+
+                    if (callback) {
+                        callback();
+                    }
+                },
+                localMediaConstraints: localMediaConstraints || {
+                    audio: session.audio ? connection.mediaConstraints.audio : false,
+                    video: session.video ? connection.mediaConstraints.video : false
+                }
+            });
         };
 
         function applyConstraints(stream, mediaConstraints) {
@@ -1009,44 +961,19 @@
                             return alert(error);
                         }
 
-                        invokeGetUserMedia({
-                            video: screen_constraints
-                        }, session.audio || session.video ? invokeGetUserMedia : false);
+                        connection.invokeGetUserMedia({
+                            audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
+                            video: screen_constraints,
+                            isScreen: true
+                        }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia(null, gumCallback) : gumCallback);
                     });
                 } else if (session.audio || session.video) {
-                    invokeGetUserMedia();
+                    connection.invokeGetUserMedia(null, gumCallback);
                 }
             }
 
-            function invokeGetUserMedia(localMediaConstraints, callback) {
-                getUserMediaHandler({
-                    onGettingLocalMedia: function(stream) {
-                        mPeer.onGettingLocalMedia(stream);
-
-                        if (callback) {
-                            return callback();
-                        }
-
-                        connection.replaceTrack(stream, remoteUserId, isVideoTrack || session.video || session.screen);
-                    },
-                    onLocalMediaError: function(error, constraints) {
-                        mPeer.onLocalMediaError(error, constraints);
-
-                        if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
-                            constraints.video = false;
-                            invokeGetUserMedia(constraints, callback);
-                            return;
-                        }
-
-                        if (callback) {
-                            callback();
-                        }
-                    },
-                    localMediaConstraints: localMediaConstraints || {
-                        audio: session.audio ? connection.mediaConstraints.audio : false,
-                        video: session.video ? connection.mediaConstraints.video : false
-                    }
-                });
+            function gumCallback(stream) {
+                connection.replaceTrack(stream, remoteUserId, isVideoTrack || session.video || session.screen);
             }
         };
 
@@ -1446,13 +1373,17 @@
             connection.getChromeExtensionStatus = getChromeExtensionStatus;
         }
 
-        connection.getScreenConstraints = function(callback) {
+        connection.getScreenConstraints = function(callback, audioPlusTab) {
+            if (isAudioPlusTab(connection, audioPlusTab)) {
+                audioPlusTab = true;
+            }
+
             getScreenConstraints(function(error, screen_constraints) {
                 if (!error) {
                     screen_constraints = connection.modifyScreenConstraints(screen_constraints);
                     callback(error, screen_constraints);
                 }
-            });
+            }, audioPlusTab);
         };
 
         connection.modifyScreenConstraints = function(screen_constraints) {
@@ -2158,52 +2089,52 @@
                     localMediaConstraints.video = connection.mediaConstraints.video;
                 }
 
-                invokeGetUserMedia(localMediaConstraints, message, remoteUserId);
+                var session = connection.session;
+
+                if (!session.audio || session.video || session.screen) {
+                    if (session.screen) {
+                        connection.getScreenConstraints(function(error, screen_constraints) {
+                            if (error) {
+                                alert(error);
+                            }
+
+                            connection.invokeGetUserMedia({
+                                audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
+                                video: screen_constraints,
+                                isScreen: true
+                            }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia(null, cb) : cb);
+                        });
+                    } else if (session.audio || session.video) {
+                        connection.invokeGetUserMedia(null, cb);
+                    }
+                }
             }
 
             if (message.readyForOffer) {
                 connection.onReadyForOffer(remoteUserId, message.userPreferences);
             }
+
+            function cb(stream) {
+                gumCallback(stream, message, remoteUserId);
+            }
         };
 
-        function invokeGetUserMedia(mediaConstraints, message, remoteUserId) {
-            getUserMediaHandler({
-                onGettingLocalMedia: function(localStream) {
-                    self.onGettingLocalMedia(localStream);
-
-                    var streamsToShare = {};
-                    connection.attachStreams.forEach(function(stream) {
-                        streamsToShare[stream.streamid] = {
-                            isAudio: !!stream.isAudio,
-                            isVideo: !!stream.isVideo,
-                            isScreen: !!stream.isScreen
-                        };
-                    });
-                    message.userPreferences.streamsToShare = streamsToShare;
-
-                    self.onNegotiationNeeded({
-                        readyForOffer: true,
-                        userPreferences: message.userPreferences
-                    }, remoteUserId);
-                },
-                onLocalMediaError: function(error, constraints) {
-                    self.onLocalMediaError(error, constraints);
-
-                    if (constraints.audio && constraints.video && (error.name || '').toString().indexOf('DevicesNotFound') !== -1) {
-                        constraints.video = false;
-                        invokeGetUserMedia(constraints, message, remoteUserId);
-                        return;
-                    }
-
-                    self.onNegotiationNeeded({
-                        readyForOffer: true,
-                        userPreferences: message.userPreferences
-                    }, remoteUserId);
-                },
-                localMediaConstraints: mediaConstraints
+        function gumCallback(stream, message, remoteUserId) {
+            var streamsToShare = {};
+            connection.attachStreams.forEach(function(stream) {
+                streamsToShare[stream.streamid] = {
+                    isAudio: !!stream.isAudio,
+                    isVideo: !!stream.isVideo,
+                    isScreen: !!stream.isScreen
+                };
             });
-        }
+            message.userPreferences.streamsToShare = streamsToShare;
 
+            self.onNegotiationNeeded({
+                readyForOffer: true,
+                userPreferences: message.userPreferences
+            }, remoteUserId);
+        }
 
         this.connectNewParticipantWithAllBroadcasters = function(newParticipantId, userPreferences, broadcastersList) {
             broadcastersList = broadcastersList.split('|-,-|');
@@ -2619,6 +2550,40 @@
                 });
             };
         }
+    }
+
+    function isAudioPlusTab(connection, audioPlusTab) {
+        if (isFirefox && audioPlusTab !== false) {
+            return true;
+        }
+
+        if (!isChrome || chromeVersion < 50) return false;
+
+        if (typeof audioPlusTab === true) {
+            return true;
+        }
+
+        if (typeof audioPlusTab === 'undefined' && connection.session.audio && connection.session.screen && !connection.session.video) {
+            audioPlusTab = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    function getAudioScreenConstraints(screen_constraints) {
+        if (isFirefox) {
+            return true;
+        }
+
+        if (!isChrome) return false;
+
+        return {
+            mandatory: {
+                chromeMediaSource: screen_constraints.mandatory.chromeMediaSource,
+                chromeMediaSourceId: screen_constraints.mandatory.chromeMediaSourceId
+            }
+        };
     }
 
     // Last time updated: 2016-02-26 11:47:17 AM UTC
@@ -5019,248 +4984,199 @@
         };
     })();
 
-    // Last time updated at Oct 24, 2015, 08:32:23
+    // Last time updated at March 30, 2016, 08:32:23
 
-    // Latest file can be found here: https://cdn.webrtc-experiment.com/getScreenId.js
+    // Latest file can be found here: https://cdn.webrtc-experiment.com/Screen-Capturing.js
 
-    // Muaz Khan         - www.MuazKhan.com
-    // MIT License       - www.WebRTC-Experiment.com/licence
-    // Documentation     - https://github.com/muaz-khan/getScreenId.
+    // Muaz Khan     - www.MuazKhan.com
+    // MIT License   - www.WebRTC-Experiment.com/licence
+    // Documentation - https://github.com/muaz-khan/Chrome-Extensions/tree/master/Screen-Capturing.js
+    // Demo          - https://www.webrtc-experiment.com/Screen-Capturing/
 
-    // ______________
-    // getScreenId.js
+    // ___________________
+    // Screen-Capturing.js
 
-    /*
-    getScreenId(function (error, sourceId, screen_constraints) {
-        // error    == null || 'permission-denied' || 'not-installed' || 'installed-disabled' || 'not-chrome'
-        // sourceId == null || 'string' || 'firefox'
-        
-        if(sourceId == 'firefox') {
-            navigator.mozGetUserMedia(screen_constraints, onSuccess, onFailure);
-        }
-        else navigator.webkitGetUserMedia(screen_constraints, onSuccess, onFailure);
-    });
-    */
-
-    (function() {
-        window.getScreenId = function(callback) {
-            // for Firefox:
-            // sourceId == 'firefox'
-            // screen_constraints = {...}
-            if (!!navigator.mozGetUserMedia) {
-                callback(null, 'firefox', {
-                    video: {
-                        mozMediaSource: 'window',
-                        mediaSource: 'window',
-                        width: 29999,
-                        height: 8640
-                    }
-                });
-                return;
-            }
-
-            postMessage();
-
-            window.addEventListener('message', onIFrameCallback);
-
-            function onIFrameCallback(event) {
-                if (!event.data) return;
-
-                if (event.data.chromeMediaSourceId) {
-                    if (event.data.chromeMediaSourceId === 'PermissionDeniedError') {
-                        callback('permission-denied');
-                    } else callback(null, event.data.chromeMediaSourceId, getScreenConstraints(null, event.data.chromeMediaSourceId));
-                }
-
-                if (event.data.chromeExtensionStatus) {
-                    callback(event.data.chromeExtensionStatus, null, getScreenConstraints(event.data.chromeExtensionStatus));
-                }
-
-                // this event listener is no more needed
-                window.removeEventListener('message', onIFrameCallback);
-            }
-        };
-
-        function getScreenConstraints(error, sourceId) {
-            var screen_constraints = {
-                audio: false,
-                video: {
-                    mandatory: {
-                        chromeMediaSource: error ? 'screen' : 'desktop',
-                        maxWidth: 29999,
-                        maxHeight: 8640,
-                        minFrameRate: 30,
-                        maxFrameRate: 128,
-                        minAspectRatio: 1.77, // 2.39
-                        googLeakyBucket: true
-                    },
-                    optional: []
-                }
-            };
-
-            if (sourceId) {
-                screen_constraints.video.mandatory.chromeMediaSourceId = sourceId;
-            }
-
-            return screen_constraints;
-        }
-
-        function postMessage() {
-            if (!iframe) {
-                loadIFrame(postMessage);
-                return;
-            }
-
-            if (!iframe.isLoaded) {
-                setTimeout(postMessage, 100);
-                return;
-            }
-
-            iframe.contentWindow.postMessage({
-                captureSourceId: true
-            }, '*');
-        }
-
-        function loadIFrame(loadCallback) {
-            if (iframe) {
-                loadCallback();
-                return;
-            }
-
-            iframe = document.createElement('iframe');
-            iframe.onload = function() {
-                iframe.isLoaded = true;
-
-                loadCallback();
-            };
-            iframe.src = 'https://www.webrtc-experiment.com/getSourceId/'; // https://wwww.yourdomain.com/getScreenId.html
-            iframe.style.display = 'none';
-            (document.body || document.documentElement).appendChild(iframe);
-        }
-
-        var iframe;
-
-        // this function is used in v3.0
-        window.getScreenConstraints = function(callback) {
-            loadIFrame(function() {
-                getScreenId(function(error, sourceId, screen_constraints) {
-                    callback(error, screen_constraints.video);
-                });
-            });
-        };
-    })();
-
-    (function() {
-        if (document.domain.indexOf('webrtc-experiment.com') === -1) {
+    // Listen for postMessage handler
+    // postMessage is used to exchange "sourceId" between chrome extension and you webpage.
+    // though, there are tons other options as well, e.g. XHR-signaling, websockets, etc.
+    window.addEventListener('message', function(event) {
+        if (event.origin != window.location.origin) {
             return;
         }
 
-        window.getScreenId = function(callback) {
-            // for Firefox:
-            // sourceId == 'firefox'
-            // screen_constraints = {...}
-            if (!!navigator.mozGetUserMedia) {
-                callback(null, 'firefox', {
-                    video: {
-                        mozMediaSource: 'window',
-                        mediaSource: 'window',
-                        width: 29999,
-                        height: 8640
-                    }
-                });
-                return;
+        onMessageCallback(event.data);
+    });
+
+    // and the function that handles received messages
+
+    function onMessageCallback(data) {
+        // "cancel" button is clicked
+        if (data == 'PermissionDeniedError') {
+            chromeMediaSource = 'PermissionDeniedError';
+            if (screenCallback) return screenCallback('PermissionDeniedError');
+            else throw new Error('PermissionDeniedError');
+        }
+
+        // extension notified his presence
+        if (data == 'rtcmulticonnection-extension-loaded') {
+            chromeMediaSource = 'desktop';
+        }
+
+        // extension shared temp sourceId
+        if (data.sourceId && screenCallback) {
+            screenCallback(sourceId = data.sourceId);
+        }
+    }
+
+    // global variables
+    var chromeMediaSource = 'screen';
+    var sourceId;
+    var screenCallback;
+
+    // this method can be used to check if chrome extension is installed & enabled.
+    function isChromeExtensionAvailable(callback) {
+        if (!callback) return;
+
+        if (isFirefox) return isFirefoxExtensionAvailable(callback);
+
+        if (chromeMediaSource == 'desktop') return callback(true);
+
+        // ask extension if it is available
+        window.postMessage('are-you-there', '*');
+
+        setTimeout(function() {
+            if (chromeMediaSource == 'screen') {
+                callback(false);
+            } else callback(true);
+        }, 2000);
+    }
+
+    function isFirefoxExtensionAvailable(callback) {
+        if (!callback) return;
+
+        if (!isFirefox) return isChromeExtensionAvailable(callback);
+
+        var isFirefoxAddonResponded = false;
+
+        function messageCallback(event) {
+            var addonMessage = event.data;
+
+            if (!addonMessage || typeof addonMessage.isScreenCapturingEnabled === 'undefined') return;
+
+            isFirefoxAddonResponded = true;
+
+            if (addonMessage.isScreenCapturingEnabled === true) {
+                callback(true);
+            } else {
+                callback(false);
             }
 
-            postMessage();
+            window.removeEventListener("message", messageCallback, false);
+        }
 
-            window.addEventListener('message', onIFrameCallback);
+        window.addEventListener("message", messageCallback, false);
 
-            function onIFrameCallback(event) {
-                if (!event.data) return;
+        window.postMessage({
+            checkIfScreenCapturingEnabled: true,
+            domains: [document.domain]
+        }, "*");
 
-                if (event.data.chromeMediaSourceId) {
-                    if (event.data.chromeMediaSourceId === 'PermissionDeniedError') {
-                        callback('permission-denied');
-                    } else callback(null, event.data.chromeMediaSourceId, getScreenConstraints(null, event.data.chromeMediaSourceId));
-                }
-
-                if (event.data.chromeExtensionStatus) {
-                    callback(event.data.chromeExtensionStatus, null, getScreenConstraints(event.data.chromeExtensionStatus));
-                }
-
-                // this event listener is no more needed
-                window.removeEventListener('message', onIFrameCallback);
+        setTimeout(function() {
+            if (!isFirefoxAddonResponded) {
+                callback(true); // can be old firefox extension
             }
+        }, 2000); // wait 2-seconds-- todo: is this enough limit?
+    }
+
+    // this function can be used to get "source-id" from the extension
+    function getSourceId(callback, audioPlusTab) {
+        if (!callback) throw '"callback" parameter is mandatory.';
+        if (sourceId) {
+            callback(sourceId);
+            sourceId = null;
+            return;
+        }
+
+        screenCallback = callback;
+
+        if (!!audioPlusTab) {
+            window.postMessage('audio-plus-tab', '*');
+            return;
+        }
+        window.postMessage('get-sourceId', '*');
+    }
+
+    function getChromeExtensionStatus(extensionid, callback) {
+        if (arguments.length != 2) {
+            callback = extensionid;
+            extensionid = window.RMCExtensionID || 'ajhifddimkapgcifgcodmmfdlknahffk'; // default extension-id
+        }
+
+        if (isFirefox) return callback('not-chrome');
+
+        var image = document.createElement('img');
+        image.src = 'chrome-extension://' + extensionid + '/icon.png';
+        image.onload = function() {
+            chromeMediaSource = 'screen';
+            window.postMessage('are-you-there', '*');
+            setTimeout(function() {
+                if (chromeMediaSource == 'screen') {
+                    callback(extensionid == extensionid ? 'installed-enabled' : 'installed-disabled');
+                } else callback('installed-enabled');
+            }, 2000);
+        };
+        image.onerror = function() {
+            callback('not-installed');
+        };
+    }
+
+    // this function explains how to use above methods/objects
+    function getScreenConstraints(callback, audioPlusTab) {
+        var firefoxScreenConstraints = {
+            mozMediaSource: 'window',
+            mediaSource: 'window',
+            width: 29999,
+            height: 8640
         };
 
-        function getScreenConstraints(error, sourceId) {
+        if (isFirefox) return callback(null, firefoxScreenConstraints);
+
+        isChromeExtensionAvailable(function(isAvailable) {
+            // this statement defines getUserMedia constraints
+            // that will be used to capture content of screen
             var screen_constraints = {
-                audio: false,
-                video: {
-                    mandatory: {
-                        chromeMediaSource: error ? 'screen' : 'desktop',
-                        maxWidth: 29999,
-                        maxHeight: 8640,
-                        minFrameRate: 30,
-                        maxFrameRate: 128,
-                        minAspectRatio: 1.77, // 2.39
-                        googLeakyBucket: true
-                    },
-                    optional: []
-                }
+                mandatory: {
+                    chromeMediaSource: chromeMediaSource,
+                    maxWidth: 29999,
+                    maxHeight: 8640,
+                    minFrameRate: 30,
+                    maxFrameRate: 128,
+                    minAspectRatio: 1.77 // 2.39
+                },
+                optional: []
             };
 
-            if (sourceId) {
-                screen_constraints.video.mandatory.chromeMediaSourceId = sourceId;
-            }
-
-            return screen_constraints;
-        }
-
-        function postMessage() {
-            if (!iframe) {
-                loadIFrame(postMessage);
+            // this statement verifies chrome extension availability
+            // if installed and available then it will invoke extension API
+            // otherwise it will fallback to command-line based screen capturing API
+            if (chromeMediaSource == 'desktop' && !sourceId) {
+                getSourceId(function() {
+                    screen_constraints.mandatory.chromeMediaSourceId = sourceId;
+                    callback(sourceId == 'PermissionDeniedError' ? sourceId : null, screen_constraints);
+                    sourceId = null;
+                }, audioPlusTab);
                 return;
             }
 
-            if (!iframe.isLoaded) {
-                setTimeout(postMessage, 100);
-                return;
+            // this statement sets gets 'sourceId" and sets "chromeMediaSourceId" 
+            if (chromeMediaSource == 'desktop') {
+                screen_constraints.mandatory.chromeMediaSourceId = sourceId;
             }
 
-            iframe.contentWindow.postMessage({
-                captureSourceId: true
-            }, '*');
-        }
-
-        function loadIFrame(loadCallback) {
-            if (iframe) {
-                loadCallback();
-                return;
-            }
-
-            iframe = document.createElement('iframe');
-            iframe.onload = function() {
-                iframe.isLoaded = true;
-
-                loadCallback();
-            };
-            iframe.src = 'https://www.webrtc-experiment.com/getSourceId/'; // https://wwww.yourdomain.com/getScreenId.html
-            iframe.style.display = 'none';
-            (document.body || document.documentElement).appendChild(iframe);
-        }
-
-        var iframe;
-
-        // this function is used in v3.0
-        window.getScreenConstraints = function(callback) {
-            loadIFrame(function() {
-                getScreenId(function(error, sourceId, screen_constraints) {
-                    callback(error, screen_constraints.video);
-                });
-            });
-        };
-    })();
+            // now invoking native getUserMedia API
+            callback(null, screen_constraints);
+        });
+    }
 
     // TextReceiver.js & TextSender.js
 
