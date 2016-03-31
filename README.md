@@ -13,7 +13,7 @@
 
 ## Install
 
-* NPM install: https://www.youtube.com/watch?v=EtsiYEW_T8Y
+* [NPM install](https://www.youtube.com/watch?v=EtsiYEW_T8Y) or [Other Videos](https://www.youtube.com/watch?v=EtsiYEW_T8Y&list=PLPRQUXAnRydKdyun-vjKPMrySoow2N4tl)
 
 Or fetch latest code via github:
 
@@ -120,6 +120,7 @@ More info about `forever-service` [here](http://stackoverflow.com/a/36027516/552
 | getPublicModerators | [Demo](https://rtcmulticonnection.herokuapp.com/demos/getPublicModerators.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/getPublicModerators.html) |
 | Change Cameras/Microphonea | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Switch-Cameras.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Switch-Cameras.html) |
 | MultiRTC: Skype-like app | [Demo](https://rtcmulticonnection.herokuapp.com/demos/MultiRTC/) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/MultiRTC/) |
+| Change Video Resolutions in your Live Sessions | [Demo](https://rtcmulticonnection.herokuapp.com/demos/change-resolutions.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/change-resolutions.html) |
 
 ## Link Script Files
 
@@ -135,7 +136,7 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.97/rmc3.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.98/rmc3.min.js"></script>
 ```
 
 If you're sharing files, you also need to link:
@@ -147,7 +148,7 @@ If you're sharing files, you also need to link:
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.fbr.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.97/rmc3.fbr.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.98/rmc3.fbr.min.js"></script>
 ```
 
 > You can link multiple files from `dev` directory. Order doesn't matters.
@@ -712,14 +713,6 @@ It is similar to this:
 
 * http://www.rtcmulticonnection.org/docs/streams/
 
-## `socketURL`
-
-If socket.io is listening on a separate port or external URL:
-
-```javascript
-connection.socketURL = 'https://domain:port/';
-```
-
 ## `socketOptions`
 
 Socket.io options:
@@ -730,6 +723,15 @@ connection.socketOptions = {
 	'forceNew': true, // For SocketIO version >= 1.0
 	'transport': 'polling' // fixing transport:unknown issues
 };
+```
+
+## `connection.socket`
+
+```javascript
+connection.open('roomid', function() {
+    connection.socket.emit('whatever', 'hmm');
+    connection.socket.disconnect();
+});
 ```
 
 ## `DetectRTC`
@@ -1631,6 +1633,7 @@ v2.2.2 is available here:
 * [How to secure your RTCMultiConnection codes?](https://github.com/muaz-khan/RTCMultiConnection/wiki/Security)
 * [Use WebSync Signaling Server in any RTCMultiConnection demo](https://github.com/muaz-khan/RTCMultiConnection/wiki/WebSync-Signaling-Server)
 * [How to implement client-side (local) screen-sharing without involving any 3rd-party service or extension or addon](https://github.com/muaz-khan/RTCMultiConnection/wiki/Screen-Sharing-on-your-Local-Server)
+* [Detect Who is Speaking](https://github.com/muaz-khan/RTCMultiConnection/wiki/Detect-Who-is-Speaking)
 
 ## Twitter
 

@@ -86,7 +86,9 @@ function PeerInitiator(config) {
 
     var localStreams = [];
     connection.attachStreams.forEach(function(stream) {
-        if (!!stream) localStreams.push(stream);
+        if (!!stream) {
+            localStreams.push(stream);
+        }
     });
 
     if (!renegotiatingPeer) {
@@ -96,36 +98,6 @@ function PeerInitiator(config) {
         } : null, window.PluginRTC ? null : connection.optionalArgument);
     } else {
         peer = config.peerRef;
-
-        peer.getLocalStreams().forEach(function(stream) {
-            localStreams.forEach(function(localStream, index) {
-                if (stream == localStream) {
-                    delete localStreams[index];
-                }
-            });
-
-            connection.removeStreams.forEach(function(streamToRemove, index) {
-                if (stream === streamToRemove) {
-                    stream = connection.beforeRemovingStream(stream);
-                    if (stream && !!peer.removeStream) {
-                        peer.removeStream(stream);
-                    }
-
-                    localStreams.forEach(function(localStream, index) {
-                        if (streamToRemove == localStream) {
-                            delete localStreams[index];
-                        }
-                    });
-                }
-            });
-        });
-    }
-
-    if (connection.DetectRTC.browser.name === 'Firefox') {
-        peer.removeStream = function(stream) {
-            stream.mute();
-            connection.StreamsHandler.onSyncNeeded(stream.streamid, 'stream-removed');
-        };
     }
 
     peer.onicecandidate = function(event) {
@@ -170,6 +142,15 @@ function PeerInitiator(config) {
         }
 
         localStream = connection.beforeAddingStream(localStream);
+
+        if (!localStream) return;
+
+        peer.getLocalStreams().forEach(function(stream) {
+            if (stream.id == localStream.id) {
+                localStream = null;
+            }
+        });
+
         if (localStream) {
             peer.addStream(localStream);
         }

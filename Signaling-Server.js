@@ -293,6 +293,10 @@ module.exports = exports = function(app, socketCallback) {
 
         socket.on('disconnect', function() {
             try {
+                delete socket.namespace.sockets[this.id];
+            } catch (e) {}
+
+            try {
                 var message = shiftedModerationControls[socket.userid];
 
                 if (message) {
