@@ -334,6 +334,13 @@ function RTCMultiConnection(roomid, forceOptions) {
         }
 
         options = options || {};
+
+        var cb = function() {};
+        if (typeof options === 'function') {
+            cb = options;
+            options = {};
+        }
+
         if (typeof options.localPeerSdpConstraints !== 'undefined') {
             localPeerSdpConstraints = options.localPeerSdpConstraints;
         }
@@ -370,6 +377,7 @@ function RTCMultiConnection(roomid, forceOptions) {
             }
 
             mPeer.onNegotiationNeeded(connectionDescription);
+            cb();
         });
 
         return connectionDescription;

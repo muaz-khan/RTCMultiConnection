@@ -1,4 +1,4 @@
-// Last time updated: 2016-03-31 1:23:45 PM UTC
+// Last time updated: 2016-04-10 12:38:30 PM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -350,6 +350,13 @@
             }
 
             options = options || {};
+
+            var cb = function() {};
+            if (typeof options === 'function') {
+                cb = options;
+                options = {};
+            }
+
             if (typeof options.localPeerSdpConstraints !== 'undefined') {
                 localPeerSdpConstraints = options.localPeerSdpConstraints;
             }
@@ -386,6 +393,7 @@
                 }
 
                 mPeer.onNegotiationNeeded(connectionDescription);
+                cb();
             });
 
             return connectionDescription;
