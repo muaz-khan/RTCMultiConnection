@@ -535,7 +535,7 @@ function RTCMultiConnection(roomid, forceOptions) {
         video: {
             mandatory: {},
             optional: [{
-                bandwidth: connection.bandwidth.audio * 8 * 1024 || 128 * 8 * 1024
+                bandwidth: connection.bandwidth.video * 8 * 1024 || 128 * 8 * 1024
             }, {
                 googLeakyBucket: true
             }, {
@@ -1308,10 +1308,13 @@ function RTCMultiConnection(roomid, forceOptions) {
     connection.disconnectWith = mPeer.disconnectWith;
 
     connection.checkPresence = function(remoteUserId, callback) {
-        mPeer.onNegotiationNeeded({
-            detectPresence: true,
-            userid: (remoteUserId || connection.sessionid) + ''
-        }, 'system', callback);
+        if (!connection.socket) {
+            connection.connectSocket(function() {
+                connection.checkPresence(remoteUserId, callback);
+            });
+            return;
+        }
+        connection.socket.emit('check-presence', (remoteUserId || connection.sessionid) + '', callback);
     };
 
     connection.onReadyForOffer = function(remoteUserId, userPreferences) {
@@ -1412,7 +1415,7 @@ function RTCMultiConnection(roomid, forceOptions) {
                 screen: 30
             };
 
-            if (connection.mediaConstraints.audio && connection.mediaConstraints.audio.optional.length) {
+            if (connection.mediaConstraints.audio && connection.mediaConstraints.audio.optional && connection.mediaConstraints.audio.optional.length) {
                 var newArray = [];
                 connection.mediaConstraints.audio.optional.forEach(function(opt) {
                     if (typeof opt.bandwidth === 'undefined') {
@@ -1422,7 +1425,7 @@ function RTCMultiConnection(roomid, forceOptions) {
                 connection.mediaConstraints.audio.optional = newArray;
             }
 
-            if (connection.mediaConstraints.video && connection.mediaConstraints.video.optional.length) {
+            if (connection.mediaConstraints.video && connection.mediaConstraints.video.optional && connection.mediaConstraints.video.optional.length) {
                 var newArray = [];
                 connection.mediaConstraints.video.optional.forEach(function(opt) {
                     if (typeof opt.bandwidth === 'undefined') {

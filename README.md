@@ -121,6 +121,7 @@ More info about `forever-service` [here](http://stackoverflow.com/a/36027516/552
 | Change Cameras/Microphonea | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Switch-Cameras.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Switch-Cameras.html) |
 | MultiRTC: Skype-like app | [Demo](https://rtcmulticonnection.herokuapp.com/demos/MultiRTC/) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/MultiRTC/) |
 | Change Video Resolutions in your Live Sessions | [Demo](https://rtcmulticonnection.herokuapp.com/demos/change-resolutions.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/change-resolutions.html) |
+| Admin/Guest demo | [Demo](https://rtcmulticonnection.herokuapp.com/demos/admin-guest.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/admin-guest.html) |
 
 ## Link Script Files
 
@@ -136,7 +137,7 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.99/rmc3.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.00/rmc3.min.js"></script>
 ```
 
 If you're sharing files, you also need to link:
@@ -148,7 +149,7 @@ If you're sharing files, you also need to link:
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.fbr.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.2.99/rmc3.fbr.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.00/rmc3.fbr.min.js"></script>
 ```
 
 > You can link multiple files from `dev` directory. Order doesn't matters.
@@ -1399,6 +1400,10 @@ connection.changeUserId('your-new-userid');
 
 ## iOS/Android
 
+1. Audio/Video + TextChat/FileSharing (supported both on iOS/Android) [broadcast, conferencing, everything]
+2. Screen Viewer (supported both on iOS/Android) -- You can merely view the screen shared by desktop.
+3. Screen Capturing & Sharing (NOT Supported on Mobile platforms)
+
 RTCMultiConnection-v3 supports `cordova` based iOS/android apps.
 
 Copy/paste entire [`rmc3.min.js`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dist/rmc3.min.js) file inside `deviceready` callback:
@@ -1438,7 +1443,7 @@ document.addEventListener('deviceready', function() {
 
     // you can put your custom-ui-codes here
     // e.g.
-    // var connection = new RTCMultiConnection();
+    // var connection = new RTCMultiConnection({useDefaultDevices:true});
 }, false);
 ```
 

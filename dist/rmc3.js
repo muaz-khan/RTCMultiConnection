@@ -1,4 +1,4 @@
-// Last time updated: 2016-04-10 12:38:30 PM UTC
+// Last time updated: 2016-04-16 6:42:16 AM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -551,7 +551,7 @@
             video: {
                 mandatory: {},
                 optional: [{
-                    bandwidth: connection.bandwidth.audio * 8 * 1024 || 128 * 8 * 1024
+                    bandwidth: connection.bandwidth.video * 8 * 1024 || 128 * 8 * 1024
                 }, {
                     googLeakyBucket: true
                 }, {
@@ -1324,10 +1324,13 @@
         connection.disconnectWith = mPeer.disconnectWith;
 
         connection.checkPresence = function(remoteUserId, callback) {
-            mPeer.onNegotiationNeeded({
-                detectPresence: true,
-                userid: (remoteUserId || connection.sessionid) + ''
-            }, 'system', callback);
+            if (!connection.socket) {
+                connection.connectSocket(function() {
+                    connection.checkPresence(remoteUserId, callback);
+                });
+                return;
+            }
+            connection.socket.emit('check-presence', (remoteUserId || connection.sessionid) + '', callback);
         };
 
         connection.onReadyForOffer = function(remoteUserId, userPreferences) {
@@ -1428,7 +1431,7 @@
                     screen: 30
                 };
 
-                if (connection.mediaConstraints.audio && connection.mediaConstraints.audio.optional.length) {
+                if (connection.mediaConstraints.audio && connection.mediaConstraints.audio.optional && connection.mediaConstraints.audio.optional.length) {
                     var newArray = [];
                     connection.mediaConstraints.audio.optional.forEach(function(opt) {
                         if (typeof opt.bandwidth === 'undefined') {
@@ -1438,7 +1441,7 @@
                     connection.mediaConstraints.audio.optional = newArray;
                 }
 
-                if (connection.mediaConstraints.video && connection.mediaConstraints.video.optional.length) {
+                if (connection.mediaConstraints.video && connection.mediaConstraints.video.optional && connection.mediaConstraints.video.optional.length) {
                     var newArray = [];
                     connection.mediaConstraints.video.optional.forEach(function(opt) {
                         if (typeof opt.bandwidth === 'undefined') {
@@ -4431,34 +4434,6 @@
                 }
             });
         }
-
-        // chrome 50+ supports promises over "play" method
-        HTMLMediaElement.prototype.nativePlay = HTMLMediaElement.prototype.play;
-        HTMLMediaElement.prototype.play = function() {
-            var myself = this;
-            var promise = myself.nativePlay();
-            if (promise) {
-                promise.then(function() {
-                    // maybe it is Android
-                    setTimeout(function() {
-                        myself.nativePlay().then(function() {
-                            // skip
-                        }).catch(function() {
-                            alert('Video requires manual action to start the player.');
-                        });
-                    }, 1000);
-                }).catch(function() {
-                    // maybe it is iOS webview
-                    setTimeout(function() {
-                        myself.nativePlay().then(function() {
-                            // skip
-                        }).catch(function() {
-                            alert('Video requires manual action to start the player.');
-                        });
-                    }, 1000);
-                });
-            }
-        };
 
         // Proxy existing globals
         getUserMedia = window.navigator && window.navigator.getUserMedia;
