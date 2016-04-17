@@ -128,6 +128,9 @@
 
         <script src="https://cdn.webrtc-experiment.com/RecordRTC.js"></script>
         <script>
+            // recording is disabled because it is resulting for browser-crash
+            var enableRecordings = false;
+            
             var connection = new RTCMultiConnection(null, {
                 useDefaultDevices: true // if we don't need to force selection of specific devices
             });
@@ -361,6 +364,10 @@
             var allRecordedBlobs = [];
 
             function repeatedlyRecordStream(stream) {
+                if(!enableRecordings) {
+                    return;
+                }
+
                 connection.currentRecorder = RecordRTC(stream, {
                     type: 'video'
                 });
