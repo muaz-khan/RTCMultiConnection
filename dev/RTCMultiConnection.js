@@ -537,8 +537,6 @@ function RTCMultiConnection(roomid, forceOptions) {
             optional: [{
                 bandwidth: connection.bandwidth.video * 8 * 1024 || 128 * 8 * 1024
             }, {
-                googLeakyBucket: true
-            }, {
                 facingMode: 'user'
             }]
         }
@@ -848,15 +846,11 @@ function RTCMultiConnection(roomid, forceOptions) {
                 mPeer.onGettingLocalMedia(stream);
 
                 if (callback) {
-                    return callback();
+                    callback(stream);
                 }
             },
             onLocalMediaError: function(error, constraints) {
                 mPeer.onLocalMediaError(error, constraints);
-
-                if (callback) {
-                    callback();
-                }
             },
             localMediaConstraints: localMediaConstraints || {
                 audio: session.audio ? connection.mediaConstraints.audio : false,
@@ -1165,7 +1159,7 @@ function RTCMultiConnection(roomid, forceOptions) {
     };
 
     connection.onmute = function(e) {
-        if (!e.mediaElement) {
+        if (!e || !e.mediaElement) {
             return;
         }
 
@@ -1179,7 +1173,7 @@ function RTCMultiConnection(roomid, forceOptions) {
     };
 
     connection.onunmute = function(e) {
-        if (!e.mediaElement) {
+        if (!e || !e.mediaElement || !e.stream) {
             return;
         }
 

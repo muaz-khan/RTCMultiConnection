@@ -13,7 +13,7 @@
 
 ## Install
 
-* [NPM install](https://www.youtube.com/watch?v=EtsiYEW_T8Y) or [Other Videos](https://www.youtube.com/watch?v=EtsiYEW_T8Y&list=PLPRQUXAnRydKdyun-vjKPMrySoow2N4tl)
+* Youtube Video: [NPM install](https://www.youtube.com/watch?v=EtsiYEW_T8Y) or [Other Videos](https://www.youtube.com/watch?v=EtsiYEW_T8Y&list=PLPRQUXAnRydKdyun-vjKPMrySoow2N4tl)
 
 Or fetch latest code via github:
 
@@ -41,17 +41,19 @@ To TEST:
 node server.js
 ```
 
-If above command fails:
+## Stop Old Processes
+
+Check all processes running on port `9001` and stop process by `id`:
 
 ```
 lsof -n -i4TCP:9001 | grep LISTEN
 kill process-ID
 ```
 
-Or kill specific port. It may require "sudo" privileges:
+Or stop all processes on a specific port. (It may require `sudo` privileges):
 
 ```
-fuser -vk 9001/tcp
+[sudo] fuser -vk 9001/tcp
 ```
 
 Now open: `https://localhost:9001/`
@@ -123,6 +125,7 @@ More info about `forever-service` [here](http://stackoverflow.com/a/36027516/552
 | MultiRTC: Skype-like app | [Demo](https://rtcmulticonnection.herokuapp.com/demos/MultiRTC/) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/MultiRTC/) |
 | Change Video Resolutions in your Live Sessions | [Demo](https://rtcmulticonnection.herokuapp.com/demos/change-resolutions.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/change-resolutions.html) |
 | Admin/Guest demo | [Demo](https://rtcmulticonnection.herokuapp.com/demos/admin-guest.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/admin-guest.html) |
+| Check if StreamHasData | [Demo](https://rtcmulticonnection.herokuapp.com/demos/StreamHasData.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/StreamHasData.html) |
 
 ## Link Script Files
 
@@ -138,7 +141,7 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.2/rmc3.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.3/rmc3.min.js"></script>
 ```
 
 If you're sharing files, you also need to link:
@@ -150,7 +153,7 @@ If you're sharing files, you also need to link:
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.fbr.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.2/rmc3.fbr.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.3/rmc3.fbr.min.js"></script>
 ```
 
 > You can link multiple files from `dev` directory. Order doesn't matters.
@@ -1399,6 +1402,33 @@ Change userid using this method:
 connection.changeUserId('your-new-userid');
 ```
 
+## `StreamHasData`
+
+[`StreamHasData.js`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dev/StreamHasData.js) allows you check if remote stream started flowing or if remote stream is successfully received or if remote stream has data or not.
+
+```html
+<script src="/dev/StreamHasData.js"></script>
+<script>
+connection.videosContainer = document.getElementById('videos-container');
+connection.onstream = function(event) {
+    StreamHasData.check(event.mediaElement, function(hasData) {
+        if (!hasData) {
+            alert('Seems stream does NOT has any data.');
+        }
+
+        // append video here
+        connection.videosContainer.appendChild(event.mediaElement);
+        event.mediaElement.play();
+        setTimeout(function() {
+            event.mediaElement.play();
+        }, 5000);
+    });
+};
+</script>
+```
+
+Demo: https://rtcmulticonnection.herokuapp.com/demos/StreamHasData.html
+
 ## iOS/Android
 
 1. Audio/Video + TextChat/FileSharing (supported both on iOS/Android) [broadcast, conferencing, everything]
@@ -1501,7 +1531,7 @@ sudo xcode-select -switch /Applications/Xcode5.1.1/Xcode.app
 
 `config.xml` hints:
 
-Modify `platform/android/AndroidManifest.xml` for `<uses-permission android:name="android.permission.CAMERA"/>`. Now getUserMedia API will work in Android.
+Modify `platform/android/AndroidManifest.xml` for `<uses-permission android:name="android.permission.CAMERA"/>` and a few others. Now getUserMedia API will work in Android.
 
 An example `AndroidManifest.xml` file:
 
@@ -1518,11 +1548,16 @@ An example `AndroidManifest.xml` file:
         </activity>
     </application>
     <uses-sdk android:minSdkVersion="14" android:targetSdkVersion="23" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.MICROPHONE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 </manifest>
 ```
 
