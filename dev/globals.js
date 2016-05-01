@@ -86,10 +86,10 @@ function setHarkEvents(connection, streamEvent) {
 }
 
 function setMuteHandlers(connection, streamEvent) {
-    if (!streamEvent.stream || !streamEvent.stream.addEventListener) return;
+    if (!streamEvent.stream || !streamEvent.stream || !streamEvent.stream.addEventListener) return;
 
     streamEvent.stream.addEventListener('mute', function(event) {
-        event = connection.streamEvents[event.target.streamid];
+        event = connection.streamEvents[streamEvent.streamid];
 
         event.session = {
             audio: event.muteType === 'audio',
@@ -100,7 +100,7 @@ function setMuteHandlers(connection, streamEvent) {
     }, false);
 
     streamEvent.stream.addEventListener('unmute', function(event) {
-        event = connection.streamEvents[event.target.streamid];
+        event = connection.streamEvents[streamEvent.streamid];
 
         event.session = {
             audio: event.unmuteType === 'audio',

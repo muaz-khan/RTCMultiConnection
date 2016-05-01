@@ -1,4 +1,4 @@
-// Last time updated: 2016-04-26 5:20:49 AM UTC
+// Last time updated: 2016-05-01 3:16:54 PM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -2368,10 +2368,10 @@
     }
 
     function setMuteHandlers(connection, streamEvent) {
-        if (!streamEvent.stream || !streamEvent.stream.addEventListener) return;
+        if (!streamEvent.stream || !streamEvent.stream || !streamEvent.stream.addEventListener) return;
 
         streamEvent.stream.addEventListener('mute', function(event) {
-            event = connection.streamEvents[event.target.streamid];
+            event = connection.streamEvents[streamEvent.streamid];
 
             event.session = {
                 audio: event.muteType === 'audio',
@@ -2382,7 +2382,7 @@
         }, false);
 
         streamEvent.stream.addEventListener('unmute', function(event) {
-            event = connection.streamEvents[event.target.streamid];
+            event = connection.streamEvents[streamEvent.streamid];
 
             event.session = {
                 audio: event.unmuteType === 'audio',
@@ -4372,8 +4372,8 @@
             var iceServers = [];
 
             iceServers.push(getSTUNObj('stun:stun.l.google.com:19302'));
-            iceServers.push(getTURNObj('turn:turn.bistri.com:80', 'homeo', 'homeo'));
-            iceServers.push(getTURNObj('turn:turn.anyfirewall.com:443', 'webrtc', 'webrtc'));
+            iceServers.push(getTURNObj('turn:webrtcweb.com:80', 'muazkh', 'muazkh'));
+            iceServers.push(getTURNObj('turn:webrtcweb.com:443', 'muazkh', 'muazkh'));
 
             if (window.RMCExternalIceServers) {
                 iceServers = iceServers.concat(getExtenralIceFormatted());

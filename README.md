@@ -126,6 +126,7 @@ More info about `forever-service` [here](http://stackoverflow.com/a/36027516/552
 | Change Video Resolutions in your Live Sessions | [Demo](https://rtcmulticonnection.herokuapp.com/demos/change-resolutions.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/change-resolutions.html) |
 | Admin/Guest demo | [Demo](https://rtcmulticonnection.herokuapp.com/demos/admin-guest.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/admin-guest.html) |
 | Check if StreamHasData | [Demo](https://rtcmulticonnection.herokuapp.com/demos/StreamHasData.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/StreamHasData.html) |
+| Capture & Share Screen from any domain! | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Cross-Domain-Screen-Capturing.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Cross-Domain-Screen-Capturing.html) |
 
 ## Link Script Files
 
@@ -141,7 +142,7 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.3/rmc3.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.4/rmc3.min.js"></script>
 ```
 
 If you're sharing files, you also need to link:
@@ -153,7 +154,7 @@ If you're sharing files, you also need to link:
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.fbr.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.3/rmc3.fbr.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.4/rmc3.fbr.min.js"></script>
 ```
 
 > You can link multiple files from `dev` directory. Order doesn't matters.
@@ -1152,6 +1153,58 @@ connection.getScreenConstraints = function(callback) {
         callback(error, screen_constraints);
     });
 };
+```
+
+## Cross-Domain Screen Capturing
+
+First step, install this chrome extension:
+
+* https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk
+
+Now use below code in any RTCMultiConnection-v3 (screen) demo:
+
+```html
+<script src="/dev/globals.js"></script>
+        
+<!-- capture screen from any HTTPs domain! -->
+<script src="https://cdn.webrtc-experiment.com:443/getScreenId.js"></script>
+
+<script>
+// Using getScreenId.js to capture screen from any domain
+// You do NOT need to deploy Chrome Extension YOUR-Self!!
+connection.getScreenConstraints = function(callback, audioPlusTab) {
+    if (isAudioPlusTab(connection, audioPlusTab)) {
+        audioPlusTab = true;
+    }
+
+    getScreenConstraints(function(error, screen_constraints) {
+        if (!error) {
+            screen_constraints = connection.modifyScreenConstraints(screen_constraints);
+            callback(error, screen_constraints);
+        }
+    }, audioPlusTab);
+};
+</script>
+```
+
+Don't want to link `/dev/globals.js` or want to simplify codes???
+
+```html
+<!-- capture screen from any HTTPs domain! -->
+<script src="https://cdn.webrtc-experiment.com:443/getScreenId.js"></script>
+
+<script>
+// Using getScreenId.js to capture screen from any domain
+// You do NOT need to deploy Chrome Extension YOUR-Self!!
+connection.getScreenConstraints = function(callback) {
+    getScreenConstraints(function(error, screen_constraints) {
+        if (!error) {
+            screen_constraints = connection.modifyScreenConstraints(screen_constraints);
+            callback(error, screen_constraints);
+        }
+    });
+};
+</script>
 ```
 
 ## Firebase?

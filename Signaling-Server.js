@@ -258,6 +258,19 @@ module.exports = exports = function(app, socketCallback) {
                     return;
                 }
 
+                // for v3 backward compatibility; >v3.3.3 no more uses below block
+                if (message.remoteUserId == 'system') {
+                    if (message.message.detectPresence) {
+                        if (message.message.userid === socket.userid) {
+                            callback(false, socket.userid);
+                            return;
+                        }
+
+                        callback(!!listOfUsers[message.message.userid], message.message.userid);
+                        return;
+                    }
+                }
+
                 if (!listOfUsers[message.sender]) {
                     listOfUsers[message.sender] = {
                         socket: socket,
