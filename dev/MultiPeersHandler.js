@@ -209,6 +209,12 @@ function MultiPeers(connection) {
 
         userPreferences = userPreferences || {};
 
+        if (connection.isInitiator && !!connection.session.audio && connection.session.audio === 'two-way' && !userPreferences.streamsToShare) {
+            userPreferences.isOneWay = false;
+            userPreferences.isDataOnly = false;
+            userPreferences.session = connection.session;
+        }
+
         if (!userPreferences.isOneWay && !userPreferences.isDataOnly) {
             userPreferences.isOneWay = true;
             this.onNegotiationNeeded({
@@ -341,15 +347,17 @@ function MultiPeers(connection) {
                 localMediaConstraints.video = connection.mediaConstraints.video;
             }
 
-            var session = connection.session;
+            var session = userPreferences.session || connection.session;
 
-            if (!session.audio || session.video || session.screen) {
+            if (session.oneway && session.audio && session.audio === 'two-way') {
+                session = {
+                    audio: true
+                };
+            }
+
+            if (session.audio || session.video || session.screen) {
                 if (session.screen) {
                     connection.getScreenConstraints(function(error, screen_constraints) {
-                        if (error) {
-                            alert(error);
-                        }
-
                         connection.invokeGetUserMedia({
                             audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
                             video: screen_constraints,
@@ -357,7 +365,7 @@ function MultiPeers(connection) {
                         }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia(null, cb) : cb);
                     });
                 } else if (session.audio || session.video) {
-                    connection.invokeGetUserMedia(null, cb);
+                    connection.invokeGetUserMedia(null, cb, session);
                 }
             }
         }

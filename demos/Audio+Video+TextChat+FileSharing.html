@@ -6,9 +6,9 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
 
-    <title>Audio+Video+TextChat+FileSharing using RTCMultiConnection-v3.0</title>
+    <title>Audio+Video+TextChat+FileSharing using RTCMultiConnection</title>
 
-    <meta name="description" content="Share audio, video along with text chat and filesharing using RTCMultiConnection v3.0" />
+    <meta name="description" content="Share audio, video along with text chat and filesharing using RTCMultiConnection" />
     <meta name="keywords" content="WebRTC,RTCMultiConnection,Demos,Experiments,Samples,Examples" />
 
     <style>
@@ -39,7 +39,7 @@
     <article>
 
         <header style="text-align: center;">
-            <h1>Audio+Video+TextChat+FileSharing using RTCMultiConnection-v3.0</h1>
+            <h1>Audio+Video+TextChat+FileSharing using RTCMultiConnection</h1>
             <p>
                 <a href="https://rtcmulticonnection.herokuapp.com/">HOME</a>
                 <span> &copy; </span>
@@ -51,8 +51,14 @@
             </p>
         </header>
 
-
         <div class="github-stargazers"></div>
+
+        <blockquote>
+            Mesh networking model is used to implement many-to-many video/data connection.<br>
+            All users can watch each other; all of them can speak as well.<br>
+            All users can exchange chat messages.<br>
+            ALl users can share files as well. If you share a file, all others will receive it.
+        </blockquote>
 
         <section class="experiment">
             <div class="make-center">
@@ -78,6 +84,9 @@
 
         <!-- <script src="/dist/rmc3.min.js"></script> -->
         <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
+
+        <!-- custom layout for HTML5 audio/video elements -->
+        <script src="https://cdn.webrtc-experiment.com/getMediaElement.js"></script>
         
         <!-- <script src="/dev/FileBufferReader.js"></script> -->
         <script src="https://cdn.webrtc-experiment.com:443/rmc3.fbr.min.js"></script>
@@ -196,11 +205,28 @@
 
             connection.videosContainer = document.getElementById('videos-container');
             connection.onstream = function(event) {
-                connection.videosContainer.appendChild(event.mediaElement);
-                event.mediaElement.play();
+                var width = parseInt(connection.videosContainer.clientWidth / 2) - 20;
+                var mediaElement = getMediaElement(event.mediaElement, {
+                    title: event.userid,
+                    buttons: ['full-screen'],
+                    width: width,
+                    showOnMouseEnter: false
+                });
+
+                connection.videosContainer.appendChild(mediaElement);
+
                 setTimeout(function() {
-                    event.mediaElement.play();
+                    mediaElement.media.play();
                 }, 5000);
+
+                mediaElement.id = event.streamid;
+            };
+
+            connection.onstreamended = function(event) {
+                var mediaElement = document.getElementById(event.streamid);
+                if(mediaElement) {
+                    mediaElement.parentNode.removeChild(mediaElement);
+                }
             };
 
             connection.onmessage = appendDIV;

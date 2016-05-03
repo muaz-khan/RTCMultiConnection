@@ -8,13 +8,13 @@
 
     <title>Audio+ScreenSharing using RTCMultiConnection</title>
 
-    <meta name="description" content="OneWay Screen Sharing using RTCMultiConnection v3.0" />
+    <meta name="description" content="OneWay Screen Sharing using RTCMultiConnection" />
     <meta name="keywords" content="WebRTC,RTCMultiConnection,Demos,Experiments,Samples,Examples" />
 
     <style>
         video {
             object-fit: fill;
-            width: 30%;
+            width: 100%
         }
         button,
         input,
@@ -54,10 +54,11 @@
         <div class="github-stargazers"></div>
 
         <blockquote>
-            Please try this demo on Chrome Canary. Also make sure to enable <code>"chrome://flags/#tab-for-desktop-share"</code> flag.
-
-            <br><br>
-            Requirements: <a href="https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk">install this Chrome extension</a> or <a href="https://addons.mozilla.org/en-US/firefox/addon/enable-screen-capturing/">this Firefox extension</a>.
+            Only organizer/initiator shares his screen.<br>
+            Screen is one-way; however audio is two-way.<br>
+            Organizer can speak with all users.<br>
+            All users can NOT only view organizer's screen; but also they can talk with him.<br>
+            Users can NOT hear/talk each other. It is one-to-many kind of topology; it is NOT mesh or many-to-many.
         </blockquote>
 
         <section class="experiment">
@@ -72,14 +73,20 @@
             </div>
 
             <div id="videos-container"></div>
+            <div id="audios-container"></div>
 
             <br><br>
             (Install <a href="https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk" target="_blank">Chrome</a> / or / <a href="https://www.webrtc-experiment.com/store/firefox-extension/enable-screen-capturing.xpi" target="_blank">Firefox</a> extension) - Extensions are <a href="https://github.com/muaz-khan?tab=repositories">open-sourced</a>!
-            <div id="videos-container"></div>
         </section>
 
         <!-- <script src="/dist/rmc3.min.js"></script> -->
         <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
+
+        <!-- capture screen from any HTTPs domain! -->
+        <script src="https://cdn.webrtc-experiment.com:443/getScreenId.js"></script>
+
+        <!-- custom layout for HTML5 audio/video elements -->
+        <script src="https://cdn.webrtc-experiment.com/getMediaElement.js"></script>
 
         <!-- socket.io for signaling -->
         <script src="/socket.io/socket.io.js"></script>
@@ -130,8 +137,9 @@
             };
 
             connection.session = {
-                audio: true,
-                screen: true
+                audio: 'two-way', // merely audio will be two-way, rest of the streams will be oneway
+                screen: true,
+                oneway: true
             };
 
             connection.sdpConstraints.mandatory = {
@@ -140,21 +148,39 @@
             };
 
             connection.videosContainer = document.getElementById('videos-container');
-            connection.onstream = function(event) {
-                connection.videosContainer.appendChild(event.mediaElement);
-                event.mediaElement.play();
+            connection.audiosContainer = document.getElementById('audios-container');
 
-                if(event.type === 'remote') {
-                    event.mediaElement.muted = false;
-                    event.mediaElement.volume = 1;
+            connection.onstream = function(event) {
+                if(event.type === 'remote' && !connection.session.video) {
+                    document.getElementById('btn-add-video').disabled = false;
+                }
+
+                var width = event.mediaElement.clientWidth || connection.videosContainer.clientWidth;
+                var mediaElement = getMediaElement(event.mediaElement, {
+                    title: event.userid,
+                    buttons: ['full-screen'],
+                    width: width,
+                    showOnMouseEnter: false
+                });
+
+                if(event.stream.isScreen) {
+                    connection.videosContainer.appendChild(mediaElement);
+                }
+                else {
+                    connection.audiosContainer.appendChild(mediaElement);
                 }
 
                 setTimeout(function() {
-                    event.mediaElement.play();
+                    mediaElement.media.play();
                 }, 5000);
 
-                if(event.type === 'remote' && !connection.session.video) {
-                    document.getElementById('btn-add-video').disabled = false;
+                mediaElement.id = event.streamid;
+            };
+
+            connection.onstreamended = function(event) {
+                var mediaElement = document.getElementById(event.streamid);
+                if(mediaElement) {
+                    mediaElement.parentNode.removeChild(mediaElement);
                 }
             };
 
@@ -164,6 +190,19 @@
                 connection.addStream({
                     video: true,
                     oneway: true
+                });
+            };
+
+            // Using getScreenId.js to capture screen from any domain
+            // You do NOT need to deploy Chrome Extension YOUR-Self!!
+            connection.getScreenConstraints = function(callback) {
+                getScreenConstraints(function(error, screen_constraints) {
+                    if (!error) {
+                        screen_constraints = connection.modifyScreenConstraints(screen_constraints);
+                        callback(error, screen_constraints);
+                        return;
+                    }
+                    throw error;
                 });
             };
         </script>

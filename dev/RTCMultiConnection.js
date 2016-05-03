@@ -421,7 +421,17 @@ function RTCMultiConnection(roomid, forceOptions) {
                         audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
                         video: screen_constraints,
                         isScreen: true
-                    }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia : false);
+                    }, function() {
+                        if ((session.audio || session.video) && !isAudioPlusTab(connection)) {
+                            var nonScreenSession = {};
+                            for (var s in session) {
+                                if (s !== 'screen') {
+                                    nonScreenSession[s] = session[s];
+                                }
+                            }
+                            connection.invokeGetUserMedia(null, null, nonScreenSession);
+                        }
+                    });
                 });
             } else if (session.audio || session.video) {
                 connection.invokeGetUserMedia();
@@ -795,7 +805,7 @@ function RTCMultiConnection(roomid, forceOptions) {
             return;
         }
 
-        if (!session.audio || session.video || session.screen) {
+        if (session.audio || session.video || session.screen) {
             if (session.screen) {
                 connection.getScreenConstraints(function(error, screen_constraints) {
                     if (error) {
@@ -825,6 +835,10 @@ function RTCMultiConnection(roomid, forceOptions) {
     connection.invokeGetUserMedia = function(localMediaConstraints, callback, session) {
         if (!session) {
             session = connection.session;
+        }
+
+        if (localMediaConstraints instanceof MediaStream) {
+            throw localMediaConstraints;
         }
 
         getUserMediaHandler({
@@ -940,7 +954,7 @@ function RTCMultiConnection(roomid, forceOptions) {
             return;
         }
 
-        if (!session.audio || session.video || session.screen) {
+        if (session.audio || session.video || session.screen) {
             if (session.screen) {
                 connection.getScreenConstraints(function(error, screen_constraints) {
                     if (error) {

@@ -1,4 +1,4 @@
-// Last time updated: 2016-05-01 3:16:54 PM UTC
+// Last time updated: 2016-05-03 8:03:49 AM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -437,7 +437,17 @@
                             audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
                             video: screen_constraints,
                             isScreen: true
-                        }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia : false);
+                        }, function() {
+                            if ((session.audio || session.video) && !isAudioPlusTab(connection)) {
+                                var nonScreenSession = {};
+                                for (var s in session) {
+                                    if (s !== 'screen') {
+                                        nonScreenSession[s] = session[s];
+                                    }
+                                }
+                                connection.invokeGetUserMedia(null, null, nonScreenSession);
+                            }
+                        });
                     });
                 } else if (session.audio || session.video) {
                     connection.invokeGetUserMedia();
@@ -811,7 +821,7 @@
                 return;
             }
 
-            if (!session.audio || session.video || session.screen) {
+            if (session.audio || session.video || session.screen) {
                 if (session.screen) {
                     connection.getScreenConstraints(function(error, screen_constraints) {
                         if (error) {
@@ -841,6 +851,10 @@
         connection.invokeGetUserMedia = function(localMediaConstraints, callback, session) {
             if (!session) {
                 session = connection.session;
+            }
+
+            if (localMediaConstraints instanceof MediaStream) {
+                throw localMediaConstraints;
             }
 
             getUserMediaHandler({
@@ -956,7 +970,7 @@
                 return;
             }
 
-            if (!session.audio || session.video || session.screen) {
+            if (session.audio || session.video || session.screen) {
                 if (session.screen) {
                     connection.getScreenConstraints(function(error, screen_constraints) {
                         if (error) {
@@ -1974,6 +1988,12 @@
 
             userPreferences = userPreferences || {};
 
+            if (connection.isInitiator && !!connection.session.audio && connection.session.audio === 'two-way' && !userPreferences.streamsToShare) {
+                userPreferences.isOneWay = false;
+                userPreferences.isDataOnly = false;
+                userPreferences.session = connection.session;
+            }
+
             if (!userPreferences.isOneWay && !userPreferences.isDataOnly) {
                 userPreferences.isOneWay = true;
                 this.onNegotiationNeeded({
@@ -2106,15 +2126,17 @@
                     localMediaConstraints.video = connection.mediaConstraints.video;
                 }
 
-                var session = connection.session;
+                var session = userPreferences.session || connection.session;
 
-                if (!session.audio || session.video || session.screen) {
+                if (session.oneway && session.audio && session.audio === 'two-way') {
+                    session = {
+                        audio: true
+                    };
+                }
+
+                if (session.audio || session.video || session.screen) {
                     if (session.screen) {
                         connection.getScreenConstraints(function(error, screen_constraints) {
-                            if (error) {
-                                alert(error);
-                            }
-
                             connection.invokeGetUserMedia({
                                 audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
                                 video: screen_constraints,
@@ -2122,7 +2144,7 @@
                             }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia(null, cb) : cb);
                         });
                     } else if (session.audio || session.video) {
-                        connection.invokeGetUserMedia(null, cb);
+                        connection.invokeGetUserMedia(null, cb, session);
                     }
                 }
             }
@@ -2570,6 +2592,10 @@
     }
 
     function isAudioPlusTab(connection, audioPlusTab) {
+        if (connection.session.audio && connection.session.audio === 'two-way') {
+            return false;
+        }
+
         if (isFirefox && audioPlusTab !== false) {
             return true;
         }

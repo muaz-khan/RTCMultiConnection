@@ -121,7 +121,7 @@ More info about `forever-service` [here](http://stackoverflow.com/a/36027516/552
 | Socket.io Custom-Messaging | [Demo](https://rtcmulticonnection.herokuapp.com/demos/custom-socket-event.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/custom-socket-event.html) |
 | Check Rooms Presence | [Demo](https://rtcmulticonnection.herokuapp.com/demos/checkPresence.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/checkPresence.html) |
 | getPublicModerators | [Demo](https://rtcmulticonnection.herokuapp.com/demos/getPublicModerators.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/getPublicModerators.html) |
-| Change Cameras/Microphonea | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Switch-Cameras.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Switch-Cameras.html) |
+| Change Cameras/Microphone | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Switch-Cameras.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Switch-Cameras.html) |
 | MultiRTC: Skype-like app | [Demo](https://rtcmulticonnection.herokuapp.com/demos/MultiRTC/) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/MultiRTC/) |
 | Change Video Resolutions in your Live Sessions | [Demo](https://rtcmulticonnection.herokuapp.com/demos/change-resolutions.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/change-resolutions.html) |
 | Admin/Guest demo | [Demo](https://rtcmulticonnection.herokuapp.com/demos/admin-guest.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/admin-guest.html) |
@@ -934,9 +934,66 @@ connection.addStream({
 
 * http://www.rtcmulticonnection.org/docs/userid/
 
+`conection.open` method sets this:
+
+```javascript
+connection.open = function(roomid) {
+    connection.userid = roomid; // --------- please check this line
+
+    // rest of the codes
+};
+```
+
+It means that `roomid` is always organizer/moderator's `userid`.
+
+RTCMultiConnection requires unique `userid` for each peer.
+
+Following code is WRONG/INVALID:
+
+```javascript
+// both organizer and participants are using same 'userid'
+connection.userid = roomid;
+connection.open(roomid);
+connection.join(roomid);
+```
+
+Following code is VALID:
+
+```javascript
+connection.userid = connection.token(); // random userid
+connection.open(roomid);
+connection.join(roomid);
+```
+
+Following code is also VALID:
+
+```javascript
+var roomid = 'xyz';
+connection.open(roomid); // organizer will use "roomid" as his "userid" here
+connection.join(roomid); // participant will use random userid here
+```
+
 ## `session`
 
 * http://www.rtcmulticonnection.org/docs/session/
+
+To enable two-way audio however one-way screen or video:
+
+```javascript
+// video is oneway, however audio is two-way
+connection.session = {
+    audio: 'two-way',
+    video: true,
+    oneway: true
+};
+
+// screen is oneway, however audio is two-way
+connection.session = {
+    audio: 'two-way',
+    screen: true,
+    oneway: true
+};
+```
 
 ## `enableFileSharing`
 

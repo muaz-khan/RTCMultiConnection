@@ -10,9 +10,9 @@
 
     <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
 
-    <title>Video Conferencing using RTCMultiConnection-v3.0</title>
+    <title>Video Conferencing using RTCMultiConnection</title>
 
-    <meta name="description" content="Many-to-Many Video Conferencing using RTCMultiConnection v3.0" />
+    <meta name="description" content="Many-to-Many Video Conferencing using RTCMultiConnection" />
     <meta name="keywords" content="WebRTC,RTCMultiConnection,Demos,Experiments,Samples,Examples" />
 
     <style>
@@ -56,7 +56,7 @@
     <article>
 
         <header style="text-align: center;">
-            <h1>Video Conferencing using RTCMultiConnection-v3.0</h1>
+            <h1>Video Conferencing using RTCMultiConnection</h1>
             <p>
                 <a href="https://rtcmulticonnection.herokuapp.com/">HOME</a>
                 <span> &copy; </span>
@@ -68,8 +68,12 @@
             </p>
         </header>
 
-
         <div class="github-stargazers"></div>
+
+        <blockquote>
+            Mesh networking model is used to implement many-to-many video connection.<br>
+            All users can watch each other; all of them can speak as well.
+        </blockquote>
 
         <section class="experiment">
             <div class="make-center">
@@ -84,6 +88,9 @@
 
         <!-- <script src="/dist/rmc3.min.js"></script> -->
         <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
+
+        <!-- custom layout for HTML5 audio/video elements -->
+        <script src="https://cdn.webrtc-experiment.com/getMediaElement.js"></script>
 
         <!-- socket.io for signaling -->
         <script src="/socket.io/socket.io.js"></script>
@@ -152,11 +159,28 @@
 
             connection.videosContainer = document.getElementById('videos-container');
             connection.onstream = function(event) {
-                connection.videosContainer.appendChild(event.mediaElement);
-                event.mediaElement.play();
+                var width = parseInt(connection.videosContainer.clientWidth / 2) - 20;
+                var mediaElement = getMediaElement(event.mediaElement, {
+                    title: event.userid,
+                    buttons: ['full-screen'],
+                    width: width,
+                    showOnMouseEnter: false
+                });
+
+                connection.videosContainer.appendChild(mediaElement);
+
                 setTimeout(function() {
-                    event.mediaElement.play();
+                    mediaElement.media.play();
                 }, 5000);
+
+                mediaElement.id = event.streamid;
+            };
+
+            connection.onstreamended = function(event) {
+                var mediaElement = document.getElementById(event.streamid);
+                if(mediaElement) {
+                    mediaElement.parentNode.removeChild(mediaElement);
+                }
             };
         </script>
 

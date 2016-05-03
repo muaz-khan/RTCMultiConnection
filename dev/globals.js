@@ -288,6 +288,10 @@ if (typeof MediaStream !== 'undefined') {
 }
 
 function isAudioPlusTab(connection, audioPlusTab) {
+    if (connection.session.audio && connection.session.audio === 'two-way') {
+        return false;
+    }
+
     if (isFirefox && audioPlusTab !== false) {
         return true;
     }
