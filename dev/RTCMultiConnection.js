@@ -400,13 +400,12 @@ function RTCMultiConnection(roomid, forceOptions) {
         });
     };
 
-    connection.getUserMedia = connection.captureUserMedia = function(callback, session) {
-        session = session || connection.session;
+    connection.getUserMedia = connection.captureUserMedia = function(callback, sessionForced) {
+        callback = callback || function() {};
+        var session = sessionForced || connection.session;
 
         if (connection.dontCaptureUserMedia || isData(session)) {
-            if (callback) {
-                callback();
-            }
+            callback();
             return;
         }
 
@@ -421,7 +420,7 @@ function RTCMultiConnection(roomid, forceOptions) {
                         audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
                         video: screen_constraints,
                         isScreen: true
-                    }, function() {
+                    }, function(stream) {
                         if ((session.audio || session.video) && !isAudioPlusTab(connection)) {
                             var nonScreenSession = {};
                             for (var s in session) {
@@ -429,12 +428,14 @@ function RTCMultiConnection(roomid, forceOptions) {
                                     nonScreenSession[s] = session[s];
                                 }
                             }
-                            connection.invokeGetUserMedia(null, null, nonScreenSession);
+                            connection.invokeGetUserMedia(sessionForced, callback, nonScreenSession);
+                            return;
                         }
+                        callback(stream);
                     });
                 });
             } else if (session.audio || session.video) {
-                connection.invokeGetUserMedia();
+                connection.invokeGetUserMedia(sessionForced, callback, session);
             }
         }
     };
@@ -837,13 +838,13 @@ function RTCMultiConnection(roomid, forceOptions) {
             session = connection.session;
         }
 
-        if (localMediaConstraints instanceof MediaStream) {
-            throw localMediaConstraints;
+        if (!localMediaConstraints) {
+            localMediaConstraints = connection.mediaConstraints;
         }
 
         getUserMediaHandler({
             onGettingLocalMedia: function(stream) {
-                var videoConstraints = localMediaConstraints ? localMediaConstraints.video : connection.mediaConstraints;
+                var videoConstraints = localMediaConstraints.video;
                 if (videoConstraints) {
                     if (videoConstraints.mediaSource || videoConstraints.mozMediaSource) {
                         stream.isScreen = true;
@@ -867,8 +868,8 @@ function RTCMultiConnection(roomid, forceOptions) {
                 mPeer.onLocalMediaError(error, constraints);
             },
             localMediaConstraints: localMediaConstraints || {
-                audio: session.audio ? connection.mediaConstraints.audio : false,
-                video: session.video ? connection.mediaConstraints.video : false
+                audio: session.audio ? localMediaConstraints.audio : false,
+                video: session.video ? localMediaConstraints.video : false
             }
         });
     };

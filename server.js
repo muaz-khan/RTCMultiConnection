@@ -68,8 +68,7 @@ function serverHandler(request, response) {
 
                 file = file.replace('<section class="experiment own-widgets latest-commits">', otherDemos);
             }
-        }
-        catch(e) {}
+        } catch (e) {}
 
         response.writeHead(200);
         response.write(file, 'utf8');

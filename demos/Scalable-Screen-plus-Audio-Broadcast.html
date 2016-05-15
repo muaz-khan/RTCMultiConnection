@@ -7,7 +7,7 @@
 
     <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css"> 
 
-    <title>WebRTC Scalable Media Broadcast using RTCMultiConnection</title>
+    <title>WebRTC Scalable Screen+Audio Broadcast using RTCMultiConnection</title>
 
     <meta name="description" content="This module simply initializes socket.io and configures it in a way that single audio/video/screen stream can be shared/relayed over unlimited users without any bandwidth/CPU usage issues. Everything happens peer-to-peer!" />
     <meta name="keywords" content="WebRTC,RTCMultiConnection,Demos,Experiments,Samples,Examples" />
@@ -32,7 +32,11 @@
 
         .make-center {
             text-align: center;
-            padding: 5px 10px;
+            padding-top: 5px;
+        }
+
+        #video-preview {
+            margin-bottom: -13px;
         }
 
         button, input, select {
@@ -83,7 +87,7 @@
     <article>
 
         <header style="text-align: center;">
-            <h1><a href="https://github.com/muaz-khan/WebRTC-Scalable-Broadcast">WebRTC Scalable Media Broadcast</a> using <a href="https://github.com/muaz-khan/RTCMultiConnection">RTCMultiConnection</a></h1>
+            <h1><a href="https://github.com/muaz-khan/WebRTC-Scalable-Broadcast">WebRTC Scalable Screen+Audio Broadcast</a> using <a href="https://github.com/muaz-khan/RTCMultiConnection">RTCMultiConnection</a></h1>
             <p>
                 <a href="https://rtcmulticonnection.herokuapp.com/">HOME</a>
                 <span> &copy; </span>
@@ -97,20 +101,25 @@
 
         <div class="github-stargazers"></div>
 
-        <section class="experiment">
-            <div class="make-center">
+        <section class="experiment make-center">
+            <div>
                 <input type="text" id="broadcast-id" placeholder="broadcast-id" value="room-xyz">
                 <button id="open-or-join">Open or Join Broadcast</button>
             </div>
 
-            <video id="video-preview" controls loop></video>
+            <br>
+
+            <video id="video-preview" controls autoplay></video>
         </section>
 
         <blockquote>
             This module simply initializes socket.io and configures it in a way that single audio/video/screen stream can be shared/relayed over unlimited users without any <a href="https://www.webrtc-experiment.com/docs/RTP-usage.html">bandwidth/CPU usage issues</a>. Everything happens peer-to-peer!
 
             <br><br>
-            Share files with unlimited users using p2p methods! <a href="/demos/Files-Scalable-Broadcast.html">Files Scalable Broadcast</a>
+            You can try <a href="/demos/Scalable-Broadcast.html">Scalable Video Broadcast</a>!
+
+            <br><br>
+            Requirements: <a href="https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk">install this Chrome extension</a> or <a href="https://addons.mozilla.org/en-US/firefox/addon/enable-screen-capturing/">this Firefox extension</a>.
         </blockquote>
 
         <script src="/socket.io/socket.io.js"></script>
@@ -123,14 +132,28 @@
         <!-- <script src="/dist/rmc3.min.js"></script> -->
         <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
 
+        <!-- capture screen from any HTTPs domain! -->
+        <script src="https://cdn.webrtc-experiment.com:443/getScreenId.js"></script>
+
         <script src="https://cdn.webrtc-experiment.com/RecordRTC.js"></script>
         <script>
             // recording is disabled because it is resulting for browser-crash
             var enableRecordings = false;
-
+            
             var connection = new RTCMultiConnection(null, {
                 useDefaultDevices: true // if we don't need to force selection of specific devices
             });
+
+            // Using getScreenId.js to capture screen from any domain
+            // You do NOT need to deploy Chrome Extension YOUR-Self!!
+            connection.getScreenConstraints = function(callback) {
+                getScreenConstraints(function(error, screen_constraints) {
+                    if (!error) {
+                        screen_constraints = connection.modifyScreenConstraints(screen_constraints);
+                        callback(error, screen_constraints);
+                    }
+                });
+            };
 
             // its mandatory in v3
             connection.enableScalableBroadcast = true;
@@ -148,7 +171,7 @@
             // comment-out below line if you do not have your own socket.io server
             // connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
 
-            connection.socketMessageEvent = 'scalable-media-broadcast-demo';
+            connection.socketMessageEvent = 'scalable-screen-plus-audio-broadcast-demo';
 
             var broadcastId = '';
             if(localStorage.getItem('rmc-broadcast-id')) {
@@ -176,8 +199,8 @@
 
                     connection.session = hintsToJoinBroadcast.typeOfStreams;
                     connection.sdpConstraints.mandatory = {
-                        OfferToReceiveVideo: !!connection.session.video,
-                        OfferToReceiveAudio: !!connection.session.audio
+                        OfferToReceiveVideo: true,
+                        OfferToReceiveAudio: true
                     };
                     connection.join(hintsToJoinBroadcast.userid);
                 });
@@ -221,7 +244,13 @@
                     // "open" method here will capture media-stream
                     // we can skip this function always; it is totally optional here.
                     // we can use "connection.getUserMediaHandler" instead
-                    connection.open(connection.userid);
+                    connection.captureUserMedia(function(audioStream) {
+                        connection.captureUserMedia(function(screenStream) {
+                            screenStream.addTrack(audioStream.getAudioTracks()[0]);
+                            connection.dontCaptureUserMedia = true;
+                            connection.open(connection.userid);
+                        }, {screen: true});
+                    }, {audio: true});
                 });
             });
 
@@ -233,16 +262,18 @@
             var videoPreview = document.getElementById('video-preview');
 
             connection.onstream = function(event) {
+                if(event.stream.isAudio) {
+                    event.mediaElement.pause();
+                    delete event.mediaElement;
+                    return;
+                }
+
                 if(connection.isInitiator && event.type !== 'local') {
                     return;
                 }
 
-                if(event.mediaElement) {
-                    event.mediaElement.pause();
-                    delete event.mediaElement;
-                }
-
                 connection.isUpperUserLeft = false;
+
                 videoPreview.src = URL.createObjectURL(event.stream);
                 videoPreview.play();
 
@@ -252,10 +283,15 @@
                     videoPreview.muted = true;
                 }
 
+                if(event.mediaElement) {
+                    event.mediaElement.pause();
+                    delete event.mediaElement;
+                }
+
                 if (connection.isInitiator == false && event.type === 'remote') {
                     // he is merely relaying the media
                     connection.dontCaptureUserMedia = true;
-                    connection.attachStreams = [event.stream];
+                    connection.attachStreams.push(event.stream);
                     connection.sdpConstraints.mandatory = {
                         OfferToReceiveAudio: false,
                         OfferToReceiveVideo: false
@@ -314,8 +350,7 @@
                 this.disabled = true;
 
                 connection.session = {
-                    audio: true,
-                    video: true,
+                    screen: true,
                     oneway: true
                 };
 

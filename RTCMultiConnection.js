@@ -1,4 +1,4 @@
-// Last time updated: 2016-05-03 8:03:49 AM UTC
+// Last time updated: 2016-05-15 4:12:35 AM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -416,13 +416,12 @@
             });
         };
 
-        connection.getUserMedia = connection.captureUserMedia = function(callback, session) {
-            session = session || connection.session;
+        connection.getUserMedia = connection.captureUserMedia = function(callback, sessionForced) {
+            callback = callback || function() {};
+            var session = sessionForced || connection.session;
 
             if (connection.dontCaptureUserMedia || isData(session)) {
-                if (callback) {
-                    callback();
-                }
+                callback();
                 return;
             }
 
@@ -437,7 +436,7 @@
                             audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
                             video: screen_constraints,
                             isScreen: true
-                        }, function() {
+                        }, function(stream) {
                             if ((session.audio || session.video) && !isAudioPlusTab(connection)) {
                                 var nonScreenSession = {};
                                 for (var s in session) {
@@ -445,12 +444,14 @@
                                         nonScreenSession[s] = session[s];
                                     }
                                 }
-                                connection.invokeGetUserMedia(null, null, nonScreenSession);
+                                connection.invokeGetUserMedia(sessionForced, callback, nonScreenSession);
+                                return;
                             }
+                            callback(stream);
                         });
                     });
                 } else if (session.audio || session.video) {
-                    connection.invokeGetUserMedia();
+                    connection.invokeGetUserMedia(sessionForced, callback, session);
                 }
             }
         };
@@ -853,13 +854,13 @@
                 session = connection.session;
             }
 
-            if (localMediaConstraints instanceof MediaStream) {
-                throw localMediaConstraints;
+            if (!localMediaConstraints) {
+                localMediaConstraints = connection.mediaConstraints;
             }
 
             getUserMediaHandler({
                 onGettingLocalMedia: function(stream) {
-                    var videoConstraints = localMediaConstraints ? localMediaConstraints.video : connection.mediaConstraints;
+                    var videoConstraints = localMediaConstraints.video;
                     if (videoConstraints) {
                         if (videoConstraints.mediaSource || videoConstraints.mozMediaSource) {
                             stream.isScreen = true;
@@ -883,8 +884,8 @@
                     mPeer.onLocalMediaError(error, constraints);
                 },
                 localMediaConstraints: localMediaConstraints || {
-                    audio: session.audio ? connection.mediaConstraints.audio : false,
-                    video: session.video ? connection.mediaConstraints.video : false
+                    audio: session.audio ? localMediaConstraints.audio : false,
+                    video: session.video ? localMediaConstraints.video : false
                 }
             });
         };

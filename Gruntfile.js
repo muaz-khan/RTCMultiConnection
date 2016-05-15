@@ -34,6 +34,8 @@ module.exports = function(grunt) {
             dist: {
                 src: [
                     'dev/head.js',
+                    // 'dev/amd.js',
+
                     'dev/RTCMultiConnection.js',
                     'dev/SocketConnection.js', // You can replace it with: FirebaseConnection.js || PubNubConnection.js
                     'dev/MultiPeersHandler.js',

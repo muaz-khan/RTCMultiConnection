@@ -142,7 +142,7 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.4/rmc3.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.5/rmc3.min.js"></script>
 ```
 
 If you're sharing files, you also need to link:
@@ -154,7 +154,7 @@ If you're sharing files, you also need to link:
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.fbr.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.4/rmc3.fbr.min.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.5/rmc3.fbr.min.js"></script>
 ```
 
 > You can link multiple files from `dev` directory. Order doesn't matters.
@@ -675,13 +675,62 @@ connection.maxParticipantsAllowed = 1;
 
 ## `setCustomSocketHandler`
 
-This method allows you skip Socket.io and force Firebase or PubNub or WebSockets or PHP/ASPNET whatever.
+This method allows you skip Socket.io and force custom signaling implementations e.g. SIP-signaling, XHR-signaling, SignalR/WebSync signaling, Firebase/PubNub signaling etc.
+
+Here is Firebase example:
+
+```html
+<script src="/dev/globals.js"></script>
+<script src="/dev/FirebaseConnection.js"></script>
+<script>
+var connection = new RTCMultiConnection();
+
+connection.firebase = 'your-firebase-account';
+
+// below line replaces FirebaseConnection
+connection.setCustomSocketHandler(FirebaseConnection);
+</script>
+```
+
+Here is PubNub example:
+
+```html
+<script src="/dev/globals.js"></script>
+<script src="/dev/PubNubConnection.js"></script>
+<script>
+var connection = new RTCMultiConnection();
+
+// below line replaces PubNubConnection
+connection.setCustomSocketHandler(PubNubConnection);
+</script>
+```
+
+SIP/SignalR/WebSync/XHR signaling:
 
 ```javascript
-connection.setCustomSocketHandler(FirebaseConnection);
+// please don't forget linking /dev/globals.js
+
+var connection = new RTCMultiConnection();
+
+// SignalR (requires /dev/SignalRConnection.js)
+connection.setCustomSocketHandler(SignalRConnection);
+
+// WebSync (requires /dev/WebSyncConnection.js)
+connection.setCustomSocketHandler(WebSyncConnection);
+
+// XHR (requires /dev/XHRConnection.js)
+connection.setCustomSocketHandler(XHRConnection);
+
+// Sip (requires /dev/SipConnection.js)
+connection.setCustomSocketHandler(SipConnection);
 ```
 
 Please check [`FirebaseConnection`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dev/FirebaseConnection.js) or [`PubNubConnection.js`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dev/PubNubConnection.js) to understand how it works.
+
+For more information:
+
+* https://rtcmulticonnection.herokuapp.com/demos/Audio+Video+TextChat+FileSharing.html#comment-2670178473
+* https://rtcmulticonnection.herokuapp.com/demos/Audio+Video+TextChat+FileSharing.html#comment-2670182313
 
 ## `enableLogs`
 
@@ -1263,37 +1312,6 @@ connection.getScreenConstraints = function(callback) {
 };
 </script>
 ```
-
-## Firebase?
-
-If you are willing to use Firebase instead of Socket.io there, open [GruntFile.js](https://github.com/muaz-khan/RTCMultiConnection/blob/master/Gruntfile.js#L26) and replace `SocketConnection.js` with `FirebaseConnection.js`.
-
-Then use `grunt` to recompile RTCMultiConnection.js.
-
-**Otherwise** if you don't want to modify RTCMultiConnection:
-
-```html
-<script src="/dev/globals.js"></script>
-<script src="/dev/FirebaseConnection.js"></script>
-<script>
-var connection = new RTCMultiConnection();
-
-connection.firebase = 'your-firebase-account';
-
-// below line replaces FirebaseConnection
-connection.setCustomSocketHandler(FirebaseConnection);
-</script>
-```
-
-Demo: [https://rtcmulticonnection.herokuapp.com/demos/Firebase-Demo.html](https://rtcmulticonnection.herokuapp.com/demos/Firebase-Demo.html)
-
-## PubNub?
-
-Follow above all "firebase" steps and use `PubNubConnection.js` instead.
-
-Please don't forget to use your own PubNub keys.
-
-Demo: [https://rtcmulticonnection.herokuapp.com/demos/PubNub-Demo.html](https://rtcmulticonnection.herokuapp.com/demos/PubNub-Demo.html)
 
 ## Scalable Broadcasting
 
