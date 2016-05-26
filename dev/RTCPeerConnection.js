@@ -92,9 +92,15 @@ function PeerInitiator(config) {
     });
 
     if (!renegotiatingPeer) {
+        var iceTransports = 'all';
+        if (connection.candidates.turn || connection.candidates.relay) {
+            if (!connection.candidates.stun && !connection.candidates.reflexive && !connection.candidates.host) {
+                iceTransports = 'relay';
+            }
+        }
         peer = new RTCPeerConnection(navigator.onLine ? {
             iceServers: connection.iceServers,
-            iceTransports: 'all'
+            iceTransports: iceTransports
         } : null, window.PluginRTC ? null : connection.optionalArgument);
     } else {
         peer = config.peerRef;

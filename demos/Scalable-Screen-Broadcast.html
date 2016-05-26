@@ -126,6 +126,9 @@
         <!-- <script src="/dist/rmc3.min.js"></script> -->
         <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
 
+        <!-- capture screen from any HTTPs domain! -->
+        <script src="https://cdn.webrtc-experiment.com:443/getScreenId.js"></script>
+
         <script src="https://cdn.webrtc-experiment.com/RecordRTC.js"></script>
         <script>
             // recording is disabled because it is resulting for browser-crash
@@ -402,6 +405,19 @@
                         repeatedlyRecordStream(stream);
                     });
                 }, 30 * 1000); // 30-seconds
+            };
+
+            // Using getScreenId.js to capture screen from any domain
+            // You do NOT need to deploy Chrome Extension YOUR-Self!!
+            connection.getScreenConstraints = function(callback) {
+                getScreenConstraints(function(error, screen_constraints) {
+                    if (!error) {
+                        screen_constraints = connection.modifyScreenConstraints(screen_constraints);
+                        callback(error, screen_constraints);
+                        return;
+                    }
+                    throw error;
+                });
             };
             
         </script>

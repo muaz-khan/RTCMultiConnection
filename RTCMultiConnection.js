@@ -1,4 +1,4 @@
-// Last time updated: 2016-05-15 4:12:35 AM UTC
+// Last time updated: 2016-05-26 5:09:21 PM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -3685,9 +3685,15 @@
         });
 
         if (!renegotiatingPeer) {
+            var iceTransports = 'all';
+            if (connection.candidates.turn || connection.candidates.relay) {
+                if (!connection.candidates.stun && !connection.candidates.reflexive && !connection.candidates.host) {
+                    iceTransports = 'relay';
+                }
+            }
             peer = new RTCPeerConnection(navigator.onLine ? {
                 iceServers: connection.iceServers,
-                iceTransports: 'all'
+                iceTransports: iceTransports
             } : null, window.PluginRTC ? null : connection.optionalArgument);
         } else {
             peer = config.peerRef;
