@@ -127,7 +127,7 @@ function MultiPeers(connection) {
             },
             remoteSdp: remoteSdp,
             onDataChannelMessage: function(message) {
-                if (!fbr && connection.enableFileSharing) initFileBufferReader();
+                if (!connection.fbr && connection.enableFileSharing) initFileBufferReader();
 
                 if (typeof message == 'string' || !connection.enableFileSharing) {
                     self.onDataChannelMessage(message, remoteUserId);
@@ -137,14 +137,14 @@ function MultiPeers(connection) {
                 var that = this;
 
                 if (message instanceof ArrayBuffer || message instanceof DataView) {
-                    fbr.convertToObject(message, function(object) {
+                    connection.fbr.convertToObject(message, function(object) {
                         that.onDataChannelMessage(object);
                     });
                     return;
                 }
 
                 if (message.readyForNextChunk) {
-                    fbr.getNextChunk(message.uuid, function(nextChunk, isLastChunk) {
+                    connection.fbr.getNextChunk(message.uuid, function(nextChunk, isLastChunk) {
                         connection.peers[remoteUserId].channels.forEach(function(channel) {
                             channel.send(nextChunk);
                         });
@@ -152,7 +152,7 @@ function MultiPeers(connection) {
                     return;
                 }
 
-                fbr.addChunk(message, function(promptNextChunk) {
+                connection.fbr.addChunk(message, function(promptNextChunk) {
                     connection.peers[remoteUserId].peer.channel.send(promptNextChunk);
                 });
             },
@@ -430,17 +430,15 @@ function MultiPeers(connection) {
         connection.onMediaError(error, constraints);
     };
 
-    var fbr;
-
     function initFileBufferReader() {
-        fbr = new FileBufferReader();
-        fbr.onProgress = function(chunk) {
+        connection.fbr = new FileBufferReader();
+        connection.fbr.onProgress = function(chunk) {
             connection.onFileProgress(chunk);
         };
-        fbr.onBegin = function(file) {
+        connection.fbr.onBegin = function(file) {
             connection.onFileStart(file);
         };
-        fbr.onEnd = function(file) {
+        connection.fbr.onEnd = function(file) {
             connection.onFileEnd(file);
         };
     }
@@ -452,7 +450,7 @@ function MultiPeers(connection) {
 
         initFileBufferReader();
 
-        fbr.readAsArrayBuffer(file, function(uuid) {
+        connection.fbr.readAsArrayBuffer(file, function(uuid) {
             var arrayOfUsers = connection.getAllParticipants();
 
             if (remoteUserId) {
@@ -460,7 +458,7 @@ function MultiPeers(connection) {
             }
 
             arrayOfUsers.forEach(function(participant) {
-                fbr.getNextChunk(uuid, function(nextChunk) {
+                connection.fbr.getNextChunk(uuid, function(nextChunk) {
                     connection.peers[participant].channels.forEach(function(channel) {
                         channel.send(nextChunk);
                     });
