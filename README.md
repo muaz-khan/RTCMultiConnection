@@ -11,13 +11,16 @@
 >
 > v3 can use XHR/XMPP/etc. signaling implementations as well. Please check [PubNubConnection.js](https://github.com/muaz-khan/RTCMultiConnection/blob/master/dev/PubNubConnection.js) to see how to configure it for 3rd party signaling implementations. You simply have to modify top few lines.
 
-# RTCMultiConnection [Documentation](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/)
+# [Documentation](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/)
 
 1. [Installation Guide](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/installation-guide.md)
 2. [How to Use?](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/how-to-use.md)
 3. [API Reference](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/api.md)
 4. [Upgrade from v2 to v3](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/upgrade.md)
 5. [How to write iOS/Android applications?](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/ios-android.md)
+6. [Tips & Tricks](https://github.com/muaz-khan/RTCMultiConnection/blob/master/docs/tips-tricks.md)
+
+# v3 Demos
 
 | DemoTitle        | TestLive           | ViewSource |
 | ------------- |-------------|-------------|
@@ -51,9 +54,7 @@
 | Check if StreamHasData | [Demo](https://rtcmulticonnection.herokuapp.com/demos/StreamHasData.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/StreamHasData.html) |
 | Capture & Share Screen from any domain! | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Cross-Domain-Screen-Capturing.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Cross-Domain-Screen-Capturing.html) |
 
-
-
-## RTCMultiConnection v2 Demos
+# v2 Demos
 
 | Experiment Name        | Demo           | Source Code |
 | ------------- |-------------|-------------|

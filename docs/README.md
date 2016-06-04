@@ -5,6 +5,7 @@
 3. [API Reference](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/api.md)
 4. [Upgrade from v2 to v3](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/upgrade.md)
 5. [How to write iOS/Android applications?](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/ios-android.md)
+6. [Tips & Tricks](https://github.com/muaz-khan/RTCMultiConnection/blob/master/docs/tips-tricks.md)
 
 # [Wiki Pages](https://github.com/muaz-khan/RTCMultiConnection/wiki)
 

@@ -495,6 +495,18 @@ connection.socketOptions = {
 };
 ```
 
+Or:
+
+```javascript
+connection.socketOptions.resource = 'custom';
+connection.socketOptions.transport = 'polling';
+connection.socketOptions['try multiple transports'] = false;
+connection.socketOptions.secure = true;
+connection.socketOptions.port = '9001';
+connection.socketOptions['max reconnection attempts'] = 100;
+// etc.
+```
+
 ## `connection.socket`
 
 ```javascript
@@ -682,6 +694,17 @@ connection.addStream({
 });
 ```
 
+## `removeStream`
+
+* http://www.rtcmulticonnection.org/docs/removeStream/
+
+You can even pass `streamCallback`:
+
+```javascript
+connection.removeStream('streamid');
+connection.renegotiate();
+```
+
 ## `mediaConstraints`
 
 * http://www.rtcmulticonnection.org/docs/mediaConstraints/
@@ -809,6 +832,16 @@ window.onbeforeunlaod = function() {
     connection.closeEntireSession();
 };
 ```
+
+## `closeSocket`
+
+```javascript
+connection.closeSocket(); // close socket.io connections
+```
+
+## `close`
+
+* http://www.rtcmulticonnection.org/docs/close/
 
 ## `onUserIdAlreadyTaken`
 
@@ -1223,28 +1256,6 @@ if(connection.DetectRTC.browser.name === 'Firefox') {
 </script>
 ```
 
-## Tips & Tricks
-
-`Object.observe` has been removed since `v3.2.95`. So you've to manually update-extra-data or set stream-end-handlers:
-
-```javascript
-connection.extra.something = 'something';
-connection.updateExtraData();
-```
-
-When attaching external streams:
-
-```javascript
-connection.attachStreams.push(yourExternalStrea);
-connection.setStreamEndHandler(yourExternalStrea);
-```
-
-Change userid using this method:
-
-```javascript
-connection.changeUserId('your-new-userid');
-```
-
 ## `StreamHasData`
 
 [`StreamHasData.js`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dev/StreamHasData.js) allows you check if remote stream started flowing or if remote stream is successfully received or if remote stream has data or not.
@@ -1301,8 +1312,8 @@ fileInput.onchange = function() {
 };
 
 if(connection.fbr) {
-    // Second Last step: remove file chunks based on file UUID
-    connection.fbr.chunks[file.uuid];
+    // Second Last step: remove/delete file chunks based on file UUID
+    delete connection.fbr.chunks[file.uuid];
 }
 ```
 
@@ -1361,6 +1372,14 @@ You can either remove `enableLogs` from the `config.json` to **disable logs**; o
   "enableLogs": "false"
 }
 ```
+
+# Missing API?
+
+Search here: http://www.rtcmulticonnection.org/docs/
+
+# Tips & Tricks
+
+* https://github.com/muaz-khan/RTCMultiConnection/blob/master/docs/tips-tricks.md
 
 ## Twitter
 
