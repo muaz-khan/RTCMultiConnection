@@ -1,4 +1,4 @@
-// Last time updated: 2016-06-04 2:15:39 PM UTC
+// Last time updated: 2016-06-05 3:14:50 PM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -17,7 +17,9 @@
     // RTCMultiConnection.js
 
     function RTCMultiConnection(roomid, forceOptions) {
-        forceOptions = forceOptions || {};
+        forceOptions = forceOptions || {
+            useDefaultDevices: true
+        };
 
         var connection = this;
 

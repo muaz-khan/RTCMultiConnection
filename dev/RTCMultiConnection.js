@@ -1,7 +1,9 @@
 // RTCMultiConnection.js
 
 function RTCMultiConnection(roomid, forceOptions) {
-    forceOptions = forceOptions || {};
+    forceOptions = forceOptions || {
+        useDefaultDevices: true
+    };
 
     var connection = this;
 
