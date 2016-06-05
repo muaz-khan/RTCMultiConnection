@@ -71,7 +71,25 @@ btnStopRecording.onclick = function() {
 
 ## Record All Videos In Single File
 
-Not Supported yet.
+Wanna try a hack? **You will be able to record entire tab + all audios**.
+
+First of all, install this Google Chrome extension:
+
+* https://chrome.google.com/webstore/detail/recordrtc/ndcljioonkecdnaaihodjgiliohngojp
+
+Now, install **last Google Chrome Canary**. Remember, chrome version 53+.
+
+Now open options page `chrome://extensions/?options=ndcljioonkecdnaaihodjgiliohngojp` and enable this check-box:
+
+```
+Enable audio+tab recording?
+```
+
+Now click "R" icon to record any tab. Above chrome-extension **will record entire tab activity along with all audios at once!!!**
+
+To repeat, `audio+tab` recording option allows you record entire tab activity; all videos on tab, all audios on the tab, dashboards or any activity!
+
+Again, above chrome extension requires Google Chrome version greater than or equal to 53.
 
 ## Record Audio along with Screen
 
