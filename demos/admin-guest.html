@@ -89,6 +89,8 @@
                 <button id="btn-become-admin">I'm Admin</button>
                 <button id="btn-become-guest">I'm Guest</button>
 
+                <div id="room-urls" style="text-align: center;display: none;background: #F1EDED;margin: 15px -10px;border: 1px solid rgb(189, 189, 189);border-left: 0;border-right: 0;"></div>
+
                 <br><br>
                 <input type="text" id="input-text-chat" placeholder="Enter Text Chat" disabled>
                 <button id="share-file" disabled>Share File</button>
@@ -127,7 +129,7 @@
             // ......................................................
 
             document.getElementById('btn-become-admin').onclick = function() {
-                this.disabled = true;
+                disableInputButtons();
 
                 connection.adminId = document.getElementById('admin-id').value;
                 connection.socketCustomEvent = connection.adminId;
@@ -145,13 +147,16 @@
                         return;
                     }
 
-                    connection.open(connection.adminId);
+                    connection.open(connection.adminId, function() {
+                        showRoomURL(connection.sessionid);
+                    });
                     handleSocketCustomMessages();
                 });
             };
 
             document.getElementById('btn-become-guest').onclick = function() {
-                this.disabled = true;
+                disableInputButtons();
+
                 connection.adminId = document.getElementById('admin-id').value;
                 connection.socketCustomEvent = connection.adminId;
 
@@ -296,18 +301,6 @@
             // connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
 
             connection.socketMessageEvent = 'admin-guest-demo';
-
-            var roomid = '';
-            if(localStorage.getItem('rmc-admin-id')) {
-                roomid = localStorage.getItem('rmc-admin-id');
-            }
-            else {
-                roomid = connection.token();
-            }
-            document.getElementById('admin-id').value = roomid;
-            document.getElementById('admin-id').onkeyup = function() {
-                localStorage.setItem('rmc-admin-id', this.value);
-            };
 
             connection.enableFileSharing = true; // by default, it is "false".
 
@@ -463,6 +456,71 @@
                         return;
                     }
                 });
+            }
+
+            function disableInputButtons() {
+                document.getElementById('btn-become-admin').disabled = true;
+                document.getElementById('btn-become-guest').disabled = true;
+                document.getElementById('admin-id').disabled = true;
+            }
+
+            // ......................................................
+            // ......................Handling admin-id................
+            // ......................................................
+
+            function showRoomURL(adminId) {
+                var roomHashURL = '#' + adminId;
+                var roomQueryStringURL = '?adminId=' + adminId;
+
+                var html = '<h2>Unique URL for your room:</h2><br>';
+
+                html += 'Hash URL: <a href="' + roomHashURL + '" target="_blank">' + roomHashURL + '</a>';
+                html += '<br>';
+                html += 'QueryString URL: <a href="' + roomQueryStringURL + '" target="_blank">' + roomQueryStringURL + '</a>';
+
+                var roomURLsDiv = document.getElementById('room-urls');
+                roomURLsDiv.innerHTML = html;
+
+                roomURLsDiv.style.display = 'block';
+            }
+
+            (function() {
+                var params = {},
+                    r = /([^&=]+)=?([^&]*)/g;
+
+                function d(s) {
+                    return decodeURIComponent(s.replace(/\+/g, ' '));
+                }
+                var match, search = window.location.search;
+                while (match = r.exec(search.substring(1)))
+                    params[d(match[1])] = d(match[2]);
+                window.params = params;
+            })();
+
+            var adminId = '';
+            if (localStorage.getItem(connection.socketMessageEvent)) {
+                adminId = localStorage.getItem(connection.socketMessageEvent);
+            } else {
+                adminId = connection.token();
+            }
+            document.getElementById('admin-id').value = adminId;
+            document.getElementById('admin-id').onkeyup = function() {
+                localStorage.setItem(connection.socketMessageEvent, this.value);
+            };
+            
+            var hashString = location.hash.replace('#', '');
+
+            var adminId = params.adminId;
+            if(!adminId && hashString.length) {
+                adminId = hashString;
+            }
+
+            if(adminId && adminId.length) {
+                document.getElementById('admin-id').value = adminId;
+                localStorage.setItem(connection.socketMessageEvent, adminId);
+
+                disableInputButtons();
+                document.getElementById('btn-become-guest').onclick();
             }
         </script>
 

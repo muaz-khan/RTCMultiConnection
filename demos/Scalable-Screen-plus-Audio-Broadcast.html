@@ -105,6 +105,8 @@
             <div>
                 <input type="text" id="broadcast-id" placeholder="broadcast-id" value="room-xyz">
                 <button id="open-or-join">Open or Join Broadcast</button>
+
+                <div id="room-urls" style="text-align: center;display: none;background: #F1EDED;margin: 15px -10px;border: 1px solid rgb(189, 189, 189);border-left: 0;border-right: 0;"></div>
             </div>
 
             <br>
@@ -173,18 +175,6 @@
 
             connection.socketMessageEvent = 'scalable-screen-plus-audio-broadcast-demo';
 
-            var broadcastId = '';
-            if(localStorage.getItem('rmc-broadcast-id')) {
-                broadcastId = localStorage.getItem('rmc-broadcast-id');
-            }
-            else {
-                broadcastId = connection.token();
-            }
-            document.getElementById('broadcast-id').value = broadcastId;
-            document.getElementById('broadcast-id').onkeyup = function() {
-                localStorage.setItem('rmc-broadcast-id', this.value);
-            };
-
             // document.getElementById('broadcast-id').value = connection.userid;
 
             // user need to connect server, so that others can reach him.
@@ -248,7 +238,9 @@
                         connection.captureUserMedia(function(screenStream) {
                             screenStream.addTrack(audioStream.getAudioTracks()[0]);
                             connection.dontCaptureUserMedia = true;
-                            connection.open(connection.userid);
+                            connection.open(connection.userid, function() {
+                                showRoomURL(connection.sessionid);
+                            });
                         }, {screen: true});
                     }, {audio: true});
                 });
@@ -347,7 +339,7 @@
                     return;
                 }
 
-                this.disabled = true;
+                document.getElementById('open-or-join').disabled = true;
 
                 connection.session = {
                     screen: true,
@@ -436,6 +428,81 @@
                     });
                 }, 30 * 1000); // 30-seconds
             };
+
+            function disableInputButtons() {
+                document.getElementById('open-or-join').disabled = true;
+                document.getElementById('broadcast-id').disabled = true;
+            }
+
+            // ......................................................
+            // ......................Handling broadcast-id................
+            // ......................................................
+
+            function showRoomURL(broadcastId) {
+                var roomHashURL = '#' + broadcastId;
+                var roomQueryStringURL = '?broadcastId=' + broadcastId;
+
+                var html = '<h2>Unique URL for your room:</h2><br>';
+
+                html += 'Hash URL: <a href="' + roomHashURL + '" target="_blank">' + roomHashURL + '</a>';
+                html += '<br>';
+                html += 'QueryString URL: <a href="' + roomQueryStringURL + '" target="_blank">' + roomQueryStringURL + '</a>';
+
+                var roomURLsDiv = document.getElementById('room-urls');
+                roomURLsDiv.innerHTML = html;
+
+                roomURLsDiv.style.display = 'block';
+            }
+
+            (function() {
+                var params = {},
+                    r = /([^&=]+)=?([^&]*)/g;
+
+                function d(s) {
+                    return decodeURIComponent(s.replace(/\+/g, ' '));
+                }
+                var match, search = window.location.search;
+                while (match = r.exec(search.substring(1)))
+                    params[d(match[1])] = d(match[2]);
+                window.params = params;
+            })();
+
+            var broadcastId = '';
+            if (localStorage.getItem(connection.socketMessageEvent)) {
+                broadcastId = localStorage.getItem(connection.socketMessageEvent);
+            } else {
+                broadcastId = connection.token();
+            }
+            document.getElementById('broadcast-id').value = broadcastId;
+            document.getElementById('broadcast-id').onkeyup = function() {
+                localStorage.setItem(connection.socketMessageEvent, this.value);
+            };
+            
+            var hashString = location.hash.replace('#', '');
+
+            var broadcastId = params.broadcastId;
+            if(!broadcastId && hashString.length) {
+                broadcastId = hashString;
+            }
+
+            if(broadcastId && broadcastId.length) {
+                document.getElementById('broadcast-id').value = broadcastId;
+                localStorage.setItem(connection.socketMessageEvent, broadcastId);
+
+                // auto-join-room
+                (function reCheckRoomPresence() {
+                    connection.checkPresence(broadcastId, function(isRoomExists) {
+                        if(isRoomExists) {
+                            document.getElementById('open-or-join').onclick();
+                            return;
+                        }
+
+                        setTimeout(reCheckRoomPresence, 5000);
+                    });
+                })();
+
+                disableInputButtons();
+            }
             
         </script>
 
