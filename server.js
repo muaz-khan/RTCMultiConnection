@@ -80,6 +80,24 @@ function serverHandler(request, response) {
             }
         } catch (e) {}
 
+        try {
+            var docs = (fs.readdirSync('docs') || []);
+
+            if (docs.length) {
+                var html = '<section class="experiment" id="docs">';
+                html += '<h2><a href="#docs">Documentation</a></h2>';
+                html += '<ol>';
+
+                docs.forEach(function(f) {
+                    html += '<li><a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/' + f + '">' + f + '</a></li>';
+                });
+
+                html += '</ol></section><section class="experiment own-widgets latest-commits">';
+
+                file = file.replace('<section class="experiment own-widgets latest-commits">', html);
+            }
+        } catch (e) {}
+
         response.writeHead(200);
         response.write(file, 'utf8');
         response.end();

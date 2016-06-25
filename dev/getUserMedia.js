@@ -1,9 +1,5 @@
 // getUserMediaHandler.js
 
-if (typeof webrtcUtils !== 'undefined') {
-    webrtcUtils.enableLogs = false;
-}
-
 function setStreamType(constraints, stream) {
     if (constraints.mandatory && constraints.mandatory.chromeMediaSource) {
         stream.isScreen = true;
@@ -89,6 +85,19 @@ function getUserMediaHandler(options) {
                 streaming(stream);
             }, function(error) {});
 
+            return;
+        }
+
+        var isBlackBerry = !!(/BB10|BlackBerry/i.test(navigator.userAgent || ''));
+        if (isBlackBerry || typeof navigator.mediaDevices === 'undefined' || typeof navigator.mediaDevices.getUserMedia !== 'function') {
+            navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+            navigator.getUserMedia(options.localMediaConstraints, function(stream) {
+                stream.streamid = stream.streamid || stream.id || getRandomString();
+                stream.idInstance = idInstance;
+                streaming(stream);
+            }, function(error) {
+                options.onLocalMediaError(error, options.localMediaConstraints);
+            });
             return;
         }
 

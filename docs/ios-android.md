@@ -1,64 +1,55 @@
+<title>RTCMultiConnection on iOS and Android</title>
+
 # iOS and Android
+
+## iPhone, iPad, Nexus, Blackberry, Samsung, many other devices
 
 > This page explains how to write iOS+Android phonegap/cordova applications for RTCMultiConnection-v3.
 
-1. Audio/Video + TextChat/FileSharing (supported both on iOS/Android) [broadcast, conferencing, everything]
-2. Screen Viewer (supported both on iOS/Android) -- You can merely view the screen shared by desktop.
-3. Screen Capturing & Sharing (NOT Supported on Mobile platforms)
+# Prerequisites
 
-RTCMultiConnection-v3 supports `cordova` based iOS/android apps.
+1. xcode `7.2.1` (required)
+2. cordova android plugin `5.1.0` (suggested)
+3. cordova ios plugin `3.9.2` --- note: MUST be this version (don't use newer ones)
 
-Copy/paste entire [`rmc3.min.js`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dist/rmc3.min.js) file inside `deviceready` callback:
+Check xcode-build-version: `xcodebuild -version`
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>CordovaApp using RTCMultiConnection-v3</title>
-    <link rel="stylesheet" href="css/index.css">
-</head>
-<body>
-    <!-- your UI code -->
-
-    <!-- scripts are placed on footer -->
-    <script src="cordova.js"></script>
-
-    <!-- NEVER link rmc3.min.js here -->
-    <!-- instead copy/paste code from rmc3.min.js into below "index.js" file -->
-    <script src="js/index.js"></script>
-</body>
-</html>
-```
-
-`www/js/index.js`:
-
-
-```javascript
-// please read below comments:
-document.addEventListener('deviceready', function() {
-    // copy/paste entire/all code from "rmc3.min.js" file
-    // here --- exact here
-    // paste inside this callback
-    // if you will NOT do this, RTCMultiConnection will fail on cordova-based apps
-    // again, you MUST NOT link rmc3.min.js
-    // instead copy/paste all the codes here
-
-    // you can put your custom-ui-codes here
-    // e.g.
-    // var connection = new RTCMultiConnection({useDefaultDevices:true});
-}, false);
-```
-
-Installations:
+Make sure that terminal is using latest xcode:
 
 ```
-sudo npm install cordova -g
-sudo npm install xcode -g
+xcode-select --print-path
 
-cordova create ./mobileApp org.mobileApp mobileApp
-cd mobileApp
+sudo xcode-select -switch /Applications/Xcode5.1.1/Xcode.app
+```
 
+# Install Prerequisites
+
+```sh
+# if a command fails, try with [sudo]
+
+npm install cordova -g
+npm install xcode -g
+
+cordova platform add ios@3.9.2
+cordova platform add android@5.1.0
+```
+
+# Create Your First App
+
+```sh
+cordova create ./yourAppName org.yourAppName yourAppName
+cd yourAppName
+```
+
+## Add WebRTC plugin for iOS apps
+
+```sh
 cordova plugin add cordova-plugin-iosrtc
+```
+
+Now compile SWIFT parameters:
+
+```sh
 cd hooks
 wget https://raw.githubusercontent.com/eface2face/cordova-plugin-iosrtc/master/extra/hooks/iosrtc-swift-support.js
 
@@ -75,32 +66,14 @@ Now modify `config.xml` for this section:
 </platform>
 ```
 
-Further commands:
+# Build your Apps
 
-```
-cordova platform add ios@3.9.2
-
+```sh
 cordova build ios
 cordova build android
 ```
 
-Prerequisites:
-
-1. xcode `7.2.1` (required)
-2. cordova android plugin `5.1.0` (suggested)
-3. cordova ios plugin `3.9.2` --- note: MUST be this version (don't use newer ones)
-
-Check xcode-build-version: `xcodebuild -version`
-
-Make sure that terminal is using latest xcode:
-
-```
-xcode-select --print-path
-
-sudo xcode-select -switch /Applications/Xcode5.1.1/Xcode.app
-```
-
-`config.xml` hints:
+# `config.xml` hints
 
 Modify `platform/android/AndroidManifest.xml` for `<uses-permission android:name="android.permission.CAMERA"/>` and a few others. Now getUserMedia API will work in Android.
 
@@ -174,6 +147,60 @@ An example `config.xml` file (make sure that `icon.png` has valid path):
     <preference name="AndroidPersistentFileLocation" value="Internal" />
 </widget>
 ```
+
+# Use RTCMultiConnection-v3
+
+> This section explains how to integrate RTCMultiConnection-v3 for both iOS and Android apps.
+
+Copy/paste entire [`rmc3.min.js`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dist/rmc3.min.js) file inside `deviceready` callback:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>CordovaApp using RTCMultiConnection-v3</title>
+    <link rel="stylesheet" href="css/index.css">
+</head>
+<body>
+    <!-- your UI code -->
+
+    <!-- scripts are placed on footer -->
+    <script src="cordova.js"></script>
+
+    <!-- NEVER link rmc3.min.js here -->
+    <!-- instead copy/paste code from rmc3.min.js into below "index.js" file -->
+    <script src="js/index.js"></script>
+</body>
+</html>
+```
+
+`www/js/index.js`:
+
+
+```javascript
+// please read below comments:
+document.addEventListener('deviceready', function() {
+    // copy/paste entire/all code from "rmc3.min.js" file
+    // here --- exact here
+    // paste inside this callback
+    // if you will NOT do this, RTCMultiConnection will fail on cordova-based apps
+    // again, you MUST NOT link rmc3.min.js
+    // instead copy/paste all the codes here
+
+    // you can put your custom-ui-codes here
+    // e.g.
+    // var connection = new RTCMultiConnection({useDefaultDevices:true});
+}, false);
+```
+
+# Other Documents
+
+1. [Installation Guide](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/installation-guide.md)
+2. [How to Use?](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/how-to-use.md)
+3. [API Reference](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/api.md)
+4. [Upgrade from v2 to v3](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/upgrade.md)
+5. [How to write iOS/Android applications?](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/ios-android.md)
+6. [Tips & Tricks](https://github.com/muaz-khan/RTCMultiConnection/blob/master/docs/tips-tricks.md)
 
 ## Twitter
 
