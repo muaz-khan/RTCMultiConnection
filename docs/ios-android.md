@@ -6,6 +6,18 @@
 
 > This page explains how to write iOS+Android phonegap/cordova applications for RTCMultiConnection-v3.
 
+# Cordova Demos
+
+You can find FileSharing demo with all the instructions, here:
+
+* http://dl.webrtc-experiment.com/cordova-apps/filesharing
+
+You can download source-code using [Download-Source.zip](http://dl.webrtc-experiment.com/cordova-apps/filesharing/Download-Source.zip)
+
+You can install pre-compiled Android APK using [Install-Android-App.apk](http://dl.webrtc-experiment.com/cordova-apps/filesharing/Install-Android-App.apk)
+
+Please don't forget checking all other .TXT files.
+
 # Prerequisites
 
 1. xcode `7.2.1` (required)
