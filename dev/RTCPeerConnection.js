@@ -266,7 +266,9 @@ function PeerInitiator(config) {
             sdpConstraints = config.remoteSdp.remotePeerSdpConstraints;
         }
         defaults.sdpConstraints = setSdpConstraints(sdpConstraints);
-        this.addRemoteSdp(config.remoteSdp);
+        this.addRemoteSdp(config.remoteSdp, function() {
+            createOfferOrAnswer('createAnswer');
+        });
     }
 
     function setChannelEvents(channel) {
@@ -317,27 +319,36 @@ function PeerInitiator(config) {
         };
     });
 
-    peer[isOfferer ? 'createOffer' : 'createAnswer'](function(localSdp) {
-        localSdp.sdp = connection.processSdp(localSdp.sdp);
-        peer.setLocalDescription(localSdp);
+    function createOfferOrAnswer(_method) {
+        peer[_method](function(localSdp) {
+            localSdp.sdp = connection.processSdp(localSdp.sdp);
+            peer.setLocalDescription(localSdp, function() {
+                if (!connection.trickleIce) return;
+                config.onLocalSdp({
+                    type: localSdp.type,
+                    sdp: localSdp.sdp,
+                    remotePeerSdpConstraints: config.remotePeerSdpConstraints || false,
+                    renegotiatingPeer: !!config.renegotiatingPeer || false,
+                    connectionDescription: self.connectionDescription,
+                    dontGetRemoteStream: !!config.dontGetRemoteStream,
+                    extra: connection ? connection.extra : {},
+                    streamsToShare: streamsToShare,
+                    isFirefoxOffered: isFirefox
+                });
+            }, function(error) {
+                if (!connection.enableLogs) return;
+                console.error('setLocalDescription error', error);
+            });
+        }, function(error) {
+            if (!!connection.enableLogs) {
+                console.error('sdp-error', error);
+            }
+        }, defaults.sdpConstraints);
+    }
 
-        if (!connection.trickleIce) return;
-        config.onLocalSdp({
-            type: localSdp.type,
-            sdp: localSdp.sdp,
-            remotePeerSdpConstraints: config.remotePeerSdpConstraints || false,
-            renegotiatingPeer: !!config.renegotiatingPeer || false,
-            connectionDescription: self.connectionDescription,
-            dontGetRemoteStream: !!config.dontGetRemoteStream,
-            extra: connection ? connection.extra : {},
-            streamsToShare: streamsToShare,
-            isFirefoxOffered: isFirefox
-        });
-    }, function(error) {
-        if (!!connection.enableLogs) {
-            console.error('sdp-error', error);
-        }
-    }, defaults.sdpConstraints);
+    if (isOfferer) {
+        createOfferOrAnswer('createOffer');
+    }
 
     peer.nativeClose = peer.close;
     peer.close = function() {
