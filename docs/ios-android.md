@@ -8,15 +8,10 @@
 
 # Cordova Demos
 
-You can find FileSharing demo with all the instructions, here:
-
-* http://dl.webrtc-experiment.com/cordova-apps/filesharing
-
-You can download source-code using [Download-Source.zip](http://dl.webrtc-experiment.com/cordova-apps/filesharing/Download-Source.zip)
-
-You can install pre-compiled Android APK using [Install-Android-App.apk](http://dl.webrtc-experiment.com/cordova-apps/filesharing/Install-Android-App.apk)
-
-Please don't forget checking all other .TXT files.
+| DemoTitle        | DownloadZip           | AndroidAPK | AllFiles |
+| ------------- |-------------|-------------|-------------|
+| Audio Conferencing | [Source](http://dl.webrtc-experiment.com/cordova-apps/audio-conferencing/Download-Source.zip) | [Android APK](http://dl.webrtc-experiment.com/cordova-apps/audio-conferencing/Install-Android-App.apk) | [All files](http://dl.webrtc-experiment.com/cordova-apps/audio-conferencing) |
+| File Sharing | [Source](http://dl.webrtc-experiment.com/cordova-apps/filesharing/Download-Source.zip) | [Android APK](http://dl.webrtc-experiment.com/cordova-apps/filesharing/Install-Android-App.apk) | [All files](http://dl.webrtc-experiment.com/cordova-apps/filesharing) |
 
 # Prerequisites
 
@@ -26,12 +21,15 @@ Please don't forget checking all other .TXT files.
 
 Check xcode-build-version: `xcodebuild -version`
 
+* https://cordova.apache.org/docs/en/latest/guide/platforms/ios/
+
 Make sure that terminal is using latest xcode:
 
 ```
 xcode-select --print-path
 
-sudo xcode-select -switch /Applications/Xcode5.1.1/Xcode.app
+# maybe [sudo]
+xcode-select -switch /Applications/Xcode5.1.1/Xcode.app
 ```
 
 # Install Prerequisites
@@ -41,9 +39,6 @@ sudo xcode-select -switch /Applications/Xcode5.1.1/Xcode.app
 
 npm install cordova -g
 npm install xcode -g
-
-cordova platform add ios@3.9.2
-cordova platform add android@5.1.0
 ```
 
 # Create Your First App
@@ -65,7 +60,8 @@ Now compile SWIFT parameters:
 cd hooks
 wget https://raw.githubusercontent.com/eface2face/cordova-plugin-iosrtc/master/extra/hooks/iosrtc-swift-support.js
 
-sudo chmod +x iosrtc-swift-support.js
+# maybe [sudo]
+chmod +x iosrtc-swift-support.js
 
 cd ..
 ```
@@ -76,6 +72,22 @@ Now modify `config.xml` for this section:
 <platform name="ios">
     <hook type="after_platform_add" src="hooks/iosrtc-swift-support.js" />
 </platform>
+```
+
+# Add Platforms
+
+Now add platforms. If you already added, please remove all existing platforms, and add them again. Otherwise, you'll see errors during `cordova build ios` or `cordova build android`:
+
+> Note: Do same if you change your app's name in the "config.xml" file. Make sure to remove and re-add all platforms.
+
+```sh
+# remove any existing platform
+cordova platform remove ios
+cordova platform remove android
+
+# add specific/working platform versions
+cordova platform add ios@3.9.2
+cordova platform add android@5.1.0
 ```
 
 # Build your Apps
@@ -107,13 +119,14 @@ An example `AndroidManifest.xml` file:
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <uses-permission android:name="android.permission.WRITE_CONTACTS" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.MICROPHONE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 </manifest>
 ```
 
