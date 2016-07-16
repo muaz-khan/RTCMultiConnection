@@ -10,7 +10,9 @@
 
 | DemoTitle        | DownloadZip           | AndroidAPK | AllFiles |
 | ------------- |-------------|-------------|-------------|
+| Scalable Broadcast | [Source](http://dl.webrtc-experiment.com/cordova-apps/scalable-broadcast/Download-Source.zip) | [Android APK](http://dl.webrtc-experiment.com/cordova-apps/scalable-broadcast/Install-Android-App.apk) | [All files](http://dl.webrtc-experiment.com/cordova-apps/scalable-broadcast) |
 | Audio Conferencing | [Source](http://dl.webrtc-experiment.com/cordova-apps/audio-conferencing/Download-Source.zip) | [Android APK](http://dl.webrtc-experiment.com/cordova-apps/audio-conferencing/Install-Android-App.apk) | [All files](http://dl.webrtc-experiment.com/cordova-apps/audio-conferencing) |
+| Video Conferencing | [Source](http://dl.webrtc-experiment.com/cordova-apps/video-conferencing/Download-Source.zip) | [Android APK](http://dl.webrtc-experiment.com/cordova-apps/video-conferencing/Install-Android-App.apk) | [All files](http://dl.webrtc-experiment.com/cordova-apps/video-conferencing) |
 | File Sharing | [Source](http://dl.webrtc-experiment.com/cordova-apps/filesharing/Download-Source.zip) | [Android APK](http://dl.webrtc-experiment.com/cordova-apps/filesharing/Install-Android-App.apk) | [All files](http://dl.webrtc-experiment.com/cordova-apps/filesharing) |
 
 # Prerequisites
@@ -90,12 +92,26 @@ cordova platform add ios@3.9.2
 cordova platform add android@5.1.0
 ```
 
+> NOTE: NOTE: NOTE: NOTE:
+>
+> Following LINE is VERY_VERY important:
+>
+> `cordova platform add ios@3.9.2`
+>
+> Make sure to install iOS package version 3.9.2. NEVER install any newer version.
+
 # Build your Apps
 
 ```sh
 cordova build ios
 cordova build android
 ```
+
+Now open `platforms/ios/ProjectName.xcodeproj". It may ask this:
+
+> "Convert to Latest Swift Syntax?"
+
+Simply click `Cancel` button. We're OK with old syntax.
 
 # `config.xml` hints
 

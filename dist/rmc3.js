@@ -1,4 +1,4 @@
-// Last time updated: 2016-07-03 11:24:15 AM UTC
+// Last time updated: 2016-07-15 1:32:16 PM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -1522,7 +1522,7 @@
         connection.socket.on(connection.socketMessageEvent, function(message) {
             if (message.remoteUserId != connection.userid) return;
 
-            if (connection.peers[message.sender] && connection.peers[message.sender].extra != message.extra) {
+            if (connection.peers[message.sender] && connection.peers[message.sender].extra != message.message.extra) {
                 connection.peers[message.sender].extra = message.extra;
                 connection.onExtraDataUpdated({
                     userid: message.sender,

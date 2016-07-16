@@ -35,7 +35,7 @@ function SocketConnection(connection, connectCallback) {
     connection.socket.on(connection.socketMessageEvent, function(message) {
         if (message.remoteUserId != connection.userid) return;
 
-        if (connection.peers[message.sender] && connection.peers[message.sender].extra != message.extra) {
+        if (connection.peers[message.sender] && connection.peers[message.sender].extra != message.message.extra) {
             connection.peers[message.sender].extra = message.extra;
             connection.onExtraDataUpdated({
                 userid: message.sender,
