@@ -1,8 +1,8 @@
-<title>How to use RTCMultiConnection?</title>
-
 # How to use?
 
 > Please make sure you've [installed](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/installation-guide.md) RTCMultiConnection.
+
+* [Getting Started guide for RTCMultiConnection](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/getting-started.md)
 
 All files from `/dist` directory are available on CDN: `https://cdn.webrtc-experiment.com:443/`
 
