@@ -1,4 +1,4 @@
-// Last time updated: 2016-07-15 1:32:16 PM UTC
+// Last time updated: 2016-07-24 8:06:16 AM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -1495,6 +1495,10 @@
         if (connection.enableScalableBroadcast) {
             parameters += '&enableScalableBroadcast=true';
             parameters += '&maxRelayLimitPerUser=' + (connection.maxRelayLimitPerUser || 2);
+        }
+
+        if (connection.socketCustomParameters) {
+            parameters += connection.socketCustomParameters;
         }
 
         try {

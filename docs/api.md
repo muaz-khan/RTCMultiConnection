@@ -2,6 +2,47 @@
 
 > RTCMultiConnection v3 API References
 
+### `socketURL`
+
+1. You can run nodejs on a separate domain or separate port or on a separate server
+2. You can set `socketURL="ip-address"` to link nodejs server
+3. Now you can run RTCMultiConnection-v3 demos on any webpage; whether it is PHP page, ASP.net page, python or ruby page or whatever framework running top over HTML.
+
+```javascript
+connection.socketURL = 'https://onlyChangingPort.com:8888/';
+connection.socketURL = 'https://separateDomain.com:443/';
+connection.socketURL = '/'; // same domain
+
+// or a free signaling server
+connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+```
+
+### `socketCustomParameters`
+
+You can pass your custom socket.io parameters as well:
+
+```javascript
+// starts with "&"
+// &fullName=Muaz
+// &meetingId=xyz
+connection.socketCustomParameters = '&fullName=Muaz&country=PK&meetingId=xyz';
+```
+
+Now you can open `server.js` and access above parameters here:
+
+```javascript
+// you can find below line on "server.js" file
+require('./Signaling-Server.js')(app, function(socket) {
+    var params = socket.handshake.query;
+
+    var meetingId = params.meetingId;
+    var fullName = params.fullName;
+    var country = params.country;
+    var userid = params.userid;
+    // etc.
+});
+```
+
 ### `applyConstraints`
 
 This method allows you change video resolutions or audio sources without making a new getUserMedia request i.e. it modifies your existing MediaStream:

@@ -10,6 +10,10 @@ function SocketConnection(connection, connectCallback) {
         parameters += '&maxRelayLimitPerUser=' + (connection.maxRelayLimitPerUser || 2);
     }
 
+    if (connection.socketCustomParameters) {
+        parameters += connection.socketCustomParameters;
+    }
+
     try {
         io.sockets = {};
     } catch (e) {};

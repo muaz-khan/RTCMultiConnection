@@ -2,7 +2,7 @@
 // MIT License    - www.WebRTC-Experiment.com/licence
 // Documentation  - github.com/muaz-khan/RTCMultiConnection
 
-var isUseHTTPs = !(!!process.env.PORT || !!process.env.IP);
+var isUseHTTPs = false && !(!!process.env.PORT || !!process.env.IP);
 
 var port = process.env.PORT || 9001;
 
@@ -116,7 +116,12 @@ if (isUseHTTPs) {
 
 app = app.listen(port, process.env.IP || '0.0.0.0', function() {
     var addr = app.address();
-    console.log('Server listening at', addr.address + ':' + addr.port);
+
+    if (addr.address === '0.0.0.0') {
+        addr.address = 'localhost';
+    }
+
+    console.log('Server listening at ' + (isUseHTTPs ? 'https' : 'http') + '://' + addr.address + ':' + addr.port);
 });
 
 require('./Signaling-Server.js')(app, function(socket) {
