@@ -11,9 +11,17 @@
 >
 > v3 can use XHR/XMPP/etc. signaling implementations as well. Please check [PubNubConnection.js](https://github.com/muaz-khan/RTCMultiConnection/blob/master/dev/PubNubConnection.js) to see how to configure it for 3rd party signaling implementations. You simply have to modify top few lines.
 
-<a href="https://www.youtube.com/watch?v=EtsiYEW_T8Y"><img src="https://cdn.webrtc-experiment.com/images/RTCMultiConnection-Socketio-Server.png" alt="YouTube Video Tutorial for RTCMultiConnection!" /></a>
+# YouTube videos
 
-<a href="https://www.youtube.com/watch?v=nBUuMKtEeyU"><img src="https://cdn.webrtc-experiment.com/images/RTCMultiConnection-ScreenSharing.png" alt="YouTube Video Tutorial for RTCMultiConnection ScreenSharing!" /></a>
+1. [Getting started guide / RTCMultiConnection](https://www.youtube.com/watch?v=jqtC7mSTCgk)
+2. [Setup custom socket.io server / RTCMultiConnection](https://www.youtube.com/watch?v=EtsiYEW_T8Y)
+5. [Write screen sharing applications / RTCMultiConnection](https://www.youtube.com/watch?v=nBUuMKtEeyU)
+
+YouTube playlist:
+
+* https://www.youtube.com/playlist?list=PLPRQUXAnRydKdyun-vjKPMrySoow2N4tl
+
+RTCMultiConnection-v2 (old) videos: https://vimeo.com/muazkh
 
 # [Docs/Tutorials](https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/)
 
