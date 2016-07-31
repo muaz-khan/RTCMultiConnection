@@ -2,8 +2,8 @@
 <html id="home" lang="en">
 
 <head>
-    <title>RTCMultiConnection.open | "method"</title>
-    <meta name="description" content="RTCMultiConnection.open method allows you open a WebRTC room." />
+    <title>RTCMultiConnection.setCustomSocketHandler | "method"</title>
+    <meta name="description" content="RTCMultiConnection.setCustomSocketHandler method allows you bypass/skip socket.io and use your own signaling gateway/implementation." />
     <meta name="keywords" content="RTCMultiConnection,JavaScript,WebRTC,Demos,Experiments,Samples,Examples" />
 
 
@@ -57,7 +57,7 @@
         <header style="text-align: center;">
 
             <h1>
-                RTCMultiConnection.<strong>open</strong> | "method"
+                RTCMultiConnection.<strong>setCustomSocketHandler</strong> | "method"
             </h1>
 
             <p>
@@ -74,68 +74,65 @@
         <div class="github-stargazers"></div>
 
         <blockquote>
-            "connection.open" method allows you open a WebRTC room.
+            "connection.setCustomSocketHandler" method allows you bypass/skip socket.io and use your own signaling gateway/implementation.
+
+            <br>
+            <br> "setCustomSocketHandler" method <strong>requires RTCMultiConnection >= v3</strong>.
         </blockquote>
 
-        <section class="experiment" id="v3">
+        <section class="experiment" id="firebase">
             <h2>
-                <a href="#v3">RTCMultiConnection v3:</a>
+                <a href="#firebase">Firebase signaling</a>
             </h2>
-
-            <p>
-                "connection.open" method accepts "room-id" as first argument; and [optional] callback as second argument:
-            </p>
-
             <pre class="sh_javascript">
-connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>( 'room-id' );
+// link => /dev/globals.js
+// link => /dev/FirebaseConnection.js
 
-// or
-connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>( 'room-id', function() {
-    alert('Room has been created.');
-});
+var connection = new RTCMultiConnection();
 
-// or
-var isPublicRoom = true;
-connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>( 'room-id', isPublicRoom );
+connection.firebase = 'your-firebase-account';
+
+// below line replaces FirebaseConnection
+connection.setCustomSocketHandler(FirebaseConnection);
 </pre>
         </section>
 
-        <section class="experiment" id="v2">
+        <section class="experiment" id="pubnub">
             <h2>
-                <a href="#v2">RTCMultiConnection v2:</a>
+                <a href="#pubnub">PubNub signaling</a>
             </h2>
-
-            <p>
-                "connection.open" method accepts object parameter as well; also now it returns "sessionDescription" object:
-            </p>
-
             <pre class="sh_javascript">
-// you can pass object instead on string!
-if(you_are_initiator) {
-    var sessionDescription = connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>({
-        dontTransmit: true,    // optional --- disable default room-forwarding behaviour!
-        <a href="http://www.rtcmulticonnection.org/docs/sessionid/">sessionid</a>: 'something', // optional
-        <a href="http://www.rtcmulticonnection.org/docs/transmitRoomOnce/">transmitRoomOnce</a>: true // optional
-    });
-}
+// link => /dev/globals.js
+// link => /dev/PubNubConnection.js
 
-// you can share "sessionDescription" object using socket.io or any gateway
-// and target users can directly join using "join" method:
-if(you_are_participant) {
-    connection.<a href="http://www.rtcmulticonnection.org/docs/join/">join</a>( sessionDescription );
-}
+var connection = new RTCMultiConnection();
 
-// or
+// below line replaces PubNubConnection
+connection.setCustomSocketHandler(PubNubConnection);
+</pre>
+        </section>
 
-if(you_are_initiator) {
-    connection.<a href="http://www.RTCMultiConnection.org/docs/open/">open</a>('session-id'); // i.e. room-id
-}
+        <section class="experiment" id="others">
+            <h2>
+                <a href="#others">SIP/SignalR/WebSync/XHR signaling</a>
+            </h2>
+            <pre class="sh_javascript">
+// link => /dev/globals.js
+// link => /dev/[Relevant]Connection.js
 
-// or
-if(you_are_initiator) {
-    connection.<a href="http://www.RTCMultiConnection.org/docs/sessionid/">sessionid</a> = 'session-id';
-    connection.<a href="http://www.RTCMultiConnection.org/docs/open/">open</a>();
-}
+var connection = new RTCMultiConnection();
+
+// SignalR (requires /dev/SignalRConnection.js)
+connection.setCustomSocketHandler(SignalRConnection);
+
+// WebSync (requires /dev/WebSyncConnection.js)
+connection.setCustomSocketHandler(WebSyncConnection);
+
+// XHR (requires /dev/XHRConnection.js)
+connection.setCustomSocketHandler(XHRConnection);
+
+// Sip (requires /dev/SipConnection.js)
+connection.setCustomSocketHandler(SipConnection);
 </pre>
         </section>
 

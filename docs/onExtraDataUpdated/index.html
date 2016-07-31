@@ -2,8 +2,8 @@
 <html id="home" lang="en">
 
 <head>
-    <title>RTCMultiConnection.open | "method"</title>
-    <meta name="description" content="RTCMultiConnection.open method allows you open a WebRTC room." />
+    <title>RTCMultiConnection.onExtraDataUpdated | "event"</title>
+    <meta name="description" content="RTCMultiConnection.onExtraDataUpdated event is fired for all users as soon as someone updates his extra-data." />
     <meta name="keywords" content="RTCMultiConnection,JavaScript,WebRTC,Demos,Experiments,Samples,Examples" />
 
 
@@ -57,7 +57,7 @@
         <header style="text-align: center;">
 
             <h1>
-                RTCMultiConnection.<strong>open</strong> | "method"
+                RTCMultiConnection.<strong>onExtraDataUpdated</strong> | "event"
             </h1>
 
             <p>
@@ -74,68 +74,21 @@
         <div class="github-stargazers"></div>
 
         <blockquote>
-            "connection.open" method allows you open a WebRTC room.
+            "connection.onExtraDataUpdated" event is fired for all users as soon as someone updates his extra-data.
+
+            <br>
+            <br> "onExtraDataUpdated" event <strong>requires RTCMultiConnection >= v3</strong>.
         </blockquote>
 
-        <section class="experiment" id="v3">
+        <section class="experiment">
             <h2>
-                <a href="#v3">RTCMultiConnection v3:</a>
+                An event object is passed over "onExtraDataUpdated":
             </h2>
-
-            <p>
-                "connection.open" method accepts "room-id" as first argument; and [optional] callback as second argument:
-            </p>
-
             <pre class="sh_javascript">
-connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>( 'room-id' );
-
-// or
-connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>( 'room-id', function() {
-    alert('Room has been created.');
-});
-
-// or
-var isPublicRoom = true;
-connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>( 'room-id', isPublicRoom );
-</pre>
-        </section>
-
-        <section class="experiment" id="v2">
-            <h2>
-                <a href="#v2">RTCMultiConnection v2:</a>
-            </h2>
-
-            <p>
-                "connection.open" method accepts object parameter as well; also now it returns "sessionDescription" object:
-            </p>
-
-            <pre class="sh_javascript">
-// you can pass object instead on string!
-if(you_are_initiator) {
-    var sessionDescription = connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>({
-        dontTransmit: true,    // optional --- disable default room-forwarding behaviour!
-        <a href="http://www.rtcmulticonnection.org/docs/sessionid/">sessionid</a>: 'something', // optional
-        <a href="http://www.rtcmulticonnection.org/docs/transmitRoomOnce/">transmitRoomOnce</a>: true // optional
-    });
-}
-
-// you can share "sessionDescription" object using socket.io or any gateway
-// and target users can directly join using "join" method:
-if(you_are_participant) {
-    connection.<a href="http://www.rtcmulticonnection.org/docs/join/">join</a>( sessionDescription );
-}
-
-// or
-
-if(you_are_initiator) {
-    connection.<a href="http://www.RTCMultiConnection.org/docs/open/">open</a>('session-id'); // i.e. room-id
-}
-
-// or
-if(you_are_initiator) {
-    connection.<a href="http://www.RTCMultiConnection.org/docs/sessionid/">sessionid</a> = 'session-id';
-    connection.<a href="http://www.RTCMultiConnection.org/docs/open/">open</a>();
-}
+connection.<a href="http://www.rtcmulticonnection.org/docs/onExtraDataUpdated/">onExtraDataUpdated</a> = function(event) {
+    var extra = event.extra;
+    var targetUserId = event.userid;
+};
 </pre>
         </section>
 

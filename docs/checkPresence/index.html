@@ -2,8 +2,8 @@
 <html id="home" lang="en">
 
 <head>
-    <title>RTCMultiConnection.open | "method"</title>
-    <meta name="description" content="RTCMultiConnection.open method allows you open a WebRTC room." />
+    <title>RTCMultiConnection.checkPresence | "method"</title>
+    <meta name="description" content="RTCMultiConnection.checkPresence method allows you detect presence of a room." />
     <meta name="keywords" content="RTCMultiConnection,JavaScript,WebRTC,Demos,Experiments,Samples,Examples" />
 
 
@@ -57,7 +57,7 @@
         <header style="text-align: center;">
 
             <h1>
-                RTCMultiConnection.<strong>open</strong> | "method"
+                RTCMultiConnection.<strong>checkPresence</strong> | "method"
             </h1>
 
             <p>
@@ -74,68 +74,42 @@
         <div class="github-stargazers"></div>
 
         <blockquote>
-            "connection.open" method allows you open a WebRTC room.
+            "connection.checkPresence" method allows you detect whether a room is active or not.
+
+            <br>
+            <br> "checkPresence" method <strong>requires RTCMultiConnection >= v3</strong>.
         </blockquote>
 
-        <section class="experiment" id="v3">
+        <section class="experiment">
             <h2>
-                <a href="#v3">RTCMultiConnection v3:</a>
+                "connection.checkPresence" method accepts [required] callback as the only argument:
             </h2>
-
-            <p>
-                "connection.open" method accepts "room-id" as first argument; and [optional] callback as second argument:
-            </p>
-
             <pre class="sh_javascript">
-connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>( 'room-id' );
-
-// or
-connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>( 'room-id', function() {
-    alert('Room has been created.');
+connection.<a href="http://www.rtcmulticonnection.org/docs/checkPresence/">checkPresence</a>( 'room-id', function(isRoomEists, roomid) {
+    if(isRoomEists) {
+        connection.join(roomid);
+    }
+    else {
+        connection.open(roomid);
+    }
 });
-
-// or
-var isPublicRoom = true;
-connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>( 'room-id', isPublicRoom );
 </pre>
         </section>
 
-        <section class="experiment" id="v2">
+        <section class="experiment">
             <h2>
-                <a href="#v2">RTCMultiConnection v2:</a>
+                Use "looper" until room is started by someone else.
             </h2>
-
-            <p>
-                "connection.open" method accepts object parameter as well; also now it returns "sessionDescription" object:
-            </p>
-
             <pre class="sh_javascript">
-// you can pass object instead on string!
-if(you_are_initiator) {
-    var sessionDescription = connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>({
-        dontTransmit: true,    // optional --- disable default room-forwarding behaviour!
-        <a href="http://www.rtcmulticonnection.org/docs/sessionid/">sessionid</a>: 'something', // optional
-        <a href="http://www.rtcmulticonnection.org/docs/transmitRoomOnce/">transmitRoomOnce</a>: true // optional
+(function looper() {
+    connection.checkPresence(function(isRoomEists, roomid) {
+        if (isRoomEists) {
+            connection.join(roomid);
+        } else {
+            setTimeout(looper, 3000); // recheck after 3-seconds
+        }
     });
-}
-
-// you can share "sessionDescription" object using socket.io or any gateway
-// and target users can directly join using "join" method:
-if(you_are_participant) {
-    connection.<a href="http://www.rtcmulticonnection.org/docs/join/">join</a>( sessionDescription );
-}
-
-// or
-
-if(you_are_initiator) {
-    connection.<a href="http://www.RTCMultiConnection.org/docs/open/">open</a>('session-id'); // i.e. room-id
-}
-
-// or
-if(you_are_initiator) {
-    connection.<a href="http://www.RTCMultiConnection.org/docs/sessionid/">sessionid</a> = 'session-id';
-    connection.<a href="http://www.RTCMultiConnection.org/docs/open/">open</a>();
-}
+})();
 </pre>
         </section>
 
