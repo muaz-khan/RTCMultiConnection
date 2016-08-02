@@ -186,8 +186,8 @@ connection.<a href="http://www.rtcmulticonnection.org/docs/openOrJoin/">openOrJo
                         <li>
                             <a href="http://www.RTCMultiConnection.org/docs/checkPresence/">checkPresence</a> method
                             <pre class="sh_javascript">
-connection.<a href="http://www.rtcmulticonnection.org/docs/checkPresence/">checkPresence</a>( 'room-id', function(isRoomEists, roomid) {
-    if(isRoomEists) {
+connection.<a href="http://www.rtcmulticonnection.org/docs/checkPresence/">checkPresence</a>( 'room-id', function(isRoomExists, roomid) {
+    if(isRoomExists) {
         connection.join(roomid);
     }
     else {

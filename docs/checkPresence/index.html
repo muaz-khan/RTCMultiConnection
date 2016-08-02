@@ -85,8 +85,8 @@
                 "connection.checkPresence" method accepts [required] callback as the only argument:
             </h2>
             <pre class="sh_javascript">
-connection.<a href="http://www.rtcmulticonnection.org/docs/checkPresence/">checkPresence</a>( 'room-id', function(isRoomEists, roomid) {
-    if(isRoomEists) {
+connection.<a href="http://www.rtcmulticonnection.org/docs/checkPresence/">checkPresence</a>( 'room-id', function(isRoomExists, roomid) {
+    if(isRoomExists) {
         connection.join(roomid);
     }
     else {
@@ -102,8 +102,8 @@ connection.<a href="http://www.rtcmulticonnection.org/docs/checkPresence/">check
             </h2>
             <pre class="sh_javascript">
 (function looper() {
-    connection.checkPresence(function(isRoomEists, roomid) {
-        if (isRoomEists) {
+    connection.checkPresence(function(isRoomExists, roomid) {
+        if (isRoomExists) {
             connection.join(roomid);
         } else {
             setTimeout(looper, 3000); // recheck after 3-seconds
