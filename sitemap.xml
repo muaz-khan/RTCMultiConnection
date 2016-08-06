@@ -124,27 +124,6 @@
         <changefreq>always</changefreq>
         <priority>1.00</priority>
     </url>
-	
-	<url>
-        <loc>http://www.rtcmulticonnection.org/+/</loc>
-        <lastmod>2016-08-05T06:02:10+00:00</lastmod>
-        <changefreq>always</changefreq>
-        <priority>1.00</priority>
-    </url>
-	
-	<url>
-        <loc>http://www.rtcmulticonnection.org/+/all-in-one/</loc>
-        <lastmod>2016-08-05T06:02:10+00:00</lastmod>
-        <changefreq>always</changefreq>
-        <priority>1.00</priority>
-    </url>
-	
-	<url>
-        <loc>http://www.rtcmulticonnection.org/+/mute-unmute-close-leave-eject/</loc>
-        <lastmod>2016-08-05T06:02:10+00:00</lastmod>
-        <changefreq>always</changefreq>
-        <priority>1.00</priority>
-    </url>
     
     <url>
         <loc>http://www.rtcmulticonnection.org/docs/</loc>
