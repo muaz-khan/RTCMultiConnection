@@ -79,6 +79,15 @@ module.exports = exports = function(app, socketCallback) {
             }
         });
 
+        socket.on('get-remote-user-extra-data', function(remoteUserId, callback) {
+            callback = callback || function() {};
+            if (!remoteUserId || !listOfUsers[remoteUserId]) {
+                callback('remoteUserId (' + remoteUserId + ') does NOT exists.');
+                return;
+            }
+            callback(listOfUsers[remoteUserId].extra);
+        });
+
         socket.on('become-a-public-moderator', function() {
             try {
                 if (!listOfUsers[socket.userid]) return;

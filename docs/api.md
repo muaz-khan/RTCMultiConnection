@@ -496,6 +496,34 @@ By default, logs are enabled.
 connection.enableLogs = false; // to disable logs
 ```
 
+## Get Remote User Extra Data
+
+```javascript
+connection.extra = {
+    joinTime: new Date()
+};
+connection.updateExtraData();
+```
+
+Here is how to get extra-data:
+
+```javascript
+var extra = connection.peers['remote-userid'].extra;
+alert( extra.joinTime);
+```
+
+Recent commit supports this as well:
+
+```javascript
+connection.onstream = function(event) {
+    if(event.type === 'remote') {
+        connection.socket.emit('get-remote-user-extra-data', event.userid, function(extra) {
+             alert( extra.joinTime );
+        });
+    }
+}:
+```
+
 ## `updateExtraData`
 
 You can force all the extra-data to be synced among all connected users.
