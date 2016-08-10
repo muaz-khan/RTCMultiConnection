@@ -2,6 +2,10 @@
 
 > RTCMultiConnection v3 API References
 
+You can search docs/APIs here:
+
+* http://www.rtcmulticonnection.org/docs/
+
 ### `socketURL`
 
 1. You can run nodejs on a separate domain or separate port or on a separate server
