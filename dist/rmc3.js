@@ -1,4 +1,4 @@
-// Last time updated: 2016-07-24 8:06:16 AM UTC
+// Last time updated: 2016-08-12 5:21:05 AM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -1310,6 +1310,29 @@
         connection.socketCustomEvent = 'RTCMultiConnection-Custom-Message'; // generated via config.json
         connection.DetectRTC = DetectRTC;
 
+        connection.setCustomSocketEvent = function(customEvent) {
+            if (customEvent) {
+                connection.socketCustomEvent = customEvent;
+            }
+
+            if (!connection.socket) {
+                return;
+            }
+
+            connection.socket.emit('set-custom-socket-event-listener', connection.socketCustomEvent);
+        };
+
+        connection.getNumberOfBroadcastViewers = function(broadcastId, callback) {
+            if (!connection.socket || !broadcastId || !callback) return;
+
+            connection.socket.emit('get-number-of-users-in-specific-broadcast', broadcastId, callback);
+        };
+
+        connection.onNumberOfBroadcastViewersUpdated = function(event) {
+            if (!connection.enableLogs || !connection.isInitiator) return;
+            console.info('Number of broadcast (', event.broadcastId, ') viewers', event.numberOfBroadcastViewers);
+        };
+
         connection.onUserStatusChanged = function(event, dontWriteLogs) {
             if (!!connection.enableLogs && !dontWriteLogs) {
                 console.info(event.userid, event.status);
@@ -1781,6 +1804,10 @@
         connection.socket.on('logs', function(log) {
             if (!connection.enableLogs) return;
             console.debug('server-logs', log);
+        });
+
+        connection.socket.on('number-of-broadcast-viewers-updated', function(data) {
+            connection.onNumberOfBroadcastViewersUpdated(data);
         });
     }
 

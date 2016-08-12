@@ -209,6 +209,34 @@ connection.connectSocket(function(socket) {
 });
 ```
 
+### `socketCustomEvent`
+
+A `string` property, allows you set custom socket.io event listener:
+
+```javascript
+connection.socketCustomEvent = 'abcdef';
+connection.openOrJoin('roomid', function() {
+    connection.socket.on(connection.socketCustomEvent, function(message) {
+        alert(message);
+    });
+
+    connection.socket.emit(connection.socketCustomEvent, 'My userid is: ' + connection.userid);
+});
+```
+
+### `setCustomSocketEvent`
+
+This method allows you set custom socket listeners anytime, during a live session:
+
+```javascript
+connection.setCustomSocketEvent('abcdef');
+connection.socket.on('abcdef', function(message) {
+    alert(message);
+});
+
+connection.socket.emit('abcdef', 'My userid is: ' + connection.userid);
+```
+
 ### `getUserMediaHandler`
 
 This object allows you capture audio/video stream yourself. RTCMultiConnection will NEVER know about your stream until you add it yourself, manually:
@@ -1145,9 +1173,34 @@ connection.singleBroadcastAttendees = 3;   // how many users are handled by each
 
 Live Demos:
 
-* [All-in-One Scalable Broadcast](https://rtcmulticonnection.herokuapp.com/demos/Scalable-Broadcast.html)
-* [Files-Scalable-Broadcast.html](https://rtcmulticonnection.herokuapp.com/demos/Files-Scalable-Broadcast.html)
-* [Video-Scalable-Broadcast.html](https://rtcmulticonnection.herokuapp.com/demos/Video-Scalable-Broadcast.html)
+| DemoTitle        | TestLive           | ViewSource |
+| ------------- |-------------|-------------|
+| Scalable Audio/Video Broadcast | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Scalable-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Scalable-Broadcast.html) |
+| Scalable Screen Broadcast | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Scalable-Screen-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Scalable-Screen-Broadcast.html) |
+| Scalable Video Broadcast | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Video-Scalable-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Video-Scalable-Broadcast.html) |
+| Scalable File Sharing | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Files-Scalable-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Files-Scalable-Broadcast.html) |
+
+## `onNumberOfBroadcastViewersUpdated`
+
+This event is fired for scalable-broadcast-initiator.
+
+```javascript
+connection.onNumberOfBroadcastViewersUpdated = function(event) {
+    // event.broadcastId
+    // event.numberOfBroadcastViewers
+    console.info('Number of broadcast (', event.broadcastId, ') viewers', event.numberOfBroadcastViewers);
+};
+```
+
+## `getNumberOfBroadcastViewers`
+
+You can manually get number-of-broadcast viewers as well:
+
+```javascript
+connection.getNumberOfBroadcastViewers('broadcast-unique-id', function(numberOfBroadcastViewers) {
+    alert(numberOfBroadcastViewers);
+});
+```
 
 ## Fix Echo
 

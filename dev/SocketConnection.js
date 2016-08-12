@@ -295,4 +295,8 @@ function SocketConnection(connection, connectCallback) {
         if (!connection.enableLogs) return;
         console.debug('server-logs', log);
     });
+
+    connection.socket.on('number-of-broadcast-viewers-updated', function(data) {
+        connection.onNumberOfBroadcastViewersUpdated(data);
+    });
 }

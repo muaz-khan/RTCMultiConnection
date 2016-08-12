@@ -105,10 +105,14 @@
                 <div id="room-urls" style="text-align: center;display: none;background: #F1EDED;margin: 15px -10px;border: 1px solid rgb(189, 189, 189);border-left: 0;border-right: 0;"></div>
             </div>
 
+            <div class="make-center" id="broadcast-viewers-counter"></div>
+
             <video id="video-preview" controls loop></video>
         </section>
 
         <blockquote>
+            This demo <a href="http://dl.webrtc-experiment.com/cordova-apps/scalable-broadcast" target="_blank">has built-in (open-sourced) apps both for iOS and Android</a>.<br><br>
+
             This module simply initializes socket.io and configures it in a way that single audio/video/screen stream can be shared/relayed over unlimited users without any <a href="https://www.webrtc-experiment.com/docs/RTP-usage.html">bandwidth/CPU usage issues</a>. Everything happens peer-to-peer!
 
             <br><br>
@@ -123,7 +127,7 @@
         </script>
         
         <!-- <script src="/dist/rmc3.min.js"></script> -->
-        <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
+        <script src="https://cdn.webrtc-experiment.com/rmc3.min.js"></script>
 
         <script src="https://cdn.webrtc-experiment.com/RecordRTC.js"></script>
         <script>
@@ -169,6 +173,7 @@
                         OfferToReceiveVideo: !!connection.session.video,
                         OfferToReceiveAudio: !!connection.session.audio
                     };
+                    connection.broadcastId = hintsToJoinBroadcast.broadcastId;
                     connection.join(hintsToJoinBroadcast.userid);
                 });
 
@@ -468,7 +473,14 @@
 
                 disableInputButtons();
             }
-            
+
+            // below section detects how many users are viewing your broadcast
+
+            connection.onNumberOfBroadcastViewersUpdated = function(event) {
+                if (!connection.isInitiator) return;
+                
+                document.getElementById('broadcast-viewers-counter').innerHTML = 'Number of broadcast viewers: <b>' + event.numberOfBroadcastViewers + '</b>';
+            };
         </script>
 
         <section class="experiment own-widgets latest-commits">

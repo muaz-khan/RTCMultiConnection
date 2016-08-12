@@ -1294,6 +1294,29 @@ function RTCMultiConnection(roomid, forceOptions) {
     connection.socketCustomEvent = '@@socketCustomEvent'; // generated via config.json
     connection.DetectRTC = DetectRTC;
 
+    connection.setCustomSocketEvent = function(customEvent) {
+        if (customEvent) {
+            connection.socketCustomEvent = customEvent;
+        }
+
+        if (!connection.socket) {
+            return;
+        }
+
+        connection.socket.emit('set-custom-socket-event-listener', connection.socketCustomEvent);
+    };
+
+    connection.getNumberOfBroadcastViewers = function(broadcastId, callback) {
+        if (!connection.socket || !broadcastId || !callback) return;
+
+        connection.socket.emit('get-number-of-users-in-specific-broadcast', broadcastId, callback);
+    };
+
+    connection.onNumberOfBroadcastViewersUpdated = function(event) {
+        if (!connection.enableLogs || !connection.isInitiator) return;
+        console.info('Number of broadcast (', event.broadcastId, ') viewers', event.numberOfBroadcastViewers);
+    };
+
     connection.onUserStatusChanged = function(event, dontWriteLogs) {
         if (!!connection.enableLogs && !dontWriteLogs) {
             console.info(event.userid, event.status);

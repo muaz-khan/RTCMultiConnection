@@ -97,6 +97,18 @@ module.exports = exports = function(app, socketCallback) {
             }
         });
 
+        var dontDuplicateListeners = {};
+        socket.on('set-custom-socket-event-listener', function(customEvent) {
+            if (dontDuplicateListeners[customEvent]) return;
+            dontDuplicateListeners[customEvent] = customEvent;
+
+            socket.on(customEvent, function(message) {
+                try {
+                    socket.broadcast.emit(customEvent, message);
+                } catch (e) {}
+            });
+        });
+
         socket.on('dont-make-me-moderator', function() {
             try {
                 if (!listOfUsers[socket.userid]) return;
