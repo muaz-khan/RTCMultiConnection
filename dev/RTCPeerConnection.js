@@ -208,7 +208,12 @@ function PeerInitiator(config) {
         if (!event.stream.stop) {
             event.stream.stop = function() {
                 if (isFirefox) {
-                    fireEvent(this, 'ended');
+                    var streamEndedEvent = 'ended';
+
+                    if ('oninactive' in event.stream) {
+                        streamEndedEvent = 'inactive';
+                    }
+                    fireEvent(event.stream, streamEndedEvent);
                 }
             };
         }

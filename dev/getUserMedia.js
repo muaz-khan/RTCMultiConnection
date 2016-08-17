@@ -52,7 +52,12 @@ function getUserMediaHandler(options) {
         setStreamType(options.localMediaConstraints, stream);
         options.onGettingLocalMedia(stream, returnBack);
 
-        stream.addEventListener('ended', function() {
+        var streamEndedEvent = 'ended';
+
+        if ('oninactive' in stream) {
+            streamEndedEvent = 'inactive';
+        }
+        stream.addEventListener(streamEndedEvent, function() {
             delete currentUserMediaRequest.streams[idInstance];
 
             currentUserMediaRequest.mutex = false;

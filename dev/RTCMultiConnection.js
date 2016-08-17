@@ -1023,7 +1023,13 @@ function RTCMultiConnection(roomid, forceOptions) {
         }
         stream.alreadySetEndHandler = true;
 
-        stream.addEventListener('ended', function() {
+        var streamEndedEvent = 'ended';
+
+        if ('oninactive' in stream) {
+            streamEndedEvent = 'inactive';
+        }
+
+        stream.addEventListener(streamEndedEvent, function() {
             if (stream.idInstance) {
                 currentUserMediaRequest.remove(stream.idInstance);
             }

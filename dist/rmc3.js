@@ -1,4 +1,4 @@
-// Last time updated: 2016-08-12 5:21:05 AM UTC
+// Last time updated: 2016-08-17 8:46:40 AM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -1039,7 +1039,13 @@
             }
             stream.alreadySetEndHandler = true;
 
-            stream.addEventListener('ended', function() {
+            var streamEndedEvent = 'ended';
+
+            if ('oninactive' in stream) {
+                streamEndedEvent = 'inactive';
+            }
+
+            stream.addEventListener(streamEndedEvent, function() {
                 if (stream.idInstance) {
                     currentUserMediaRequest.remove(stream.idInstance);
                 }
@@ -2488,12 +2494,18 @@
         // http://goo.gl/WZ5nFl
         // Firefox don't yet support onended for any stream (remote/local)
         if (isFirefox) {
-            mediaElement.addEventListener('ended', function() {
+            var streamEndedEvent = 'ended';
+
+            if ('oninactive' in stream) {
+                streamEndedEvent = 'inactive';
+            }
+
+            mediaElement.addEventListener(streamEndedEvent, function() {
                 // fireEvent(stream, 'ended', stream);
                 currentUserMediaRequest.remove(stream.idInstance);
 
                 if (stream.type === 'local') {
-                    StreamsHandler.onSyncNeeded(stream.streamid, 'ended');
+                    StreamsHandler.onSyncNeeded(stream.streamid, streamEndedEvent);
 
                     connection.attachStreams.forEach(function(aStream, idx) {
                         if (stream.streamid === aStream.streamid) {
@@ -3917,7 +3929,12 @@
             if (!event.stream.stop) {
                 event.stream.stop = function() {
                     if (isFirefox) {
-                        fireEvent(this, 'ended');
+                        var streamEndedEvent = 'ended';
+
+                        if ('oninactive' in event.stream) {
+                            streamEndedEvent = 'inactive';
+                        }
+                        fireEvent(event.stream, streamEndedEvent);
                     }
                 };
             }
@@ -4606,7 +4623,12 @@
             setStreamType(options.localMediaConstraints, stream);
             options.onGettingLocalMedia(stream, returnBack);
 
-            stream.addEventListener('ended', function() {
+            var streamEndedEvent = 'ended';
+
+            if ('oninactive' in stream) {
+                streamEndedEvent = 'inactive';
+            }
+            stream.addEventListener(streamEndedEvent, function() {
                 delete currentUserMediaRequest.streams[idInstance];
 
                 currentUserMediaRequest.mutex = false;
@@ -4696,8 +4718,14 @@
             if (!stream || !stream.addEventListener) return;
 
             if (typeof syncAction == 'undefined' || syncAction == true) {
-                stream.addEventListener('ended', function() {
-                    StreamsHandler.onSyncNeeded(this.streamid, 'ended');
+                var streamEndedEvent = 'ended';
+
+                if ('oninactive' in stream) {
+                    streamEndedEvent = 'inactive';
+                }
+
+                stream.addEventListener(streamEndedEvent, function() {
+                    StreamsHandler.onSyncNeeded(this.streamid, streamEndedEvent);
                 }, false);
             }
 
