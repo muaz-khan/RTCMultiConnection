@@ -35,6 +35,19 @@ module.exports = exports = function(app, socketCallback) {
             extra = alreadyExists.extra;
         }
 
+        var params = socket.handshake.query;
+
+        if (params.extra) {
+            try {
+                if (typeof params.extra === 'string') {
+                    params.extra = JSON.parse(params.extra);
+                }
+                extra = params.extra;
+            } catch (e) {
+                extra = params.extra;
+            }
+        }
+
         listOfUsers[socket.userid] = {
             socket: socket,
             connectedWith: {},

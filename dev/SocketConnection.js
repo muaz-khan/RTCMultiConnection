@@ -220,9 +220,13 @@ function SocketConnection(connection, connectCallback) {
             console.info('socket.io connection is opened.');
         }
 
-        connection.socket.emit('extra-data-updated', connection.extra);
+        setTimeout(function() {
+            connection.socket.emit('extra-data-updated', connection.extra);
 
-        if (connectCallback) connectCallback(connection.socket);
+            if (connectCallback) {
+                connectCallback(connection.socket);
+            }
+        }, 1000);
     });
 
     connection.socket.on('disconnect', function() {

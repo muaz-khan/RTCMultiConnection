@@ -47,6 +47,20 @@ require('./Signaling-Server.js')(app, function(socket) {
 });
 ```
 
+### Update Extra-Data before Socket connects
+
+This feature allows you reliably update-extra data on nodejs before socket.io connection opens.
+
+```javascript
+connection.extra = {
+    fullName: 'Muaz Khan',
+    joinedAt: (new Date).toISOString()
+};s
+connection.socketCustomParameters = '&extra=' + JSON.stringify(connection.extra);
+
+connection.openOrJoin('room-id');
+```
+
 ### `applyConstraints`
 
 This method allows you change video resolutions or audio sources without making a new getUserMedia request i.e. it modifies your existing MediaStream:

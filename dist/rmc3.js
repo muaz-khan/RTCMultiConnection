@@ -1,4 +1,4 @@
-// Last time updated: 2016-08-17 8:46:40 AM UTC
+// Last time updated: 2016-08-21 2:16:23 PM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -1736,9 +1736,13 @@
                 console.info('socket.io connection is opened.');
             }
 
-            connection.socket.emit('extra-data-updated', connection.extra);
+            setTimeout(function() {
+                connection.socket.emit('extra-data-updated', connection.extra);
 
-            if (connectCallback) connectCallback(connection.socket);
+                if (connectCallback) {
+                    connectCallback(connection.socket);
+                }
+            }, 1000);
         });
 
         connection.socket.on('disconnect', function() {
@@ -3749,12 +3753,12 @@
     }
 
     var RTCPeerConnection;
-    if (typeof mozRTCPeerConnection !== 'undefined') {
+    if (typeof window.RTCPeerConnection !== 'undefined') {
+        RTCPeerConnection = window.RTCPeerConnection;
+    } else if (typeof mozRTCPeerConnection !== 'undefined') {
         RTCPeerConnection = mozRTCPeerConnection;
     } else if (typeof webkitRTCPeerConnection !== 'undefined') {
         RTCPeerConnection = webkitRTCPeerConnection;
-    } else if (typeof window.RTCPeerConnection !== 'undefined') {
-        RTCPeerConnection = window.RTCPeerConnection;
     }
 
     var RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription;
@@ -3827,6 +3831,18 @@
             peer = config.peerRef;
         }
 
+        function getLocalStreams() {
+            // if-block is temporarily disabled
+            if (false && 'getSenders' in peer && typeof peer.getSenders === 'function') {
+                var streamObject2 = new MediaStream();
+                peer.getSenders().forEach(function(sender) {
+                    streamObject2.addTrack(sender.track);
+                });
+                return streamObject2;
+            }
+            return peer.getLocalStreams();
+        }
+
         peer.onicecandidate = function(event) {
             if (!event.candidate) {
                 if (!connection.trickleIce) {
@@ -3872,11 +3888,13 @@
 
             if (!localStream) return;
 
-            peer.getLocalStreams().forEach(function(stream) {
-                if (stream.id == localStream.id) {
-                    localStream = null;
-                }
-            });
+            if (getLocalStreams().forEach) {
+                getLocalStreams().forEach(function(stream) {
+                    if (localStream && stream.id == localStream.id) {
+                        localStream = null;
+                    }
+                });
+            }
 
             if (localStream) {
                 peer.addStream(localStream);
@@ -3911,7 +3929,37 @@
 
         defaults.sdpConstraints = setSdpConstraints(sdpConstraints);
 
-        peer.onaddstream = function(event) {
+        var remoteStreamAddEvent = 'addstream';
+        if ('ontrack' in peer) {
+            // temporarily disabled
+            // remoteStreamAddEvent = 'track';
+        }
+
+        var streamObject;
+        peer.addEventListener(remoteStreamAddEvent, function(event) {
+            if (event.streams && event.streams.length && !event.stream) {
+                if (!streamObject) {
+                    streamObject = new MediaStream();
+                    return;
+                }
+
+                event.streams.forEach(function(stream) {
+                    if (stream.getVideoTracks().length) {
+                        streamObject.addTrack(stream.getVideoTracks()[0]);
+                    }
+                    if (stream.getAudioTracks().length) {
+                        streamObject.addTrack(stream.getAudioTracks()[0]);
+                    }
+                });
+                event.stream = streamObject;
+
+                if (connection.session.audio && connection.session.video && (!streamObject.getVideoTracks().length || !streamObject.getAudioTracks().length)) {
+                    return;
+                }
+
+                streamObject = null;
+            }
+
             var streamsToShare = {};
             if (config.remoteSdp && config.remoteSdp.streamsToShare) {
                 streamsToShare = config.remoteSdp.streamsToShare;
@@ -3940,7 +3988,7 @@
             }
             allRemoteStreams[event.stream.id] = event.stream;
             config.onRemoteStream(event.stream);
-        };
+        }, false);
 
         peer.onremovestream = function(event) {
             event.stream.streamid = event.stream.id;
@@ -4037,13 +4085,15 @@
         }
 
         var streamsToShare = {};
-        peer.getLocalStreams().forEach(function(stream) {
-            streamsToShare[stream.streamid] = {
-                isAudio: !!stream.isAudio,
-                isVideo: !!stream.isVideo,
-                isScreen: !!stream.isScreen
-            };
-        });
+        if (getLocalStreams().forEach) {
+            getLocalStreams().forEach(function(stream) {
+                streamsToShare[stream.streamid] = {
+                    isAudio: !!stream.isAudio,
+                    isVideo: !!stream.isVideo,
+                    isScreen: !!stream.isScreen
+                };
+            });
+        }
 
         function createOfferOrAnswer(_method) {
             peer[_method](function(localSdp) {
