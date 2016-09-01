@@ -812,6 +812,15 @@ function RTCMultiConnection(roomid, forceOptions) {
             if (session.screen) {
                 connection.getScreenConstraints(function(error, screen_constraints) {
                     if (error) {
+                        if (error === 'PermissionDeniedError') {
+                            if (session.streamCallback) {
+                                session.streamCallback(null);
+                            }
+                            if (connection.enableLogs) {
+                                console.error('User rejected to share his screen.');
+                            }
+                            return;
+                        }
                         return alert(error);
                     }
 

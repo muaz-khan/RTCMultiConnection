@@ -1,4 +1,4 @@
-// Last time updated: 2016-08-21 2:16:23 PM UTC
+// Last time updated: 2016-09-01 11:25:35 AM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -828,6 +828,15 @@
                 if (session.screen) {
                     connection.getScreenConstraints(function(error, screen_constraints) {
                         if (error) {
+                            if (error === 'PermissionDeniedError') {
+                                if (session.streamCallback) {
+                                    session.streamCallback(null);
+                                }
+                                if (connection.enableLogs) {
+                                    console.error('User rejected to share his screen.');
+                                }
+                                return;
+                            }
                             return alert(error);
                         }
 
@@ -4888,7 +4897,7 @@
         };
     })();
 
-    // Last time updated at March 30, 2016, 08:32:23
+    // Last time updated at Sep 01, 2016, 08:32:23
 
     // Latest file can be found here: https://cdn.webrtc-experiment.com/Screen-Capturing.js
 
@@ -4917,8 +4926,11 @@
         // "cancel" button is clicked
         if (data == 'PermissionDeniedError') {
             chromeMediaSource = 'PermissionDeniedError';
-            if (screenCallback) return screenCallback('PermissionDeniedError');
-            else throw new Error('PermissionDeniedError');
+            if (screenCallback) {
+                return screenCallback('PermissionDeniedError');
+            } else {
+                throw new Error('PermissionDeniedError: User rejected to share his screen.');
+            }
         }
 
         // extension notified his presence
@@ -5072,7 +5084,7 @@
                 return;
             }
 
-            // this statement sets gets 'sourceId" and sets "chromeMediaSourceId" 
+            // this statement sets gets 'sourceId" and sets "chromeMediaSourceId"
             if (chromeMediaSource == 'desktop') {
                 screen_constraints.mandatory.chromeMediaSourceId = sourceId;
             }
