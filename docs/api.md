@@ -717,7 +717,8 @@ connection.renegotiate(); // with all users
 
 * http://www.rtcmulticonnection.org/docs/addStream/
 
-You can even pass `streamCallback`:
+You can even pass `streamCallback` and check if user declined prompt to share
+screen:
 
 ```javascript
 connection.addStream({
@@ -725,13 +726,17 @@ connection.addStream({
 	oneway: true,
 	streamCallback: function(screenStream) {
 		// this will be fired as soon as stream is captured
+		if (!screenStream) {
+			alert('User did NOT select to share any stream. He clicked "Cancel" button instead.');
+			return;
+		}
 		screenStream.onended = function() {
 			document.getElementById('share-screen').disabled = false;
 
 			// or show button
 			$('#share-screen').show();
-		}
-	}
+		};
+	};
 });
 ```
 
@@ -1060,7 +1065,7 @@ Now use below code in any RTCMultiConnection-v3 (screen) demo:
 
 ```html
 <script src="/dev/globals.js"></script>
-        
+
 <!-- capture screen from any HTTPs domain! -->
 <script src="https://cdn.webrtc-experiment.com:443/getScreenId.js"></script>
 
