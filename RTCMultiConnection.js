@@ -1,4 +1,4 @@
-// Last time updated: 2016-09-01 11:25:35 AM UTC
+// Last time updated: 2016-09-04 3:05:25 AM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -2686,7 +2686,7 @@
         };
     }
 
-    // Last time updated: 2016-06-17 7:44:40 AM UTC
+    // Last time updated: 2016-09-04 3:03:44 AM UTC
 
     // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
 
@@ -2914,7 +2914,6 @@
                         isPrivate = false;
                     },
                     function(e) {
-                        console.log(e);
                         isPrivate = true;
                     }
                 );
