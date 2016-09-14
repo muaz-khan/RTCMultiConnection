@@ -1256,7 +1256,6 @@ function RTCMultiConnection(roomid, forceOptions) {
         connectSocket(callback);
     };
 
-    connection.socketAutoReConnect = true;
     connection.closeSocket = function() {
         try {
             io.sockets = {};
@@ -1264,10 +1263,12 @@ function RTCMultiConnection(roomid, forceOptions) {
 
         if (!connection.socket) return;
 
-        connection.socketAutoReConnect = false;
-
         if (typeof connection.socket.disconnect === 'function') {
             connection.socket.disconnect();
+        }
+
+        if (typeof connection.socket.resetProps === 'function') {
+            connection.socket.resetProps();
         }
 
         connection.socket = null;

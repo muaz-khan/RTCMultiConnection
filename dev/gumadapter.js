@@ -3,7 +3,7 @@
 // gumadapter.js => github.com/muaz-khan/gumadapter
 // https://cdn.webrtc-experiment.com/gumadapter.js
 
-// getUserMedia hacks from git/webrtc/adapter; 
+// getUserMedia hacks from git/webrtc/adapter;
 // removed redundant codes
 // A-to-Zee, all copyrights goes to:
 // https://github.com/webrtc/adapter/blob/master/LICENSE.md

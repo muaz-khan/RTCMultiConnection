@@ -1,4 +1,4 @@
-// Last time updated: 2016-09-04 3:05:25 AM UTC
+// Last time updated: 2016-09-14 5:44:05 AM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -1272,7 +1272,6 @@
             connectSocket(callback);
         };
 
-        connection.socketAutoReConnect = true;
         connection.closeSocket = function() {
             try {
                 io.sockets = {};
@@ -1280,10 +1279,12 @@
 
             if (!connection.socket) return;
 
-            connection.socketAutoReConnect = false;
-
             if (typeof connection.socket.disconnect === 'function') {
                 connection.socket.disconnect();
+            }
+
+            if (typeof connection.socket.resetProps === 'function') {
+                connection.socket.resetProps();
             }
 
             connection.socket = null;
@@ -1580,13 +1581,16 @@
 
                 var action = message.message.action;
 
-                if (action === 'ended' || action === 'stream-removed') {
+                if (action === 'ended' || action === 'inactive' || action === 'stream-removed') {
                     connection.onstreamended(stream);
                     return;
                 }
 
                 var type = message.message.type != 'both' ? message.message.type : null;
-                stream.stream[action](type);
+
+                if (typeof stream.stream[action] == 'function') {
+                    stream.stream[action](type);
+                }
                 return;
             }
 
@@ -1735,11 +1739,17 @@
             });
         });
 
+        var alreadyConnected = false;
+
+        connection.socket.resetProps = function() {
+            alreadyConnected = false;
+        };
+
         connection.socket.on('connect', function() {
-            if (!connection.socketAutoReConnect) {
-                connection.socket = null;
+            if (alreadyConnected) {
                 return;
             }
+            alreadyConnected = true;
 
             if (connection.enableLogs) {
                 console.info('socket.io connection is opened.');
@@ -1755,14 +1765,8 @@
         });
 
         connection.socket.on('disconnect', function() {
-            if (!connection.socketAutoReConnect) {
-                connection.socket = null;
-                return;
-            }
-
             if (connection.enableLogs) {
-                console.info('socket.io connection is closed');
-                console.warn('socket.io reconnecting');
+                console.warn('socket.io connection is closed');
             }
         });
 

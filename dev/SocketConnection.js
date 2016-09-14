@@ -55,13 +55,16 @@ function SocketConnection(connection, connectCallback) {
 
             var action = message.message.action;
 
-            if (action === 'ended' || action === 'stream-removed') {
+            if (action === 'ended' || action === 'inactive' || action === 'stream-removed') {
                 connection.onstreamended(stream);
                 return;
             }
 
             var type = message.message.type != 'both' ? message.message.type : null;
-            stream.stream[action](type);
+
+            if (typeof stream.stream[action] == 'function') {
+                stream.stream[action](type);
+            }
             return;
         }
 
@@ -210,11 +213,17 @@ function SocketConnection(connection, connectCallback) {
         });
     });
 
+    var alreadyConnected = false;
+
+    connection.socket.resetProps = function() {
+        alreadyConnected = false;
+    };
+
     connection.socket.on('connect', function() {
-        if (!connection.socketAutoReConnect) {
-            connection.socket = null;
+        if (alreadyConnected) {
             return;
         }
+        alreadyConnected = true;
 
         if (connection.enableLogs) {
             console.info('socket.io connection is opened.');
@@ -230,14 +239,8 @@ function SocketConnection(connection, connectCallback) {
     });
 
     connection.socket.on('disconnect', function() {
-        if (!connection.socketAutoReConnect) {
-            connection.socket = null;
-            return;
-        }
-
         if (connection.enableLogs) {
-            console.info('socket.io connection is closed');
-            console.warn('socket.io reconnecting');
+            console.warn('socket.io connection is closed');
         }
     });
 
