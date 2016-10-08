@@ -1,5 +1,13 @@
 # iOS and Android
 
+Please check these docs instead:
+
+# 1) [Write iOS apps using RTCMultiConnection](http://www.rtcmulticonnection.org/docs/Write-iOS-Apps/)
+
+# 2) [Write Android apps using RTCMultiConnection](http://www.rtcmulticonnection.org/docs/Write-Android-Apps/)
+
+----
+
 ## iPhone, iPad, Nexus, Blackberry, Samsung, many other devices
 
 > This page explains how to write iOS+Android phonegap/cordova applications for RTCMultiConnection-v3.
