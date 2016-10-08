@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html id="home" lang="en">
+
+<head>
+    <title>Write iOS apps using RTCMultiConnection</title>
+    <meta name="description" content="Write iOS apps using RTCMultiConnection" />
+    <meta name="keywords" content="iOS,Android,Cordova,CrossWalk-Project,RTCMultiConnection,JavaScript,WebRTC,Demos,Experiments,Samples,Examples" />
+
+
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
+    <meta name="author" content="Muaz Khan">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+    <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
+
+    <style>
+        p {
+            padding: .8em;
+        }
+        li {
+            border-bottom: 1px solid rgb(189, 189, 189);
+            border-left: 1px solid rgb(189, 189, 189);
+            padding: .5em;
+        }
+        .image-container {
+            margin: 2em 0;
+            text-align: center;
+        }
+        .image-parent {
+            border: 2px solid black;
+            border-radius: 5px;
+            margin: 0 2em;
+        }
+        .image-parent img {
+            width: 100%;
+        }
+
+        p {
+          margin-top: 0!important;
+          margin-bottom: 0!important;
+          padding: 10px 10px!important;
+        }
+
+        blockquote {
+          margin: 10px;
+          border-radius: 10px;
+          background: rgb(253, 253, 253);
+          padding: 8px 20px;
+          font-size: 25px;
+          font-weight: 200;
+          line-height: 1.5;
+          word-spacing: 5px;
+        }
+
+        section blockquote {
+          color: #EC008C;
+        }
+
+        .specific-h2, h1 {
+          font-size: 35px;
+          font-weight: 200;
+          padding: 5px 10px;
+          border-bottom: 1px dotted #EC008C;
+        }
+
+        .specific-h2 a {
+          color: #EC008C;
+        }
+
+        h1 {
+          font-size: 40px;
+          color: #EC008C;
+        }
+    </style>
+    <!-- for HTML5 el styling -->
+    <script>
+        document.createElement('article');
+        document.createElement('footer');
+    </script>
+
+    <script src="https://cdn.webrtc-experiment.com/syntax/sh_main.min.js" type="text/javascript"> </script>
+    <script src="https://cdn.webrtc-experiment.com/syntax/sh_javascript.min.js" type="text/javascript"> </script>
+    <script src="https://cdn.webrtc-experiment.com/syntax/sh_html.min.js" type="text/javascript"> </script>
+    <link href="https://cdn.webrtc-experiment.com/syntax/sh_style.css" type="text/css" rel="stylesheet">
+</head>
+
+<body onload="sh_highlightDocument();">
+    <article>
+        <a href="http://www.RTCMultiConnection.org/docs/" style="border-bottom: 1px solid #2844FA; font-size: 1.2em; position: absolute; right: 0; text-decoration: none; top: 0;">RTCMultiConnection Docs</a>
+
+        <header style="text-align: center;">
+            <h1>
+                Write iOS apps using RTCMultiConnection
+            </h1>
+
+            <p>
+                <a href="https://rtcmulticonnection.herokuapp.com/">HOME</a>
+                <span> &copy; </span>
+                <a href="http://www.MuazKhan.com/" target="_blank">Muaz Khan</a> .
+                <a href="http://twitter.com/WebRTCWeb" target="_blank" title="Twitter profile for WebRTC Experiments">@WebRTCWeb</a> .
+                <a href="https://github.com/muaz-khan?tab=repositories" target="_blank" title="Github Profile">Github</a> .
+                <a href="https://github.com/muaz-khan/RTCMultiConnection/issues?state=open" target="_blank">Latest issues</a> .
+                <a href="https://github.com/muaz-khan/RTCMultiConnection/commits/master" target="_blank">What's New?</a>
+            </p>
+        </header>
+
+        <div class="github-stargazers"></div>
+
+        <blockquote>
+            All <a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos">RTCMultiConnection Demos</a> has their <strong>equivalent (open-sourced) apps</strong> for both platforms: <strong>Android</strong> and <strong>iOS</strong>.
+        </blockquote>
+
+        <section class="experiment">
+          <h2 class="specific-h2"><a id="dev-environment" href="#dev-environment">Development Environment Prerequisites</a></h2>
+
+          <ol>
+            <li>
+              MacOSX 10.11 or higher
+            </li>
+
+            <li>
+              XCode 7.3 or higher
+            </li>
+
+            <li>
+              iOS 9.2 (DO NOT use any other version)
+            </li>
+          </ol>
+
+          <blockquote>
+            Please also check: <a href="https://cordova.apache.org/docs/en/2.5.0/guide/getting-started/ios/#requirements" target="_blank">iOS platform prerequisites</a> Or <a href="#verify-prerequisites">check if your system is ready</a>
+          </blockquote>
+        </section>
+
+        <section class="experiment">
+          <h2 class="specific-h2"><a id="cordova" href="#cordova">Cordova Prerequisites</a></h2>
+
+          <p>
+            <a href="https://cordova.apache.org/#getstarted" target="_blank">Install Cordova</a>:
+          </p>
+
+          <pre class="sh_javascript">
+npm <strong>install</strong> -g <strong>cordova</strong>
+</pre>
+        </section>
+
+        <section class="experiment">
+          <h2 class="specific-h2"><a id="verify-prerequisites" href="#verify-prerequisites">Check if your system is ready</a></h2>
+
+          <pre class="sh_javascript">
+cordova <strong>requirements</strong>
+</pre>
+
+          <p>
+            Above command will/should display a result similar to this:
+          </p>
+
+          <pre class="sh_javascript">
+<strong>Apple OS X</strong>: installed darwin ---- OSX should be 10.11 or higher
+<strong>Xcode</strong>: installed 7.3         ---- MUST always be 7.3
+<strong>ios-deploy</strong>: installed 1.8.4  ---- optional
+<strong>ios-sim</strong>: installed 5.0.6     ---- optional
+</pre>
+          <blockquote>
+            Please make sure to re-install the prerequisites if you get different result.
+          </blockquote>
+        </section>
+
+        <section class="experiment">
+          <h2 class="specific-h2"><a id="download-apps" href="#download-apps">Download Open-Sourced Cordova Apps</a></h2>
+
+          <p>
+            Download any HTML-demo-file from <a href="https://github.com/muaz-khan/RTCMultiConnection/blob/master/demos">this page</a> and search for "<strong>blockquote</strong>". You will find a link to download the open-sourced app/codes.
+          </p>
+
+          <p>
+            Example demo file: <a href="https://github.com/muaz-khan/RTCMultiConnection/blob/master/demos/Scalable-Broadcast.html#L113">github/Scalable-Broadcast.html#L113</a>
+          </p>
+
+          <p>
+            Download & extract the mobile-app's ZIP file.
+          </p>
+        </section>
+
+        <section class="experiment">
+          <h2 class="specific-h2"><a id="config-xml" href="#config-xml">Modify Config.xml</a></h2>
+
+          <p>
+            "Config.xml" file will have following information:
+          </p>
+
+          <pre class="sh_html">
+&lt;?xml version='1.0' encoding='utf-8'?&gt;
+&lt;widget id="com.webrtc.scalablebroadcast" version="3.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0"&gt;
+    &lt;name&gt;Scalable-Broadcast&lt;/name&gt;
+    &lt;icon src="www/img/icon.png" /&gt;
+&lt;/widget&gt;
+</pre>
+
+          <p>
+            Please mdofiy following XML attributes:
+            <ol>
+              <li>
+                "id" attribute: It should be something like this:
+                <pre class="sh_html">
+&lt;widget id="com.yourdomain"&gt;
+</pre>
+              </li>
+
+              <li>
+                "name" attribute: Name should NOT have spaces or special characters. Consider it as a "username":
+
+                <pre class="sh_html">
+&lt;name&gt;yourAppName&lt;/name&gt;
+</pre>
+              </li>
+
+              <li>
+                "icon" attribute: You can replace "icon.png" file with your own app-icon.
+              </li>
+            </ol>
+          </p>
+        </section>
+
+        <section class="experiment">
+          <h2 class="specific-h2"><a id="iOS-platform" href="#iOS-platform">Re-Add Cordova-based iOS platform</a></h2>
+
+          <pre class="sh_javascript">
+# first of all, remove old iOS platforms
+<strong>cordova platform remove ios</strong>
+
+# strongly recommended version: 3.9.2
+# please NEVER use any newer version
+
+<strong>cordova platform add ios@3.9.2 --save</strong>
+</pre>
+
+          <blockquote>
+            It will re-generate iOS prerequisites according to your app's new name, id, and icon. (things that <a href="#config-xml">you modifed in the config.xml file</a>)
+          </blockquote>
+        </section>
+
+        <section class="experiment">
+          <h2 class="specific-h2"><a id="build-iOS" href="#build-iOS">Build iOS App</a></h2>
+
+          <pre class="sh_javascript">
+cordova <strong>build</strong> ios
+</pre>
+
+          <blockquote>
+            Now go to "<strong>platforms/ios/build/emulator</strong>" and you will find the iOS app.
+          </blockquote>
+        </section>
+
+        <section class="experiment">
+          <h2 class="specific-h2"><a id="emulator" href="#emulator">Test on Emulator</a></h2>
+
+          <pre class="sh_javascript">
+cordova <strong>emulate</strong> ios
+</pre>
+        </section>
+
+        <section class="experiment">
+          <h2 class="specific-h2"><a id="iphone" href="#iphone">Test on a Real iPhone device</a></h2>
+
+          <ol>
+            <li>(Using USB cable) Plugin your iPhone (6p or 7) device to your MacBook</li>
+            <li>Open XCode and click "Generic iOS Device" from the tool-bar</li>
+            <li>Select your real iPhone device</li>
+            <li>Click "Run" button from the same tool-bar</li>
+          </ol>
+
+          <blockquote>
+            It will generate iOS app, automatically install it on your real iPhone device and automatically open it as well.
+
+            <br><br>
+            Now your real iPhone will be used as an emulator.
+          </blockquote>
+        </section>
+
+        <section class="experiment own-widgets">
+            <h2 class="header" id="updates" style="color: red;padding-bottom: .1em;"><a href="https://github.com/muaz-khan/RTCMultiConnection/issues">Latest Issues</a></h2>
+            <div id="github-issues"></div>
+        </section>
+
+        <section style="border: 1px solid rgb(189, 189, 189); border-radius: .2em; margin: 1em 3em;">
+            <h2 id="feedback" style="border-bottom: 1px solid rgb(189, 189, 189); padding: .2em .4em;">Want to ask a Question?</h2>
+            <div>
+                <textarea id="message" style="border: 1px solid rgb(189, 189, 189); height: 8em; margin: .2em; outline: none; resize: vertical; width: 98%;" placeholder="Feel free to ask any question regarding RTCMultiConnection.js!"></textarea>
+            </div>
+            <button id="send-message" style="font-size: 1em;">Ask a Question</button><small style="margin-left: 1em;">You can include your email for private conversation!</small>
+        </section>
+
+        <section class="experiment own-widgets latest-commits">
+            <h2 class="header" id="updates" style="color: red; padding-bottom: .1em;"><a href="https://github.com/muaz-khan/WebRTC-Experiment/commits/master" target="_blank">Latest Updates</a></h2>
+            <div id="github-commits"></div>
+        </section>
+    </article>
+
+    <a href="https://github.com/muaz-khan/RTCMultiConnection" class="fork-left"></a>
+
+    <footer>
+        <p>
+            <a href="https://www.webrtc-experiment.com">WebRTC Experiments</a> © <a href="https://plus.google.com/+MuazKhan" rel="author" target="_blank">Muaz Khan</a>
+            <a href="mailto:muazkh@gmail.com" target="_blank">muazkh@gmail.com</a>
+            <a href="https://github.com/muaz-khan" target="_blank">Github</a>
+        </p>
+    </footer>
+
+    <script>
+        window.useThisGithubPath = 'muaz-khan/RTCMultiConnection';
+    </script>
+    <script src="https://cdn.webrtc-experiment.com/commits.js"></script>
+</body>
+
+</html>

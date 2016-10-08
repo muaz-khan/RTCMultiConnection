@@ -7,3 +7,17 @@ bower_components
 RTCMultiConnection-v3.0
 
 make-tar.sh
+
+.*.swp
+._*
+.DS_Store
+.git
+.hg
+.npmrc
+.lock-wscript
+.svn
+.wafpickle-*
+config.gypi
+CVS
+npm-debug.log
+rmc-debug.log
