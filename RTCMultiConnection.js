@@ -1,4 +1,4 @@
-// Last time updated: 2016-10-18 2:19:17 PM UTC
+// Last time updated: 2016-09-14 5:44:05 AM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -1980,16 +1980,11 @@
                     }
 
                     if (message.readyForNextChunk) {
-                        connection.fbr.getNextChunk(message, function(nextChunk, isLastChunk) {
+                        connection.fbr.getNextChunk(message.uuid, function(nextChunk, isLastChunk) {
                             connection.peers[remoteUserId].channels.forEach(function(channel) {
                                 channel.send(nextChunk);
                             });
                         }, remoteUserId);
-                        return;
-                    }
-
-                    if (message.chunkMissing) {
-                        connection.fbr.chunkMissing(message);
                         return;
                     }
 
@@ -2238,10 +2233,13 @@
         }
 
         this.connectNewParticipantWithAllBroadcasters = function(newParticipantId, userPreferences, broadcastersList) {
-            broadcastersList = broadcastersList.split('|-,-|');
-            if (!broadcastersList.length) {
-                return;
+            if (!broadcastersList) {
+                return;  
             }
+            broadcastersList = broadcastersList.split('|-,-|');
+//             if (!broadcastersList.length) {
+//                 return;  //never get here, because split always return at least one element in the array ( so length >= 1 )
+//             }
 
             var firstBroadcaster = broadcastersList[0];
 
@@ -2258,9 +2256,15 @@
                     array.push(broadcaster);
                 }
             });
-
+            
+            var  arrayjoin = array.join( '|-,-|' );
+            
+            if( !arrayjoin ){
+	            return;
+            }
+            
             setTimeout(function() {
-                self.connectNewParticipantWithAllBroadcasters(newParticipantId, userPreferences, array.join('|-,-|'));
+                self.connectNewParticipantWithAllBroadcasters(newParticipantId, userPreferences, arrayjoin);
             }, 10 * 1000);
         };
 
@@ -2695,7 +2699,7 @@
         };
     }
 
-    // Last time updated: 2016-10-12 6:16:40 AM UTC
+    // Last time updated: 2016-09-04 3:03:44 AM UTC
 
     // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
 
@@ -2930,9 +2934,6 @@
                 var db;
                 try {
                     db = window.indexedDB.open('test');
-                    db.onerror = function() {
-                        return true;
-                    };
                 } catch (e) {
                     isPrivate = true;
                 }
