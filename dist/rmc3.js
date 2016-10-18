@@ -1,4 +1,4 @@
-// Last time updated: 2016-10-18 5:17:25 PM UTC
+// Last time updated: 2016-10-18 5:23:20 PM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -2262,8 +2262,6 @@
                 return;
             }
 
-            console.error('firstBroadcaster', firstBroadcaster);
-
             self.onNegotiationNeeded({
                 newParticipant: newParticipantId,
                 userPreferences: userPreferences || false
@@ -2272,8 +2270,6 @@
             if (!remainingBroadcasters.length) {
                 return;
             }
-
-            console.error('remainingBroadcasters', remainingBroadcasters);
 
             setTimeout(function() {
                 self.connectNewParticipantWithAllBroadcasters(newParticipantId, userPreferences, remainingBroadcasters.join('|-,-|'));
