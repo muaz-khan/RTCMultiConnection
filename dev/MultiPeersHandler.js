@@ -426,8 +426,6 @@ function MultiPeers(connection) {
             return;
         }
 
-        console.error('firstBroadcaster', firstBroadcaster);
-
         self.onNegotiationNeeded({
             newParticipant: newParticipantId,
             userPreferences: userPreferences || false
@@ -436,8 +434,6 @@ function MultiPeers(connection) {
         if (!remainingBroadcasters.length) {
             return;
         }
-
-        console.error('remainingBroadcasters', remainingBroadcasters);
 
         setTimeout(function() {
             self.connectNewParticipantWithAllBroadcasters(newParticipantId, userPreferences, remainingBroadcasters.join('|-,-|'));
