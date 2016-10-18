@@ -144,11 +144,16 @@ function MultiPeers(connection) {
                 }
 
                 if (message.readyForNextChunk) {
-                    connection.fbr.getNextChunk(message.uuid, function(nextChunk, isLastChunk) {
+                    connection.fbr.getNextChunk(message, function(nextChunk, isLastChunk) {
                         connection.peers[remoteUserId].channels.forEach(function(channel) {
                             channel.send(nextChunk);
                         });
                     }, remoteUserId);
+                    return;
+                }
+
+                if (message.chunkMissing) {
+                    connection.fbr.chunkMissing(message);
                     return;
                 }
 

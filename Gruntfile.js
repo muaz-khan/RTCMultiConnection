@@ -90,8 +90,7 @@ module.exports = function(grunt) {
             my_target: {
                 files: {
                     'RTCMultiConnection.min.js': ['RTCMultiConnection.js'],
-                    'dist/rmc3.min.js': ['RTCMultiConnection.js'],
-                    'dist/rmc3.fbr.min.js': ['dev/FileBufferReader.js'],
+                    'dist/rmc3.min.js': ['RTCMultiConnection.js']
                 }
             }
         },
@@ -101,8 +100,7 @@ module.exports = function(grunt) {
                     flatten: true
                 },
                 files: {
-                    'dist/rmc3.js': ['RTCMultiConnection.js'],
-                    'dist/rmc3.fbr.js': ['dev/FileBufferReader.js'],
+                    'dist/rmc3.js': ['RTCMultiConnection.js']
                 },
             },
         },

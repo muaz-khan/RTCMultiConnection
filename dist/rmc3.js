@@ -1,4 +1,4 @@
-// Last time updated: 2016-09-14 5:44:05 AM UTC
+// Last time updated: 2016-10-18 2:19:17 PM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -1980,11 +1980,16 @@
                     }
 
                     if (message.readyForNextChunk) {
-                        connection.fbr.getNextChunk(message.uuid, function(nextChunk, isLastChunk) {
+                        connection.fbr.getNextChunk(message, function(nextChunk, isLastChunk) {
                             connection.peers[remoteUserId].channels.forEach(function(channel) {
                                 channel.send(nextChunk);
                             });
                         }, remoteUserId);
+                        return;
+                    }
+
+                    if (message.chunkMissing) {
+                        connection.fbr.chunkMissing(message);
                         return;
                     }
 
@@ -2690,7 +2695,7 @@
         };
     }
 
-    // Last time updated: 2016-09-04 3:03:44 AM UTC
+    // Last time updated: 2016-10-12 6:16:40 AM UTC
 
     // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
 
@@ -2925,6 +2930,9 @@
                 var db;
                 try {
                     db = window.indexedDB.open('test');
+                    db.onerror = function() {
+                        return true;
+                    };
                 } catch (e) {
                     isPrivate = true;
                 }

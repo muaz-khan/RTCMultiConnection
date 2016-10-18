@@ -14,9 +14,6 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 
 <!-- CDN non-minified or minified -->
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
-
-<!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.9/rmc3.min.js"></script>
 ```
 
 If you're sharing files, you also need to link:
@@ -26,9 +23,6 @@ If you're sharing files, you also need to link:
 
 <!-- or CDN -->
 <script src="https://cdn.webrtc-experiment.com:443/rmc3.fbr.min.js"></script>
-
-<!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.3.9/rmc3.fbr.min.js"></script>
 ```
 
 > You can link multiple files from `dev` directory. Order doesn't matters.
