@@ -402,30 +402,46 @@ function MultiPeers(connection) {
     }
 
     this.connectNewParticipantWithAllBroadcasters = function(newParticipantId, userPreferences, broadcastersList) {
-        broadcastersList = broadcastersList.split('|-,-|');
+        broadcastersList = (broadcastersList || '').split('|-,-|');
+
         if (!broadcastersList.length) {
             return;
         }
 
-        var firstBroadcaster = broadcastersList[0];
+        var firstBroadcaster;
+
+        var remainingBroadcasters = [];
+        broadcastersList.forEach(function(list) {
+            list = (list || '').replace(/ /g, '');
+            if (list.length) {
+                if (!firstBroadcaster) {
+                    firstBroadcaster = list;
+                } else {
+                    remainingBroadcasters.push(list);
+                }
+            }
+        });
+
+        if (!firstBroadcaster) {
+            return;
+        }
+
+        console.error('firstBroadcaster', firstBroadcaster);
 
         self.onNegotiationNeeded({
             newParticipant: newParticipantId,
             userPreferences: userPreferences || false
         }, firstBroadcaster);
 
-        delete broadcastersList[0];
+        if (!remainingBroadcasters.length) {
+            return;
+        }
 
-        var array = [];
-        broadcastersList.forEach(function(broadcaster) {
-            if (broadcaster) {
-                array.push(broadcaster);
-            }
-        });
+        console.error('remainingBroadcasters', remainingBroadcasters);
 
         setTimeout(function() {
-            self.connectNewParticipantWithAllBroadcasters(newParticipantId, userPreferences, array.join('|-,-|'));
-        }, 10 * 1000);
+            self.connectNewParticipantWithAllBroadcasters(newParticipantId, userPreferences, remainingBroadcasters.join('|-,-|'));
+        }, 3 * 1000);
     };
 
     this.onGettingRemoteMedia = function(stream, remoteUserId) {};

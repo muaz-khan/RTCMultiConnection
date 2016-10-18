@@ -81,7 +81,7 @@ module.exports = function(grunt) {
                 }]
             }
         },
-        clean: ['./temp'],
+        clean: ['./temp', 'RTCMultiConnection.js'],
         uglify: {
             options: {
                 mangle: false,
@@ -89,7 +89,6 @@ module.exports = function(grunt) {
             },
             my_target: {
                 files: {
-                    'RTCMultiConnection.min.js': ['RTCMultiConnection.js'],
                     'dist/rmc3.min.js': ['RTCMultiConnection.js']
                 }
             }
