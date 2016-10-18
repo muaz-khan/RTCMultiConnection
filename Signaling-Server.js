@@ -160,7 +160,7 @@ module.exports = exports = function(app, socketCallback) {
             }
 
             try {
-                if (listOfUsers[socket.userid] && listOfUsers[socket.userid].socket.id == socket.userid) {
+                if (listOfUsers[socket.userid] && listOfUsers[socket.userid].socket.id == socket.id) {
                     if (newUserId === socket.userid) return;
 
                     var oldUserId = socket.userid;
