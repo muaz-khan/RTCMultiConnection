@@ -1173,6 +1173,7 @@ function RTCMultiConnection(roomid, forceOptions) {
 
     connection.invokeSelectFileDialog = function(callback) {
         var selector = new FileSelector();
+        selector.accept = '*.*';
         selector.selectSingleFile(callback);
     };
 

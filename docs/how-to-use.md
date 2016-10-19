@@ -19,10 +19,7 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 If you're sharing files, you also need to link:
 
 ```html
-<script src="/dev/FileBufferReader.js"></script>
-
-<!-- or CDN -->
-<script src="https://cdn.webrtc-experiment.com:443/rmc3.fbr.min.js"></script>
+<script src="https://cdn.webrtc-experiment.com:443/FileBufferReader.js"></script>
 ```
 
 > You can link multiple files from `dev` directory. Order doesn't matters.

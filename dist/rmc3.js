@@ -1,4 +1,4 @@
-// Last time updated: 2016-10-18 5:23:20 PM UTC
+// Last time updated: 2016-10-19 12:32:38 PM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -1189,6 +1189,7 @@
 
         connection.invokeSelectFileDialog = function(callback) {
             var selector = new FileSelector();
+            selector.accept = '*.*';
             selector.selectSingleFile(callback);
         };
 
