@@ -24,6 +24,9 @@ function SocketConnection(connection, connectCallback) {
         connection.socket = io.connect((connection.socketURL || '/') + parameters, connection.socketOptions);
     }
 
+    // detect signaling medium
+    connection.socket.io = true;
+
     var mPeer = connection.multiPeersHandler;
 
     connection.socket.on('extra-data-updated', function(remoteUserId, extra) {

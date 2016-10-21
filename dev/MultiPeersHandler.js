@@ -230,7 +230,6 @@ function MultiPeers(connection) {
         }
 
         userPreferences = connection.setUserPreferences(userPreferences, remoteUserId);
-
         var localConfig = this.getLocalConfig(null, remoteUserId, userPreferences);
         connection.peers[remoteUserId] = new PeerInitiator(localConfig);
     };
@@ -341,38 +340,6 @@ function MultiPeers(connection) {
                 }, remoteUserId);
                 return;
             }
-
-            var localMediaConstraints = {};
-            var userPreferences = message.userPreferences;
-            if (userPreferences.localPeerSdpConstraints.OfferToReceiveAudio) {
-                localMediaConstraints.audio = connection.mediaConstraints.audio;
-            }
-
-            if (userPreferences.localPeerSdpConstraints.OfferToReceiveVideo) {
-                localMediaConstraints.video = connection.mediaConstraints.video;
-            }
-
-            var session = userPreferences.session || connection.session;
-
-            if (session.oneway && session.audio && session.audio === 'two-way') {
-                session = {
-                    audio: true
-                };
-            }
-
-            if (session.audio || session.video || session.screen) {
-                if (session.screen) {
-                    connection.getScreenConstraints(function(error, screen_constraints) {
-                        connection.invokeGetUserMedia({
-                            audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
-                            video: screen_constraints,
-                            isScreen: true
-                        }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia(null, cb) : cb);
-                    });
-                } else if (session.audio || session.video) {
-                    connection.invokeGetUserMedia(null, cb, session);
-                }
-            }
         }
 
         if (message.readyForOffer) {
@@ -402,6 +369,10 @@ function MultiPeers(connection) {
     }
 
     this.connectNewParticipantWithAllBroadcasters = function(newParticipantId, userPreferences, broadcastersList) {
+        if (connection.socket.io) {
+            return;
+        }
+
         broadcastersList = (broadcastersList || '').split('|-,-|');
 
         if (!broadcastersList.length) {

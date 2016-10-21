@@ -189,7 +189,9 @@ function RTCMultiConnection(roomid, forceOptions) {
                     password: password || false
                 };
 
-                mPeer.onNegotiationNeeded(connectionDescription);
+                connection.beforeJoin(connectionDescription.message, function() {
+                    mPeer.onNegotiationNeeded(connectionDescription);
+                });
                 return;
             }
 
@@ -372,17 +374,62 @@ function RTCMultiConnection(roomid, forceOptions) {
             password: false
         };
 
-        connectSocket(function() {
-            if (!!connection.peers[connection.sessionid]) {
-                // on socket disconnect & reconnect
-                return;
-            }
+        connection.beforeJoin(connectionDescription.message, function() {
+            connectSocket(function() {
+                if (!!connection.peers[connection.sessionid]) {
+                    // on socket disconnect & reconnect
+                    return;
+                }
 
-            mPeer.onNegotiationNeeded(connectionDescription);
-            cb();
+                mPeer.onNegotiationNeeded(connectionDescription);
+                cb();
+            });
         });
-
         return connectionDescription;
+    };
+
+    connection.beforeJoin = function(userPreferences, callback) {
+        if (connection.dontCaptureUserMedia) {
+            callback();
+            return;
+        }
+
+        var localMediaConstraints = {};
+
+        if (userPreferences.localPeerSdpConstraints.OfferToReceiveAudio) {
+            localMediaConstraints.audio = connection.mediaConstraints.audio;
+        }
+
+        if (userPreferences.localPeerSdpConstraints.OfferToReceiveVideo) {
+            localMediaConstraints.video = connection.mediaConstraints.video;
+        }
+
+        var session = userPreferences.session || connection.session;
+
+        if (session.oneway && session.audio !== 'two-way' && session.video !== 'two-way' && session.screen !== 'two-way') {
+            callback();
+            return;
+        }
+
+        if (session.oneway && session.audio && session.audio === 'two-way') {
+            session = {
+                audio: true
+            };
+        }
+
+        if (session.audio || session.video || session.screen) {
+            if (session.screen) {
+                connection.getScreenConstraints(function(error, screen_constraints) {
+                    connection.invokeGetUserMedia({
+                        audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
+                        video: screen_constraints,
+                        isScreen: true
+                    }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia(null, callback) : callback);
+                });
+            } else if (session.audio || session.video) {
+                connection.invokeGetUserMedia(null, callback, session);
+            }
+        }
     };
 
     connection.connectWithAllParticipants = function(remoteUserId) {
@@ -1078,6 +1125,10 @@ function RTCMultiConnection(roomid, forceOptions) {
     };
 
     connection.addNewBroadcaster = function(broadcasterId, userPreferences) {
+        if (connection.socket.io) {
+            return;
+        }
+
         if (connection.broadcasters.length) {
             setTimeout(function() {
                 mPeer.connectNewParticipantWithAllBroadcasters(broadcasterId, userPreferences, connection.broadcasters.join('|-,-|'));

@@ -1,4 +1,4 @@
-// Last time updated: 2016-10-19 12:32:38 PM UTC
+// Last time updated: 2016-10-21 5:52:57 PM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -205,7 +205,9 @@
                         password: password || false
                     };
 
-                    mPeer.onNegotiationNeeded(connectionDescription);
+                    connection.beforeJoin(connectionDescription.message, function() {
+                        mPeer.onNegotiationNeeded(connectionDescription);
+                    });
                     return;
                 }
 
@@ -388,17 +390,62 @@
                 password: false
             };
 
-            connectSocket(function() {
-                if (!!connection.peers[connection.sessionid]) {
-                    // on socket disconnect & reconnect
-                    return;
-                }
+            connection.beforeJoin(connectionDescription.message, function() {
+                connectSocket(function() {
+                    if (!!connection.peers[connection.sessionid]) {
+                        // on socket disconnect & reconnect
+                        return;
+                    }
 
-                mPeer.onNegotiationNeeded(connectionDescription);
-                cb();
+                    mPeer.onNegotiationNeeded(connectionDescription);
+                    cb();
+                });
             });
-
             return connectionDescription;
+        };
+
+        connection.beforeJoin = function(userPreferences, callback) {
+            if (connection.dontCaptureUserMedia) {
+                callback();
+                return;
+            }
+
+            var localMediaConstraints = {};
+
+            if (userPreferences.localPeerSdpConstraints.OfferToReceiveAudio) {
+                localMediaConstraints.audio = connection.mediaConstraints.audio;
+            }
+
+            if (userPreferences.localPeerSdpConstraints.OfferToReceiveVideo) {
+                localMediaConstraints.video = connection.mediaConstraints.video;
+            }
+
+            var session = userPreferences.session || connection.session;
+
+            if (session.oneway && session.audio !== 'two-way' && session.video !== 'two-way' && session.screen !== 'two-way') {
+                callback();
+                return;
+            }
+
+            if (session.oneway && session.audio && session.audio === 'two-way') {
+                session = {
+                    audio: true
+                };
+            }
+
+            if (session.audio || session.video || session.screen) {
+                if (session.screen) {
+                    connection.getScreenConstraints(function(error, screen_constraints) {
+                        connection.invokeGetUserMedia({
+                            audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
+                            video: screen_constraints,
+                            isScreen: true
+                        }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia(null, callback) : callback);
+                    });
+                } else if (session.audio || session.video) {
+                    connection.invokeGetUserMedia(null, callback, session);
+                }
+            }
         };
 
         connection.connectWithAllParticipants = function(remoteUserId) {
@@ -1094,6 +1141,10 @@
         };
 
         connection.addNewBroadcaster = function(broadcasterId, userPreferences) {
+            if (connection.socket.io) {
+                return;
+            }
+
             if (connection.broadcasters.length) {
                 setTimeout(function() {
                     mPeer.connectNewParticipantWithAllBroadcasters(broadcasterId, userPreferences, connection.broadcasters.join('|-,-|'));
@@ -1550,6 +1601,9 @@
         } catch (e) {
             connection.socket = io.connect((connection.socketURL || '/') + parameters, connection.socketOptions);
         }
+
+        // detect signaling medium
+        connection.socket.io = true;
 
         var mPeer = connection.multiPeersHandler;
 
@@ -2067,7 +2121,6 @@
             }
 
             userPreferences = connection.setUserPreferences(userPreferences, remoteUserId);
-
             var localConfig = this.getLocalConfig(null, remoteUserId, userPreferences);
             connection.peers[remoteUserId] = new PeerInitiator(localConfig);
         };
@@ -2178,38 +2231,6 @@
                     }, remoteUserId);
                     return;
                 }
-
-                var localMediaConstraints = {};
-                var userPreferences = message.userPreferences;
-                if (userPreferences.localPeerSdpConstraints.OfferToReceiveAudio) {
-                    localMediaConstraints.audio = connection.mediaConstraints.audio;
-                }
-
-                if (userPreferences.localPeerSdpConstraints.OfferToReceiveVideo) {
-                    localMediaConstraints.video = connection.mediaConstraints.video;
-                }
-
-                var session = userPreferences.session || connection.session;
-
-                if (session.oneway && session.audio && session.audio === 'two-way') {
-                    session = {
-                        audio: true
-                    };
-                }
-
-                if (session.audio || session.video || session.screen) {
-                    if (session.screen) {
-                        connection.getScreenConstraints(function(error, screen_constraints) {
-                            connection.invokeGetUserMedia({
-                                audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
-                                video: screen_constraints,
-                                isScreen: true
-                            }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia(null, cb) : cb);
-                        });
-                    } else if (session.audio || session.video) {
-                        connection.invokeGetUserMedia(null, cb, session);
-                    }
-                }
             }
 
             if (message.readyForOffer) {
@@ -2239,6 +2260,10 @@
         }
 
         this.connectNewParticipantWithAllBroadcasters = function(newParticipantId, userPreferences, broadcastersList) {
+            if (connection.socket.io) {
+                return;
+            }
+
             broadcastersList = (broadcastersList || '').split('|-,-|');
 
             if (!broadcastersList.length) {

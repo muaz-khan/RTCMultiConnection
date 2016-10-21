@@ -278,6 +278,28 @@ module.exports = exports = function(app, socketCallback) {
             }
         }
 
+        function joinARoom(message) {
+            var roomInitiator = listOfUsers[message.remoteUserId];
+            var usersInARoom = roomInitiator.connectedWith;
+
+            var inviteTheseUsers = [roomInitiator.socket];
+            Object.keys(usersInARoom).forEach(function(key) {
+                inviteTheseUsers.push(usersInARoom[key]);
+            });
+
+            var keepUnique = [];
+            inviteTheseUsers.forEach(function(userSocket) {
+                if (userSocket.userid == socket.userid) return;
+                if (keepUnique.indexOf(userSocket.userid) != -1) {
+                    return;
+                }
+                keepUnique.push(userSocket.userid);
+
+                message.remoteUserId = userSocket.userid;
+                userSocket.emit(socketMessageEvent, message);
+            });
+        }
+
         var numberOfPasswordTries = 0;
         socket.on(socketMessageEvent, function(message, callback) {
             if (message.remoteUserId && message.remoteUserId === socket.userid) {
@@ -304,6 +326,11 @@ module.exports = exports = function(app, socketCallback) {
                             socket.emit('invalid-password', message.remoteUserId, message.password);
                             return;
                         }
+                    }
+
+                    if (listOfUsers[message.remoteUserId]) {
+                        joinARoom(message);
+                        return;
                     }
                 }
 
@@ -340,9 +367,13 @@ module.exports = exports = function(app, socketCallback) {
 
                 // if someone tries to join a person who is absent
                 if (message.message.newParticipationRequest) {
-                    var waitFor = 120; // 2 minutes
+                    var waitFor = 60 * 10; // 10 minutes
                     var invokedTimes = 0;
                     (function repeater() {
+                        if (typeof socket == 'undefined' || !listOfUsers[socket.userid]) {
+                            return;
+                        }
+
                         invokedTimes++;
                         if (invokedTimes > waitFor) {
                             socket.emit('user-not-found', message.remoteUserId);
@@ -350,7 +381,7 @@ module.exports = exports = function(app, socketCallback) {
                         }
 
                         if (listOfUsers[message.remoteUserId] && listOfUsers[message.remoteUserId].socket) {
-                            onMessageCallback(message);
+                            joinARoom(message);
                             return;
                         }
 

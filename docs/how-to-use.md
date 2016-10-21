@@ -7,8 +7,6 @@
 All files from `/dist` directory are available on CDN: `https://cdn.webrtc-experiment.com:443/`
 
 ```html
-<script src="/RTCMultiConnection.min.js"></script>
-
 <!-- or -->
 <script src="/dist/rmc3.min.js"></script>
 

@@ -3,13 +3,20 @@
 // Documentation  - github.com/muaz-khan/RTCMultiConnection
 var isUseHTTPs = false && !(!!process.env.PORT || !!process.env.IP);
 
+// user-guide: change port via "config.json"
 var port = process.env.PORT || 9001;
 
-try {
-    var _port = require('./config.json').port;
+var autoRebootServerOnFailure = false;
 
-    if (_port && _port.toString() !== '9001') {
-        port = parseInt(_port);
+try {
+    var config = require('./config.json');
+
+    if ((config.port || '').toString() !== '9001') {
+        port = parseInt(config.port);
+    }
+
+    if ((config.autoRebootServerOnFailure || '').toString() !== true) {
+        autoRebootServerOnFailure = true;
     }
 } catch (e) {}
 
@@ -139,36 +146,56 @@ if (isUseHTTPs) {
     app = server.createServer(options, serverHandler);
 } else app = server.createServer(serverHandler);
 
-app = app.listen(port, process.env.IP || '0.0.0.0', function() {
-    var addr = app.address();
+function runServer() {
+    app = app.listen(port, process.env.IP || '0.0.0.0', function() {
+        var addr = app.address();
 
-    if (addr.address === '0.0.0.0') {
-        addr.address = 'localhost';
-    }
-
-    console.log('Server listening at ' + (isUseHTTPs ? 'https' : 'http') + '://' + addr.address + ':' + addr.port);
-});
-
-require('./Signaling-Server.js')(app, function(socket) {
-    try {
-        var params = socket.handshake.query;
-
-        // "socket" object is totally in your own hands!
-        // do whatever you want!
-
-        // in your HTML page, you can access socket as following:
-        // connection.socketCustomEvent = 'custom-message';
-        // var socket = connection.getSocket();
-        // socket.emit(connection.socketCustomEvent, { test: true });
-
-        if (!params.socketCustomEvent) {
-            params.socketCustomEvent = 'custom-message';
+        if (addr.address === '0.0.0.0') {
+            addr.address = 'localhost';
         }
 
-        socket.on(params.socketCustomEvent, function(message) {
-            try {
-                socket.broadcast.emit(params.socketCustomEvent, message);
-            } catch (e) {}
+        console.log('Server listening at ' + (isUseHTTPs ? 'https' : 'http') + '://' + addr.address + ':' + addr.port);
+    });
+
+    require('./Signaling-Server.js')(app, function(socket) {
+        try {
+            var params = socket.handshake.query;
+
+            // "socket" object is totally in your own hands!
+            // do whatever you want!
+
+            // in your HTML page, you can access socket as following:
+            // connection.socketCustomEvent = 'custom-message';
+            // var socket = connection.getSocket();
+            // socket.emit(connection.socketCustomEvent, { test: true });
+
+            if (!params.socketCustomEvent) {
+                params.socketCustomEvent = 'custom-message';
+            }
+
+            socket.on(params.socketCustomEvent, function(message) {
+                try {
+                    socket.broadcast.emit(params.socketCustomEvent, message);
+                } catch (e) {}
+            });
+        } catch (e) {}
+    });
+}
+
+if (autoRebootServerOnFailure) {
+    // auto restart app on failure
+    var cluster = require('cluster');
+    if (cluster.isMaster) {
+        cluster.fork();
+
+        cluster.on('exit', function(worker, code, signal) {
+            cluster.fork();
         });
-    } catch (e) {}
-});
+    }
+
+    if (cluster.isWorker) {
+        runServer();
+    }
+} else {
+    runServer();
+}
