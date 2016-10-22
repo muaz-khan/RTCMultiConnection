@@ -189,7 +189,7 @@ function RTCMultiConnection(roomid, forceOptions) {
                     password: password || false
                 };
 
-                connection.beforeJoin(connectionDescription.message, function() {
+                beforeJoin(connectionDescription.message, function() {
                     mPeer.onNegotiationNeeded(connectionDescription);
                 });
                 return;
@@ -374,7 +374,7 @@ function RTCMultiConnection(roomid, forceOptions) {
             password: false
         };
 
-        connection.beforeJoin(connectionDescription.message, function() {
+        beforeJoin(connectionDescription.message, function() {
             connectSocket(function() {
                 if (!!connection.peers[connection.sessionid]) {
                     // on socket disconnect & reconnect
@@ -388,8 +388,8 @@ function RTCMultiConnection(roomid, forceOptions) {
         return connectionDescription;
     };
 
-    connection.beforeJoin = function(userPreferences, callback) {
-        if (connection.dontCaptureUserMedia) {
+    function beforeJoin(userPreferences, callback) {
+        if (connection.dontCaptureUserMedia || userPreferences.isDataOnly) {
             callback();
             return;
         }
@@ -430,7 +430,7 @@ function RTCMultiConnection(roomid, forceOptions) {
                 connection.invokeGetUserMedia(null, callback, session);
             }
         }
-    };
+    }
 
     connection.connectWithAllParticipants = function(remoteUserId) {
         mPeer.onNegotiationNeeded('connectWithAllParticipants', remoteUserId || connection.sessionid);

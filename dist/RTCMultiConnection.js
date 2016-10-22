@@ -1,4 +1,4 @@
-// Last time updated: 2016-10-22 4:57:49 AM UTC
+// Last time updated: 2016-10-22 5:06:02 AM UTC
 
 // _____________________
 // RTCMultiConnection-v3
@@ -205,7 +205,7 @@
                         password: password || false
                     };
 
-                    connection.beforeJoin(connectionDescription.message, function() {
+                    beforeJoin(connectionDescription.message, function() {
                         mPeer.onNegotiationNeeded(connectionDescription);
                     });
                     return;
@@ -390,7 +390,7 @@
                 password: false
             };
 
-            connection.beforeJoin(connectionDescription.message, function() {
+            beforeJoin(connectionDescription.message, function() {
                 connectSocket(function() {
                     if (!!connection.peers[connection.sessionid]) {
                         // on socket disconnect & reconnect
@@ -404,8 +404,8 @@
             return connectionDescription;
         };
 
-        connection.beforeJoin = function(userPreferences, callback) {
-            if (connection.dontCaptureUserMedia) {
+        function beforeJoin(userPreferences, callback) {
+            if (connection.dontCaptureUserMedia || userPreferences.isDataOnly) {
                 callback();
                 return;
             }
@@ -446,7 +446,7 @@
                     connection.invokeGetUserMedia(null, callback, session);
                 }
             }
-        };
+        }
 
         connection.connectWithAllParticipants = function(remoteUserId) {
             mPeer.onNegotiationNeeded('connectWithAllParticipants', remoteUserId || connection.sessionid);

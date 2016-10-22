@@ -280,6 +280,11 @@ module.exports = exports = function(app, socketCallback) {
 
         function joinARoom(message) {
             var roomInitiator = listOfUsers[message.remoteUserId];
+
+            if (!roomInitiator) {
+                return;
+            }
+
             var usersInARoom = roomInitiator.connectedWith;
 
             var inviteTheseUsers = [roomInitiator.socket];
