@@ -8,10 +8,10 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 
 ```html
 <!-- or -->
-<script src="/dist/rmc3.min.js"></script>
+<script src="/dist/RTCMultiConnection.min.js"></script>
 
-<!-- CDN non-minified or minified -->
-<script src="https://cdn.webrtc-experiment.com:443/rmc3.min.js"></script>
+<!-- Heroku Link -->
+<script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
 ```
 
 If you're sharing files, you also need to link:

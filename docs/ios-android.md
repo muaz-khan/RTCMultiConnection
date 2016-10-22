@@ -199,7 +199,7 @@ An example `config.xml` file (make sure that `icon.png` has valid path):
 
 > This section explains how to integrate RTCMultiConnection-v3 for both iOS and Android apps.
 
-Copy/paste entire [`rmc3.min.js`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dist/rmc3.min.js) file inside `deviceready` callback:
+Copy/paste entire [`RTCMultiConnection.min.js`](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dist/RTCMultiConnection.min.js) file inside `deviceready` callback:
 
 ```html
 <!DOCTYPE html>
@@ -214,8 +214,8 @@ Copy/paste entire [`rmc3.min.js`](https://github.com/muaz-khan/RTCMultiConnectio
     <!-- scripts are placed on footer -->
     <script src="cordova.js"></script>
 
-    <!-- NEVER link rmc3.min.js here -->
-    <!-- instead copy/paste code from rmc3.min.js into below "index.js" file -->
+    <!-- NEVER link RTCMultiConnection.min.js here -->
+    <!-- instead copy/paste code from RTCMultiConnection.min.js into below "index.js" file -->
     <script src="js/index.js"></script>
 </body>
 </html>
@@ -227,11 +227,11 @@ Copy/paste entire [`rmc3.min.js`](https://github.com/muaz-khan/RTCMultiConnectio
 ```javascript
 // please read below comments:
 document.addEventListener('deviceready', function() {
-    // copy/paste entire/all code from "rmc3.min.js" file
+    // copy/paste entire/all code from "RTCMultiConnection.min.js" file
     // here --- exact here
     // paste inside this callback
     // if you will NOT do this, RTCMultiConnection will fail on cordova-based apps
-    // again, you MUST NOT link rmc3.min.js
+    // again, you MUST NOT link RTCMultiConnection.min.js
     // instead copy/paste all the codes here
 
     // you can put your custom-ui-codes here

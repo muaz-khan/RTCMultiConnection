@@ -12,18 +12,6 @@ cd RTCMultiConnection
 sudo npm install --save-dev
 ```
 
-Or wget/TAR:
-
-```sh
-mkdir RTCMultiConnection-v3
-cd RTCMultiConnection-v3
-wget http://dl.webrtc-experiment.com/rtcmulticonnection-v3.tar.gz
-tar -zxvf rtcmulticonnection-v3.tar.gz
-ls -a
-```
-
-* [rtcmulticonnection-v3.tar.gz](http://dl.webrtc-experiment.com/rtcmulticonnection-v3.tar.gz)
-
 To TEST:
 
 ```sh
@@ -45,7 +33,7 @@ Or stop all processes on a specific port. (It may require `sudo` privileges):
 fuser -vk 9001/tcp
 ```
 
-Now open: `https://localhost:9001/`
+Now open: `http://localhost:9001/`
 
 ## Keep running server in background
 
