@@ -7,10 +7,12 @@ module.exports = function(grunt) {
         scope: 'devDependencies'
     });
 
+    var versionNumber = grunt.file.readJSON('package.json').version
+
     var banner = '// Last time updated: <%= grunt.template.today("UTC:yyyy-mm-dd h:MM:ss TT Z") %>\n\n';
 
-    banner += '// _____________________\n';
-    banner += '// RTCMultiConnection-v3\n\n';
+    banner += '// _________________________\n';
+    banner += '// RTCMultiConnection v' + versionNumber + '\n\n';
 
     banner += '// Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection\n\n';
 
@@ -71,6 +73,9 @@ module.exports = function(grunt) {
                 options: {
                     patterns: [{
                         json: grunt.file.readJSON('config.json')
+                    }, {
+                        match: 'version',
+                        replacement: versionNumber
                     }]
                 },
                 files: [{

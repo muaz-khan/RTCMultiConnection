@@ -1,7 +1,7 @@
-// Last time updated: 2016-10-22 5:06:02 AM UTC
+// Last time updated: 2016-10-24 5:07:57 AM UTC
 
-// _____________________
-// RTCMultiConnection-v3
+// _________________________
+// RTCMultiConnection v3.4.1
 
 // Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection
 
@@ -1574,6 +1574,7 @@
         };
 
         connection.trickleIce = true;
+        connection.version = '3.4.1';
     }
 
     function SocketConnection(connection, connectCallback) {

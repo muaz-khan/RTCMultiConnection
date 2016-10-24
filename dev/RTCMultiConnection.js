@@ -1558,4 +1558,5 @@ function RTCMultiConnection(roomid, forceOptions) {
     };
 
     connection.trickleIce = true;
+    connection.version = '@@version';
 }
