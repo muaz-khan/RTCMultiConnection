@@ -25,7 +25,7 @@ function SocketConnection(connection, connectCallback) {
     }
 
     // detect signaling medium
-    connection.socket.io = true;
+    connection.socket.isIO = true;
 
     var mPeer = connection.multiPeersHandler;
 

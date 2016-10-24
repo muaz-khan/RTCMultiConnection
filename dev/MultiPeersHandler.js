@@ -369,7 +369,7 @@ function MultiPeers(connection) {
     }
 
     this.connectNewParticipantWithAllBroadcasters = function(newParticipantId, userPreferences, broadcastersList) {
-        if (connection.socket.io) {
+        if (connection.socket.isIO) {
             return;
         }
 

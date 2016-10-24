@@ -7,7 +7,7 @@ module.exports = function(grunt) {
         scope: 'devDependencies'
     });
 
-    var versionNumber = grunt.file.readJSON('package.json').version
+    var versionNumber = grunt.file.readJSON('package.json').version;
 
     var banner = '// Last time updated: <%= grunt.template.today("UTC:yyyy-mm-dd h:MM:ss TT Z") %>\n\n';
 

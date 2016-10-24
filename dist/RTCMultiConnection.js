@@ -1,4 +1,4 @@
-// Last time updated: 2016-10-24 5:07:57 AM UTC
+// Last time updated: 2016-10-24 7:21:07 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.1
@@ -1141,7 +1141,7 @@
         };
 
         connection.addNewBroadcaster = function(broadcasterId, userPreferences) {
-            if (connection.socket.io) {
+            if (connection.socket.isIO) {
                 return;
             }
 
@@ -1604,7 +1604,7 @@
         }
 
         // detect signaling medium
-        connection.socket.io = true;
+        connection.socket.isIO = true;
 
         var mPeer = connection.multiPeersHandler;
 
@@ -2261,7 +2261,7 @@
         }
 
         this.connectNewParticipantWithAllBroadcasters = function(newParticipantId, userPreferences, broadcastersList) {
-            if (connection.socket.io) {
+            if (connection.socket.isIO) {
                 return;
             }
 

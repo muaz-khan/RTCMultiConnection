@@ -1125,7 +1125,7 @@ function RTCMultiConnection(roomid, forceOptions) {
     };
 
     connection.addNewBroadcaster = function(broadcasterId, userPreferences) {
-        if (connection.socket.io) {
+        if (connection.socket.isIO) {
             return;
         }
 
