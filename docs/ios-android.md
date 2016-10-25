@@ -14,12 +14,16 @@ Please check these docs instead:
 
 # Cordova Demos
 
+Please check all iOS+Android demos here:
+
+* http://webrtcweb.com:9001/cordova-apps/
+
 | DemoTitle        | DownloadZip           | AndroidAPK | AllFiles |
 | ------------- |-------------|-------------|-------------|
-| Scalable Broadcast | [Source](http://dl.webrtc-experiment.com/cordova-apps/scalable-broadcast/Download-Source.zip) | [Android APK](http://dl.webrtc-experiment.com/cordova-apps/scalable-broadcast/Install-Android-App.apk) | [All files](http://dl.webrtc-experiment.com/cordova-apps/scalable-broadcast) |
-| Audio Conferencing | [Source](http://dl.webrtc-experiment.com/cordova-apps/audio-conferencing/Download-Source.zip) | [Android APK](http://dl.webrtc-experiment.com/cordova-apps/audio-conferencing/Install-Android-App.apk) | [All files](http://dl.webrtc-experiment.com/cordova-apps/audio-conferencing) |
-| Video Conferencing | [Source](http://dl.webrtc-experiment.com/cordova-apps/video-conferencing/Download-Source.zip) | [Android APK](http://dl.webrtc-experiment.com/cordova-apps/video-conferencing/Install-Android-App.apk) | [All files](http://dl.webrtc-experiment.com/cordova-apps/video-conferencing) |
-| File Sharing | [Source](http://dl.webrtc-experiment.com/cordova-apps/filesharing/Download-Source.zip) | [Android APK](http://dl.webrtc-experiment.com/cordova-apps/filesharing/Install-Android-App.apk) | [All files](http://dl.webrtc-experiment.com/cordova-apps/filesharing) |
+| Scalable Broadcast | [Source](http://webrtcweb.com:9001/cordova-apps/scalable-broadcast/Download-Source.zip) | [Android APK](http://webrtcweb.com:9001/cordova-apps/scalable-broadcast/Install-Android-App.apk) | [All files](http://webrtcweb.com:9001/cordova-apps/scalable-broadcast) |
+| Audio Conferencing | [Source](http://webrtcweb.com:9001/cordova-apps/audio-conferencing/Download-Source.zip) | [Android APK](http://webrtcweb.com:9001/cordova-apps/audio-conferencing/Install-Android-App.apk) | [All files](http://webrtcweb.com:9001/cordova-apps/audio-conferencing) |
+| Video Conferencing | [Source](http://webrtcweb.com:9001/cordova-apps/video-conferencing/Download-Source.zip) | [Android APK](http://webrtcweb.com:9001/cordova-apps/video-conferencing/Install-Android-App.apk) | [All files](http://webrtcweb.com:9001/cordova-apps/video-conferencing) |
+| File Sharing | [Source](http://webrtcweb.com:9001/cordova-apps/filesharing/Download-Source.zip) | [Android APK](http://webrtcweb.com:9001/cordova-apps/filesharing/Install-Android-App.apk) | [All files](http://webrtcweb.com:9001/cordova-apps/filesharing) |
 
 # Prerequisites
 
