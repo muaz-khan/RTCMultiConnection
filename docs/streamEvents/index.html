@@ -2,8 +2,8 @@
 <html id="home" lang="en">
 
 <head>
-    <title>RTCMultiConnection.streams "object"</title>
-    <meta name="description" content="RTCMultiConnection.streams object allows you get all local/remote audio/video/screen streams, mute or unmute any stream, and stop or remove any stream." />
+    <title>RTCMultiConnection.streamEvents "object"</title>
+    <meta name="description" content="RTCMultiConnection.streamEvents object allows you get all local/remote audio/video/screen streams, mute or unmute any stream, and stop or remove any stream." />
     <meta name="keywords" content="iOS,Android,Cordova,CrossWalk-Project,RTCMultiConnection,JavaScript,WebRTC,Demos,Experiments,Samples,Examples" />
 
 
@@ -93,7 +93,7 @@
 
         <header style="text-align: center;">
             <h1>
-                RTCMultiConnection.streams "object"
+                RTCMultiConnection.streamEvents "object"
             </h1>
 
             <p>
@@ -110,25 +110,25 @@
         <div class="github-stargazers"></div>
 
         <blockquote>
-            RTCMultiConnection.streams object allows you get all local/remote audio/video/screen streams, mute or unmute any stream, and stop or remove any stream.
+            RTCMultiConnection.streamEvents object allows you get all local/remote audio/video/screen streams, mute or unmute any stream, and stop or remove any stream.
 
             <br><br>
 
-            "streams" object <strong>requires RTCMultiConnection <= v2</strong>.
+            "streamEvents" object <strong>requires RTCMultiConnection >= v3</strong>.
 
             <br><br>
-            Please check "<a href="http://www.RTCMultiConnection.org/docs/streamEvents/">connection.streamEvents</a>" for v3 or new releases.
+            Please check "<a href="http://www.RTCMultiConnection.org/docs/streams/">connection.streams</a>" for v2 or earlier releases.
         </blockquote>
 
         <section class="experiment">
           <h2 class="specific-h2"><a id="mute-unmute" href="#mute-unmute">Mute/UnMute Streams</a></h2>
 
           <pre class="sh_javascript">
-// mute
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>['stream-id'].mute();
+// you can pass: 'audio' || 'video' || 'both
+connection.<a href="http://www.RTCMultiConnection.org/docs/streamEvents/">streamEvents</a>['stream-id'].stream.mute('both');
 
 // or unmute
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>['stream-id'].unmute();
+connection.<a href="http://www.RTCMultiConnection.org/docs/streamEvents/">streamEvents</a>['stream-id'].stream.unmute('both');
 </pre>
         </section>
 
@@ -136,115 +136,7 @@ connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>
           <h2 class="specific-h2"><a id="stop" href="#stop">Stop Streams</a></h2>
 
           <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>['stream-id'].stream.stop();
-</pre>
-        </section>
-
-        <section class="experiment">
-            <h2 class="specific-h2"><a href="#selectFirst">selectFirst</a></h2>
-            <pre class="sh_javascript">
-// select first local stream, any stream
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>.selectFirst({
-    local: true
-}).mute();
-
-// select first local stream, only those streams that are having video tracks.
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>.selectFirst({
-    isVideo: true,
-    local: true
-}).mute();
-</pre>
-        </section>
-
-        <section class="experiment">
-            <h2 class="specific-h2"><a href="#selectAll">selectAll</a></h2>
-            <pre class="sh_javascript">
-// select all local streams, all kind of streams
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>.selectAll({
-    local: true
-}).mute();
-
-// select all local streams, only those streams that are having video tracks.
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>.selectAll({
-    isVideo: true,
-    local: true
-}).mute();
-</pre>
-        </section>
-
-        <section class="experiment">
-            <h2 class="specific-h2"><a href="#takeSnapshot">takeSnapshot</a></h2>
-            <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>.selectFirst({
-    local: true
-}).<a href="http://www.RTCMultiConnection.org/docs/takeSnapshot/">takeSnapshot</a>(function(snapshotImage, blob) {
-    yourImage.src = snapshotImage;
-});
-
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>['stream-id'].<a href="http://www.RTCMultiConnection.org/docs/takeSnapshot/">takeSnapshot</a>(function(snapshotImage, blob) {
-    yourImage.src = snapshotImage;
-});
-</pre>
-        </section>
-
-        <section class="experiment">
-            <h2 class="specific-h2"><a href="#mute">mute</a></h2>
-            <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>.selectFirst({
-    local: true
-}).<a href="http://www.RTCMultiConnection.org/docs/mute/">mute</a>();
-
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>['stream-id'].<a href="http://www.RTCMultiConnection.org/docs/mute/">mute</a>();
-</pre>
-        </section>
-
-        <section class="experiment">
-            <h2 class="specific-h2"><a href="#unmute">unmute</a></h2>
-            <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>.selectFirst({
-    local: true
-}).<a href="http://www.RTCMultiConnection.org/docs/unmute/">unmute</a>();
-
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>['stream-id'].<a href="http://www.RTCMultiConnection.org/docs/unmute/">unmute</a>();
-</pre>
-        </section>
-
-        <section class="experiment">
-            <h2 class="specific-h2"><a href="#stop">stop</a></h2>
-            <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>.selectFirst({
-    local: true
-}).<a href="http://www.RTCMultiConnection.org/docs/stop/">stop</a>();
-
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>['stream-id'].<a href="http://www.RTCMultiConnection.org/docs/stop/">stop</a>();
-</pre>
-        </section>
-
-        <section class="experiment">
-            <h2 class="specific-h2"><a href="#startRecording">startRecording</a></h2>
-            <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>.selectFirst({
-    local: true
-}).<a href="http://www.RTCMultiConnection.org/docs/startRecording/">startRecording</a>();
-
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>['stream-id'].<a href="http://www.RTCMultiConnection.org/docs/startRecording/">startRecording</a>();
-</pre>
-        </section>
-
-        <section class="experiment">
-            <h2 class="specific-h2"><a href="#stopRecording">stopRecording</a></h2>
-            <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>.selectFirst({
-    local: true
-}).<a href="http://www.RTCMultiConnection.org/docs/stopRecording/">stopRecording</a>(function(blob) {
-    // blob.audio
-    // blob.video
-});
-
-connection.<a href="http://www.RTCMultiConnection.org/docs/streams/">streams</a>['stream-id'].<a href="http://www.RTCMultiConnection.org/docs/stopRecording/">stopRecording</a>(function(blob) {
-    // blob.audio
-    // blob.video
-});
+connection.<a href="http://www.RTCMultiConnection.org/docs/streamEvents/">streamEvents</a>['stream-id'].stream.stop();
 </pre>
         </section>
 
