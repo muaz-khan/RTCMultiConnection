@@ -1,4 +1,4 @@
-// Last time updated: 2016-10-24 7:21:07 AM UTC
+// Last time updated: 2016-10-29 4:39:44 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.1
@@ -4658,8 +4658,9 @@
             var iceServers = [];
 
             iceServers.push(getSTUNObj('stun:stun.l.google.com:19302'));
-            iceServers.push(getTURNObj('turn:webrtcweb.com:80', 'muazkh', 'muazkh'));
-            iceServers.push(getTURNObj('turn:webrtcweb.com:443', 'muazkh', 'muazkh'));
+            iceServers.push(getTURNObj('turn:webrtcweb.com:80', 'muazkh', 'muazkh')); // coTURN
+            iceServers.push(getTURNObj('turn:webrtcweb.com:443', 'muazkh', 'muazkh')); // coTURN
+            iceServers.push(getTURNObj('turn:webrtcweb.com:3344', 'muazkh', 'muazkh')); // resiprocate
 
             if (window.RMCExternalIceServers) {
                 iceServers = iceServers.concat(getExtenralIceFormatted());

@@ -22,7 +22,7 @@ function BluetoothConnection(connection, connectCallback) {
     }
 
     function sendUsingBluetooth(data) {
-      // send data using bluetooth
+        // send data using bluetooth
     }
 
     connection.socket.emit = function(eventName, data, callback) {

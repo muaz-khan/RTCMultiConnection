@@ -86,8 +86,9 @@ var IceServersHandler = (function() {
         var iceServers = [];
 
         iceServers.push(getSTUNObj('stun:stun.l.google.com:19302'));
-        iceServers.push(getTURNObj('turn:webrtcweb.com:80', 'muazkh', 'muazkh'));
-        iceServers.push(getTURNObj('turn:webrtcweb.com:443', 'muazkh', 'muazkh'));
+        iceServers.push(getTURNObj('turn:webrtcweb.com:80', 'muazkh', 'muazkh')); // coTURN
+        iceServers.push(getTURNObj('turn:webrtcweb.com:443', 'muazkh', 'muazkh')); // coTURN
+        iceServers.push(getTURNObj('turn:webrtcweb.com:3344', 'muazkh', 'muazkh')); // resiprocate
 
         if (window.RMCExternalIceServers) {
             iceServers = iceServers.concat(getExtenralIceFormatted());
