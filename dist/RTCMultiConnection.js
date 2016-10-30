@@ -1,4 +1,4 @@
-// Last time updated: 2016-10-29 4:39:44 PM UTC
+// Last time updated: 2016-10-30 9:05:32 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.1
@@ -712,6 +712,8 @@
             }]
         };
 
+        connection.rtcpMuxPolicy = 'negotiate'; // or "required"
+        connection.iceTransportPolicy = null; // "relay" or "all"
         connection.optionalArgument = {
             optional: [{
                 DtlsSrtpKeyAgreement: true
@@ -3884,7 +3886,8 @@
             }
             peer = new RTCPeerConnection(navigator.onLine ? {
                 iceServers: connection.iceServers,
-                iceTransports: iceTransports
+                iceTransportPolicy: connection.iceTransportPolicy || iceTransports,
+                rtcpMuxPolicy: connection.rtcpMuxPolicy || 'negotiate'
             } : null, window.PluginRTC ? null : connection.optionalArgument);
         } else {
             peer = config.peerRef;
@@ -4661,6 +4664,7 @@
             iceServers.push(getTURNObj('turn:webrtcweb.com:80', 'muazkh', 'muazkh')); // coTURN
             iceServers.push(getTURNObj('turn:webrtcweb.com:443', 'muazkh', 'muazkh')); // coTURN
             iceServers.push(getTURNObj('turn:webrtcweb.com:3344', 'muazkh', 'muazkh')); // resiprocate
+            iceServers.push(getTURNObj('turn:webrtcweb.com:4433', 'muazkh', 'muazkh')); // resiprocate
 
             if (window.RMCExternalIceServers) {
                 iceServers = iceServers.concat(getExtenralIceFormatted());

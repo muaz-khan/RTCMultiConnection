@@ -100,7 +100,8 @@ function PeerInitiator(config) {
         }
         peer = new RTCPeerConnection(navigator.onLine ? {
             iceServers: connection.iceServers,
-            iceTransports: iceTransports
+            iceTransportPolicy: connection.iceTransportPolicy || iceTransports,
+            rtcpMuxPolicy: connection.rtcpMuxPolicy || 'negotiate'
         } : null, window.PluginRTC ? null : connection.optionalArgument);
     } else {
         peer = config.peerRef;
