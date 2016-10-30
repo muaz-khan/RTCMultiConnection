@@ -110,14 +110,17 @@ function serverHandler(request, response) {
 
                 if (docs.length) {
                     var html = '<section class="experiment" id="docs">';
-                    html += '<h2><a href="#docs">Documentation</a></h2>';
+                    html += '<details><summary style="text-align:center;">RTCMultiConnection Docs</summary>';
+                    html += '<h2 style="text-align:center;display:block;"><a href="http://www.rtcmulticonnection.org/docs/">http://www.rtcmulticonnection.org/docs/</a></h2>';
                     html += '<ol>';
 
                     docs.forEach(function(f) {
-                        html += '<li><a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/' + f + '">' + f + '</a></li>';
+                        if(f.indexOf('DS_Store') == -1) {
+                          html += '<li><a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/' + f + '">' + f + '</a></li>';
+                        }
                     });
 
-                    html += '</ol></section><section class="experiment own-widgets latest-commits">';
+                    html += '</ol></details></section><section class="experiment own-widgets latest-commits">';
 
                     file = file.replace('<section class="experiment own-widgets latest-commits">', html);
                 }

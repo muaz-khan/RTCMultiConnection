@@ -323,23 +323,30 @@ function MultiPeers(connection) {
         }
 
         if (message.enableMedia) {
-            if (connection.attachStreams.length || connection.dontCaptureUserMedia) {
-                var streamsToShare = {};
-                connection.attachStreams.forEach(function(stream) {
-                    streamsToShare[stream.streamid] = {
-                        isAudio: !!stream.isAudio,
-                        isVideo: !!stream.isVideo,
-                        isScreen: !!stream.isScreen
-                    };
-                });
-                message.userPreferences.streamsToShare = streamsToShare;
+            connection.session = message.userPreferences.session || connection.session;
 
-                self.onNegotiationNeeded({
-                    readyForOffer: true,
-                    userPreferences: message.userPreferences
-                }, remoteUserId);
-                return;
+            if (connection.session.oneway && connection.attachStreams.length) {
+                connection.attachStreams = [];
             }
+
+            if (message.userPreferences.isDataOnly && connection.attachStreams.length) {
+                connection.attachStreams.length = [];
+            }
+
+            var streamsToShare = {};
+            connection.attachStreams.forEach(function(stream) {
+                streamsToShare[stream.streamid] = {
+                    isAudio: !!stream.isAudio,
+                    isVideo: !!stream.isVideo,
+                    isScreen: !!stream.isScreen
+                };
+            });
+            message.userPreferences.streamsToShare = streamsToShare;
+
+            self.onNegotiationNeeded({
+                readyForOffer: true,
+                userPreferences: message.userPreferences
+            }, remoteUserId);
         }
 
         if (message.readyForOffer) {

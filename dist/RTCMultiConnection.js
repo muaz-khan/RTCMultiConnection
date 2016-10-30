@@ -1,4 +1,4 @@
-// Last time updated: 2016-10-30 9:05:32 AM UTC
+// Last time updated: 2016-10-30 4:36:48 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.1
@@ -2217,23 +2217,30 @@
             }
 
             if (message.enableMedia) {
-                if (connection.attachStreams.length || connection.dontCaptureUserMedia) {
-                    var streamsToShare = {};
-                    connection.attachStreams.forEach(function(stream) {
-                        streamsToShare[stream.streamid] = {
-                            isAudio: !!stream.isAudio,
-                            isVideo: !!stream.isVideo,
-                            isScreen: !!stream.isScreen
-                        };
-                    });
-                    message.userPreferences.streamsToShare = streamsToShare;
+                connection.session = message.userPreferences.session || connection.session;
 
-                    self.onNegotiationNeeded({
-                        readyForOffer: true,
-                        userPreferences: message.userPreferences
-                    }, remoteUserId);
-                    return;
+                if (connection.session.oneway && connection.attachStreams.length) {
+                    connection.attachStreams = [];
                 }
+
+                if (message.userPreferences.isDataOnly && connection.attachStreams.length) {
+                    connection.attachStreams.length = [];
+                }
+
+                var streamsToShare = {};
+                connection.attachStreams.forEach(function(stream) {
+                    streamsToShare[stream.streamid] = {
+                        isAudio: !!stream.isAudio,
+                        isVideo: !!stream.isVideo,
+                        isScreen: !!stream.isScreen
+                    };
+                });
+                message.userPreferences.streamsToShare = streamsToShare;
+
+                self.onNegotiationNeeded({
+                    readyForOffer: true,
+                    userPreferences: message.userPreferences
+                }, remoteUserId);
             }
 
             if (message.readyForOffer) {
