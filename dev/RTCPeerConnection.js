@@ -98,11 +98,16 @@ function PeerInitiator(config) {
                 iceTransports = 'relay';
             }
         }
+
         peer = new RTCPeerConnection(navigator.onLine ? {
             iceServers: connection.iceServers,
             iceTransportPolicy: connection.iceTransportPolicy || iceTransports,
             rtcpMuxPolicy: connection.rtcpMuxPolicy || 'negotiate'
         } : null, window.PluginRTC ? null : connection.optionalArgument);
+
+        if (!connection.iceServers.length) {
+            peer = new RTCPeerConnection(null, null);
+        }
     } else {
         peer = config.peerRef;
     }

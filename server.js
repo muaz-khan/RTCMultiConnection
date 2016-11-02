@@ -115,8 +115,8 @@ function serverHandler(request, response) {
                     html += '<ol>';
 
                     docs.forEach(function(f) {
-                        if(f.indexOf('DS_Store') == -1) {
-                          html += '<li><a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/' + f + '">' + f + '</a></li>';
+                        if (f.indexOf('DS_Store') == -1) {
+                            html += '<li><a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/' + f + '">' + f + '</a></li>';
                         }
                     });
 

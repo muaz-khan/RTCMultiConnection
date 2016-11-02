@@ -404,7 +404,9 @@ module.exports = exports = function(app, socketCallback) {
 
         socket.on('disconnect', function() {
             try {
-                delete socket.namespace.sockets[this.id];
+                if(socket && socket.namespace && socket.namespace.sockets) {
+                  delete socket.namespace.sockets[this.id];
+                }
             } catch (e) {
                 pushLogs('disconnect', e);
             }
