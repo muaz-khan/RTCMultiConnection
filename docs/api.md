@@ -184,6 +184,15 @@ connection.onleave = connection.streamended = connection.onclose = function(even
 };
 ```
 
+### `onRoomFull`
+
+```javascript
+connection.maxParticipantsAllowed = 1; // one-to-one
+connection.onRoomFull = function(roomid) {
+  alert('Room is full.');
+};
+```
+
 ### `getSocket`
 
 This method allows you get the `socket` object used for signaling (handshake/presence-detection/etc.):

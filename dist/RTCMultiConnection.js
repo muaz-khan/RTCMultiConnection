@@ -1,4 +1,4 @@
-// Last time updated: 2016-11-02 10:24:02 AM UTC
+// Last time updated: 2016-11-04 9:09:57 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.1
@@ -1575,6 +1575,12 @@
             connection.join(useridAlreadyTaken);
         };
 
+        connection.onRoomFull = function(roomid) {
+            if (connection.enableLogs) {
+                console.warn(roomid, 'is full.');
+            }
+        };
+
         connection.trickleIce = true;
         connection.version = '3.4.1';
     }
@@ -1585,6 +1591,8 @@
         parameters += '?userid=' + connection.userid;
         parameters += '&msgEvent=' + connection.socketMessageEvent;
         parameters += '&socketCustomEvent=' + connection.socketCustomEvent;
+
+        parameters += '&maxParticipantsAllowed=' + connection.maxParticipantsAllowed;
 
         if (connection.enableScalableBroadcast) {
             parameters += '&enableScalableBroadcast=true';
@@ -1889,6 +1897,10 @@
 
         connection.socket.on('number-of-broadcast-viewers-updated', function(data) {
             connection.onNumberOfBroadcastViewersUpdated(data);
+        });
+
+        connection.socket.on('room-full', function(roomid) {
+            connection.onRoomFull(roomid);
         });
     }
 

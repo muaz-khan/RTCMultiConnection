@@ -1559,6 +1559,12 @@ function RTCMultiConnection(roomid, forceOptions) {
         connection.join(useridAlreadyTaken);
     };
 
+    connection.onRoomFull = function(roomid) {
+        if (connection.enableLogs) {
+            console.warn(roomid, 'is full.');
+        }
+    };
+
     connection.trickleIce = true;
     connection.version = '@@version';
 }

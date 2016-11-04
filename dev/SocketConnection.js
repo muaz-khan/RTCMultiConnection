@@ -5,6 +5,8 @@ function SocketConnection(connection, connectCallback) {
     parameters += '&msgEvent=' + connection.socketMessageEvent;
     parameters += '&socketCustomEvent=' + connection.socketCustomEvent;
 
+    parameters += '&maxParticipantsAllowed=' + connection.maxParticipantsAllowed;
+
     if (connection.enableScalableBroadcast) {
         parameters += '&enableScalableBroadcast=true';
         parameters += '&maxRelayLimitPerUser=' + (connection.maxRelayLimitPerUser || 2);
@@ -308,5 +310,9 @@ function SocketConnection(connection, connectCallback) {
 
     connection.socket.on('number-of-broadcast-viewers-updated', function(data) {
         connection.onNumberOfBroadcastViewersUpdated(data);
+    });
+
+    connection.socket.on('room-full', function(roomid) {
+        connection.onRoomFull(roomid);
     });
 }

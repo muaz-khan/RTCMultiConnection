@@ -52,7 +52,8 @@ module.exports = exports = function(app, socketCallback) {
             socket: socket,
             connectedWith: {},
             isPublic: false, // means: isPublicModerator
-            extra: extra || {}
+            extra: extra || {},
+            maxParticipantsAllowed: params.maxParticipantsAllowed || 1000
         };
     }
 
@@ -258,7 +259,8 @@ module.exports = exports = function(app, socketCallback) {
                             socket: null,
                             connectedWith: {},
                             isPublic: false,
-                            extra: {}
+                            extra: {},
+                            maxParticipantsAllowed: params.maxParticipantsAllowed || 1000
                         };
                     }
 
@@ -286,6 +288,16 @@ module.exports = exports = function(app, socketCallback) {
             }
 
             var usersInARoom = roomInitiator.connectedWith;
+            var maxParticipantsAllowed = roomInitiator.maxParticipantsAllowed;
+
+            if (Object.keys(usersInARoom).length >= maxParticipantsAllowed) {
+                socket.emit('room-full', message.remoteUserId);
+
+                if (roomInitiator.connectedWith[socket.userid]) {
+                    delete roomInitiator.connectedWith[socket.userid];
+                }
+                return;
+            }
 
             var inviteTheseUsers = [roomInitiator.socket];
             Object.keys(usersInARoom).forEach(function(key) {
@@ -366,7 +378,8 @@ module.exports = exports = function(app, socketCallback) {
                         socket: socket,
                         connectedWith: {},
                         isPublic: false,
-                        extra: {}
+                        extra: {},
+                        maxParticipantsAllowed: params.maxParticipantsAllowed || 1000
                     };
                 }
 
@@ -404,8 +417,8 @@ module.exports = exports = function(app, socketCallback) {
 
         socket.on('disconnect', function() {
             try {
-                if(socket && socket.namespace && socket.namespace.sockets) {
-                  delete socket.namespace.sockets[this.id];
+                if (socket && socket.namespace && socket.namespace.sockets) {
+                    delete socket.namespace.sockets[this.id];
                 }
             } catch (e) {
                 pushLogs('disconnect', e);
