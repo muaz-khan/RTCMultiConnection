@@ -22,6 +22,12 @@ If you're sharing files, you also need to link:
 
 > You can link multiple files from `dev` directory. Order doesn't matters.
 
+Use socket.io:
+
+```html
+<script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
+```
+
 ## Set different socket URL
 
 By default, RTCMultiConnection uses default port of your domain.
@@ -62,7 +68,7 @@ connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
 
 Here is a demo explaining how to use above `socketURL`:
 
-* [https://jsfiddle.net/zd9Lsdfk/](https://jsfiddle.net/zd9Lsdfk/)
+* https://jsfiddle.net/zd9Lsdfk/50/
 
 ## Integrate in your own applications?
 

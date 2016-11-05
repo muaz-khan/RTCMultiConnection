@@ -1,6 +1,8 @@
 // Muaz Khan      - www.MuazKhan.com
 // MIT License    - www.WebRTC-Experiment.com/licence
 // Documentation  - github.com/muaz-khan/RTCMultiConnection
+
+// Please use HTTPs on non-localhost domains.
 var isUseHTTPs = false && !(!!process.env.PORT || !!process.env.IP);
 
 // user-guide: change port via "config.json"
