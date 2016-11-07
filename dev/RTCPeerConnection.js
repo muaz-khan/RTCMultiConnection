@@ -218,6 +218,7 @@ function PeerInitiator(config) {
 
     var streamObject;
     peer.addEventListener(remoteStreamAddEvent, function(event) {
+        if (!event) return;
         if (event.streams && event.streams.length && !event.stream) {
             if (!streamObject) {
                 streamObject = new MediaStream();

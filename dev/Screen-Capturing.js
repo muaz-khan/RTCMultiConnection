@@ -1,4 +1,4 @@
-// Last time updated at Sep 01, 2016, 08:32:23
+// Last time updated at Nov 07, 2016, 08:32:23
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/Screen-Capturing.js
 
@@ -20,6 +20,15 @@ window.addEventListener('message', function(event) {
 
     onMessageCallback(event.data);
 });
+
+// via: https://bugs.chromium.org/p/chromium/issues/detail?id=487935#c17
+// you can capture screen on Android Chrome >= 55 with flag: "Experimental ScreenCapture android"
+window.IsAndroidChrome = false;
+try {
+    if (navigator.userAgent.toLowerCase().indexOf("android") > -1 && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)) {
+        window.IsAndroidChrome = true;
+    }
+} catch (e) {}
 
 // and the function that handles received messages
 
@@ -55,6 +64,12 @@ function isChromeExtensionAvailable(callback) {
     if (!callback) return;
 
     if (isFirefox) return isFirefoxExtensionAvailable(callback);
+
+    if (window.IsAndroidChrome) {
+        chromeMediaSource = 'screen';
+        callback(true);
+        return;
+    }
 
     if (chromeMediaSource == 'desktop') return callback(true);
 
@@ -124,6 +139,12 @@ function getSourceId(callback, audioPlusTab) {
 }
 
 function getChromeExtensionStatus(extensionid, callback) {
+    if (window.IsAndroidChrome) {
+        chromeMediaSource = 'screen';
+        callback('installed-enabled');
+        return;
+    }
+
     if (arguments.length != 2) {
         callback = extensionid;
         extensionid = window.RMCExtensionID || 'ajhifddimkapgcifgcodmmfdlknahffk'; // default extension-id
@@ -172,6 +193,12 @@ function getScreenConstraints(callback, audioPlusTab) {
             },
             optional: []
         };
+
+        if (window.IsAndroidChrome) {
+            // now invoking native getUserMedia API
+            callback(null, screen_constraints);
+            return;
+        }
 
         // this statement verifies chrome extension availability
         // if installed and available then it will invoke extension API

@@ -171,7 +171,9 @@ function MultiPeers(connection) {
                 self.onDataChannelClosed(event, remoteUserId);
             },
             onRemoteStream: function(stream) {
-                connection.peers[remoteUserId].streams.push(stream);
+                if (connection.peers[remoteUserId]) {
+                    connection.peers[remoteUserId].streams.push(stream);
+                }
 
                 if (isPluginRTC && window.PluginRTC) {
                     var mediaElement = document.createElement('video');

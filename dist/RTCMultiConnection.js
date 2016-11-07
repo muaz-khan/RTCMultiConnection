@@ -1,7 +1,7 @@
-// Last time updated: 2016-11-04 9:09:57 AM UTC
+// Last time updated: 2016-11-07 3:00:06 PM UTC
 
 // _________________________
-// RTCMultiConnection v3.4.1
+// RTCMultiConnection v3.4.2
 
 // Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection
 
@@ -1582,7 +1582,7 @@
         };
 
         connection.trickleIce = true;
-        connection.version = '3.4.1';
+        connection.version = '3.4.2';
     }
 
     function SocketConnection(connection, connectCallback) {
@@ -2077,7 +2077,9 @@
                     self.onDataChannelClosed(event, remoteUserId);
                 },
                 onRemoteStream: function(stream) {
-                    connection.peers[remoteUserId].streams.push(stream);
+                    if (connection.peers[remoteUserId]) {
+                        connection.peers[remoteUserId].streams.push(stream);
+                    }
 
                     if (isPluginRTC && window.PluginRTC) {
                         var mediaElement = document.createElement('video');
@@ -4022,6 +4024,7 @@
 
         var streamObject;
         peer.addEventListener(remoteStreamAddEvent, function(event) {
+            if (!event) return;
             if (event.streams && event.streams.length && !event.stream) {
                 if (!streamObject) {
                     streamObject = new MediaStream();
@@ -4753,7 +4756,7 @@
         }
         currentUserMediaRequest.mutex = true;
 
-        // easy way to match 
+        // easy way to match
         var idInstance = JSON.stringify(options.localMediaConstraints);
 
         function streaming(stream, returnBack) {
@@ -4954,7 +4957,11 @@
                 var mediaElement = connection.streamEvents[stream.streamid].mediaElement;
                 mediaElement.volume = 0;
                 afterEach(200, 5, function() {
-                    mediaElement.volume += .20;
+                    try {
+                        mediaElement.volume += .20;
+                    } catch (e) {
+                        mediaElement.volume = 1;
+                    }
                 });
             }
         }
@@ -4975,7 +4982,7 @@
         };
     })();
 
-    // Last time updated at Sep 01, 2016, 08:32:23
+    // Last time updated at Nov 07, 2016, 08:32:23
 
     // Latest file can be found here: https://cdn.webrtc-experiment.com/Screen-Capturing.js
 
@@ -4997,6 +5004,15 @@
 
         onMessageCallback(event.data);
     });
+
+    // via: https://bugs.chromium.org/p/chromium/issues/detail?id=487935#c17
+    // you can capture screen on Android Chrome >= 55 with flag: "Experimental ScreenCapture android"
+    window.IsAndroidChrome = false;
+    try {
+        if (navigator.userAgent.toLowerCase().indexOf("android") > -1 && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)) {
+            window.IsAndroidChrome = true;
+        }
+    } catch (e) {}
 
     // and the function that handles received messages
 
@@ -5032,6 +5048,12 @@
         if (!callback) return;
 
         if (isFirefox) return isFirefoxExtensionAvailable(callback);
+
+        if (window.IsAndroidChrome) {
+            chromeMediaSource = 'screen';
+            callback(true);
+            return;
+        }
 
         if (chromeMediaSource == 'desktop') return callback(true);
 
@@ -5101,6 +5123,12 @@
     }
 
     function getChromeExtensionStatus(extensionid, callback) {
+        if (window.IsAndroidChrome) {
+            chromeMediaSource = 'screen';
+            callback('installed-enabled');
+            return;
+        }
+
         if (arguments.length != 2) {
             callback = extensionid;
             extensionid = window.RMCExtensionID || 'ajhifddimkapgcifgcodmmfdlknahffk'; // default extension-id
@@ -5149,6 +5177,12 @@
                 },
                 optional: []
             };
+
+            if (window.IsAndroidChrome) {
+                // now invoking native getUserMedia API
+                callback(null, screen_constraints);
+                return;
+            }
 
             // this statement verifies chrome extension availability
             // if installed and available then it will invoke extension API

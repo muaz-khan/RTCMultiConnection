@@ -129,10 +129,9 @@ var StreamsHandler = (function() {
             mediaElement.volume = 0;
             afterEach(200, 5, function() {
                 try {
-                  mediaElement.volume += .20;
-                }
-                catch(e) {
-                  mediaElement.volume = 1;
+                    mediaElement.volume += .20;
+                } catch (e) {
+                    mediaElement.volume = 1;
                 }
             });
         }

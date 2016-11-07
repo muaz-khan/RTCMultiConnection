@@ -45,7 +45,7 @@ function getUserMediaHandler(options) {
     }
     currentUserMediaRequest.mutex = true;
 
-    // easy way to match 
+    // easy way to match
     var idInstance = JSON.stringify(options.localMediaConstraints);
 
     function streaming(stream, returnBack) {
