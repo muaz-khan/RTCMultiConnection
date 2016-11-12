@@ -1,4 +1,4 @@
-// Last time updated: 2016-11-07 3:00:06 PM UTC
+// Last time updated: 2016-11-12 6:04:49 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.2
@@ -2757,7 +2757,7 @@
         };
     }
 
-    // Last time updated: 2016-11-02 8:56:06 AM UTC
+    // Last time updated: 2016-11-12 6:02:08 AM UTC
 
     // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
 
@@ -3652,6 +3652,16 @@
         // ----------
         DetectRTC.isCanvasSupportsStreamCapturing = isCanvasSupportsStreamCapturing;
         DetectRTC.isVideoSupportsStreamCapturing = isVideoSupportsStreamCapturing;
+
+        if (DetectRTC.browser.name == 'Chrome' && DetectRTC.browser.version >= 53) {
+            if (!DetectRTC.isCanvasSupportsStreamCapturing) {
+                DetectRTC.isCanvasSupportsStreamCapturing = 'Requires chrome flag: enable-experimental-web-platform-features';
+            }
+
+            if (!DetectRTC.isVideoSupportsStreamCapturing) {
+                DetectRTC.isVideoSupportsStreamCapturing = 'Requires chrome flag: enable-experimental-web-platform-features';
+            }
+        }
 
         // ------
         DetectRTC.DetectLocalIPAddress = DetectLocalIPAddress;
@@ -4691,6 +4701,8 @@
             iceServers.push(getTURNObj('turn:webrtcweb.com:443', 'muazkh', 'muazkh')); // coTURN
             iceServers.push(getTURNObj('turn:webrtcweb.com:3344', 'muazkh', 'muazkh')); // resiprocate
             iceServers.push(getTURNObj('turn:webrtcweb.com:4433', 'muazkh', 'muazkh')); // resiprocate
+            iceServers.push(getTURNObj('turn:webrtcweb.com:4455', 'muazkh', 'muazkh')); // restund
+            iceServers.push(getTURNObj('turn:webrtcweb.com:5544?transport=tcp', 'muazkh', 'muazkh')); // restund
 
             if (window.RMCExternalIceServers) {
                 iceServers = iceServers.concat(getExtenralIceFormatted());
@@ -5162,6 +5174,9 @@
         };
 
         if (isFirefox) return callback(null, firefoxScreenConstraints);
+
+        // support recapture again & again
+        sourceId = null;
 
         isChromeExtensionAvailable(function(isAvailable) {
             // this statement defines getUserMedia constraints

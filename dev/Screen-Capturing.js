@@ -179,6 +179,9 @@ function getScreenConstraints(callback, audioPlusTab) {
 
     if (isFirefox) return callback(null, firefoxScreenConstraints);
 
+    // support recapture again & again
+    sourceId = null;
+
     isChromeExtensionAvailable(function(isAvailable) {
         // this statement defines getUserMedia constraints
         // that will be used to capture content of screen

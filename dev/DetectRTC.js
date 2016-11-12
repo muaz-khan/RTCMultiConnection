@@ -1,4 +1,4 @@
-// Last time updated: 2016-11-02 8:56:06 AM UTC
+// Last time updated: 2016-11-12 6:02:08 AM UTC
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
 
@@ -893,6 +893,16 @@
     // ----------
     DetectRTC.isCanvasSupportsStreamCapturing = isCanvasSupportsStreamCapturing;
     DetectRTC.isVideoSupportsStreamCapturing = isVideoSupportsStreamCapturing;
+
+    if (DetectRTC.browser.name == 'Chrome' && DetectRTC.browser.version >= 53) {
+        if (!DetectRTC.isCanvasSupportsStreamCapturing) {
+            DetectRTC.isCanvasSupportsStreamCapturing = 'Requires chrome flag: enable-experimental-web-platform-features';
+        }
+
+        if (!DetectRTC.isVideoSupportsStreamCapturing) {
+            DetectRTC.isVideoSupportsStreamCapturing = 'Requires chrome flag: enable-experimental-web-platform-features';
+        }
+    }
 
     // ------
     DetectRTC.DetectLocalIPAddress = DetectLocalIPAddress;
