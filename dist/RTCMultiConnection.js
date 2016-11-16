@@ -1,4 +1,4 @@
-// Last time updated: 2016-11-12 6:04:49 AM UTC
+// Last time updated: 2016-11-16 2:15:21 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.2
@@ -1109,7 +1109,14 @@
                 }
 
                 if (!isRemote) {
-                    delete connection.attachStreams[connection.attachStreams.indexOf(stream)];
+                    // reset attachStreams
+                    var streams = [];
+                    connection.attachStreams.forEach(function(s) {
+                        if (s.id != stream.id) {
+                            streams.push(s);
+                        }
+                    });
+                    connection.attachStreams = streams;
                 }
 
                 // connection.renegotiate();
@@ -1124,6 +1131,18 @@
                         extra: connection.extra,
                         mediaElement: connection.streamEvents[stream.streamid] ? connection.streamEvents[stream.streamid].mediaElement : null
                     };
+                }
+
+                if (isRemote && connection.peers[streamEvent.userid]) {
+                    // reset remote "streams"
+                    var peer = connection.peers[streamEvent.userid].peer;
+                    var streams = [];
+                    peer.getRemoteStreams().forEach(function(s) {
+                        if (s.id != stream.id) {
+                            streams.push(s);
+                        }
+                    });
+                    connection.peers[streamEvent.userid].streams = streams;
                 }
 
                 if (streamEvent.userid === connection.userid && streamEvent.type === 'remote') {
@@ -4735,7 +4754,8 @@
         }
     }
 
-    var currentUserMediaRequest = {
+    // allow users to manage this object (to support re-capturing of screen/etc.)
+    window.currentUserMediaRequest = {
         streams: [],
         mutex: false,
         queueRequests: [],
@@ -5046,7 +5066,8 @@
 
         // extension shared temp sourceId
         if (data.sourceId && screenCallback) {
-            screenCallback(sourceId = data.sourceId);
+            sourceId = data.sourceId;
+            screenCallback(sourceId);
         }
     }
 
@@ -5067,7 +5088,10 @@
             return;
         }
 
-        if (chromeMediaSource == 'desktop') return callback(true);
+        if (chromeMediaSource == 'desktop') {
+            callback(true);
+            return;
+        }
 
         // ask extension if it is available
         window.postMessage('are-you-there', '*');
@@ -5151,6 +5175,7 @@
         var image = document.createElement('img');
         image.src = 'chrome-extension://' + extensionid + '/icon.png';
         image.onload = function() {
+            sourceId = null;
             chromeMediaSource = 'screen';
             window.postMessage('are-you-there', '*');
             setTimeout(function() {
@@ -5215,6 +5240,10 @@
             if (chromeMediaSource == 'desktop') {
                 screen_constraints.mandatory.chromeMediaSourceId = sourceId;
             }
+
+            sourceId = null;
+            chromeMediaSource = 'screen'; // maybe this line is redundant?
+            screenCallback = null;
 
             // now invoking native getUserMedia API
             callback(null, screen_constraints);

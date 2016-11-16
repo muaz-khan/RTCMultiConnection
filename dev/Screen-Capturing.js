@@ -50,7 +50,8 @@ function onMessageCallback(data) {
 
     // extension shared temp sourceId
     if (data.sourceId && screenCallback) {
-        screenCallback(sourceId = data.sourceId);
+        sourceId = data.sourceId;
+        screenCallback(sourceId);
     }
 }
 
@@ -71,7 +72,10 @@ function isChromeExtensionAvailable(callback) {
         return;
     }
 
-    if (chromeMediaSource == 'desktop') return callback(true);
+    if (chromeMediaSource == 'desktop') {
+        callback(true);
+        return;
+    }
 
     // ask extension if it is available
     window.postMessage('are-you-there', '*');
@@ -155,6 +159,7 @@ function getChromeExtensionStatus(extensionid, callback) {
     var image = document.createElement('img');
     image.src = 'chrome-extension://' + extensionid + '/icon.png';
     image.onload = function() {
+        sourceId = null;
         chromeMediaSource = 'screen';
         window.postMessage('are-you-there', '*');
         setTimeout(function() {
@@ -219,6 +224,10 @@ function getScreenConstraints(callback, audioPlusTab) {
         if (chromeMediaSource == 'desktop') {
             screen_constraints.mandatory.chromeMediaSourceId = sourceId;
         }
+
+        sourceId = null;
+        chromeMediaSource = 'screen'; // maybe this line is redundant?
+        screenCallback = null;
 
         // now invoking native getUserMedia API
         callback(null, screen_constraints);

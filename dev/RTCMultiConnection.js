@@ -1093,7 +1093,14 @@ function RTCMultiConnection(roomid, forceOptions) {
             }
 
             if (!isRemote) {
-                delete connection.attachStreams[connection.attachStreams.indexOf(stream)];
+                // reset attachStreams
+                var streams = [];
+                connection.attachStreams.forEach(function(s) {
+                    if (s.id != stream.id) {
+                        streams.push(s);
+                    }
+                });
+                connection.attachStreams = streams;
             }
 
             // connection.renegotiate();
@@ -1108,6 +1115,18 @@ function RTCMultiConnection(roomid, forceOptions) {
                     extra: connection.extra,
                     mediaElement: connection.streamEvents[stream.streamid] ? connection.streamEvents[stream.streamid].mediaElement : null
                 };
+            }
+
+            if (isRemote && connection.peers[streamEvent.userid]) {
+                // reset remote "streams"
+                var peer = connection.peers[streamEvent.userid].peer;
+                var streams = [];
+                peer.getRemoteStreams().forEach(function(s) {
+                    if (s.id != stream.id) {
+                        streams.push(s);
+                    }
+                });
+                connection.peers[streamEvent.userid].streams = streams;
             }
 
             if (streamEvent.userid === connection.userid && streamEvent.type === 'remote') {

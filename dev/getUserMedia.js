@@ -12,7 +12,8 @@ function setStreamType(constraints, stream) {
     }
 }
 
-var currentUserMediaRequest = {
+// allow users to manage this object (to support re-capturing of screen/etc.)
+window.currentUserMediaRequest = {
     streams: [],
     mutex: false,
     queueRequests: [],
