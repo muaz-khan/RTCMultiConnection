@@ -1586,4 +1586,10 @@ function RTCMultiConnection(roomid, forceOptions) {
 
     connection.trickleIce = true;
     connection.version = '@@version';
+
+    connection.onSettingLocalDescription = function(event) {
+        if (connection.enableLogs) {
+            console.info('Set local description for remote user', event.userid);
+        }
+    };
 }

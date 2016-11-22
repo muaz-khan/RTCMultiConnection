@@ -393,6 +393,8 @@ function PeerInitiator(config) {
                     streamsToShare: streamsToShare,
                     isFirefoxOffered: isFirefox
                 });
+
+                connection.onSettingLocalDescription(self);
             }, function(error) {
                 if (!connection.enableLogs) return;
                 console.error('setLocalDescription error', error);

@@ -699,19 +699,12 @@
                 document.querySelector('.overlay').style.display = 'none';
                 iframe.style.display = 'block';
 
-                var fileNameMatches = (file.name || '').match(/.3gp|.mp3|.mp4|.m4a|.m3u8|.ts|.wav|.ogg|.aac|.flac|.mid|.xmf|.mxmf|.rtx|.mkv|.flv|.jpg|.jpeg|.png|.gif|.webp|.bmp|.webm|.txt|.rtf|.doc|docx|.js|.css|.cs/g);
-                if (file.type.match(/image|video|audio|pdf|txt|javascript|css|php|py/g) || fileNameMatches) {
-                    iframe.src = URL.createObjectURL(file);
-                } else {
-                    iframe.src = 'https://cdn.webrtc-experiment.com/images/folder-icon.png';
-                }
-
                 iframe.onload = function() {
                     Array.prototype.slice.call(iframe.contentWindow.document.body.querySelectorAll('*')).forEach(function(element) {
                         element.style.maxWidth = '100%';
                     });
 
-                    if (!file.type || fileNameMatches || file.type.match(/image|video|audio|pdf/g) || iframe.src.indexOf('data:image/png') !== -1) {
+                    if (!file.type || fileNameMatches || file.type.match(/image|video|audio|pdf/g) || iframe.src.indexOf('data:image/png') !== -1 || iframe.src.toLowerCase().search(/.png|.jpeg|.jpg|.gif/g) !== -1) {
                         iframe.contentWindow.document.body.style.textAlign = 'center';
                         iframe.contentWindow.document.body.style.background = 'black';
                         iframe.contentWindow.document.body.style.color = 'white';
@@ -721,6 +714,13 @@
                     iframe.contentWindow.document.body.style.background = 'white';
                     iframe.contentWindow.document.body.style.color = 'black';
                 };
+
+                var fileNameMatches = (file.name || '').toLowerCase().match(/.webm|.wav|.pdf|.txt|.js|.css|.cs|.png|.jpg|.jpeg|.gif/g);
+                if (fileNameMatches) {
+                    iframe.src = URL.createObjectURL(file);
+                } else {
+                    iframe.src = 'https://rtcxp.com/fs/unknown-file.png';
+                }
             }
 
             setupWebRTCConnection();

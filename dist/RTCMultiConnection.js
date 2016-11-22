@@ -1,4 +1,4 @@
-// Last time updated: 2016-11-16 2:15:21 PM UTC
+// Last time updated: 2016-11-22 12:00:27 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.2
@@ -1602,6 +1602,12 @@
 
         connection.trickleIce = true;
         connection.version = '3.4.2';
+
+        connection.onSettingLocalDescription = function(event) {
+            if (connection.enableLogs) {
+                console.info('Set local description for remote user', event.userid);
+            }
+        };
     }
 
     function SocketConnection(connection, connectCallback) {
@@ -4228,6 +4234,8 @@
                         streamsToShare: streamsToShare,
                         isFirefoxOffered: isFirefox
                     });
+
+                    connection.onSettingLocalDescription(self);
                 }, function(error) {
                     if (!connection.enableLogs) return;
                     console.error('setLocalDescription error', error);
