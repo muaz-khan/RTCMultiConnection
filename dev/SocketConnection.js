@@ -20,10 +20,27 @@ function SocketConnection(connection, connectCallback) {
         io.sockets = {};
     } catch (e) {};
 
+    if (!connection.socketURL) {
+        connection.socketURL = '/';
+    }
+
+    if (connection.socketURL.substr(connection.socketURL.length - 1, 1) != '/') {
+        // connection.socketURL = 'https://domain.com:9001/';
+        throw '"socketURL" MUST end with a slash.';
+    }
+
+    if (connection.enableLogs) {
+        if (connection.socketURL == '/') {
+            console.info('socket.io is connected at: ', location.origin + '/');
+        } else {
+            console.info('socket.io is connected at: ', connection.socketURL);
+        }
+    }
+
     try {
-        connection.socket = io((connection.socketURL || '/') + parameters);
+        connection.socket = io(connection.socketURL + parameters);
     } catch (e) {
-        connection.socket = io.connect((connection.socketURL || '/') + parameters, connection.socketOptions);
+        connection.socket = io.connect(connection.socketURL + parameters, connection.socketOptions);
     }
 
     // detect signaling medium

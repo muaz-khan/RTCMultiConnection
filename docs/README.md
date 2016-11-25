@@ -29,7 +29,7 @@
 
 # iOS+Android Demo Apps
 
-* http://webrtcweb.com:9001/cordova-apps/
+* http://webrtcweb.com/cordova-apps/
 
 ## Twitter
 

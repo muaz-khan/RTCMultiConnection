@@ -1,4 +1,4 @@
-// Last time updated: 2016-11-22 12:00:27 PM UTC
+// Last time updated: 2016-11-25 6:09:38 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.2
@@ -1632,10 +1632,27 @@
             io.sockets = {};
         } catch (e) {};
 
+        if (!connection.socketURL) {
+            connection.socketURL = '/';
+        }
+
+        if (connection.socketURL.substr(connection.socketURL.length - 1, 1) != '/') {
+            // connection.socketURL = 'https://domain.com:9001/';
+            throw '"socketURL" MUST end with a slash.';
+        }
+
+        if (connection.enableLogs) {
+            if (connection.socketURL == '/') {
+                console.info('socket.io is connected at: ', location.origin + '/');
+            } else {
+                console.info('socket.io is connected at: ', connection.socketURL);
+            }
+        }
+
         try {
-            connection.socket = io((connection.socketURL || '/') + parameters);
+            connection.socket = io(connection.socketURL + parameters);
         } catch (e) {
-            connection.socket = io.connect((connection.socketURL || '/') + parameters, connection.socketOptions);
+            connection.socket = io.connect(connection.socketURL + parameters, connection.socketOptions);
         }
 
         // detect signaling medium
@@ -4724,10 +4741,18 @@
             var iceServers = [];
 
             iceServers.push(getSTUNObj('stun:stun.l.google.com:19302'));
-            iceServers.push(getTURNObj('turn:webrtcweb.com:80', 'muazkh', 'muazkh')); // coTURN
-            iceServers.push(getTURNObj('turn:webrtcweb.com:443', 'muazkh', 'muazkh')); // coTURN
-            iceServers.push(getTURNObj('turn:webrtcweb.com:3344', 'muazkh', 'muazkh')); // resiprocate
-            iceServers.push(getTURNObj('turn:webrtcweb.com:4433', 'muazkh', 'muazkh')); // resiprocate
+
+            iceServers.push(getTURNObj('stun:webrtcweb.com:7788', 'muazkh', 'muazkh')); // coTURN
+            iceServers.push(getTURNObj('turn:webrtcweb.com:7788', 'muazkh', 'muazkh')); // coTURN
+            iceServers.push(getTURNObj('turn:webrtcweb.com:8877', 'muazkh', 'muazkh')); // coTURN
+
+            iceServers.push(getTURNObj('turns:webrtcweb.com:7788', 'muazkh', 'muazkh')); // coTURN
+            iceServers.push(getTURNObj('turns:webrtcweb.com:8877', 'muazkh', 'muazkh')); // coTURN
+
+            // iceServers.push(getTURNObj('turn:webrtcweb.com:3344', 'muazkh', 'muazkh')); // resiprocate
+            // iceServers.push(getTURNObj('turn:webrtcweb.com:4433', 'muazkh', 'muazkh')); // resiprocate
+
+            iceServers.push(getTURNObj('stun:webrtcweb.com:4455', 'muazkh', 'muazkh')); // restund
             iceServers.push(getTURNObj('turn:webrtcweb.com:4455', 'muazkh', 'muazkh')); // restund
             iceServers.push(getTURNObj('turn:webrtcweb.com:5544?transport=tcp', 'muazkh', 'muazkh')); // restund
 

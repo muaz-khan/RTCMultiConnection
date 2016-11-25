@@ -11,6 +11,10 @@
 >
 > v3 can use XHR/XMPP/etc. signaling implementations as well. Please check [PubNubConnection.js](https://github.com/muaz-khan/RTCMultiConnection/blob/master/dev/PubNubConnection.js) to see how to configure it for 3rd party signaling implementations. You simply have to modify top few lines.
 
+# Install On Your Own Site
+
+* https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/installation-guide.md
+
 # YouTube videos
 
 1. [Getting started guide / RTCMultiConnection](https://www.youtube.com/watch?v=jqtC7mSTCgk)
@@ -35,7 +39,7 @@ RTCMultiConnection-v2 (old) videos: https://vimeo.com/muazkh
 
 # iOS+Android Demo Apps
 
-* http://webrtcweb.com:9001/cordova-apps/
+* http://webrtcweb.com/cordova-apps/
 
 # v3 Demos
 

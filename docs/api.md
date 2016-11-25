@@ -1102,6 +1102,8 @@ connection.onSettingLocalDescription = fucntion(event) {
 	(function looper() {
 		if(tries > 10) return; // throw error here
 
+		tries++;
+
 		// make sure that each user's video.id == hisUserID
 		var video = document.getElementById(event.userid);
 
