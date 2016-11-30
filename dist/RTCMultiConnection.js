@@ -1,7 +1,7 @@
-// Last time updated: 2016-11-25 6:09:38 PM UTC
+// Last time updated: 2016-11-30 11:33:03 AM UTC
 
 // _________________________
-// RTCMultiConnection v3.4.2
+// RTCMultiConnection v3.4.3
 
 // Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection
 
@@ -102,6 +102,10 @@
                     streamid: stream.streamid,
                     mediaElement: connection.streamEvents[stream.streamid] ? connection.streamEvents[stream.streamid].mediaElement : null
                 };
+            }
+
+            if (connection.peers.backup[streamEvent.userid]) {
+                streamEvent.extra = connection.peers.backup[streamEvent.userid].extra;
             }
 
             connection.onstreamended(streamEvent);
@@ -270,10 +274,16 @@
                 return;
             }
 
-            connection.onleave({
+            var eventObject = {
                 userid: remoteUserId,
                 extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {}
-            });
+            };
+
+            if (connection.peers.backup[eventObject.userid]) {
+                eventObject.extra = connection.peers.backup[eventObject.userid].extra;
+            }
+
+            connection.onleave(eventObject);
 
             if (!!connection.peers[remoteUserId]) {
                 connection.peers[remoteUserId].streams.forEach(function(stream) {
@@ -1149,6 +1159,10 @@
                     return;
                 }
 
+                if (connection.peers.backup[streamEvent.userid]) {
+                    streamEvent.extra = connection.peers.backup[streamEvent.userid].extra;
+                }
+
                 connection.onstreamended(streamEvent);
 
                 delete connection.streamEvents[stream.streamid];
@@ -1601,7 +1615,7 @@
         };
 
         connection.trickleIce = true;
-        connection.version = '3.4.2';
+        connection.version = '3.4.3';
 
         connection.onSettingLocalDescription = function(event) {
             if (connection.enableLogs) {
@@ -1668,6 +1682,15 @@
                 userid: remoteUserId,
                 extra: extra
             });
+
+            if (!connection.peers.backup[remoteUserId]) {
+                connection.peers.backup[remoteUserId] = {
+                    userid: remoteUserId,
+                    extra: {}
+                };
+            }
+
+            connection.peers.backup[remoteUserId].extra = extra;
         });
 
         connection.socket.on(connection.socketMessageEvent, function(message) {
@@ -1690,6 +1713,9 @@
                 var action = message.message.action;
 
                 if (action === 'ended' || action === 'inactive' || action === 'stream-removed') {
+                    if (connection.peers.backup[stream.userid]) {
+                        stream.extra = connection.peers.backup[stream.userid].extra;
+                    }
                     connection.onstreamended(stream);
                     return;
                 }
@@ -1841,10 +1867,16 @@
                 extra: connection.peers[userid] ? connection.peers[userid].extra || {} : {}
             });
 
-            connection.onleave({
+            var eventObject = {
                 userid: userid,
                 extra: {}
-            });
+            };
+
+            if (connection.peers.backup[eventObject.userid]) {
+                eventObject.extra = connection.peers.backup[eventObject.userid].extra;
+            }
+
+            connection.onleave(eventObject);
         });
 
         var alreadyConnected = false;
@@ -1951,8 +1983,9 @@
     function MultiPeers(connection) {
         var self = this;
 
-        var skipPeers = ['getAllParticipants', 'getLength', 'selectFirst', 'streams', 'send', 'forEach'];
+        var skipPeers = ['getAllParticipants', 'getLength', 'selectFirst', 'streams', 'send', 'forEach', 'backup'];
         connection.peers = {
+            backup: {},
             getLength: function() {
                 var numberOfPeers = 0;
                 for (var peer in this) {

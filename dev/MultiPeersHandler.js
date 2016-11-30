@@ -3,8 +3,9 @@
 function MultiPeers(connection) {
     var self = this;
 
-    var skipPeers = ['getAllParticipants', 'getLength', 'selectFirst', 'streams', 'send', 'forEach'];
+    var skipPeers = ['getAllParticipants', 'getLength', 'selectFirst', 'streams', 'send', 'forEach', 'backup'];
     connection.peers = {
+        backup: {},
         getLength: function() {
             var numberOfPeers = 0;
             for (var peer in this) {

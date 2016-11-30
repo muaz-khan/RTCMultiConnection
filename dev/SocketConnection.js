@@ -56,6 +56,15 @@ function SocketConnection(connection, connectCallback) {
             userid: remoteUserId,
             extra: extra
         });
+
+        if (!connection.peers.backup[remoteUserId]) {
+            connection.peers.backup[remoteUserId] = {
+                userid: remoteUserId,
+                extra: {}
+            };
+        }
+
+        connection.peers.backup[remoteUserId].extra = extra;
     });
 
     connection.socket.on(connection.socketMessageEvent, function(message) {
@@ -78,6 +87,9 @@ function SocketConnection(connection, connectCallback) {
             var action = message.message.action;
 
             if (action === 'ended' || action === 'inactive' || action === 'stream-removed') {
+                if (connection.peers.backup[stream.userid]) {
+                    stream.extra = connection.peers.backup[stream.userid].extra;
+                }
                 connection.onstreamended(stream);
                 return;
             }
@@ -229,10 +241,16 @@ function SocketConnection(connection, connectCallback) {
             extra: connection.peers[userid] ? connection.peers[userid].extra || {} : {}
         });
 
-        connection.onleave({
+        var eventObject = {
             userid: userid,
             extra: {}
-        });
+        };
+
+        if (connection.peers.backup[eventObject.userid]) {
+            eventObject.extra = connection.peers.backup[eventObject.userid].extra;
+        }
+
+        connection.onleave(eventObject);
     });
 
     var alreadyConnected = false;
