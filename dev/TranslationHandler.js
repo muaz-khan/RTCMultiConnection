@@ -20,17 +20,51 @@ var TranslationHandler = (function() {
                 window[randomNumber] = function(response) {
                     if (response.data && response.data.translations[0] && callback) {
                         callback(response.data.translations[0].translatedText);
+                        return;
                     }
 
                     if (response.error && response.error.message === 'Daily Limit Exceeded') {
-                        warn('Text translation failed. Error message: "Daily Limit Exceeded."');
-
-                        // returning original text
-                        callback(text);
+                        console.error('Text translation failed. Error message: "Daily Limit Exceeded."');
+                        return;
                     }
+
+                    if (response.error) {
+                        console.error(response.error.message);
+                        return;
+                    }
+
+                    console.error(response);
                 };
 
                 var source = 'https://www.googleapis.com/language/translate/v2?key=' + connection.googKey + '&target=' + (connection.language || 'en-US') + '&callback=window.' + randomNumber + '&q=' + sourceText;
+                newScript.src = source;
+                document.getElementsByTagName('head')[0].appendChild(newScript);
+            },
+            getListOfLanguages: function(callback) {
+                var newScript = document.createElement('script');
+                newScript.type = 'text/javascript';
+
+                var randomNumber = 'method' + connection.token();
+                window[randomNumber] = function(response) {
+                    if (response.data && response.data.languages && callback) {
+                        callback(response.data.languages);
+                        return;
+                    }
+
+                    if (response.error && response.error.message === 'Daily Limit Exceeded') {
+                        console.error('Text translation failed. Error message: "Daily Limit Exceeded."');
+                        return;
+                    }
+
+                    if (response.error) {
+                        console.error(response.error.message);
+                        return;
+                    }
+
+                    console.error(response);
+                };
+
+                var source = 'https://www.googleapis.com/language/translate/v2/languages?key=' + connection.googKey;
                 newScript.src = source;
                 document.getElementsByTagName('head')[0].appendChild(newScript);
             }
