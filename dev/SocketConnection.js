@@ -2,8 +2,10 @@ function SocketConnection(connection, connectCallback) {
     var parameters = '';
 
     parameters += '?userid=' + connection.userid;
+    parameters += '&sessionid=' + connection.sessionid;
     parameters += '&msgEvent=' + connection.socketMessageEvent;
     parameters += '&socketCustomEvent=' + connection.socketCustomEvent;
+    parameters += '&autoCloseEntireSession=' + !!connection.autoCloseEntireSession;
 
     parameters += '&maxParticipantsAllowed=' + connection.maxParticipantsAllowed;
 
@@ -57,14 +59,14 @@ function SocketConnection(connection, connectCallback) {
             extra: extra
         });
 
-        if (!connection.peers.backup[remoteUserId]) {
-            connection.peers.backup[remoteUserId] = {
+        if (!connection.peersBackup[remoteUserId]) {
+            connection.peersBackup[remoteUserId] = {
                 userid: remoteUserId,
                 extra: {}
             };
         }
 
-        connection.peers.backup[remoteUserId].extra = extra;
+        connection.peersBackup[remoteUserId].extra = extra;
     });
 
     connection.socket.on(connection.socketMessageEvent, function(message) {
@@ -87,8 +89,8 @@ function SocketConnection(connection, connectCallback) {
             var action = message.message.action;
 
             if (action === 'ended' || action === 'inactive' || action === 'stream-removed') {
-                if (connection.peers.backup[stream.userid]) {
-                    stream.extra = connection.peers.backup[stream.userid].extra;
+                if (connection.peersBackup[stream.userid]) {
+                    stream.extra = connection.peersBackup[stream.userid].extra;
                 }
                 connection.onstreamended(stream);
                 return;
@@ -246,8 +248,8 @@ function SocketConnection(connection, connectCallback) {
             extra: {}
         };
 
-        if (connection.peers.backup[eventObject.userid]) {
-            eventObject.extra = connection.peers.backup[eventObject.userid].extra;
+        if (connection.peersBackup[eventObject.userid]) {
+            eventObject.extra = connection.peersBackup[eventObject.userid].extra;
         }
 
         connection.onleave(eventObject);
@@ -349,5 +351,13 @@ function SocketConnection(connection, connectCallback) {
 
     connection.socket.on('room-full', function(roomid) {
         connection.onRoomFull(roomid);
+    });
+
+    connection.socket.on('become-next-modrator', function(sessionid) {
+        if (sessionid != connection.sessionid) return;
+        setTimeout(function() {
+            connection.open(sessionid);
+            connection.socket.emit('shift-moderator-control-on-disconnect');
+        }, 1000);
     });
 }

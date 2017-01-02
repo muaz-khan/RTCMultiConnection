@@ -11,7 +11,13 @@ function RTCMultiConnection(roomid, forceOptions) {
 
     var mPeer = new MultiPeers(connection);
 
+    var preventDuplicateOnStreamEvents = {};
     mPeer.onGettingLocalMedia = function(stream) {
+        if (preventDuplicateOnStreamEvents[stream.streamid]) {
+            return;
+        }
+        preventDuplicateOnStreamEvents[stream.streamid] = true;
+
         stream.type = 'local';
 
         connection.setStreamEndHandler(stream);
@@ -88,8 +94,8 @@ function RTCMultiConnection(roomid, forceOptions) {
             };
         }
 
-        if (connection.peers.backup[streamEvent.userid]) {
-            streamEvent.extra = connection.peers.backup[streamEvent.userid].extra;
+        if (connection.peersBackup[streamEvent.userid]) {
+            streamEvent.extra = connection.peersBackup[streamEvent.userid].extra;
         }
 
         connection.onstreamended(streamEvent);
@@ -263,8 +269,8 @@ function RTCMultiConnection(roomid, forceOptions) {
             extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {}
         };
 
-        if (connection.peers.backup[eventObject.userid]) {
-            eventObject.extra = connection.peers.backup[eventObject.userid].extra;
+        if (connection.peersBackup[eventObject.userid]) {
+            eventObject.extra = connection.peersBackup[eventObject.userid].extra;
         }
 
         connection.onleave(eventObject);
@@ -1143,8 +1149,8 @@ function RTCMultiConnection(roomid, forceOptions) {
                 return;
             }
 
-            if (connection.peers.backup[streamEvent.userid]) {
-                streamEvent.extra = connection.peers.backup[streamEvent.userid].extra;
+            if (connection.peersBackup[streamEvent.userid]) {
+                streamEvent.extra = connection.peersBackup[streamEvent.userid].extra;
             }
 
             connection.onstreamended(streamEvent);

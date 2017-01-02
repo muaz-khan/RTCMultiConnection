@@ -41,32 +41,32 @@ var TranslationHandler = (function() {
                 document.getElementsByTagName('head')[0].appendChild(newScript);
             },
             getListOfLanguages: function(callback) {
-                var newScript = document.createElement('script');
-                newScript.type = 'text/javascript';
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState == XMLHttpRequest.DONE) {
+                        var response = JSON.parse(xhr.responseText);
 
-                var randomNumber = 'method' + connection.token();
-                window[randomNumber] = function(response) {
-                    if (response.data && response.data.languages && callback) {
-                        callback(response.data.languages);
-                        return;
+                        if (response && response.data && response.data.languages) {
+                            callback(response.data.languages);
+                            return;
+                        }
+
+                        if (response.error && response.error.message === 'Daily Limit Exceeded') {
+                            console.error('Text translation failed. Error message: "Daily Limit Exceeded."');
+                            return;
+                        }
+
+                        if (response.error) {
+                            console.error(response.error.message);
+                            return;
+                        }
+
+                        console.error(response);
                     }
-
-                    if (response.error && response.error.message === 'Daily Limit Exceeded') {
-                        console.error('Text translation failed. Error message: "Daily Limit Exceeded."');
-                        return;
-                    }
-
-                    if (response.error) {
-                        console.error(response.error.message);
-                        return;
-                    }
-
-                    console.error(response);
-                };
-
-                var source = 'https://www.googleapis.com/language/translate/v2/languages?key=' + connection.googKey;
-                newScript.src = source;
-                document.getElementsByTagName('head')[0].appendChild(newScript);
+                }
+                var url = 'https://www.googleapis.com/language/translate/v2/languages?key=' + connection.googKey + '&target=en';
+                xhr.open('GET', url, true);
+                xhr.send(null);
             }
         };
     }

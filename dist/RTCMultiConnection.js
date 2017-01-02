@@ -1,4 +1,4 @@
-// Last time updated: 2016-12-13 5:43:10 AM UTC
+// Last time updated: 2017-01-02 6:06:03 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.3
@@ -27,7 +27,13 @@
 
         var mPeer = new MultiPeers(connection);
 
+        var preventDuplicateOnStreamEvents = {};
         mPeer.onGettingLocalMedia = function(stream) {
+            if (preventDuplicateOnStreamEvents[stream.streamid]) {
+                return;
+            }
+            preventDuplicateOnStreamEvents[stream.streamid] = true;
+
             stream.type = 'local';
 
             connection.setStreamEndHandler(stream);
@@ -104,8 +110,8 @@
                 };
             }
 
-            if (connection.peers.backup[streamEvent.userid]) {
-                streamEvent.extra = connection.peers.backup[streamEvent.userid].extra;
+            if (connection.peersBackup[streamEvent.userid]) {
+                streamEvent.extra = connection.peersBackup[streamEvent.userid].extra;
             }
 
             connection.onstreamended(streamEvent);
@@ -279,8 +285,8 @@
                 extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {}
             };
 
-            if (connection.peers.backup[eventObject.userid]) {
-                eventObject.extra = connection.peers.backup[eventObject.userid].extra;
+            if (connection.peersBackup[eventObject.userid]) {
+                eventObject.extra = connection.peersBackup[eventObject.userid].extra;
             }
 
             connection.onleave(eventObject);
@@ -1159,8 +1165,8 @@
                     return;
                 }
 
-                if (connection.peers.backup[streamEvent.userid]) {
-                    streamEvent.extra = connection.peers.backup[streamEvent.userid].extra;
+                if (connection.peersBackup[streamEvent.userid]) {
+                    streamEvent.extra = connection.peersBackup[streamEvent.userid].extra;
                 }
 
                 connection.onstreamended(streamEvent);
@@ -1628,8 +1634,10 @@
         var parameters = '';
 
         parameters += '?userid=' + connection.userid;
+        parameters += '&sessionid=' + connection.sessionid;
         parameters += '&msgEvent=' + connection.socketMessageEvent;
         parameters += '&socketCustomEvent=' + connection.socketCustomEvent;
+        parameters += '&autoCloseEntireSession=' + !!connection.autoCloseEntireSession;
 
         parameters += '&maxParticipantsAllowed=' + connection.maxParticipantsAllowed;
 
@@ -1683,14 +1691,14 @@
                 extra: extra
             });
 
-            if (!connection.peers.backup[remoteUserId]) {
-                connection.peers.backup[remoteUserId] = {
+            if (!connection.peersBackup[remoteUserId]) {
+                connection.peersBackup[remoteUserId] = {
                     userid: remoteUserId,
                     extra: {}
                 };
             }
 
-            connection.peers.backup[remoteUserId].extra = extra;
+            connection.peersBackup[remoteUserId].extra = extra;
         });
 
         connection.socket.on(connection.socketMessageEvent, function(message) {
@@ -1713,8 +1721,8 @@
                 var action = message.message.action;
 
                 if (action === 'ended' || action === 'inactive' || action === 'stream-removed') {
-                    if (connection.peers.backup[stream.userid]) {
-                        stream.extra = connection.peers.backup[stream.userid].extra;
+                    if (connection.peersBackup[stream.userid]) {
+                        stream.extra = connection.peersBackup[stream.userid].extra;
                     }
                     connection.onstreamended(stream);
                     return;
@@ -1872,8 +1880,8 @@
                 extra: {}
             };
 
-            if (connection.peers.backup[eventObject.userid]) {
-                eventObject.extra = connection.peers.backup[eventObject.userid].extra;
+            if (connection.peersBackup[eventObject.userid]) {
+                eventObject.extra = connection.peersBackup[eventObject.userid].extra;
             }
 
             connection.onleave(eventObject);
@@ -1976,6 +1984,14 @@
         connection.socket.on('room-full', function(roomid) {
             connection.onRoomFull(roomid);
         });
+
+        connection.socket.on('become-next-modrator', function(sessionid) {
+            if (sessionid != connection.sessionid) return;
+            setTimeout(function() {
+                connection.open(sessionid);
+                connection.socket.emit('shift-moderator-control-on-disconnect');
+            }, 1000);
+        });
     }
 
     // MultiPeersHandler.js
@@ -1983,9 +1999,9 @@
     function MultiPeers(connection) {
         var self = this;
 
-        var skipPeers = ['getAllParticipants', 'getLength', 'selectFirst', 'streams', 'send', 'forEach', 'backup'];
+        var skipPeers = ['getAllParticipants', 'getLength', 'selectFirst', 'streams', 'send', 'forEach'];
+        connection.peersBackup = {};
         connection.peers = {
-            backup: {},
             getLength: function() {
                 var numberOfPeers = 0;
                 for (var peer in this) {
@@ -3023,6 +3039,7 @@
                 interval = 10,
                 isTimeout = false;
             var id = window.setInterval(
+
                 function() {
                     if (isDone()) {
                         window.clearInterval(id);
@@ -3076,6 +3093,7 @@
 
                 if (typeof isPrivate === 'undefined') {
                     retry(
+
                         function isDone() {
                             return db.readyState === 'done' ? true : false;
                         },
@@ -3109,6 +3127,7 @@
             }
 
             retry(
+
                 function isDone() {
                     return typeof isPrivate !== 'undefined' ? true : false;
                 },
@@ -5564,32 +5583,32 @@
                     document.getElementsByTagName('head')[0].appendChild(newScript);
                 },
                 getListOfLanguages: function(callback) {
-                    var newScript = document.createElement('script');
-                    newScript.type = 'text/javascript';
+                    var xhr = new XMLHttpRequest();
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState == XMLHttpRequest.DONE) {
+                            var response = JSON.parse(xhr.responseText);
 
-                    var randomNumber = 'method' + connection.token();
-                    window[randomNumber] = function(response) {
-                        if (response.data && response.data.languages && callback) {
-                            callback(response.data.languages);
-                            return;
+                            if (response && response.data && response.data.languages) {
+                                callback(response.data.languages);
+                                return;
+                            }
+
+                            if (response.error && response.error.message === 'Daily Limit Exceeded') {
+                                console.error('Text translation failed. Error message: "Daily Limit Exceeded."');
+                                return;
+                            }
+
+                            if (response.error) {
+                                console.error(response.error.message);
+                                return;
+                            }
+
+                            console.error(response);
                         }
-
-                        if (response.error && response.error.message === 'Daily Limit Exceeded') {
-                            console.error('Text translation failed. Error message: "Daily Limit Exceeded."');
-                            return;
-                        }
-
-                        if (response.error) {
-                            console.error(response.error.message);
-                            return;
-                        }
-
-                        console.error(response);
-                    };
-
-                    var source = 'https://www.googleapis.com/language/translate/v2/languages?key=' + connection.googKey;
-                    newScript.src = source;
-                    document.getElementsByTagName('head')[0].appendChild(newScript);
+                    }
+                    var url = 'https://www.googleapis.com/language/translate/v2/languages?key=' + connection.googKey + '&target=en';
+                    xhr.open('GET', url, true);
+                    xhr.send(null);
                 }
             };
         }

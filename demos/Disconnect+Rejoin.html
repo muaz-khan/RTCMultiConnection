@@ -159,6 +159,8 @@
 
             var connection = new RTCMultiConnection();
 
+            connection.autoCloseEntireSession = false;
+
             // by default, socket.io server is assumed to be deployed on your own URL
             connection.socketURL = '/';
 
