@@ -1,5 +1,3 @@
-// MultiPeersHandler.js
-
 function MultiPeers(connection) {
     var self = this;
 

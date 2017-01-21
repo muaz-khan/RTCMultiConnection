@@ -1,11 +1,7 @@
-// RTCMultiConnection.js
-
-function RTCMultiConnection(roomid, forceOptions) {
+(function(connection) {
     forceOptions = forceOptions || {
         useDefaultDevices: true
     };
-
-    var connection = this;
 
     connection.channel = connection.sessionid = (roomid || location.href.replace(/\/|:|#|\?|\$|\^|%|\.|`|~|!|\+|@|\[|\||]|\|*. /g, '').split('\n').join('').split('\r').join('')) + '';
 
@@ -18,7 +14,9 @@ function RTCMultiConnection(roomid, forceOptions) {
         }
         preventDuplicateOnStreamEvents[stream.streamid] = true;
 
-        stream.type = 'local';
+        try {
+            stream.type = 'local';
+        } catch (e) {}
 
         connection.setStreamEndHandler(stream);
 
@@ -54,7 +52,9 @@ function RTCMultiConnection(roomid, forceOptions) {
     };
 
     mPeer.onGettingRemoteMedia = function(stream, remoteUserId) {
-        stream.type = 'remote';
+        try {
+            stream.type = 'remote';
+        } catch (e) {}
 
         connection.setStreamEndHandler(stream, 'remote-stream');
 
@@ -1612,4 +1612,4 @@ function RTCMultiConnection(roomid, forceOptions) {
             console.info('Set local description for remote user', event.userid);
         }
     };
-}
+})(this);
