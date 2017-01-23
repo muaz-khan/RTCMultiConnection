@@ -539,8 +539,9 @@
 
     connection.userid = getRandomString();
     connection.changeUserId = function(newUserId, callback) {
+        callback = callback || function() {};
         connection.userid = newUserId || getRandomString();
-        connection.socket.emit('changed-uuid', connection.userid, callback || function() {});
+        connection.socket.emit('changed-uuid', connection.userid, callback);
     };
 
     connection.extra = {};
@@ -841,7 +842,7 @@
         });
 
         if (!stream) {
-            console.warn('No such stream exists.', streamid);
+            console.warn('No such stream exist.', streamid);
             return;
         }
 
@@ -1246,7 +1247,7 @@
             }, participant);
         });
         connection.userid = sender;
-        connection.socket.emit('changed-uuid', connection.userid);
+        connection.changeUserId(connection.userid);
     };
 
     connection.shiftModerationControl = function(remoteUserId, existingBroadcasters, firedOnLeave) {
@@ -1611,5 +1612,12 @@
         if (connection.enableLogs) {
             console.info('Set local description for remote user', event.userid);
         }
+    };
+
+    connection.oneRoomAlreadyExist = function(roomid) {
+        if (connection.enableLogs) {
+            console.info('Server says "Room ', roomid, 'already exist. Joining instead.');
+        }
+        connection.join(roomid);
     };
 })(this);

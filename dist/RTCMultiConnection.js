@@ -1,4 +1,4 @@
-// Last time updated: 2017-01-18 3:37:39 AM UTC
+// Last time updated: 2017-01-23 7:40:08 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.3
@@ -625,7 +625,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         this.renegotiatePeer = function(remoteUserId, userPreferences, remoteSdp) {
             if (!connection.peers[remoteUserId]) {
                 if (connection.enableLogs) {
-                    console.error('This peer (' + remoteUserId + ') does not exists. Renegotiation skipped.');
+                    console.error('This peer (' + remoteUserId + ') does not exist. Renegotiation skipped.');
                 }
                 return;
             }
@@ -645,7 +645,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
         this.replaceTrack = function(track, remoteUserId, isVideoTrack) {
             if (!connection.peers[remoteUserId]) {
-                throw 'This peer (' + remoteUserId + ') does not exists.';
+                throw 'This peer (' + remoteUserId + ') does not exist.';
             }
 
             var peer = connection.peers[remoteUserId].peer;
@@ -3888,7 +3888,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             connection.onFileEnd = function(file) {
                 var helper = progressHelper[file.uuid];
                 if (!helper) {
-                    console.error('No such progress-helper element exists.', file);
+                    console.error('No such progress-helper element exist.', file);
                     return;
                 }
 
@@ -4541,8 +4541,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
         connection.userid = getRandomString();
         connection.changeUserId = function(newUserId, callback) {
+            callback = callback || function() {};
             connection.userid = newUserId || getRandomString();
-            connection.socket.emit('changed-uuid', connection.userid, callback || function() {});
+            connection.socket.emit('changed-uuid', connection.userid, callback);
         };
 
         connection.extra = {};
@@ -4843,7 +4844,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             });
 
             if (!stream) {
-                console.warn('No such stream exists.', streamid);
+                console.warn('No such stream exist.', streamid);
                 return;
             }
 
@@ -5248,7 +5249,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 }, participant);
             });
             connection.userid = sender;
-            connection.socket.emit('changed-uuid', connection.userid);
+            connection.changeUserId(connection.userid);
         };
 
         connection.shiftModerationControl = function(remoteUserId, existingBroadcasters, firedOnLeave) {
@@ -5613,6 +5614,13 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             if (connection.enableLogs) {
                 console.info('Set local description for remote user', event.userid);
             }
+        };
+
+        connection.oneRoomAlreadyExist = function(roomid) {
+            if (connection.enableLogs) {
+                console.info('Server says "Room ', roomid, 'already exist. Joining instead.');
+            }
+            connection.join(roomid);
         };
     })(this);
 

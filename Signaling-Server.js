@@ -19,13 +19,16 @@ module.exports = exports = function(app, socketCallback) {
         });
 
         io.set('transports', [
-            'websocket', // 'disconnect' EVENT will work only with 'websocket'
+            'websocket',
             'xhr-polling',
             'jsonp-polling'
         ]);
 
         io.sockets.on('connection', onConnection);
     }
+
+    // to secure your socket.io usage:
+    // io.set('origins', 'https://domain.com:9001');
 
     function appendUser(socket) {
         var alreadyExists = listOfUsers[socket.userid];
@@ -72,7 +75,7 @@ module.exports = exports = function(app, socketCallback) {
         }
 
         // temporarily disabled
-        if (false && !!listOfUsers[params.userid]) {
+        if (!!listOfUsers[params.userid]) {
             params.dontUpdateUserId = true;
 
             var useridAlreadyTaken = params.userid;
