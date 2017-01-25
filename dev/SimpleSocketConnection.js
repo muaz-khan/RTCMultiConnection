@@ -1,49 +1,28 @@
-function FirebaseConnection(connection, connectCallback) {
-    function isData(session) {
-        return !session.audio && !session.video && !session.screen && session.data;
+function isData(session) {
+    return !session.audio && !session.video && !session.screen && session.data;
+}
+
+function SimpleSocketConnection(connection, connectCallback) {
+    connection.socketMessageEvent = 'message';
+    connection.socketURL = 'http://localhost:9002/';
+
+    try {
+        connection.socket = io(connection.socketURL);
+    } catch (e) {
+        connection.socket = io.connect(connection.socketURL);
     }
-
-    connection.firebase = connection.firebase || 'webrtc-experiment';
-    var channelId = connection.channel;
-
-    connection.socket = new Firebase('https://' + connection.firebase + '.firebaseio.com/' + channelId);
-
-    connection.socket.on('child_added', function(snap) {
-        var data = JSON.parse(snap.val());
-
-        if (data.eventName === connection.socketMessageEvent) {
-            onMessagesCallback(data.data);
-        }
-
-        snap.ref().remove(); // for socket.io live behavior
-    });
-
-    connection.socket.onDisconnect().remove();
-
-    connection.socket.emit = function(eventName, data, callback) {
-        if (eventName === 'changed-uuid') return;
-        if (data.message && data.message.shiftedModerationControl) return;
-
-        connection.socket.push(JSON.stringify({
-            eventName: eventName,
-            data: data
-        }));
-
-        if (callback) {
-            callback();
-        }
-    };
 
     var mPeer = connection.multiPeersHandler;
 
-    function onMessagesCallback(message) {
+    connection.socket.on(connection.socketMessageEvent, function(message) {
+        console.error(message.remoteUserId, connection.userid);
         if (message.remoteUserId != connection.userid) return;
 
         if (connection.peers[message.sender] && connection.peers[message.sender].extra != message.message.extra) {
-            connection.peers[message.sender].extra = message.message.extra;
+            connection.peers[message.sender].extra = message.extra;
             connection.onExtraDataUpdated({
                 userid: message.sender,
-                extra: message.message.extra
+                extra: message.extra
             });
         }
 
@@ -55,13 +34,19 @@ function FirebaseConnection(connection, connectCallback) {
 
             var action = message.message.action;
 
-            if (action === 'ended' || action === 'stream-removed') {
+            if (action === 'ended' || action === 'inactive' || action === 'stream-removed') {
+                if (connection.peersBackup[stream.userid]) {
+                    stream.extra = connection.peersBackup[stream.userid].extra;
+                }
                 connection.onstreamended(stream);
                 return;
             }
 
             var type = message.message.type != 'both' ? message.message.type : null;
-            stream.stream[action](type);
+
+            if (typeof stream.stream[action] == 'function') {
+                stream.stream[action](type);
+            }
             return;
         }
 
@@ -140,7 +125,7 @@ function FirebaseConnection(connection, connectCallback) {
             }
 
             var userPreferences = {
-                extra: message.message.extra || {},
+                extra: message.extra || {},
                 localPeerSdpConstraints: message.message.remotePeerSdpConstraints || {
                     OfferToReceiveAudio: connection.sdpConstraints.mandatory.OfferToReceiveAudio,
                     OfferToReceiveVideo: connection.sdpConstraints.mandatory.OfferToReceiveVideo
@@ -193,15 +178,23 @@ function FirebaseConnection(connection, connectCallback) {
         }
 
         mPeer.addNegotiatedMessage(message.message, message.sender);
-    }
+    });
 
-    new Firebase('https://' + connection.firebase + '.firebaseio.com/.info/connected').on('value', function(snap) {
-        if (snap.val()) {
-            if (connection.enableLogs) {
-                console.info('Firebase connection is opened.');
+    connection.socket.on('connect', function() {
+        if (connection.enableLogs) {
+            console.info('socket.io connection is opened.');
+        }
+
+        setTimeout(function() {
+            if (connectCallback) {
+                connectCallback(connection.socket);
             }
+        }, 1000);
+    });
 
-            if (connectCallback) connectCallback(connection.socket);
+    connection.socket.on('disconnect', function() {
+        if (connection.enableLogs) {
+            console.warn('socket.io connection is closed');
         }
     });
 }

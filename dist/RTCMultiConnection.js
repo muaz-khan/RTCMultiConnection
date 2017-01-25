@@ -1,4 +1,4 @@
-// Last time updated: 2017-01-23 7:40:08 AM UTC
+// Last time updated: 2017-01-25 11:51:05 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.3
@@ -1230,6 +1230,8 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
     }
 
+    window.iOSDefaultAudioOutputDevice = window.iOSDefaultAudioOutputDevice || 'speaker'; // earpiece or speaker
+
     // Last time updated: 2016-11-12 6:02:08 AM UTC
 
     // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
@@ -2284,6 +2286,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         navigator.getUserMedia = navigator.webkitGetUserMedia = iosrtc.getUserMedia;
 
         iosrtc.debug.enable('iosrtc*');
+        if (typeof iosrtc.selectAudioOutput == 'function') {
+            iosrtc.selectAudioOutput(window.iOSDefaultAudioOutputDevice || 'speaker'); // earpiece or speaker
+        }
         iosrtc.registerGlobals();
     }
 

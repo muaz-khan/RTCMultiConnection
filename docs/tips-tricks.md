@@ -11,7 +11,25 @@ io.on('connection', onConnection);
 
 // add this line,
 // quickly after above line
-io.set('origins', 'https://domain.com:9001');
+io.set('origins', 'https://domain.com');
+```
+
+Otherwise:
+
+```javascript
+// Seach & modify this function on Signaling-Server.js
+
+function onConnection(socket) {
+    if (socket.handshake.headers.origin == 'https://domain.com') {
+        console.log(socket.handshake.headers.origin + ' Allowed.');
+    } else {
+        console.log(socket.handshake.he aders.origin + ' Not Allowed.');
+        socket.disconnect();
+        return;
+    }
+
+    // rest of the code from Signaling-Server.js
+}
 ```
 
 Now you've restricted the usage of socket.io only on domain `https://domain.com:9001`.

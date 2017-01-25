@@ -330,3 +330,5 @@ function getAudioScreenConstraints(screen_constraints) {
         }
     };
 }
+
+window.iOSDefaultAudioOutputDevice = window.iOSDefaultAudioOutputDevice || 'speaker'; // earpiece or speaker

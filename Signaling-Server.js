@@ -3,16 +3,24 @@
 // Documentation  - github.com/muaz-khan/RTCMultiConnection
 
 module.exports = exports = function(app, socketCallback) {
+    // stores all sockets, user-ids, extra-data and connected sockets
+    // you can check presence as following:
+    // var isRoomExist = listOfUsers['room-id'] != null;
     var listOfUsers = {};
+
     var shiftedModerationControls = {};
+
+    // for scalable-broadcast demos
     var ScalableBroadcast;
 
     var io = require('socket.io');
 
     try {
+        // use latest socket.io
         io = io(app);
         io.on('connection', onConnection);
     } catch (e) {
+        // otherwise fallback
         io = io.listen(app, {
             log: false,
             origins: '*:*'
@@ -27,15 +35,15 @@ module.exports = exports = function(app, socketCallback) {
         io.sockets.on('connection', onConnection);
     }
 
-    // to secure your socket.io usage:
-    // io.set('origins', 'https://domain.com:9001');
+    // to secure your socket.io usage: (via: docs/tips-tricks.md)
+    // io.set('origins', 'https://domain.com');
 
     function appendUser(socket) {
-        var alreadyExists = listOfUsers[socket.userid];
+        var alreadyExist = listOfUsers[socket.userid];
         var extra = {};
 
-        if (alreadyExists && alreadyExists.extra) {
-            extra = alreadyExists.extra;
+        if (alreadyExist && alreadyExist.extra) {
+            extra = alreadyExist.extra;
         }
 
         var params = socket.handshake.query;
@@ -110,7 +118,7 @@ module.exports = exports = function(app, socketCallback) {
         socket.on('get-remote-user-extra-data', function(remoteUserId, callback) {
             callback = callback || function() {};
             if (!remoteUserId || !listOfUsers[remoteUserId]) {
-                callback('remoteUserId (' + remoteUserId + ') does NOT exists.');
+                callback('remoteUserId (' + remoteUserId + ') does NOT exist.');
                 return;
             }
             callback(listOfUsers[remoteUserId].extra);
