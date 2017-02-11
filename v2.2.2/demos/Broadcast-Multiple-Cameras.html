@@ -93,67 +93,55 @@ var buttonsContainer = document.getElementById('buttons-container');
 // connection.enumerateDevices --- to get list of all captured devices
 
 var skipDuplicateDevies = {};
+var uniqueCamerasLength = 0;
 DetectRTC.load(function() {
-        // iterate over devices-array
-        DetectRTC.MediaDevices.forEach(function(device) {
-            if(skipDuplicateDevies[device.id]) return;
-            skipDuplicateDevies[device.id] = true;
+    // iterate over devices-array
+    DetectRTC.MediaDevices.forEach(function(device) {
+        if (skipDuplicateDevies[device.id]) return;
+        skipDuplicateDevies[device.id] = true;
 
-            // skip audio devices
-            if (device.kind.indexOf('audio') != -1) return;
+        // skip audio devices
+        if (device.kind.indexOf('audio') != -1) return;
 
-            var button = document.createElement('button');
-            button.id = device.id;
-            button.innerHTML = device.label || device.id;
-            button.onclick = function() {
-                this.disabled = true;
+        uniqueCamerasLength++;
 
-                var videoConstraints = {
-                    mandatory: {},
-                    optional: [{
-                        sourceId: this.id // Chrome
-                    }]
-                };
+        var button = document.createElement('button');
+        button.id = device.id;
+        button.innerHTML = device.label || device.id;
+        button.onclick = function() {
+            this.disabled = true;
 
-                if(DetectRTC.browser.name === 'Firefox') {
-                    videoConstraints = {
-                        deviceId: this.id
-                    };
+            connection._mediaSources.video = this.id;
+
+            connection.dontCaptureUserMedia = false;
+            connection.captureUserMedia(function(stream) {
+                connection.attachStreams.push(stream);
+                connection.dontCaptureUserMedia = true;
+
+                if (document.getElementById('broadcast-all-cameras').disabled == true) {
+                    document.getElementById('broadcast-all-cameras').disabled = false;
+                    // document.getElementById('broadcast-all-cameras').style.background = '-webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(0.05, rgb(143, 231, 253)), to(rgb(255, 255, 255)))';
+
+                    document.getElementById('broadcast-all-cameras').style.background = '-webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(0.05, rgb(195, 35, 56)), to(rgb(255, 15, 15)))';
+                    document.getElementById('broadcast-all-cameras').style.color = 'white';
                 }
 
-                connection.mediaConstraints = {
-                    video: videoConstraints,
-                    audio: true
-                };
-
-                connection.dontCaptureUserMedia = false;
-                connection.captureUserMedia(function(stream) {
-                    connection.attachStreams.push(stream);
-                    connection.dontCaptureUserMedia = true;
-
-                    if (document.getElementById('broadcast-all-cameras').disabled == true) {
-                        document.getElementById('broadcast-all-cameras').disabled = false;
-                        // document.getElementById('broadcast-all-cameras').style.background = '-webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(0.05, rgb(143, 231, 253)), to(rgb(255, 255, 255)))';
-
-                        document.getElementById('broadcast-all-cameras').style.background = '-webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(0.05, rgb(195, 35, 56)), to(rgb(255, 15, 15)))';
-                        document.getElementById('broadcast-all-cameras').style.color = 'white';
-                    }
-
-                    if(window.alreadyDisplayedAlertBox) return;
-                    window.alreadyDisplayedAlertBox = true;
-                    alert('Please do not forget to click "Broadcast All Cameras" red-button.');
-                });
-            };
-            buttonsContainer.appendChild(button);
-        });
+                if(connection.attachStreams.length >= uniqueCamerasLength) {
+                    document.getElementById('broadcast-all-cameras').onclick();
+                }
+            });
+        };
+        buttonsContainer.appendChild(button);
+    });
 });
 
 connection.connect();
 
 document.getElementById('broadcast-all-cameras').onclick = function() {
-    this.disabled = true;
-    this.style.background = 'rgba(216, 205, 205, 0.2)';
-    this.style.color = 'rgb(27, 26, 26)';
+    var that = document.getElementById('broadcast-all-cameras');
+    that.disabled = true;
+    that.style.background = 'rgba(216, 205, 205, 0.2)';
+    that.style.color = 'rgb(27, 26, 26)';
 
     connection.sdpConstraints.mandatory = {
         OfferToReceiveAudio: false,
