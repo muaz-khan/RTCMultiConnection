@@ -165,7 +165,7 @@ function PeerInitiator(config) {
             return;
         }
 
-        localStream = connection.beforeAddingStream(localStream);
+        localStream = connection.beforeAddingStream(localStream, self);
 
         if (!localStream) return;
 

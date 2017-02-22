@@ -1,4 +1,4 @@
-// Last time updated: 2017-01-25 11:51:05 AM UTC
+// Last time updated: 2017-02-22 10:59:35 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.3
@@ -2462,7 +2462,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 return;
             }
 
-            localStream = connection.beforeAddingStream(localStream);
+            localStream = connection.beforeAddingStream(localStream, self);
 
             if (!localStream) return;
 
