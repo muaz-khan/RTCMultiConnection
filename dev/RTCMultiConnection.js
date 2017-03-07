@@ -833,7 +833,7 @@
 
     connection.direction = 'many-to-many';
 
-    connection.removeStream = function(streamid) {
+    connection.removeStream = function(streamid, remoteUserId) {
         var stream;
         connection.attachStreams.forEach(function(localStream) {
             if (localStream.id === streamid) {
@@ -847,6 +847,10 @@
         }
 
         connection.peers.getAllParticipants().forEach(function(participant) {
+            if (remoteUserId && participant !== remoteUserId) {
+                return;
+            }
+
             var user = connection.peers[participant];
             try {
                 user.peer.removeStream(stream);

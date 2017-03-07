@@ -1,4 +1,4 @@
-// Last time updated: 2017-02-28 3:01:32 AM UTC
+// Last time updated: 2017-03-07 11:34:20 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.3
@@ -2360,6 +2360,14 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         this.streams = [];
         this.channels = config.channels || [];
         this.connectionDescription = config.connectionDescription;
+
+        this.addStream = function(session) {
+            connection.addStream(session, this.userid);
+        };
+
+        this.removeStream = function(streamid) {
+            connection.removeStream(streamid, this.userid);
+        };
 
         var self = this;
 
@@ -4776,7 +4784,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
         connection.direction = 'many-to-many';
 
-        connection.removeStream = function(streamid) {
+        connection.removeStream = function(streamid, remoteUserId) {
             var stream;
             connection.attachStreams.forEach(function(localStream) {
                 if (localStream.id === streamid) {
@@ -4790,6 +4798,10 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             }
 
             connection.peers.getAllParticipants().forEach(function(participant) {
+                if (remoteUserId && participant !== remoteUserId) {
+                    return;
+                }
+
                 var user = connection.peers[participant];
                 try {
                     user.peer.removeStream(stream);

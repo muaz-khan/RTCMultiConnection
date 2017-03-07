@@ -64,6 +64,14 @@ function PeerInitiator(config) {
     this.channels = config.channels || [];
     this.connectionDescription = config.connectionDescription;
 
+    this.addStream = function(session) {
+        connection.addStream(session, this.userid);
+    };
+
+    this.removeStream = function(streamid) {
+        connection.removeStream(streamid, this.userid);
+    };
+
     var self = this;
 
     if (config.remoteSdp) {
