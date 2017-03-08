@@ -207,6 +207,18 @@ function PeerInitiator(config) {
             extra: extra,
             userid: self.userid
         });
+
+        if (isFirefox && peer.iceConnectionState.search(/closed|failed/gi) !== -1) {
+            self.streams.forEach(function(stream) {
+                var streamEvent = connection.streamEvents[stream.id] || {
+                    streamid: stream.id,
+                    stream: stream,
+                    type: 'remote'
+                };
+
+                connection.onstreamended(streamEvent);
+            });
+        }
     };
 
     var sdpConstraints = {
@@ -264,16 +276,14 @@ function PeerInitiator(config) {
             event.stream.isScreen = streamToShare.isScreen;
         }
         event.stream.streamid = event.stream.id;
-        if (!event.stream.stop) {
+        if (isFirefox || !event.stream.stop) {
             event.stream.stop = function() {
-                if (isFirefox) {
-                    var streamEndedEvent = 'ended';
+                var streamEndedEvent = 'ended';
 
-                    if ('oninactive' in event.stream) {
-                        streamEndedEvent = 'inactive';
-                    }
-                    fireEvent(event.stream, streamEndedEvent);
+                if ('oninactive' in event.stream) {
+                    streamEndedEvent = 'inactive';
                 }
+                fireEvent(event.stream, streamEndedEvent);
             };
         }
         allRemoteStreams[event.stream.id] = event.stream;
