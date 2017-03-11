@@ -1,9 +1,9 @@
 'use strict';
 
-// Last time updated: 2017-03-08 9:09:29 AM UTC
+// Last time updated: 2017-03-11 7:14:04 AM UTC
 
 // _________________________
-// RTCMultiConnection v3.4.3
+// RTCMultiConnection v3.4.4
 
 // Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection
 
@@ -1238,7 +1238,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
     window.iOSDefaultAudioOutputDevice = window.iOSDefaultAudioOutputDevice || 'speaker'; // earpiece or speaker
 
-    // Last time updated: 2017-03-05 5:56:31 AM UTC
+    // Last time updated: 2017-03-11 6:31:40 AM UTC
 
     // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
 
@@ -1959,7 +1959,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                         } catch (e) {}
                     }
 
-                    if (alreadyUsedDevices[device.deviceId]) {
+                    if (alreadyUsedDevices[device.deviceId + device.label]) {
                         return;
                     }
 
@@ -1982,7 +1982,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
                     if (!device.label) {
                         device.label = 'Please invoke getUserMedia once.';
-                        if (location.protocol !== 'https:') {
+                        if (DetectRTC.browser.isChrome && DetectRTC.browser.version >= 46 && !/^(https:|chrome-extension:)$/g.test(location.protocol || '')) {
                             if (document.domain.search && document.domain.search(/localhost|127.0./g) === -1) {
                                 device.label = 'HTTPs is required to get label of this ' + device.kind + ' device.';
                             }
@@ -2024,7 +2024,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     // there is no 'videoouput' in the spec.
                     MediaDevices.push(device);
 
-                    alreadyUsedDevices[device.deviceId] = device;
+                    alreadyUsedDevices[device.deviceId + device.label] = device;
                 });
 
                 if (typeof DetectRTC !== 'undefined') {
@@ -2094,8 +2094,15 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             isScreenCapturingSupported = true;
         }
 
-        if (location.protocol !== 'https:') {
-            isScreenCapturingSupported = false;
+        if (!/^(https:|chrome-extension:)$/g.test(location.protocol || '')) {
+            if (document.domain.search && document.domain.search(/localhost|127.0./g) === -1) {
+                // DetectRTC.browser.isChrome
+                isScreenCapturingSupported = false;
+            }
+
+            if (DetectRTC.browser.isFirefox) {
+                isScreenCapturingSupported = false;
+            }
         }
         DetectRTC.isScreenCapturingSupported = isScreenCapturingSupported;
 
@@ -2150,9 +2157,13 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             isGetUserMediaSupported = true;
         }
-        if (DetectRTC.browser.isChrome && DetectRTC.browser.version >= 46 && location.protocol !== 'https:') {
-            isGetUserMediaSupported = 'Requires HTTPs';
+
+        if (DetectRTC.browser.isChrome && DetectRTC.browser.version >= 46 && !/^(https:|chrome-extension:)$/g.test(location.protocol || '')) {
+            if (document.domain.search && document.domain.search(/localhost|127.0./g) === -1) {
+                isGetUserMediaSupported = 'Requires HTTPs';
+            }
         }
+
         if (DetectRTC.osName === 'Nodejs') {
             isGetUserMediaSupported = false;
         }
@@ -5615,7 +5626,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
 
         connection.trickleIce = true;
-        connection.version = '3.4.3';
+        connection.version = '3.4.4';
 
         connection.onSettingLocalDescription = function(event) {
             if (connection.enableLogs) {

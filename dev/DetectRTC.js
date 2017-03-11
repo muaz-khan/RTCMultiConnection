@@ -1,4 +1,4 @@
-// Last time updated: 2017-03-05 5:56:31 AM UTC
+// Last time updated: 2017-03-11 6:31:40 AM UTC
 
 // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
 
@@ -719,7 +719,7 @@
                     } catch (e) {}
                 }
 
-                if (alreadyUsedDevices[device.deviceId]) {
+                if (alreadyUsedDevices[device.deviceId + device.label]) {
                     return;
                 }
 
@@ -742,7 +742,7 @@
 
                 if (!device.label) {
                     device.label = 'Please invoke getUserMedia once.';
-                    if (location.protocol !== 'https:') {
+                    if (DetectRTC.browser.isChrome && DetectRTC.browser.version >= 46 && !/^(https:|chrome-extension:)$/g.test(location.protocol || '')) {
                         if (document.domain.search && document.domain.search(/localhost|127.0./g) === -1) {
                             device.label = 'HTTPs is required to get label of this ' + device.kind + ' device.';
                         }
@@ -784,7 +784,7 @@
                 // there is no 'videoouput' in the spec.
                 MediaDevices.push(device);
 
-                alreadyUsedDevices[device.deviceId] = device;
+                alreadyUsedDevices[device.deviceId + device.label] = device;
             });
 
             if (typeof DetectRTC !== 'undefined') {
@@ -854,8 +854,15 @@
         isScreenCapturingSupported = true;
     }
 
-    if (location.protocol !== 'https:') {
-        isScreenCapturingSupported = false;
+    if (!/^(https:|chrome-extension:)$/g.test(location.protocol || '')) {
+        if (document.domain.search && document.domain.search(/localhost|127.0./g) === -1) {
+            // DetectRTC.browser.isChrome
+            isScreenCapturingSupported = false;
+        }
+
+        if (DetectRTC.browser.isFirefox) {
+            isScreenCapturingSupported = false;
+        }
     }
     DetectRTC.isScreenCapturingSupported = isScreenCapturingSupported;
 
@@ -910,9 +917,13 @@
     } else if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         isGetUserMediaSupported = true;
     }
-    if (DetectRTC.browser.isChrome && DetectRTC.browser.version >= 46 && location.protocol !== 'https:') {
-        isGetUserMediaSupported = 'Requires HTTPs';
+
+    if (DetectRTC.browser.isChrome && DetectRTC.browser.version >= 46 && !/^(https:|chrome-extension:)$/g.test(location.protocol || '')) {
+        if (document.domain.search && document.domain.search(/localhost|127.0./g) === -1) {
+            isGetUserMediaSupported = 'Requires HTTPs';
+        }
     }
+
     if (DetectRTC.osName === 'Nodejs') {
         isGetUserMediaSupported = false;
     }
