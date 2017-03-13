@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-03-11 7:14:04 AM UTC
+// Last time updated: 2017-03-13 7:32:23 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -2560,7 +2560,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 userid: self.userid
             });
 
-            if (isFirefox && peer.iceConnectionState.search(/closed|failed/gi) !== -1) {
+            if (peer && peer.iceConnectionState && peer.iceConnectionState.search(/closed|failed/gi) !== -1 && self.streams instanceof Array) {
                 self.streams.forEach(function(stream) {
                     var streamEvent = connection.streamEvents[stream.id] || {
                         streamid: stream.id,
