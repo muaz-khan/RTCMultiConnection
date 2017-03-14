@@ -2,11 +2,3 @@ User-agent: *
 Allow: /
 
 sitemap: http://www.rtcmulticonnection.org/sitemap.xml
-
-# RTCMultiConnection http://www.rtcmulticonnection.org/
-# Muaz Khan WebRTC Experiments: https://www.webrtc-experiment.com/
-# Muaz Khan Personal Site: http://www.muazkhan.com/
-# Muaz Khan Google+ profile: https://plus.google.com/100325991024054712503
-# Muaz Khan on Twitter: http://twitter.com/muazkh/ 
-# Muaz Khan on Github: https://github.com/muaz-khan/ 
-
