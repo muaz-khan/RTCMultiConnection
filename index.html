@@ -1,344 +1,584 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
-<title>RTCMultiConnection.js / WebRTC Library</title>
-<meta http-equiv="refresh" content="0;url=http://www.rtcmulticonnection.org/docs/">
-<meta name="google-site-verification" content="0ZfJnHomOzZDWKIkhkRYklDwdYnyEFEnZ7neD7gzHPU" />
-
-<link rel="alternate" type="application/rss+xml" title="Muaz Khan Feed" href="http://feeds.feedburner.com/muazkh">
-
-<meta name="description" content="RTCMultiConnection is a WebRTC JavaScript wrapper library runs top over RTCPeerConnection API to provide multi-session establishment scenarios. It also provides dozens of features as hybrid-less mesh networking model, a reliable presence detection and syncing system; complex renegotiation scenarios; and much more. It provides everything you've in your mind! Just understand the API and you'll enjoy using it! It is simple and its syntax is similar as WebSockets JavaScript API and RTCPeerConnection API." />
-<meta name="keywords" content="WebRTC,Library,RTCWeb,RTCMultiConnection,RTCPeerConnection,WebRTC Library, WebRTC Libraries, Libraries, WebRTC JavaScript" />
-
-<link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
-<meta name="author" content="Muaz Khan">
-
-<meta charset="utf-8">
-<meta name="format-detection" content="telephone=no">
-<link rel="icon" href="images/favicon.ico">
-<link rel="shortcut icon" href="images/favicon.ico">
-<link rel="stylesheet" href="css/stuck.css">
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/ihover.css">
-<script src="js/jquery.js"></script>
-<script src="js/jquery-migrate-1.1.1.js"></script>
-<script src="js/script.js"></script>
-<script src="js/superfish.js"></script>
-<script src="js/jquery.equalheights.js"></script>
-<script src="js/jquery.mobilemenu.js"></script>
-<script src="js/jquery.easing.1.3.js"></script>
-<script src="js/tmStickUp.js"></script>
-<script src="js/jquery.ui.totop.js"></script>
-<script>
- $(document).ready(function(){
-  $().UItoTop({ easingType: 'easeOutQuart' });
-  $('#stuck_container').tmStickUp({});
-  });
-</script>
-<!--[if lt IE 9]>
- <div style=' clear: both; text-align:center; position: relative;'>
-   <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
-     <img src="http://storage.ie6countdown.com/assets/100/images/banners/warning_bar_0000_us.jpg" border="0" height="42" width="820" alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today." />
-   </a>
-</div>
-<script src="js/html5shiv.js"></script>
-<link rel="stylesheet" media="screen" href="css/ie.css">
-<![endif]-->
-<!--[if lt IE 10]>
-<link rel="stylesheet" media="screen" href="css/ie1.css">
-<![endif]-->
-
-<style>
-pre {
-    font-family: courier new;
-    font-size: 18px;
-    color: rgb(18, 71, 151);
-}
-</style>
+  <meta charset="utf-8">
+  <title>RTCMultiConnection | WebRTC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <link rel="shortcut icon" href="images/logo.png">
+  <meta name="google-site-verification" content="0ZfJnHomOzZDWKIkhkRYklDwdYnyEFEnZ7neD7gzHPU" />
+  <link rel="stylesheet" type="text/css" href="css/stylesheet.css">
 </head>
-<body class="page1" id="top">
-<!--==============================
-              header
-=================================-->
-<header>
-<!--==============================
-            Stuck menu
-=================================-->
-  <section id="stuck_container">
-    <div class="container">
-      <div class="row">
-        <div class="grid_12">
-        <h1>
-          <a href="http://www.rtcmulticonnection.org/">
-            <img src="images/logo.png" alt="RTCMultiConnection">
-          </a>
-        </h1>
-          <div class="navigation ">
-            <nav>
-              <ul class="sf-menu">
-               <li class="current"><a href="/">Home</a></li>
-               <li><a href="/docs/">APIs & Docs</a></li>
-               <li><a href="/changes-log/">Changes Log</a></li>
-               <li><a href="https://www.webrtc-experiment.com/RTCMultiConnection/">Demos</a></li>
-               <li><a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki</a></li>
-               <li><a href="/docs/getting-started/">Getting Started</a></li>
-               <li><a href="/FAQ/">FAQ</a></li>
-               <li><a href="https://github.com/muaz-khan/RTCMultiConnection">Open-Sourced</a></li>
-             </ul>
-            </nav>
-            <div class="clear"></div>
-          </div>
-        </div>
-      </div>
-    </div>
+<body>
+  <header>
+    <a class="logo" href="/"><img src="images/logo.png" alt="RTCMultiConnection"></a>
+    <nav>
+      <li>
+        <a href="docs/getting-started/">Getting Started</a>
+      </li>
+      <li>
+        <a href="FAQ/">FAQ</a>
+      </li>
+      <li>
+        <a href="https://www.youtube.com/playlist?list=PLPRQUXAnRydKdyun-vjKPMrySoow2N4tl">YouTube</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection#v3-demos">Demos</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection">Github</a>
+      </li>
+    </nav>
+  </header>
+
+  <h1>
+    RTCMultiConnection | WebRTC
+    <p>WebRTC JavaScript library for peer-to-peer applications (screen sharing, audio/video conferencing, file sharing, media streaming etc.)</p>
+  </h1>
+
+  <section id="a">
+    <h2><a href="#a">a</a></h2>
+    <ul>
+      <li>
+        <a href="docs/addStream/">addStream</a>
+      </li>
+      <li>
+        <a href="docs/attachStreams/">attachStreams</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection/blob/master/docs/api.md#applyconstraints">applyConstraints</a>
+      </li>
+      <li>
+        <a href="docs/autoCloseEntireSession/">autoCloseEntireSession</a>
+      </li>
+      <li>
+        <a href="docs/autoTranslateText/">autoTranslateText</a>
+      </li>
+    </ul>
+
+    <del>acceptModerationControl, addNewBroadcaster, acceptParticipationRequest</del>
   </section>
-</header>
-<section class="content">
-  <div class="container">
-    
-  <div class="container">
-    <div class="row">
-      <div class="grid_12">
-        <h3>Searching for a single WebRTC Library supporting everything?</h3>
-        RTCMultiConnection is a <a href="https://www.webrtc-experiment.com/">WebRTC</a> JavaScript wrapper library runs top over RTCPeerConnection API to provide multi-session establishment scenarios. It also provides dozens of features as hybrid-less mesh networking model, a reliable presence detection and syncing system; complex renegotiation scenarios; and much more. It provides everything you've in your mind! Just understand the API and you'll enjoy using it! It is simple and its syntax is similar as WebSockets JavaScript API and RTCPeerConnection API.
-        
-        <br /><br/ >
-        It is <a href="https://www.webrtc-experiment.com/licence/">MIT Licensed</a>, which means that you can use it in any commercial/non-commercial product, free of cost.
-      </div>
-      
-      
-      <div class="grid_3">
-        <div class="ih-item circle effect2 left_to_right"><a href="https://www.webrtc-experiment.com/RTCMultiConnection/MultiRTC/">
-        <div class="img"><img src="images/multirtc.jpg" alt="img"></div>
-        <div class="info">
-          <h3>MultiRTC</h3>
-          <p>try it!</p>
-        </div></a></div>
-      </div>
-      
-      
-      <div class="grid_3">
-        <div class="ih-item circle effect2 left_to_right"><a href="https://www.webrtc-experiment.com/RTCMultiConnection/AppRTC-Look.html">
-        <div class="img"><img src="images/apprtc.jpg" alt="img"></div>
-        <div class="info">
-          <h3>AppRTC</h3>
-          <p>try it!</p>
-        </div></a></div>
-      </div>
-      
-      
-      <div class="grid_3">
-        <div class="ih-item circle effect2 left_to_right"><a href="https://www.webrtc-experiment.com/RTCMultiConnection/stream-mp3-live.html">
-        <div class="img"><img src="images/mp3-streaming.jpg" alt="img"></div>
-        <div class="info">
-          <h3>Mp3 Live Streaming</h3>
-          <p>try it!</p>
-        </div></a></div>
-      </div>
-      
-      <div class="grid_3">
-        <div class="ih-item circle effect2 left_to_right"><a href="https://www.webrtc-experiment.com/RTCMultiConnection/all-in-one.html">
-        <div class="img"><img src="images/all-in-one.jpg" alt="img"></div>
-        <div class="info">
-          <h3>All-in-One</h3>
-          <p>try it!</p>
-        </div></a></div>
-      </div>
-      
-      <div class="grid_3">
-        <div class="ih-item circle effect2 left_to_right"><a href="https://www.webrtc-experiment.com/Canvas-Designer/">
-        <div class="img"><img src="images/canvas-designer.jpg" alt="img"></div>
-        <div class="info">
-          <h3>Canvas-Designer</h3>
-          <p>try it!</p>
-        </div></a></div>
-      </div>
-      
-      <div class="grid_3">
-        <div class="ih-item circle effect2 left_to_right"><a href="https://www.webrtc-experiment.com/RTCMultiConnection/Multi-Broadcasters-and-Many-Viewers.html">
-        <div class="img"><img src="images/multi-broadcasters-many-viewers.jpg" alt="img"></div>
-        <div class="info">
-          <h3>Multi-Broadcasters and Many Viewers</h3>
-          <p>try it!</p>
-        </div></a></div>
-      </div>
-      
-      
-      <div class="grid_3">
-        <div class="ih-item circle effect2 left_to_right"><a href="https://www.webrtc-experiment.com/RTCMultiConnection/RecordRTC-and-RTCMultiConnection.html">
-        <div class="img"><img src="images/record-conference.jpg" alt="img"></div>
-        <div class="info">
-          <h3>Record Conference</h3>
-          <p>try it!</p>
-        </div></a></div>
-      </div>
-      
-      
-      <div class="grid_3">
-        <div class="ih-item circle effect2 left_to_right"><a href="https://www.webrtc-experiment.com/RTCMultiConnection/remote-stream-forwarding.html">
-        <div class="img"><img src="images/remote-stream-forwarding.jpg" alt="img"></div>
-        <div class="info">
-          <h3>Remote Stream Forwarding</h3>
-          <p>try it!</p>
-        </div></a></div>
-      </div>
-      
-      <div style="text-align: center;">
-        <a href="https://www.webrtc-experiment.com/RTCMultiConnection/" class="btn">List of All Demos</a>
-      </div>
-      
-    </div>
-  </div>
-  
-  <div class="clear sep__1 sp__1"></div>
-  
-    <div class="row">
-      <div class="grid_12">
-        <div class="ta__center">
-            <div class="clear"></div>
-            
-            <h3>Link The Library (<a href="https://github.com/muaz-khan/RTCMultiConnection" target="_blank" style="color:red;text-decoration:underline;">Source Code</a>)</h3>
-          
-          <div class="row">
-            <div class="grid_8 preffix_2">
-              <div class="st1" style="text-align:left;">
-                <pre>
-https://cdn.webrtc-experiment.com/RTCMultiConnection.js
-</pre>
-              </div>
-            </div>
-          </div>
-          
-          <h3>Common Code (<a href="http://jsfiddle.net/c46de0L8/" target="_blank" style="color:red;text-decoration:underline;">Quick Simple Demo</a>)</h3>
-          
-          <div class="row">
-            <div class="grid_8 preffix_2">
-              <div class="st1" style="text-align:left;">
-                <pre>
-var MODERATOR_CHANNEL_ID = 'ABCDEF'; // channel-id
-var MODERATOR_SESSION_ID = 'XYZ';    // room-id
-var MODERATOR_ID         = 'JKL';    // user-id
-var MODERATOR_SESSION    = {         // media-type
-    audio: true,
-    video: true
-};
-var MODERATOR_EXTRA      = {};       // empty extra-data
-</pre>
-              </div>
-            </div>
-          </div>
-            
-          <h3>Code for Room Moderator (i.e. Initiator)</h3>
-          
-          <div class="row">
-            <div class="grid_8 preffix_2">
-              <div class="st1" style="text-align:left;">
-                <pre>
-var moderator     = <a href="http://www.RTCMultiConnection.org/docs/constructor/">new RTCMultiConnection</a>(MODERATOR_CHANNEL_ID);
-moderator.<a href="http://www.RTCMultiConnection.org/docs/session/">session</a> = MODERATOR_SESSION;
-moderator.<a href="http://www.RTCMultiConnection.org/docs/userid/">userid</a>  = MODERATOR_ID;
-moderator.<a href="http://www.RTCMultiConnection.org/docs/extra/">extra</a>   = MODERATOR_EXTRA;
-moderator.<a href="http://www.RTCMultiConnection.org/docs/open/">open</a>({
-    dontTransmit: true,
-    sessionid:    MODERATOR_SESSION_ID
-});
-</pre>
-              </div>
-            </div>
-          </div>
-          
-          <h3>Code for Room Participants</h3>
-          
-          <div class="row">
-            <div class="grid_8 preffix_2">
-              <div class="st1" style="text-align:left;">
-                <pre>
-var participants = <a href="http://www.RTCMultiConnection.org/docs/constructor/">new RTCMultiConnection</a>(MODERATOR_CHANNEL_ID);
-participants.<a href="http://www.RTCMultiConnection.org/docs/join/">join</a>({
-    sessionid: MODERATOR_SESSION_ID,
-    userid:    MODERATOR_ID,
-    extra:     MODERATOR_EXTRA,
-    session:   MODERATOR_SESSION
-});
-</pre>
-              </div>
-            </div>
-          </div>
-          
-          <h3>(optional) Handle how to get streams</h3>
-          
-          <div class="row">
-            <div class="grid_8 preffix_2">
-              <div class="st1" style="text-align:left;">
-                <pre>
-// same code can be used for participants
-// (it is optional) 
-connection.<a href="http://www.RTCMultiConnection.org/docs/onstreamid/">onstreamid</a> = function(event) {
-    // got a clue of incoming remote stream
-    // didn't get remote stream yet
-    
-    var incoming_stream_id = event.streamid;
-    
-    YOUR_PREVIEW_IMAGE.show();
-    
-    // or
-    YOUR_PREVIEW_VIDEO.show();
-};
 
-// same code can be used for participants
-// it is useful
-connection.<a href="http://www.RTCMultiConnection.org/docs/onstream/">onstream</a> = function(event) {
-    // got local or remote stream
-    // if(event.type == 'local')  {}
-    // if(event.type == 'remote') {}
-    
-    document.body.appendChild(event.mediaElement);
-    
-    // or YOUR_VIDEO.src = event.blobURL;
-    // or YOUR_VIDEO.src = URL.createObjectURL(event.stream);
-};
+  <section id="b">
+    <h2><a href="#b">b</a></h2>
+    <ul>
+      <li>
+        <a href="docs/bandwidth/">bandwidth</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection/blob/master/docs/api.md#beforeaddingstream">beforeAddingStream</a>
+      </li>
+      <li>
+        <a href="#noapi">beforeRemovingStream</a>
+      </li>
+      <li>
+        <a href="docs/becomePublicModerator/">becomePublicModerator</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection/blob/master/docs/api.md#processsdp">BandwidthHandler</a>
+      </li>
+    </ul>
 
-// same code can be used for participants
-// it is useful but optional
-connection.<a href="http://www.RTCMultiConnection.org/docs/onstreamended/">onstreamended</a> = function(event) {
-    event.mediaElement.parentNode.removeChild(event.mediaElement);
-};
-</pre>
-              </div>
-              <a href="/docs/getting-started/" class="btn">Getting Started Guide</a>
-            </div>
-          </div>
-          
-        </div>
-      </div>
-    </div>
-  </div>
-  
-</section>
-<!--==============================
-              footer
-=================================-->
-<footer id="footer">
-  <div class="container">
-    <div class="row">
-      <div class="grid_12">
-        <div class="socials">
-          <a href="https://twitter.com/WebRTCWeb" class="fa fa-twitter"></a>
-          <a href="https://www.facebook.com/WebRTC" class="fa fa-facebook"></a>
-          <a href="https://plus.google.com/+WebRTC-Experiment" class="fa fa-google-plus"></a>
-          <!--
-          <a href="https://youtube.com/dashingquill" class="fa fa-youtube-play"></a>
-          -->
-        </div>
-        <div class="copyright"><span class="brand">
-            <a href="http://www.muazkhan.com">Muaz Khan</a></span> &copy; <span id="copyright-year"></span> | 
-            <a href="https://www.webrtc-experiment.com/licence/">MIT License</a> | 
-            <a href="mailto:muazkh@gmail.com" target="_blank">muazkh@gmail.com</a> | 
-            <a href="https://github.com/muaz-khan" target="_blank">Github</a>
-        </div>
-      </div>
-    </div>
-  </div>
-</footer>
+    <del>broadcasters</del>
+  </section>
+
+  <section id="c">
+    <h2><a href="#c">c</a></h2>
+    <ul>
+      <li>
+        <a href="docs/checkPresence/">checkPresence</a>
+      </li>
+      <li>
+        <a href="docs/closeSocket/">closeSocket</a>
+      </li>
+      <li>
+        <a href="docs/close/">close</a>
+      </li>
+      <li>
+        <a href="docs/connectSocket/">connectSocket</a>
+      </li>
+      <li>
+        <a href="docs/candidates/">candidates</a>
+      </li>
+      <li>
+        <a href="docs/captureUserMedia/">captureUserMedia</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection/blob/master/docs/api.md#changeuserid">changeUserId</a>
+      </li>
+      <li>
+        <a href="#noapi">checkIfChromeExtensionAvailable</a>
+      </li>
+      <li>
+        <a href="docs/chunkSize/">chunkSize</a>
+      </li>
+      <li>
+        <a href="#noapi">closeBeforeUnload</a>
+      </li>
+      <li>
+        <a href="docs/connect/">connect</a>
+      </li>
+      <li>
+        <a href="docs/constructor/">constructor</a>
+      </li>
+      <li>
+        <a href="#noapi">connectWithAllParticipants</a>
+      </li>
+      <li>
+        <a href="#noapi">codecs</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection/blob/master/docs/api.md#disable-video-nack">CodecsHandler</a>
+      </li>
+    </ul>
+
+    <del>closeEntireSession</del>
+  </section>
+
+  <section id="d">
+    <h2><a href="#d">d</a></h2>
+    <ul>
+      <li>
+        <a href="docs/disconnectWith/">disconnectWith</a>
+      </li>
+      <li>
+        <a href="#noapi">disconnect</a>
+      </li>
+      <li>
+        <a href="#noapi">deletePeer</a>
+      </li>
+      <li>
+        <a href="docs/direction/">direction</a>
+      </li>
+      <li>
+        <a href="docs/dontAttachStream/">dontAttachStream</a>
+      </li>
+      <li>
+        <a href="docs/dontCaptureUserMedia/">dontCaptureUserMedia</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection/blob/master/docs/api.md#dontgetremotestream">dontGetRemoteStream</a>
+      </li>
+      <li>
+        <a href="#noapi">dontMakeMeModerator</a>
+      </li>
+      <li>
+        <a href="docs/DetectRTC/">DetectRTC</a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="e">
+    <h2><a href="#e">e</a></h2>
+    <ul>
+      <li>
+        <a href="docs/enableLogs/">enableLogs</a>
+      </li>
+      <li>
+        <a href="docs/extra/">extra</a>
+      </li>
+      <li>
+        <a href="#noapi">enableFileSharing</a>
+      </li>
+      <li>
+        <a href="#noapi">enableScalableBroadcast</a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="f">
+    <h2><a href="#f">f</a></h2>
+    <ul>
+      <li>
+        <a href="#noapi">filesContainer</a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="g">
+    <h2><a href="#g">g</a></h2>
+    <ul>
+      <li>
+        <a href="docs/getAllParticipants/">getAllParticipants</a>
+      </li>
+      <li>
+        <a href="#noapi">getChromeExtensionStatus</a>
+      </li>
+      <li>
+        <a href="#noapi">getExtraData</a>
+      </li>
+      <li>
+        <a href="#noapi">getNumberOfBroadcastViewers</a>
+      </li>
+      <li>
+        <a href="#noapi">getPublicModerators</a>
+      </li>
+      <li>
+        <a href="#noapi">getRemoteStreams</a>
+      </li>
+      <li>
+        <a href="#noapi">getScreenConstraints</a>
+      </li>
+      <li>
+        <a href="#noapi">getSocket</a>
+      </li>
+      <li>
+        <a href="#noapi">getUserMedia</a>
+      </li>
+      <li>
+        <a href="#noapi">getUserMediaHandler</a>
+      </li>
+      <li>
+        <a href="#noapi">googKey</a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="i">
+    <h2><a href="#i">i</a></h2>
+    <ul>
+      <li>
+        <a href="docs/iceServers/">iceServers</a>
+      </li>
+      <li>
+        <a href="docs/iceProtocols/">iceProtocols</a>
+      </li>
+      <li>
+        <a href="#noapi">iceTransportPolicy</a>
+      </li>
+      <li>
+        <a href="#noapi">invokeGetUserMedia</a>
+      </li>
+      <li>
+        <a href="#noapi">invokeSelectFileDialog</a>
+      </li>
+      <li>
+        <a href="docs/isInitiator/">isInitiator</a>
+      </li>
+      <li>
+        <a href="#noapi">isOnline</a>
+      </li>
+      <li>
+        <a href="#noapi">isPluginRTC</a>
+      </li>
+    </ul>
+    <del>isLowBandwidth</del>
+  </section>
+
+  <section id="j">
+    <h2><a href="#j">j</a></h2>
+    <ul>
+      <li>
+        <a href="docs/join/">join</a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="l">
+    <h2><a href="#l">l</a></h2>
+    <ul>
+      <li>
+        <a href="docs/leave/">leave</a>
+      </li>
+      <li>
+        <a href="docs/language/">language</a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="m">
+    <h2><a href="#m">m</a></h2>
+    <ul>
+      <li>
+        <a href="docs/mediaConstraints/">mediaConstraints</a>
+      </li>
+      <li>
+        <a href="docs/maxParticipantsAllowed/">maxParticipantsAllowed</a>
+      </li>
+      <li>
+        <a href="#noapi">maxRelayLimitPerUser</a>
+      </li>
+      <li>
+        <a href="#noapi">modifyScreenConstraints</a>
+      </li>
+      <li>
+        <a href="#noapi">multiPeersHandler</a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="o">
+    <h2><a href="#o">o</a></h2>
+    <ul>
+      <li>
+        <a href="docs/open/">open</a>
+      </li>
+      <li>
+        <a href="docs/openOrJoin/">openOrJoin</a>
+      </li>
+      <li>
+        <a href="docs/onstream/">onstream</a>
+      </li>
+      <li>
+        <a href="docs/onstreamended/">onstreamended</a>
+      </li>
+      <li>
+        <a href="docs/onopen/">onopen</a>
+      </li>
+      <li>
+        <a href="docs/onmessage/">onmessage</a>
+      </li>
+      <li>
+        <a href="docs/onclose/">onclose</a>
+      </li>
+      <li>
+        <a href="docs/onerror/">onerror</a>
+      </li>
+      <li>
+        <a href="docs/onleave/">onleave</a>
+      </li>
+      <li>
+        <a href="docs/onmute/">onmute</a>
+      </li>
+      <li>
+        <a href="docs/onunmute/">onunmute</a>
+      </li>
+      <li>
+        <a href="#noapi">optionalArgument</a>
+      </li>
+      <li>
+        <a href="docs/onExtraDataUpdated/">onExtraDataUpdated</a>
+      </li>
+      <li>
+        <a href="docs/onFileStart/">onFileStart</a>
+      </li>
+      <li>
+        <a href="docs/onFileProgress/">onFileProgress</a>
+      </li>
+      <li>
+        <a href="docs/onFileEnd/">onFileEnd</a>
+      </li>
+      <li>
+        <a href="#noapi">onInvalidPassword</a>
+      </li>
+      <li>
+        <a href="#noapi">onJoinWithPassword</a>
+      </li>
+      <li>
+        <a href="docs/onMediaError/">onMediaError</a>
+      </li>
+      <li>
+        <a href="#noapi">onNewParticipant</a>
+      </li>
+      <li>
+        <a href="#noapi">onNumberOfBroadcastViewersUpdated</a>
+      </li>
+      <li>
+        <a href="#noapi">onPasswordMaxTriesOver</a>
+      </li>
+      <li>
+        <a href="#noapi">onPeerStateChanged</a>
+      </li>
+      <li>
+        <a href="docs/onUserStatusChanged/">onUserStatusChanged</a>
+      </li>
+      <li>
+        <a href="#noapi">onReConnecting</a>
+      </li>
+      <li>
+        <a href="#noapi">onRoomFull</a>
+      </li>
+      <li>
+        <a href="#noapi">onSettingLocalDescription</a>
+      </li>
+      <li>
+        <a href="#noapi">onUserIdAlreadyTaken</a>
+      </li>
+      <li>
+        <a href="#noapi">oneRoomAlreadyExist</a>
+      </li>
+    </ul>
+
+    <del>onEntireSessionClosed, onstatechange, onstats, onShiftedModerationControl</del>
+  </section>
+
+  <section id="p">
+    <h2><a href="#p">p</a></h2>
+    <ul>
+      <li>
+        <a href="docs/peers/">peers</a>
+      </li>
+      <li>
+        <a href="docs/processSdp/">processSdp</a>
+      </li>
+      <li>
+        <a href="#noapi">peersBackup</a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="r">
+    <h2><a href="#r">r</a></h2>
+    <ul>
+      <li>
+        <a href="docs/rejoin/">rejoin</a>
+      </li>
+      <li>
+        <a href="docs/removeStream/">removeStream</a>
+      </li>
+      <li>
+        <a href="docs/renegotiate/">renegotiate</a>
+      </li>
+      <li>
+        <a href="#noapi">replaceTrack</a>
+      </li>
+      <li>
+        <a href="#noapi">resetTrack</a>
+      </li>
+      <li>
+        <a href="#noapi">rtcpMuxPolicy</a>
+      </li>
+    </ul>
+
+    <del>removeFromBroadcastersList</del>
+  </section>
+
+  <section id="s">
+    <h2><a href="#s">s</a></h2>
+    <ul>
+      <li>
+        <a href="docs/socketURL/">socketURL</a>
+      </li>
+      <li>
+        <a href="docs/session/">session</a>
+      </li>
+      <li>
+        <a href="docs/send/">send</a>
+      </li>
+      <li>
+        <a href="#noapi">shareFile</a>
+      </li>
+      <li>
+        <a href="docs/streamEvents/">streamEvents</a>
+      </li>
+      <li>
+        <a href="#noapi">setCustomSocketEvent</a>
+      </li>
+      <li>
+        <a href="docs/setCustomSocketHandler/">setCustomSocketHandler</a>
+      </li>
+      <li>
+        <a href="#noapi">socketCustomEvent</a>
+      </li>
+      <li>
+        <a href="#noapi">socketMessageEvent</a>
+      </li>
+      <li>
+        <a href="docs/streams/">streams</a>
+      </li>
+      <li>
+        <a href="docs/sdpConstraints/">sdpConstraints</a>
+      </li>
+      <li>
+        <a href="docs/sessionid/">sessionid</a>
+      </li>
+      <li>
+        <a href="#noapi">socketMessageEvent</a>
+      </li>
+      <li>
+        <a href="#noapi">socketOptions</a>
+      </li>
+      <li>
+        <a href="#noapi">setStreamEndHandler</a>
+      </li>
+      <li>
+        <a href="#noapi">setUserPreferences</a>
+      </li>
+      <li>
+        <a href="#noapi">StreamsHandler</a>
+      </li>
+    </ul>
+
+    <del>shiftModerationControl</del>
+  </section>
+
+  <section id="t">
+    <h2><a href="#t">t</a></h2>
+    <ul>
+      <li>
+        <a href="docs/trickleIce/">trickleIce</a>
+      </li>
+      <li>
+        <a href="docs/token/">token</a>
+      </li>
+      <li>
+        <a href="docs/Translator/">Translator</a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="u">
+    <h2><a href="#u">u</a></h2>
+    <ul>
+      <li>
+        <a href="docs/userid/">userid</a>
+      </li>
+      <li>
+        <a href="docs/updateExtraData/">updateExtraData</a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="v">
+    <h2><a href="#v">v</a></h2>
+    <ul>
+      <li>
+        <a href="#noapi">version</a>
+      </li>
+      <li>
+        <a href="#noapi">videosContainer</a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="extras">
+    <h2><a href="#extras">extras</a></h2>
+    <ul>
+      <li>
+        <a href="docs/Write-Android-Apps/">Write Android apps</a>
+      </li>
+      <li>
+        <a href="docs/Write-iOS-Apps/">Write iOS apps</a>
+      </li>
+      <li>
+        <a href="http://webrtcweb.com/cordova-apps/">Cordova Apps (open-sourced)</a>
+      </li>
+    </ul>
+  </section>
+
+  <section id="contribute">
+    <h2><a href="#contribute">contribute</a></h2>
+    <p style="margin:0;padding:0;margin-left: 20px;">
+      Do you want to contribute fixing (updating) these documentations? <a href="https://github.com/muaz-khan/RTCMultiConnection/tree/gh-pages" class="highlighted">RTCMultiConnection/gh-pages</a>
+    </p>
+  </section>
+
+  <footer>
+    <small id="feedback"></small>
+  </footer>
+
+  <script>
+      document.querySelectorAll('a[href="#noapi"]').forEach(function(link) {
+        link.onclick = function(event) {
+          event.preventDefault();
+          alert('The selected API (' + this.innerHTML + ') is NOT documented yet.');
+        };
+      });
+      window.useThisGithubPath = 'muaz-khan/RTCMultiConnection';
+  </script>
+
+  <script src="https://cdn.webrtc-experiment.com/commits.js"></script>
 </body>
 </html>
