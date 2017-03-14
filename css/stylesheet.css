@@ -83,6 +83,11 @@ a:hover, h2 a, nav a, .highlighted {
     color: #EC008C;
 }
 
+.bg-yellow {
+    background: yellow;
+    border: 1px dotted #EC008C;
+}
+
 del {
     color: #c9c9c9;
     margin-top: 20px;
