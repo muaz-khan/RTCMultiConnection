@@ -63,7 +63,7 @@ connection.autoTranslateText <span style="color:#ff5600">=</span> <span style="c
     <tbody>
       <tr>
         <td>autoTranslateText</td>
-        <td>It is a boolean, that can beither "true" or "false"</td>
+        <td>It is a boolean, that can be either "true" or "false"</td>
       </tr>
     </tbody>
     </table>
@@ -72,19 +72,18 @@ connection.autoTranslateText <span style="color:#ff5600">=</span> <span style="c
 
   <section id="demo">
     <h2><a href="#demo">Demo</a></h2>
-    <pre style="background:#fff;color:#000"><span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
-<span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
+    <pre style="background:#fff;color:#000">&lt;script src=<span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"</span>>&lt;/script>
+&lt;script src=<span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"</span>>&lt;/script>
 
-<span style="color:#ff5600">&lt;</span>script<span style="color:#ff5600">></span>
+&lt;script>
 <span style="color:#ff5600">var</span> connection <span style="color:#ff5600">=</span> <span style="color:#ff5600">new</span> <span style="color:#21439c">RTCMultiConnection</span>();
 
 <span style="color:#919191">// this line is VERY_important</span>
 connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00a33f">'https://rtcmulticonnection.herokuapp.com:443/'</span>;
 
-<span style="color:#919191">// if you want audio+video conferencing</span>
+<span style="color:#919191">// if you want to open data channels</span>
 connection.session <span style="color:#ff5600">=</span> {
-    audio: <span style="color:#a535ae">true</span>,
-    video: <span style="color:#a535ae">true</span>
+    data: <span style="color:#a535ae">true</span>
 };
 
 connection.openOrJoin(<span style="color:#00a33f">'your-room-id'</span>);
@@ -95,10 +94,10 @@ connection.autoTranslateText <span style="color:#ff5600">=</span> <span style="c
 
 <span style="color:#919191">// you can use "e.data" and "e.original"</span>
 <span style="color:#a535ae">connection</span>.<span style="color:#21439c">onmessage</span> <span style="color:#ff5600">=</span> <span style="color:#ff5600">function</span>(e) {
-   <span style="color:#919191">// e.data     ---- japanese text</span>
-   <span style="color:#919191">// e.original ---- original text</span>
+    <span style="color:#919191">// e.data     ---- japanese text</span>
+    <span style="color:#919191">// e.original ---- original text</span>
 };
-<span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
+&lt;/script>
 </pre>
   </section>
 
