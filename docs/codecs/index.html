@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
-  <title>checkPresence | RTCMultiConnection</title>
+  <title>codecs | RTCMultiConnection</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link rel="shortcut icon" href="../../images/logo.png">
   <meta name="google-site-verification" content="0ZfJnHomOzZDWKIkhkRYklDwdYnyEFEnZ7neD7gzHPU" />
@@ -37,35 +37,16 @@
   </header>
 
   <h1>
-    checkPresence | RTCMultiConnection
-    <p>Use this method to check if room exist.</p>
+    codecs | RTCMultiConnection
+    <p>You can manage audio/video codecs e.g. vp8, vp9, h264, opus, isac, G722 etc.</p>
   </h1>
 
   <section id="usage">
     <h2><a href="#usage">Usage</a></h2>
-    <pre style="background:#fff;color:#000">connection.checkPresence(<span style="color:#00a33f">'room-id'</span>, <span style="color:#ff5600">function</span>(isRoomExist, roomid) {
-    <span style="color:#ff5600">if</span> (isRoomExist <span style="color:#ff5600">===</span> <span style="color:#a535ae">true</span>) {
-        connection.<span style="color:#a535ae">join</span>(roomid);
-    } <span style="color:#ff5600">else</span> {
-        connection.<span style="color:#a535ae">open</span>(roomid);
-    }
-});
-</pre>
-  </section>
-
-  <section id="looper">
-    <h2><a href="#looper">Keep checking for room</a></h2>
-    <pre style="background:#fff;color:#000"><span style="color:#919191">// below method "checkRoom" keeps checking for room until joins it</span>
-(<span style="color:#ff5600">function</span> <span style="color:#21439c">checkRoom</span>() {
-    connection.checkPresence(<span style="color:#00a33f">'your-room-id'</span>, <span style="color:#ff5600">function</span>(isRoomExist, roomid) {
-        <span style="color:#ff5600">if</span> (isRoomExist <span style="color:#ff5600">===</span> <span style="color:#a535ae">false</span>) {
-            connection.<span style="color:#a535ae">join</span>(roomid);
-            <span style="color:#ff5600">return</span>;
-        }
-
-        <span style="color:#a535ae">setTimeout</span>(checkRoom, 3000); <span style="color:#919191">// recheck after every 3 seconds</span>
-    });
-})();
+    <pre style="background:#fff;color:#000">connection.codecs <span style="color:#ff5600">=</span> {
+    video: <span style="color:#00a33f">'H264'</span>,
+    audio: <span style="color:#00a33f">'G722'</span>
+};
 </pre>
   </section>
 
@@ -76,22 +57,48 @@
     <thead><tr><th>parameter</th><th>description</th></tr></thead>
     <tbody>
       <tr>
-        <td>roomid</td>
-        <td>API will match this string on socket.io server</td>
+        <td>audio</td>
+        <td>Audio codecs e.g. "opus", "G722", "ISAC" etc.</td>
       </tr>
       <tr>
-        <td>callback</td>
-        <td>
-            A function gets two parameters:<br>
-            1) "isRoomExist" which is a boolean<br>
-            2) "roomid" which is a room-id string
-        </td>
+        <td>video</td>
+        <td>Video codecs e.g. "h264", "vp9", "vp8" etc.</td>
       </tr>
     </tbody>
     </table>
     </div>
   </section>
-  
+
+  <section id="use-h264">
+    <h2><a href="#use-h264">Wanna use H264 for video?</a></h2>
+    <pre style="background:#fff;color:#000">connection.codecs.video <span style="color:#ff5600">=</span> <span style="color:#00a33f">'H264'</span>;
+</pre>
+  </section>
+
+  <section id="use-VP8">
+    <h2><a href="#use-VP8">Wanna use VP8 for video?</a></h2>
+    <pre style="background:#fff;color:#000">connection.codecs.video <span style="color:#ff5600">=</span> <span style="color:#00a33f">'VP8'</span>;
+</pre>
+  </section>
+
+  <section id="use-VP9">
+    <h2><a href="#use-VP9">Wanna use VP9 for video?</a></h2>
+    <pre style="background:#fff;color:#000">connection.codecs.video <span style="color:#ff5600">=</span> <span style="color:#00a33f">'VP9'</span>;
+</pre>
+  </section>
+
+  <section id="use-G722">
+    <h2><a href="#use-G722">Wanna use G722 for audio?</a></h2>
+    <pre style="background:#fff;color:#000">connection.codecs.audio <span style="color:#ff5600">=</span> <span style="color:#00a33f">'G722'</span>;
+</pre>
+  </section>
+
+  <section id="use-opus">
+    <h2><a href="#use-opus">Wanna use opus for audio?</a></h2>
+    <pre style="background:#fff;color:#000">connection.codecs.audio <span style="color:#ff5600">=</span> <span style="color:#00a33f">'opus'</span>;
+</pre>
+  </section>
+
   <section id="demo">
     <h2><a href="#demo">Demo</a></h2>
     <pre style="background:#fff;color:#000"><span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
@@ -109,13 +116,12 @@ connection.session <span style="color:#ff5600">=</span> {
     video: <span style="color:#a535ae">true</span>
 };
 
-connection.checkPresence(<span style="color:#00a33f">'room-id'</span>, <span style="color:#ff5600">function</span>(isRoomExist, roomid) {
-    <span style="color:#ff5600">if</span> (isRoomExist <span style="color:#ff5600">===</span> <span style="color:#a535ae">true</span>) {
-        connection.<span style="color:#a535ae">join</span>(roomid);
-    } <span style="color:#ff5600">else</span> {
-        connection.<span style="color:#a535ae">open</span>(roomid);
-    }
-});
+connection.codecs <span style="color:#ff5600">=</span> {
+    video: <span style="color:#00a33f">'H264'</span>,
+    audio: <span style="color:#00a33f">'G722'</span>
+};
+
+connection.openOrJoin(<span style="color:#00a33f">'your-room-id'</span>);
 <span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
 </pre>
   </section>

@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
-  <title>checkPresence | RTCMultiConnection</title>
+  <title>beforeAddingStream | RTCMultiConnection</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link rel="shortcut icon" href="../../images/logo.png">
   <meta name="google-site-verification" content="0ZfJnHomOzZDWKIkhkRYklDwdYnyEFEnZ7neD7gzHPU" />
@@ -37,35 +37,23 @@
   </header>
 
   <h1>
-    checkPresence | RTCMultiConnection
-    <p>Use this method to check if room exist.</p>
+    beforeAddingStream | RTCMultiConnection
+    <p>You can skip any stream or allow RTCMultiConnection to share a stream with remote users.</p>
+    <p><code>nativePeer.addStream</code> method will be called only if "beforeAddingStream" permits it.</p>
   </h1>
 
   <section id="usage">
     <h2><a href="#usage">Usage</a></h2>
-    <pre style="background:#fff;color:#000">connection.checkPresence(<span style="color:#00a33f">'room-id'</span>, <span style="color:#ff5600">function</span>(isRoomExist, roomid) {
-    <span style="color:#ff5600">if</span> (isRoomExist <span style="color:#ff5600">===</span> <span style="color:#a535ae">true</span>) {
-        connection.<span style="color:#a535ae">join</span>(roomid);
-    } <span style="color:#ff5600">else</span> {
-        connection.<span style="color:#a535ae">open</span>(roomid);
-    }
-});
-</pre>
-  </section>
+    <pre style="background:#fff;color:#000"><span style="color:#a535ae">connection</span>.<span style="color:#21439c">beforeAddingStream</span> <span style="color:#ff5600">=</span> <span style="color:#ff5600">function</span>(stream, peer) {
+    <span style="color:#ff5600">if</span>(stream.<span style="color:#a535ae">id</span> <span style="color:#ff5600">==</span> <span style="color:#00a33f">'any-streamid'</span>) <span style="color:#ff5600">return</span>; <span style="color:#919191">// skip</span>
+    <span style="color:#ff5600">if</span>(stream.isScreen) <span style="color:#ff5600">return</span>; <span style="color:#919191">// skip</span>
+    <span style="color:#ff5600">if</span>(stream.inactive) <span style="color:#ff5600">return</span>; <span style="color:#919191">// skip</span>
 
-  <section id="looper">
-    <h2><a href="#looper">Keep checking for room</a></h2>
-    <pre style="background:#fff;color:#000"><span style="color:#919191">// below method "checkRoom" keeps checking for room until joins it</span>
-(<span style="color:#ff5600">function</span> <span style="color:#21439c">checkRoom</span>() {
-    connection.checkPresence(<span style="color:#00a33f">'your-room-id'</span>, <span style="color:#ff5600">function</span>(isRoomExist, roomid) {
-        <span style="color:#ff5600">if</span> (isRoomExist <span style="color:#ff5600">===</span> <span style="color:#a535ae">false</span>) {
-            connection.<span style="color:#a535ae">join</span>(roomid);
-            <span style="color:#ff5600">return</span>;
-        }
+    <span style="color:#919191">// var remoteUserId = peer.userid;</span>
+    <span style="color:#919191">// var remoteUserExtra = connection.peers[remoteUserId].extra;</span>
 
-        <span style="color:#a535ae">setTimeout</span>(checkRoom, 3000); <span style="color:#919191">// recheck after every 3 seconds</span>
-    });
-})();
+    <span style="color:#ff5600">return</span> stream; <span style="color:#919191">// otherwise allow RTCMultiConnection to share this stream with remote users</span>
+};
 </pre>
   </section>
 
@@ -76,22 +64,18 @@
     <thead><tr><th>parameter</th><th>description</th></tr></thead>
     <tbody>
       <tr>
-        <td>roomid</td>
-        <td>API will match this string on socket.io server</td>
+        <td>stream</td>
+        <td>MediaStream object</td>
       </tr>
       <tr>
-        <td>callback</td>
-        <td>
-            A function gets two parameters:<br>
-            1) "isRoomExist" which is a boolean<br>
-            2) "roomid" which is a room-id string
-        </td>
+        <td>peer</td>
+        <td>remoteUserId = peer.userid<br>remoteUserExtra = peer.extra</td>
       </tr>
     </tbody>
     </table>
     </div>
   </section>
-  
+
   <section id="demo">
     <h2><a href="#demo">Demo</a></h2>
     <pre style="background:#fff;color:#000"><span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
@@ -109,13 +93,16 @@ connection.session <span style="color:#ff5600">=</span> {
     video: <span style="color:#a535ae">true</span>
 };
 
-connection.checkPresence(<span style="color:#00a33f">'room-id'</span>, <span style="color:#ff5600">function</span>(isRoomExist, roomid) {
-    <span style="color:#ff5600">if</span> (isRoomExist <span style="color:#ff5600">===</span> <span style="color:#a535ae">true</span>) {
-        connection.<span style="color:#a535ae">join</span>(roomid);
-    } <span style="color:#ff5600">else</span> {
-        connection.<span style="color:#a535ae">open</span>(roomid);
+<span style="color:#a535ae">connection</span>.<span style="color:#21439c">beforeAddingStream</span> <span style="color:#ff5600">=</span> <span style="color:#ff5600">function</span>(stream, peer) {
+    <span style="color:#ff5600">if</span>(peer.userid <span style="color:#ff5600">===</span> <span style="color:#00a33f">'xyz'</span>) {
+       <span style="color:#919191">// do not share any stream with user "XYZ"</span>
+       <span style="color:#ff5600">return</span>;
     }
-});
+
+    <span style="color:#ff5600">return</span> stream;
+};
+
+connection.openOrJoin(<span style="color:#00a33f">'your-room-id'</span>);
 <span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
 </pre>
   </section>

@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
-  <title>processSdp | RTCMultiConnection</title>
+  <title>BandwidthHandler | RTCMultiConnection</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link rel="shortcut icon" href="../../images/logo.png">
   <meta name="google-site-verification" content="0ZfJnHomOzZDWKIkhkRYklDwdYnyEFEnZ7neD7gzHPU" />
@@ -37,75 +37,12 @@
   </header>
 
   <h1>
-    processSdp | RTCMultiConnection
-    <p>This method can be used to modify SDP yourself!</p>
-    <p>You can modify SDP to force h264, vp9 or vp8 codecs.</p>
-    <p>You can even modify SDP for application-level bandwidth and many other SDP-attributes.</p>
+    BandwidthHandler | RTCMultiConnection
+    <p>BandwidthHandler allows you manage application-level bandwidth and many other SDP-attributes.</p>
   </h1>
 
   <section id="usage">
     <h2><a href="#usage">Usage</a></h2>
-    <pre style="background:#fff;color:#000"><span style="color:#a535ae">connection</span>.<span style="color:#21439c">processSdp</span> <span style="color:#ff5600">=</span> <span style="color:#ff5600">function</span>(sdp) {
-    <span style="color:#919191">// modify SDP here</span>
-    sdp <span style="color:#ff5600">=</span> remove_vp8_codecs(sdp);
-    sdp <span style="color:#ff5600">=</span> prefer_opus(sdp);
-    sdp <span style="color:#ff5600">=</span> use_maxaveragebitrate(sdp);
-
-    <span style="color:#919191">// return the modified SDP</span>
-    <span style="color:#ff5600">return</span> sdp;
-};
-</pre>
-  </section>
-
-  <section id="description">
-    <h2><a href="#description">Description</a></h2>
-    <div class="datagrid">
-    <table>
-    <thead><tr><th>parameter</th><th>description</th></tr></thead>
-    <tbody>
-      <tr>
-        <td>sdp</td>
-        <td>SDP string is passed as first parameter</td>
-      </tr>
-    </tbody>
-    </table>
-    </div>
-  </section>
-
-  <section id="isac-audio">
-    <h2><a href="#isac-audio">Force ISAC audio; and remove all other codecs</a></h2>
-    <pre style="background:#fff;color:#000"><span style="color:#a535ae">connection</span>.<span style="color:#21439c">processSdp</span> <span style="color:#ff5600">=</span> <span style="color:#ff5600">function</span> (sdp) {
-    sdp <span style="color:#ff5600">=</span> forceIsac(sdp);
-    <span style="color:#ff5600">return</span> sdp;
-};
-
-<span style="color:#ff5600">function</span> <span style="color:#21439c">forceIsac</span>(sdp) {
-    <span style="color:#919191">// Remove all other codecs (not the video codecs though).</span>
-    sdp <span style="color:#ff5600">=</span> sdp.<span style="color:#a535ae">replace</span>(<span style="color:#00a33f">/m=audio (\d+) RTP\/SAVPF.*\r\n/g</span>,
-        <span style="color:#00a33f">'m=audio $1 RTP/SAVPF 104\r\n'</span>);
-    sdp <span style="color:#ff5600">=</span> sdp.<span style="color:#a535ae">replace</span>(<span style="color:#00a33f">'a=fmtp:111 minptime=10'</span>, <span style="color:#00a33f">'a=fmtp:104 minptime=10'</span>);
-    sdp <span style="color:#ff5600">=</span> sdp.<span style="color:#a535ae">replace</span>(<span style="color:#00a33f">/a=rtpmap:(?!104)\d{1,3} (?!VP8|red|ulpfec).*\r\n/g</span>, <span style="color:#00a33f">''</span>);
-    <span style="color:#ff5600">return</span> sdp;
-}
-</pre>
-  </section>
-
-  <section id="disable-video-nack">
-    <h2><a href="#disable-video-nack">Disable Video NACK</a></h2>
-    <pre style="background:#fff;color:#000"><span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"/dev/CodecsHandler.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
-<span style="color:#ff5600">&lt;</span>script<span style="color:#ff5600">></span>
-<span style="color:#919191">// in your HTML file</span>
-<span style="color:#a535ae">connection</span>.<span style="color:#21439c">processSdp</span> <span style="color:#ff5600">=</span> <span style="color:#ff5600">function</span>(sdp) {
-    <span style="color:#919191">// Disable NACK to test IDR recovery</span>
-    sdp <span style="color:#ff5600">=</span> CodecsHandler.disableNACK(sdp);
-    <span style="color:#ff5600">return</span> sdp;
-};
-<span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
-</pre>
-  </section>
-
-  <section id="use-BandwidthHandler">
-    <h2><a href="#use-BandwidthHandler">Use BandwidthHandler</a></h2>
     <pre style="background:#fff;color:#000"><span style="color:#ff5600">var</span> BandwidthHandler <span style="color:#ff5600">=</span> connection.BandwidthHandler;
 connection.bandwidth <span style="color:#ff5600">=</span> {
     audio: 128,
@@ -137,48 +74,48 @@ connection.bandwidth <span style="color:#ff5600">=</span> {
 </pre>
   </section>
 
-  <section id="use-SdpSerializer">
-    <h2><a href="#use-SdpSerializer">Use SdpSerializer</a></h2>
-    <pre style="background:#fff;color:#000"><span style="color:#919191">// https://cdn.webrtc-experiment.com/SdpSerializer.js</span>
-<span style="color:#a535ae">connection</span>.<span style="color:#21439c">processSdp</span> <span style="color:#ff5600">=</span> <span style="color:#ff5600">function</span> (sdp) {
-    <span style="color:#ff5600">var</span> serializer <span style="color:#ff5600">=</span> <span style="color:#ff5600">new</span> <span style="color:#21439c">SdpSerializer</span>(sdp);
-    
-    <span style="color:#919191">// remove entire audio m-line</span>
-    serializer.audio.<span style="color:#a535ae">remove</span>();
-
-    <span style="color:#919191">// change order of a payload type in video m-line</span>
-    serializer.video.payload(117).order(0);
-
-    <span style="color:#919191">// inject new-line after a specific payload type; under video m-line</span>
-    serializer.video.payload(117).newLine(<span style="color:#00a33f">'a=ptime:10'</span>);
-
-    <span style="color:#919191">// remove a specific payload type; under video m-line</span>
-    serializer.video.payload(100).<span style="color:#a535ae">remove</span>();
-
-    <span style="color:#919191">// want to add/replace a crypto line?</span>
-    serializer.video.<span style="color:#a535ae">crypto</span>().newLine(<span style="color:#00a33f">'a=crypto:0 AES_CM_128_HMAC_SHA1_80 inline:AAAAAAAAAAAAAAAAAAAAAAAAA'</span>);
-
-    <span style="color:#919191">// want to remove a crypto line?</span>
-    serializer.video.<span style="color:#a535ae">crypto</span>(80).<span style="color:#a535ae">remove</span>();
-
-    <span style="color:#919191">// want to set direction?</span>
-    serializer.video.direction.set(<span style="color:#00a33f">'sendonly'</span>);
-
-    <span style="color:#919191">// want to get direction?</span>
-    serializer.video.direction.get();
-
-    <span style="color:#919191">// want to remove entire audio or video track?</span>
-    <span style="color:#919191">// usually, in video m-line:</span>
-    <span style="color:#919191">// 0-track is always "video" stream</span>
-    <span style="color:#919191">// 1-track will be screen sharing stream (if attached)</span>
-    serializer.video.track(0).<span style="color:#a535ae">remove</span>()
-
-    <span style="color:#919191">// get serialized sdp</span>
-    sdp <span style="color:#ff5600">=</span> serializer.deserialize();
-    
-    <span style="color:#ff5600">return</span> sdp;
-};
+  <section id="description">
+    <h2><a href="#description">Description</a></h2>
+    <div class="datagrid">
+    <table>
+    <thead><tr><th>parameter</th><th>description</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>BandwidthHandler.setApplicationSpecificBandwidth</td>
+        <td>
+            Set "AS=kbps"<br>
+            1) first parameter is "sdp" string<br>
+            2) second parameter is "bandwidth" object {audio: 50, video: 100}<br>
+            3) last parameter is "isScreen" boolean; which forces 300kbps minimum video bitrates
+        </td>
+      </tr>
+      <tr>
+        <td>BandwidthHandler.setVideoBitrates</td>
+        <td>
+          1) first parameter is "sdp" string<br>
+          2) last parameter is {min: bitrates, max: bitrates}
+        </td>
+      </tr>
+      <tr>
+        <td>BandwidthHandler.setOpusAttributes</td>
+        <td>
+          1) first parameter is "sdp" string<br>
+          2) last parameter accepts all following:<br><pre style="background:#fff;color:#000">{
+    <span style="color:#00a33f">'stereo'</span>: 1,
+    <span style="color:#00a33f">'sprop-stereo'</span>: 1,
+    <span style="color:#00a33f">'maxaveragebitrate'</span>: connection.bandwidth.audio <span style="color:#ff5600">*</span> 1000 <span style="color:#ff5600">*</span> 8,
+    <span style="color:#00a33f">'maxplaybackrate'</span>: connection.bandwidth.audio <span style="color:#ff5600">*</span> 1000 <span style="color:#ff5600">*</span> 8,
+    <span style="color:#00a33f">'cbr'</span>: 1,
+    <span style="color:#00a33f">'useinbandfec'</span>: 1,
+    <span style="color:#00a33f">'usedtx'</span>: 1,
+    <span style="color:#00a33f">'maxptime'</span>: 3
+}
 </pre>
+        </td>
+      </tr>
+    </tbody>
+    </table>
+    </div>
   </section>
 
   <section id="demo">
