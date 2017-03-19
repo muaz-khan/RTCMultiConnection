@@ -270,16 +270,6 @@ module.exports = exports = function(app, socketCallback) {
                     listOfUsers[message.sender].connectedWith[message.remoteUserId] = listOfUsers[message.remoteUserId].socket;
                     listOfUsers[message.sender].socket.emit('user-connected', message.remoteUserId);
 
-                    if (!listOfUsers[message.remoteUserId]) {
-                        listOfUsers[message.remoteUserId] = {
-                            socket: null,
-                            connectedWith: {},
-                            isPublic: false,
-                            extra: {},
-                            maxParticipantsAllowed: params.maxParticipantsAllowed || 1000
-                        };
-                    }
-
                     listOfUsers[message.remoteUserId].connectedWith[message.sender] = socket;
 
                     if (listOfUsers[message.remoteUserId].socket) {
