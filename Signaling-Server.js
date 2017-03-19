@@ -252,17 +252,11 @@ module.exports = exports = function(app, socketCallback) {
         });
 
         socket.on('check-presence', function(userid, callback) {
-            if (userid === socket.userid && !!listOfUsers[userid]) {
-                callback(false, socket.userid, listOfUsers[userid].extra);
-                return;
+            if (!listOfUsers[userid]) {
+                callback(false, userid, {});
+            } else {
+                callback(userid !== socket.userid, userid, listOfUsers[userid].extra);
             }
-
-            var extra = {};
-            if (listOfUsers[userid]) {
-                extra = listOfUsers[userid].extra;
-            }
-
-            callback(!!listOfUsers[userid], userid, extra);
         });
 
         function onMessageCallback(message) {
