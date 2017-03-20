@@ -98,8 +98,18 @@ function serverHandler(request, response) {
             }
         }
 
+        var contentType = 'text/plain';
+        if(filename.toLowerCase().indexOf('.html') !== -1) {
+            contentType = 'text/html';
+        }
+        if(filename.toLowerCase().indexOf('.css') !== -1) {
+            contentType = 'text/css';
+        }
+        if(filename.toLowerCase().indexOf('.png') !== -1) {
+            contentType = 'image/png';
+        }
 
-        fs.readFile(filename, 'utf8', function(err, file) {
+        fs.readFile(filename, 'binary', function(err, file) {
             if (err) {
                 response.writeHead(500, {
                     'Content-Type': 'text/plain'
@@ -147,8 +157,10 @@ function serverHandler(request, response) {
                 }
             } catch (e) {}
 
-            response.writeHead(200);
-            response.write(file, 'utf8');
+            response.writeHead(200, {
+                'Content-Type': contentType
+            });
+            response.write(file, 'binary');
             response.end();
         });
     } catch (e) {
