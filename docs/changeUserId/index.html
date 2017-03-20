@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
-  <title>candidates | RTCMultiConnection</title>
+  <title>changeUserId | RTCMultiConnection</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link rel="shortcut icon" href="../../images/logo.png">
   <meta name="google-site-verification" content="0ZfJnHomOzZDWKIkhkRYklDwdYnyEFEnZ7neD7gzHPU" />
@@ -37,17 +37,15 @@
   </header>
 
   <h1>
-    candidates | RTCMultiConnection
-    <p>Manage STUN, TURN and host ip-addresses usage.</p>
+    changeUserId | RTCMultiConnection
+    <p>Change and update userid across all connected users.</p>
   </h1>
 
   <section id="usage">
     <h2><a href="#usage">Usage</a></h2>
-    <pre style="background:#fff;color:#000">connection.candidates <span style="color:#ff5600">=</span> {
-    turn: <span style="color:#a535ae">true</span>,
-    stun: <span style="color:#a535ae">true</span>,
-    host: <span style="color:#a535ae">false</span>
-};
+    <pre style="background:#fff;color:#000">connection.changeUserId(<span style="color:#00a33f">'new-userid'</span>, <span style="color:#ff5600">function</span>() {
+    <span style="color:#a535ae">alert</span>(<span style="color:#00a33f">'Your userid is successfully changed to: '</span> <span style="color:#ff5600">+</span> connection.userid);
+});
 </pre>
   </section>
 
@@ -58,16 +56,8 @@
     <thead><tr><th>parameter</th><th>description</th></tr></thead>
     <tbody>
       <tr>
-        <td>turn</td>
-        <td>Enable or disable "relay" ip-addresses</td>
-      </tr>
-      <tr>
-        <td>stun</td>
-        <td>Enable or disable (peer) "reflexive" ip-addresses</td>
-      </tr>
-      <tr>
-        <td>host</td>
-        <td>Enable or disable local ip-addresses</td>
+        <td>callback</td>
+        <td>Optional function; a confirmation from socket.io server</td>
       </tr>
     </tbody>
     </table>
@@ -91,11 +81,10 @@ connection.session <span style="color:#ff5600">=</span> {
     video: <span style="color:#a535ae">true</span>
 };
 
-<span style="color:#919191">// enable only relay ip-addresses</span>
-connection.candidates <span style="color:#ff5600">=</span> {
-    turn: <span style="color:#a535ae">true</span>,
-    stun: <span style="color:#a535ae">false</span>,
-    host: <span style="color:#a535ae">false</span>
+<span style="color:#a535ae">btnChangeUserId</span>.<span style="color:#21439c">onclick</span> <span style="color:#ff5600">=</span> <span style="color:#ff5600">function</span>() {
+    connection.changeUserId(<span style="color:#00a33f">'new-userid'</span>, <span style="color:#ff5600">function</span>() {
+        <span style="color:#a535ae">alert</span>(<span style="color:#00a33f">'Your userid is successfully changed to: '</span> <span style="color:#ff5600">+</span> connection.userid);
+    });
 };
 
 connection.openOrJoin(<span style="color:#00a33f">'your-room-id'</span>);

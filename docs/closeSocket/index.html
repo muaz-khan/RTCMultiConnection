@@ -2,7 +2,7 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
-  <title>candidates | RTCMultiConnection</title>
+  <title>closeSocket | RTCMultiConnection</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link rel="shortcut icon" href="../../images/logo.png">
   <meta name="google-site-verification" content="0ZfJnHomOzZDWKIkhkRYklDwdYnyEFEnZ7neD7gzHPU" />
@@ -37,41 +37,33 @@
   </header>
 
   <h1>
-    candidates | RTCMultiConnection
-    <p>Manage STUN, TURN and host ip-addresses usage.</p>
+    closeSocket | RTCMultiConnection
+    <p>Disconnect socket.io.</p>
   </h1>
 
   <section id="usage">
     <h2><a href="#usage">Usage</a></h2>
-    <pre style="background:#fff;color:#000">connection.candidates <span style="color:#ff5600">=</span> {
-    turn: <span style="color:#a535ae">true</span>,
-    stun: <span style="color:#a535ae">true</span>,
-    host: <span style="color:#a535ae">false</span>
-};
+    <pre style="background:#fff;color:#000">connection.closeSocket();
 </pre>
   </section>
 
-  <section id="description">
-    <h2><a href="#description">Description</a></h2>
-    <div class="datagrid">
-    <table>
-    <thead><tr><th>parameter</th><th>description</th></tr></thead>
-    <tbody>
-      <tr>
-        <td>turn</td>
-        <td>Enable or disable "relay" ip-addresses</td>
-      </tr>
-      <tr>
-        <td>stun</td>
-        <td>Enable or disable (peer) "reflexive" ip-addresses</td>
-      </tr>
-      <tr>
-        <td>host</td>
-        <td>Enable or disable local ip-addresses</td>
-      </tr>
-    </tbody>
-    </table>
-    </div>
+  <section id="best-practice">
+    <h2><a href="#best-practice">Best practice</a></h2>
+    <pre style="background:#fff;color:#000"><span style="color:#a535ae">btnLeave</span>.<span style="color:#21439c">onclick</span> <span style="color:#ff5600">=</span> <span style="color:#ff5600">function</span>() {
+    <span style="color:#919191">// disconnect with all users</span>
+    connection.getAllParticipants().forEach(<span style="color:#ff5600">function</span>(pid) {
+        connection.disconnectWith(pid);
+    });
+
+    <span style="color:#919191">// stop all local cameras</span>
+    connection.attachStreams.forEach(<span style="color:#ff5600">function</span>(localStream) {
+        localStream.<span style="color:#a535ae">stop</span>();
+    });
+
+    <span style="color:#919191">// close socket.io connection</span>
+    connection.closeSocket();
+};
+</pre>
   </section>
 
   <section id="demo">
@@ -91,11 +83,19 @@ connection.session <span style="color:#ff5600">=</span> {
     video: <span style="color:#a535ae">true</span>
 };
 
-<span style="color:#919191">// enable only relay ip-addresses</span>
-connection.candidates <span style="color:#ff5600">=</span> {
-    turn: <span style="color:#a535ae">true</span>,
-    stun: <span style="color:#a535ae">false</span>,
-    host: <span style="color:#a535ae">false</span>
+<span style="color:#a535ae">btnLeave</span>.<span style="color:#21439c">onclick</span> <span style="color:#ff5600">=</span> <span style="color:#ff5600">function</span>() {
+    <span style="color:#919191">// disconnect with all users</span>
+    connection.getAllParticipants().forEach(<span style="color:#ff5600">function</span>(pid) {
+        connection.disconnectWith(pid);
+    });
+
+    <span style="color:#919191">// stop all local cameras</span>
+    connection.attachStreams.forEach(<span style="color:#ff5600">function</span>(localStream) {
+        localStream.<span style="color:#a535ae">stop</span>();
+    });
+
+    <span style="color:#919191">// close socket.io connection</span>
+    connection.closeSocket();
 };
 
 connection.openOrJoin(<span style="color:#00a33f">'your-room-id'</span>);
