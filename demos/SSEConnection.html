@@ -1,255 +1,182 @@
+
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" dir="ltr">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta charset="utf-8">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="msapplication-tap-highlight" content="no">
-    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
-
-    <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
-
-    <title>SSEConnection using RTCMultiConnection</title>
-
-    <meta name="description" content="SSEConnection (Server Sent Events) using RTCMultiConnection." />
-    <meta name="keywords" content="WebRTC,RTCMultiConnection,Demos,Experiments,Samples,Examples" />
-
-    <style>
-        * {
-            word-wrap:break-word;
-        }
-        video {
-            object-fit: fill;
-            width: 30%;
-        }
-        button,
-        input,
-        select {
-            font-weight: normal;
-            padding: 2px 4px;
-            text-decoration: none;
-            display: inline-block;
-            text-shadow: none;
-            font-size: 16px;
-            outline: none;
-        }
-
-        .make-center {
-            text-align: center;
-            padding: 5px 10px;
-        }
-
-        img, input, textarea {
-          max-width: 100%
-        }
-
-        @media all and (max-width: 500px) {
-            .fork-left, .fork-right, .github-stargazers {
-                display: none;
-            }
-        }
-    </style>
+  <meta charset="utf-8">
+  <title>SSE+PHP Signaling using RTCMultiConnection</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <link rel="shortcut icon" href="images/logo.png">
+  <link rel="stylesheet" type="text/css" href="/demos/stylesheet.css">
 </head>
-
 <body>
-    <article>
+  <header>
+    <a class="logo" href="/"><img src="/demos/logo.png" alt="RTCMultiConnection"></a>
+    <nav>
+      <li>
+        <a href="http://www.rtcmulticonnection.org/docs/getting-started/">Getting Started</a>
+      </li>
+      <li>
+        <a href="http://www.rtcmulticonnection.org/FAQ/">FAQ</a>
+      </li>
+      <li>
+        <a href="https://www.youtube.com/playlist?list=PLPRQUXAnRydKdyun-vjKPMrySoow2N4tl">YouTube</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection#v3-demos">Demos</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection">Github</a>
+      </li>
+    </nav>
+  </header>
 
-        <header style="text-align: center;">
-            <h1>SSEConnection using RTCMultiConnection</h1>
-            <p>
-                <a href="https://rtcmulticonnection.herokuapp.com/">HOME</a>
-                <span> &copy; </span>
-                <a href="http://www.MuazKhan.com/" target="_blank">Muaz Khan</a> .
-                <a href="http://twitter.com/WebRTCWeb" target="_blank" title="Twitter profile for WebRTC Experiments">@WebRTCWeb</a> .
-                <a href="https://github.com/muaz-khan?tab=repositories" target="_blank" title="Github Profile">Github</a> .
-                <a href="https://github.com/muaz-khan/RTCMultiConnection/issues?state=open" target="_blank">Latest issues</a> .
-                <a href="https://github.com/muaz-khan/RTCMultiConnection/commits/master" target="_blank">What's New?</a>
-            </p>
-        </header>
+  <h1>
+    SSE+PHP Signaling using RTCMultiConnection
+    <p>This demo is using SSE (Server Sent Events) to setup WebRTC one-to-one connection. <a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/SSEConnection">Check PHP Source Codes</a></p>
+  </h1>
 
-        <div class="github-stargazers"></div>
+  <section class="make-center">
+      <input type="text" id="room-id" value="abcdef" autocorrect=off autocapitalize=off size=20>
+      <button id="open-room">Open Room</button>
+      <button id="join-room">Join Room</button>
 
-        <blockquote>
-            This demo is using SSE (Server Sent Events) to setup WebRTC one-to-one connection. <a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/SSEConnection">Check PHP Source Codes</a>
-        </blockquote>
+      <div id="room-urls" style="text-align: center;display: none;background: #F1EDED;margin: 15px -10px;border: 1px solid rgb(189, 189, 189);border-left: 0;border-right: 0;"></div>
 
-        <section class="experiment">
-            <div class="make-center">
-                <input type="text" id="room-id" value="abcdef" autocorrect=off autocapitalize=off size=20>
-                <button id="open-room">Open Room</button>
-                <button id="join-room">Join Room</button>
+      <div id="videos-container"></div>
+  </section>
 
-                <div id="room-urls" style="text-align: center;display: none;background: #F1EDED;margin: 15px -10px;border: 1px solid rgb(189, 189, 189);border-left: 0;border-right: 0;"></div>
-            </div>
+<script src="/dist/RTCMultiConnection.min.js"></script>
+<script src="/dev/SSEConnection.js"></script>
+<script>
+// ......................................................
+// .......................UI Code........................
+// ......................................................
+document.getElementById('open-room').onclick = function() {
+    disableInputButtons();
+    connection.open(document.getElementById('room-id').value, function() {
+        showRoomURL(connection.sessionid);
+    });
+};
 
-            <div id="videos-container"></div>
-        </section>
+document.getElementById('join-room').onclick = function() {
+    disableInputButtons();
+    connection.join(document.getElementById('room-id').value);
+};
 
-        <script src="/dist/RTCMultiConnection.min.js"></script>
+// ......................................................
+// ..................RTCMultiConnection Code.............
+// ......................................................
 
-        <!-- SSE for signaling -->
-        <script src="/dev/SSEConnection.js"></script>
+var connection = new RTCMultiConnection();
 
-        <script>
-            // ......................................................
-            // .......................UI Code........................
-            // ......................................................
+// Using SSE (Server Sent Events) for signaling
+connection.setCustomSocketHandler(SSEConnection);
 
-            document.getElementById('open-room').onclick = function() {
-                disableInputButtons();
-                connection.open(document.getElementById('room-id').value, function() {
-                    showRoomURL(connection.sessionid);
-                });
-            };
+connection.session = {
+    audio: true,
+    video: true
+};
 
-            document.getElementById('join-room').onclick = function() {
-                disableInputButtons();
-                connection.join(document.getElementById('room-id').value);
-            };
+connection.sdpConstraints.mandatory = {
+    OfferToReceiveAudio: true,
+    OfferToReceiveVideo: true
+};
 
-            // ......................................................
-            // ..................RTCMultiConnection Code.............
-            // ......................................................
+connection.videosContainer = document.getElementById('videos-container');
+connection.onstream = function(event) {
+    event.mediaElement.id = event.streamid;
+    connection.videosContainer.appendChild(event.mediaElement);
 
-            var connection = new RTCMultiConnection();
+    if (event.type === 'remote') {
+        connection.socket.close(); // release SSE connection
+    }
+};
 
-            // Using SSE (Server Sent Events) for signaling
-            connection.setCustomSocketHandler(SSEConnection);
+connection.onstreamended = function(event) {
+    var mediaElement = document.getElementById(event.streamid);
+    if (mediaElement && mediaElement.parentNode) {
+        mediaElement.parentNode.removeChild(mediaElement);
+    }
+};
 
-            connection.session = {
-                audio: true,
-                video: true
-            };
+function disableInputButtons() {
+    document.getElementById('open-room').disabled = true;
+    document.getElementById('join-room').disabled = true;
+    document.getElementById('room-id').disabled = true;
+}
 
-            connection.sdpConstraints.mandatory = {
-                OfferToReceiveAudio: true,
-                OfferToReceiveVideo: true
-            };
+// ......................................................
+// ......................Handling Room-ID................
+// ......................................................
 
-            connection.videosContainer = document.getElementById('videos-container');
-            connection.onstream = function(event) {
-                event.mediaElement.id = event.streamid;
-                connection.videosContainer.appendChild(event.mediaElement);
+function showRoomURL(roomid) {
+    var roomHashURL = '#' + roomid;
+    var roomQueryStringURL = '?roomid=' + roomid;
 
-                if(event.type === 'remote') {
-                    connection.socket.close(); // release SSE connection
-                }
-            };
+    var html = '<h2>Unique URL for your room:</h2><br>';
 
-            connection.onstreamended = function(event) {
-                var mediaElement = document.getElementById(event.streamid);
-                if(mediaElement && mediaElement.parentNode) {
-                    mediaElement.parentNode.removeChild(mediaElement);
-                }
-            };
+    html += 'Hash URL: <a href="' + roomHashURL + '" target="_blank">' + roomHashURL + '</a>';
+    html += '<br>';
+    html += 'QueryString URL: <a href="' + roomQueryStringURL + '" target="_blank">' + roomQueryStringURL + '</a>';
 
-            function disableInputButtons() {
-                document.getElementById('open-room').disabled = true;
-                document.getElementById('join-room').disabled = true;
-                document.getElementById('room-id').disabled = true;
-            }
+    var roomURLsDiv = document.getElementById('room-urls');
+    roomURLsDiv.innerHTML = html;
 
-            // ......................................................
-            // ......................Handling Room-ID................
-            // ......................................................
+    roomURLsDiv.style.display = 'block';
+}
 
-            function showRoomURL(roomid) {
-                var roomHashURL = '#' + roomid;
-                var roomQueryStringURL = '?roomid=' + roomid;
+(function() {
+    var params = {},
+        r = /([^&=]+)=?([^&]*)/g;
 
-                var html = '<h2>Unique URL for your room:</h2><br>';
+    function d(s) {
+        return decodeURIComponent(s.replace(/\+/g, ' '));
+    }
+    var match, search = window.location.search;
+    while (match = r.exec(search.substring(1)))
+        params[d(match[1])] = d(match[2]);
+    window.params = params;
+})();
 
-                html += 'Hash URL: <a href="' + roomHashURL + '" target="_blank">' + roomHashURL + '</a>';
-                html += '<br>';
-                html += 'QueryString URL: <a href="' + roomQueryStringURL + '" target="_blank">' + roomQueryStringURL + '</a>';
+var roomid = '';
+if (localStorage.getItem(connection.socketMessageEvent)) {
+    roomid = localStorage.getItem(connection.socketMessageEvent);
+} else {
+    roomid = connection.token();
+}
+document.getElementById('room-id').value = roomid;
+document.getElementById('room-id').onkeyup = function() {
+    localStorage.setItem(connection.socketMessageEvent, this.value);
+};
 
-                var roomURLsDiv = document.getElementById('room-urls');
-                roomURLsDiv.innerHTML = html;
+var hashString = location.hash.replace('#', '');
+if (hashString.length && hashString.indexOf('comment-') == 0) {
+    hashString = '';
+}
 
-                roomURLsDiv.style.display = 'block';
-            }
+var roomid = params.roomid;
+if (!roomid && hashString.length) {
+    roomid = hashString;
+}
 
-            (function() {
-                var params = {},
-                    r = /([^&=]+)=?([^&]*)/g;
+if (roomid && roomid.length) {
+    document.getElementById('room-id').value = roomid;
+    localStorage.setItem(connection.socketMessageEvent, roomid);
 
-                function d(s) {
-                    return decodeURIComponent(s.replace(/\+/g, ' '));
-                }
-                var match, search = window.location.search;
-                while (match = r.exec(search.substring(1)))
-                    params[d(match[1])] = d(match[2]);
-                window.params = params;
-            })();
+    // auto-join-room
+    connection.join(roomid);
 
-            var roomid = '';
-            if (localStorage.getItem(connection.socketMessageEvent)) {
-                roomid = localStorage.getItem(connection.socketMessageEvent);
-            } else {
-                roomid = connection.token();
-            }
-            document.getElementById('room-id').value = roomid;
-            document.getElementById('room-id').onkeyup = function() {
-                localStorage.setItem(connection.socketMessageEvent, this.value);
-            };
+    disableInputButtons();
+}
+</script>
 
-            var hashString = location.hash.replace('#', '');
-            if(hashString.length && hashString.indexOf('comment-') == 0) {
-              hashString = '';
-            }
+  <footer>
+    <small id="send-message"></small>
+  </footer>
 
-            var roomid = params.roomid;
-            if(!roomid && hashString.length) {
-                roomid = hashString;
-            }
-
-            if(roomid && roomid.length) {
-                document.getElementById('room-id').value = roomid;
-                localStorage.setItem(connection.socketMessageEvent, roomid);
-
-                // auto-join-room
-                connection.join(roomid);
-
-                disableInputButtons();
-            }
-        </script>
-
-        <section class="experiment own-widgets latest-commits">
-            <h2 class="header" id="updates" style="color: red;padding-bottom: .1em;"><a href="https://github.com/muaz-khan/RTCMultiConnection/commits/master">Latest Updates</a></h2>
-            <div id="github-commits"></div>
-        </section>
-
-        <section class="experiment own-widgets">
-            <h2 class="header" id="updates" style="color: red;padding-bottom: .1em;"><a href="https://github.com/muaz-khan/RTCMultiConnection/issues">Latest Issues</a></h2>
-            <div id="github-issues"></div>
-        </section>
-
-        <section class="experiment">
-            <h2 class="header" id="feedback">Feedback</h2>
-            <div>
-                <textarea id="message" style="height: 8em; margin: .2em; width: 98%; border: 1px solid rgb(189, 189, 189); outline: none; resize: vertical;" placeholder="Have any message? Suggestions or something went wrong?"></textarea>
-            </div>
-            <button id="send-message" style="font-size: 1em;">Send Message</button><small style="margin-left:1em;">Enter your email too; if you want "direct" reply!</small>
-        </section>
-
-        <a href="https://github.com/muaz-khan/RTCMultiConnection" class="fork-left"></a>
-
-        <script>
-            window.useThisGithubPath = 'muaz-khan/RTCMultiConnection';
-        </script>
-        <script src="https://cdn.webrtc-experiment.com/commits.js" async></script>
-
-    </article>
-
-    <footer>
-        <p>
-            <a href="https://www.webrtc-experiment.com">WebRTC Experiments</a> © <a href="https://plus.google.com/+MuazKhan" rel="author" target="_blank">Muaz Khan</a>
-            <a href="mailto:muazkh@gmail.com" target="_blank">muazkh@gmail.com</a>
-            <a href="https://github.com/muaz-khan" target="_blank">Github</a>
-        </p>
-    </footer>
-
+  <script src="https://cdn.webrtc-experiment.com/common.js"></script>
 </body>
-
 </html>
