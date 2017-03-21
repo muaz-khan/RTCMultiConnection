@@ -31,6 +31,7 @@ h1 {
 
 h1 p {
     font-size: 17px;
+    font-weight: normal;
 }
 
 h2 {
@@ -74,11 +75,15 @@ ul {
 }
 
 a {
-    margin-right: 10px;
-    color: black;
+    margin: 0 10px;
+    color: #EC008C;
 }
 
-a:hover, h2 a, nav a, .highlighted {
+a:hover {
+    color: #671345;
+}
+
+.highlighted {
     color: #EC008C;
 }
 
@@ -120,6 +125,8 @@ pre {
 
 .datagrid table td, .datagrid table th {
   padding: 3px 10px;
+  border-bottom: 1px solid #006699;
+  border-left: 1px solid #006699;
 }
 
 .datagrid table thead th {
@@ -138,7 +145,6 @@ pre {
 
 .datagrid table tbody td {
   color: #00496B;
-  border-left: 1px solid #E1EEF4;
   font-weight: normal;
 }
 
