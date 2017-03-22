@@ -58,7 +58,7 @@
     <pre style="background:#fff;color:#000"><span style="color:#919191">// below method "checkRoom" keeps checking for room until joins it</span>
 (<span style="color:#ff5600">function</span> <span style="color:#21439c">checkRoom</span>() {
     connection.checkPresence(<span style="color:#00a33f">'your-room-id'</span>, <span style="color:#ff5600">function</span>(isRoomExist, roomid) {
-        <span style="color:#ff5600">if</span> (isRoomExist <span style="color:#ff5600">===</span> <span style="color:#a535ae">false</span>) {
+        <span style="color:#ff5600">if</span> (isRoomExist <span style="color:#ff5600">===</span> <span style="color:#a535ae">true</span>) {
             connection.<span style="color:#a535ae">join</span>(roomid);
             <span style="color:#ff5600">return</span>;
         }

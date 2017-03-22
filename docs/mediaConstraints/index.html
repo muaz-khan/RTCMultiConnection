@@ -1,189 +1,300 @@
 ﻿<!DOCTYPE html>
-<html id="home" lang="en">
-
+<html lang="en" dir="ltr">
 <head>
-    <title>"RTCMultiConnection.mediaConstraints" object / API Reference</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
-    <meta name="author" content="Muaz Khan">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    
-    <link rel="stylesheet" href="//www.rtcmulticonnection.org/style.css">
-	
-    <style>
-            p { padding: .8em; }
-
-            li {
-                border-bottom: 1px solid rgb(189, 189, 189);
-                border-left: 1px solid rgb(189, 189, 189);
-                padding: .5em;
-            }
-			
-			.image-container {
-				text-align:center;
-				margin: 2em 0;
-			}
-			
-			.image-parent {
-				margin: 0 2em;
-				border: 2px solid black;
-				border-radius: 5px;
-			}
-			
-			.image-parent img {
-				width: 100%;
-			}
-			
-			li pre {
-				margin: 0;
-			}
-        </style>
-    <!-- for HTML5 el styling -->
-    <script>
-        document.createElement('article');
-        document.createElement('footer');
-    </script>
-	
-	<script type="text/javascript" src="//www.rtcmulticonnection.org/syntax/sh_main.min.js"></script>
-    <script type="text/javascript" src="//www.rtcmulticonnection.org/syntax/sh_javascript.min.js"></script>
-    <script type="text/javascript" src="//www.rtcmulticonnection.org/syntax/sh_html.min.js"></script>
-    <link type="text/css" rel="stylesheet" href="//www.rtcmulticonnection.org/syntax/sh_style.css">
+  <meta charset="utf-8">
+  <title>mediaConstraints | RTCMultiConnection</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <link rel="shortcut icon" href="../../images/logo.png">
+  <meta name="google-site-verification" content="0ZfJnHomOzZDWKIkhkRYklDwdYnyEFEnZ7neD7gzHPU" />
+  <link rel="stylesheet" type="text/css" href="../../css/stylesheet.css">
 </head>
+<body>
+  <header>
+    <a class="logo" href="../../"><img src="../../images/logo.png" alt="RTCMultiConnection"></a>
+    <nav>
+      <li>
+        <a href="../../">Home</a>
+      </li>
+      <li>
+        <a href="../getting-started/">Getting Started</a>
+      </li>
+      <li>
+        <a href="../../FAQ/">FAQ</a>
+      </li>
+      <li>
+        <a href="https://www.youtube.com/playlist?list=PLPRQUXAnRydKdyun-vjKPMrySoow2N4tl">YouTube</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection#v3-demos">Demos</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection">Github</a>
+      </li>
+    </nav>
+  </header>
 
-<body onload="sh_highlightDocument();">
-    <article>
-        <a href="http://www.RTCMultiConnection.org/docs/" style="border-bottom: 1px solid #2844FA; font-size: 1.2em; position: absolute; text-decoration: none;right:0;top:0;">RTCMultiConnection Docs</a>
+  <h1>
+    mediaConstraints | RTCMultiConnection
+    <p>Choose front or back camera, set resolutions, choose camera/microphone by device-id etc.</p>
+  </h1>
 
-        <h1><a href="http://www.RTCMultiConnection.org/">RTCMultiConnection</a> API Reference / "<a href="http://www.RTCMultiConnection.org/docs/mediaConstraints/"><code>mediaConstraints</code></a>" object</h1>
-		
-        <div class="github-stargazers"></div>
-        
-        <blockquote class="inline">
-            "<a href="http://www.RTCMultiConnection.org/docs/mediaConstraints/"><code>mediaConstraints</code></a>" object works same as <a href="http://dev.w3.org/2011/webrtc/editor/getusermedia.html#idl-def-Constraints" target="_blank">getUserMedia API constraints</a>.
-        </blockquote>
-        
-        <section class="experiment">
-            <h2 id="v2.1.8">
-                <a href="#v2.1.8">Since v2.1.8</a>
-            </h2>
-            <pre class="sh_javascript">
-var videoConstraints = {
-    mandatory: {
-        maxWidth: 1920,
-        maxHeight: 1080,
-        minAspectRatio: 1.77,
-        minFrameRate: 3,
-        maxFrameRate: 64
-    },
-    optional: []
-};
-
-var audioConstraints = {
-    mandatory: {
-        // echoCancellation: false,
-        googEchoCancellation: false, // disabling audio processing
-        googAutoGainControl: true,
-        googNoiseSuppression: true,
-        googHighpassFilter: true,
-        googTypingNoiseDetection: true,
-        //googAudioMirroring: true
-    },
-    optional: []
-};
-
-connection.<a href="http://www.RTCMultiConnection.org/docs/mediaConstraints/"><code>mediaConstraints</code></a> = {
-    video: videoConstraints,
-    audio: audioConstraints
+  <section id="usage">
+    <h2><a href="#usage">Usage</a></h2>
+    <pre style="background:#fff;color:#000">connection.mediaConstraints <span style="color:#ff5600">=</span> {
+    video: <span style="color:#a535ae">true</span>,
+    audio: <span style="color:#a535ae">true</span>
 };
 </pre>
-        </section>
-        
-        <section class="experiment">
-            <h2 id="quick-example">
-                <a href="#quick-example">Quick Example</a>
-            </h2>
-            <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/mediaConstraints/"><code>mediaConstraints</code></a> = {
-    mandatory: {
-        maxWidth: 1920,
-        maxHeight: 1080,
-        minAspectRatio: 1.77,
+  </section>
 
-        minFrameRate: 3,
-        maxFrameRate: 64
-    },
-    optional: [
-        bandwidth: 256
-    ]
-};
-</pre>
-        </section>
-        
-        <section class="experiment">
-            <h2 id="normal-video">
-                <a href="#normal-video">Normal video...</a>
-            </h2>
-            <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/mediaConstraints/"><code>mediaConstraints</code></a> = {
-    mandatory: {},
-    optional: []
-};
-</pre>
-        </section>
-        
-        <section class="experiment">
-            <h2 id="audio-constraints">
-                <a href="#audio-constraints">Audio Constraints</a>
-            </h2>
-            <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/mediaConstraints/"><code>mediaConstraints</code></a>.audio = {
-    mandatory: {
-        googEchoCancellation: true,
-        googAutoGainControl: true,
-        googNoiseSuppression: true,
-        googHighpassFilter: true,
-        googTypingNoiseDetection: true,
-        googAudioMirroring: true
-    },
-    optional: []
+  <section id="description">
+    <h2><a href="#description">Description</a></h2>
+    <div class="datagrid">
+    <table>
+    <thead><tr><th>parameter</th><th>description</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>audio</td>
+        <td>
+            it can be a boolean (true|false) or a javascript object<br>
+            use this to enable microphone<br>
+            set microphone device-id<br>
+            set echo-cancellation browser-specific attributes<br>
+            etc.
+        </td>
+      </tr>
+      <tr>
+        <td>video</td>
+        <td>
+            it can be a boolean (true|false) or a javascript object<br>
+            use this to enable camera<br>
+            set camera device-id<br>
+            choose front or back camera<br>
+            set frame-rates, aspect-ratio<br>
+            etc.
+        </td>
+      </tr>
+    </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section id="fackingMode">
+    <h2><a href="#fackingMode">Choose front camera on Android</a></h2>
+    <pre style="background:#fff;color:#000">connection.mediaConstraints <span style="color:#ff5600">=</span> {
+    audio: <span style="color:#a535ae">true</span>,
+    video: {
+        mandatory: {},
+        optional: [{
+            facingMode: <span style="color:#00a33f">'user'</span> <span style="color:#919191">// or "application" for back camera</span>
+        }]
+    }
 };
 
-connection.<a href="http://www.RTCMultiConnection.org/docs/mediaConstraints/"><code>mediaConstraints</code></a> = {
-    mandatory: {
-        googNoiseReduction: true,
-        googCpuOveruseDetection: true
-    },
-    optional: []
-};
+<span style="color:#ff5600">if</span> (DetectRTC.browser.<span style="color:#a535ae">name</span> <span style="color:#ff5600">===</span> <span style="color:#00a33f">'Firefox'</span>) {
+    connection.mediaConstraints <span style="color:#ff5600">=</span> {
+        audio: <span style="color:#a535ae">true</span>,
+        video: {
+            facingMode: <span style="color:#00a33f">'user'</span> <span style="color:#919191">// or "application" for back camera</span>
+        }
+    };
+}
 </pre>
-        </section>
+  </section>
 
-        <br />
-        <br />
-        <section style="border: 1px solid rgb(189, 189, 189); margin: 1em 3em; border-radius: .2em;">
-                <h2 id="feedback" style="padding: .2em .4em; border-bottom: 1px solid rgb(189, 189, 189);">Want to ask a Question?</h2>
-                <div>
-                    <textarea id="message" style="height: 8em; margin: .2em; width: 98%; border: 1px solid rgb(189, 189, 189); outline: none; resize: vertical;" placeholder="Feel free to ask any question regarding RTCMultiConnection.js!"></textarea>
-                </div>
-                <button id="send-message" style="font-size: 1em;">Ask a Question</button><small style="margin-left:1em;">You can include your email for private conversation!</small>
-            </section>
-            
-            <section class="experiment own-widgets latest-commits">
-                <h2 class="header" id="updates" style="color: red; padding-bottom: .1em;"><a href="https://github.com/muaz-khan/WebRTC-Experiment/commits/master" target="_blank">Latest Updates</a></h2>
-                <div id="github-commits"></div>
-            </section>
-    </article>
-    
-    <a href="https://github.com/muaz-khan/WebRTC-Experiment/tree/master/RTCMultiConnection" class="fork-left"></a>
-	
-        <footer>
-            <a href="https://www.webrtc-experiment.com/" target="_blank">WebRTC Experiments!</a> and 
-            <a href="http://www.RTCMultiConnection.org/docs/" target="_blank">RTCMultiConnection.js</a> ©
-            <a href="mailto:muazkh@gmail.com" target="_blank">Muaz Khan</a>:
-            <a href="https://twitter.com/WebRTCWeb" target="_blank">@WebRTCWeb</a>
-        </footer>
-    <script src="//www.rtcmulticonnection.org/commits.js"> </script>
+  <section id="frameRate">
+    <h2><a href="#frameRate">Set frame-rates</a></h2>
+    <pre style="background:#fff;color:#000">connection.mediaConstraints <span style="color:#ff5600">=</span> {
+    audio: <span style="color:#a535ae">true</span>,
+    video: {
+        mandatory: {
+            minFrameRate: 15,
+            maxFrameRate: 15
+        },
+        optional: []
+    }
+};
+
+<span style="color:#ff5600">if</span> (DetectRTC.browser.<span style="color:#a535ae">name</span> <span style="color:#ff5600">===</span> <span style="color:#00a33f">'Firefox'</span>) {
+    connection.mediaConstraints <span style="color:#ff5600">=</span> {
+        audio: <span style="color:#a535ae">true</span>,
+        video: {
+            frameRate: {
+                min: 15,
+                max: 15
+            }
+        }
+    };
+}
+</pre>
+  </section>
+
+  <section id="aspectRatio">
+    <h2><a href="#aspectRatio">Set aspect-ratio</a></h2>
+    <pre style="background:#fff;color:#000">connection.mediaConstraints <span style="color:#ff5600">=</span> {
+    audio: <span style="color:#a535ae">true</span>,
+    video: {
+        mandatory: {
+            minAspectRatio: 1.77
+        },
+        optional: []
+    }
+};
+
+<span style="color:#ff5600">if</span> (DetectRTC.browser.<span style="color:#a535ae">name</span> <span style="color:#ff5600">===</span> <span style="color:#00a33f">'Firefox'</span>) {
+    connection.mediaConstraints <span style="color:#ff5600">=</span> {
+        audio: <span style="color:#a535ae">true</span>,
+        video: {
+            aspectRatio: 1.77
+        }
+    };
+}
+</pre>
+  </section>
+
+  <section id="resolutions">
+    <h2><a href="#resolutions">Set resolutions</a></h2>
+    <pre style="background:#fff;color:#000">connection.mediaConstraints <span style="color:#ff5600">=</span> {
+    audio: <span style="color:#a535ae">true</span>,
+    video: {
+        mandatory: {
+            minWidth: 1280,
+            maxWidth: 1280,
+            minHeight: 720,
+            maxHeight: 720
+        },
+        optional: []
+    }
+};
+
+<span style="color:#ff5600">if</span> (DetectRTC.browser.<span style="color:#a535ae">name</span> <span style="color:#ff5600">===</span> <span style="color:#00a33f">'Firefox'</span>) {
+    connection.mediaConstraints <span style="color:#ff5600">=</span> {
+        audio: <span style="color:#a535ae">true</span>,
+        video: {
+            width: 1280,
+            height: 720
+        }
+    };
+}
+</pre>
+  </section>
+
+  <section id="echo-cancellation">
+    <h2><a href="#echo-cancellation">Echo cancellation (browser specific)</a></h2>
+    <pre style="background:#fff;color:#000">connection.mediaConstraints <span style="color:#ff5600">=</span> {
+    video: <span style="color:#a535ae">true</span>,
+    audio: {
+        mandatory: {
+            echoCancellation: <span style="color:#a535ae">false</span>, <span style="color:#919191">// disabling audio processing</span>
+            googAutoGainControl: <span style="color:#a535ae">true</span>,
+            googNoiseSuppression: <span style="color:#a535ae">true</span>,
+            googHighpassFilter: <span style="color:#a535ae">true</span>,
+            googTypingNoiseDetection: <span style="color:#a535ae">true</span>,
+            <span style="color:#919191">//googAudioMirroring: true</span>
+        },
+        optional: []
+    }
+};
+
+<span style="color:#ff5600">if</span> (DetectRTC.browser.<span style="color:#a535ae">name</span> <span style="color:#ff5600">===</span> <span style="color:#00a33f">'Firefox'</span>) {
+    connection.mediaConstraints <span style="color:#ff5600">=</span> {
+        audio: <span style="color:#a535ae">true</span>,
+        video: <span style="color:#a535ae">true</span>
+    };
+}
+</pre>
+  </section>
+
+  <section id="deviceId">
+    <h2><a href="#deviceId">Choose secondary camera</a></h2>
+    <pre style="background:#fff;color:#000">DetectRTC.<span style="color:#a535ae">load</span>(<span style="color:#ff5600">function</span>() {
+    <span style="color:#ff5600">var</span> secondaryCamera <span style="color:#ff5600">=</span> DetectRTC.videoInputDevices[1];
+    <span style="color:#ff5600">if</span> (<span style="color:#ff5600">!</span>secondaryCamera) {
+        <span style="color:#a535ae">alert</span>(<span style="color:#00a33f">'Please attach another camera device.'</span>);
+        <span style="color:#ff5600">return</span>;
+    }
+
+    connection.mediaConstraints <span style="color:#ff5600">=</span> {
+        audio: <span style="color:#a535ae">true</span>,
+        video: {
+            mandatory: {},
+            optional: [{
+                sourceId: secondaryCamera.<span style="color:#a535ae">id</span>
+            }]
+        }
+    };
+
+    <span style="color:#ff5600">if</span> (DetectRTC.browser.<span style="color:#a535ae">name</span> <span style="color:#ff5600">===</span> <span style="color:#00a33f">'Firefox'</span>) {
+        connection.mediaConstraints <span style="color:#ff5600">=</span> {
+            audio: <span style="color:#a535ae">true</span>,
+            video: {
+                deviecId: secondaryCamera.<span style="color:#a535ae">id</span>
+            }
+        };
+    }
+});
+</pre>
+  </section>
+  
+  <section id="demo">
+    <h2><a href="#demo">Demo</a></h2>
+    <pre style="background:#fff;color:#000"><span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
+<span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
+
+<span style="color:#ff5600">&lt;</span>script<span style="color:#ff5600">></span>
+<span style="color:#ff5600">var</span> connection <span style="color:#ff5600">=</span> <span style="color:#ff5600">new</span> <span style="color:#21439c">RTCMultiConnection</span>();
+
+<span style="color:#919191">// this line is VERY_important</span>
+connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00a33f">'https://rtcmulticonnection.herokuapp.com:443/'</span>;
+
+<span style="color:#919191">// if you want audio+video conferencing</span>
+connection.session <span style="color:#ff5600">=</span> {
+    audio: <span style="color:#a535ae">true</span>,
+    video: <span style="color:#a535ae">true</span>
+};
+
+connection.mediaConstraints <span style="color:#ff5600">=</span> {
+    audio: <span style="color:#a535ae">true</span>,
+    video: {
+        mandatory: {
+            minWidth: 1280,
+            maxWidth: 1280,
+            minHeight: 720,
+            maxHeight: 720,
+            minFrameRate: 30,
+            minAspectRatio: 1.77
+        },
+        optional: [{
+            facingMode: <span style="color:#00a33f">'user'</span> <span style="color:#919191">// or "application"</span>
+        }]
+    }
+};
+
+<span style="color:#ff5600">if</span> (DetectRTC.browser.<span style="color:#a535ae">name</span> <span style="color:#ff5600">===</span> <span style="color:#00a33f">'Firefox'</span>) {
+    connection.mediaConstraints <span style="color:#ff5600">=</span> {
+        audio: <span style="color:#a535ae">true</span>,
+        video: {
+            width: 1280,
+            height: 720,
+            frameRate: 30,
+            aspectRatio: 1.77,
+            facingMode: <span style="color:#00a33f">'user'</span> <span style="color:#919191">// or "application"</span>
+        }
+    };
+}
+
+connection.openOrJoin(<span style="color:#00a33f">'your-room-id'</span>);
+<span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
+</pre>
+  </section>
+
+  <footer>
+    <small id="send-message"></small>
+  </footer>
+
+  <script src="https://cdn.webrtc-experiment.com/common.js"></script>
 </body>
 </html>
