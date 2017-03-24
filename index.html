@@ -584,6 +584,7 @@
 
   <script>
       document.querySelectorAll('a[href="#noapi"]').forEach(function(link) {
+        if(link.parentNode.parentNode.parentNode.nodeName.toLowerCase() !== 'section') return;
         link.onclick = function(event) {
           event.preventDefault();
           alert('The selected API (' + this.innerHTML + ') is NOT documented yet.');
@@ -595,12 +596,26 @@
         text = text.toString().toLowerCase().trim();
 
         var found = 0;
+        var foundParent = {};
         document.querySelectorAll('a').forEach(function(link) {
+          if(!link.parentNode.parentNode.parentNode) return;
+          if(link.parentNode.parentNode.parentNode.nodeName.toLowerCase() !== 'section') return;
+
           var html = link.innerHTML.toString().toLowerCase();
           if(!text || !text.length || html.indexOf(text) == -1) {
             link.className = '';
+
+            if(text && text.length && html.indexOf(text) == -1 && !foundParent[link.parentNode.parentNode.parentNode.id]) {
+              link.parentNode.parentNode.parentNode.style.display = 'none';
+            }
+            else {
+              link.parentNode.parentNode.parentNode.style.display = 'block';
+            }
+            
             return;
           }
+          foundParent[link.parentNode.parentNode.parentNode.id] = true;
+          link.parentNode.parentNode.parentNode.style.display = 'block';
 
           link.className = 'highlighted bg-yellow';
           found++;
