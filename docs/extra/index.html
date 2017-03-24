@@ -1,227 +1,157 @@
 <!DOCTYPE html>
-<html id="home" lang="en">
-
+<html lang="en" dir="ltr">
 <head>
-    <title>RTCMultiConnection.extra "object"</title>
-    <meta name="description" content="RTCMultiConnection.extra object allows you share extra information among all participants. E.g. you can share user full-name, email, phone-numbers, profile photos or whatever. All participants in the meeting will get extra information." />
-    <meta name="keywords" content="iOS,Android,Cordova,CrossWalk-Project,RTCMultiConnection,JavaScript,WebRTC,Demos,Experiments,Samples,Examples" />
-
-
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
-    <meta name="author" content="Muaz Khan">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-
-    <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
-
-    <style>
-        p {
-            padding: .8em;
-        }
-        li {
-            border-bottom: 1px solid rgb(189, 189, 189);
-            border-left: 1px solid rgb(189, 189, 189);
-            padding: .5em;
-        }
-        .image-container {
-            margin: 2em 0;
-            text-align: center;
-        }
-        .image-parent {
-            border: 2px solid black;
-            border-radius: 5px;
-            margin: 0 2em;
-        }
-        .image-parent img {
-            width: 100%;
-        }
-
-        p {
-          margin-top: 0!important;
-          margin-bottom: 0!important;
-          padding: 10px 10px!important;
-        }
-
-        blockquote {
-          margin: 10px;
-          border-radius: 10px;
-          background: rgb(253, 253, 253);
-          padding: 8px 20px;
-          font-size: 25px;
-          font-weight: 200;
-          line-height: 1.5;
-          word-spacing: 5px;
-        }
-
-        section blockquote {
-          color: #EC008C;
-        }
-
-        .specific-h2, h1 {
-          font-size: 35px;
-          font-weight: 200;
-          padding: 5px 10px;
-          border-bottom: 1px dotted #EC008C;
-        }
-
-        .specific-h2 a {
-          color: #EC008C;
-        }
-
-        h1 {
-          font-size: 40px;
-          color: #EC008C;
-        }
-    </style>
-    <!-- for HTML5 el styling -->
-    <script>
-        document.createElement('article');
-        document.createElement('footer');
-    </script>
-
-    <script src="https://cdn.webrtc-experiment.com/syntax/sh_main.min.js" type="text/javascript"> </script>
-    <script src="https://cdn.webrtc-experiment.com/syntax/sh_javascript.min.js" type="text/javascript"> </script>
-    <script src="https://cdn.webrtc-experiment.com/syntax/sh_html.min.js" type="text/javascript"> </script>
-    <link href="https://cdn.webrtc-experiment.com/syntax/sh_style.css" type="text/css" rel="stylesheet">
+  <meta charset="utf-8">
+  <title>extra | RTCMultiConnection</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <link rel="shortcut icon" href="../../images/logo.png">
+  <meta name="google-site-verification" content="0ZfJnHomOzZDWKIkhkRYklDwdYnyEFEnZ7neD7gzHPU" />
+  <link rel="stylesheet" type="text/css" href="../../css/stylesheet.css">
 </head>
+<body>
+  <header>
+    <a class="logo" href="../../"><img src="../../images/logo.png" alt="RTCMultiConnection"></a>
+    <nav>
+      <li>
+        <a href="../../">Home</a>
+      </li>
+      <li>
+        <a href="../getting-started/">Getting Started</a>
+      </li>
+      <li>
+        <a href="../../FAQ/">FAQ</a>
+      </li>
+      <li>
+        <a href="https://www.youtube.com/playlist?list=PLPRQUXAnRydKdyun-vjKPMrySoow2N4tl">YouTube</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection#v3-demos">Demos</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection">Github</a>
+      </li>
+    </nav>
+  </header>
 
-<body onload="sh_highlightDocument();">
-    <article>
-        <a href="http://www.RTCMultiConnection.org/docs/" style="border-bottom: 1px solid #2844FA; font-size: 1.2em; position: absolute; right: 0; text-decoration: none; top: 0;">RTCMultiConnection Docs</a>
+  <h1>
+    extra | RTCMultiConnection
+    <p>Share extra information among all participants.</p>
+    <p>
+      "event.extra" is accessible from all events e.g. 
+      <a href="../onopen/">onopen</a>
+      <a href="../onmessage/">onmessage</a>
+      <a href="../onstream/">onstream</a>
+      <a href="../onExtraDataUpdated/">onExtraDataUpdated</a>
+      etc.
+    </p>
+  </h1>
 
-        <header style="text-align: center;">
-            <h1>
-                RTCMultiConnection.extra "object"
-            </h1>
+  <section id="usage">
+    <h2><a href="#usage">Usage</a></h2>
+    <pre style="background:#fff;color:#000">connection.extra <span style="color:#ff5600">=</span> {
+    fullName: <span style="color:#00a33f">'Your full name'</span>,
+    email: <span style="color:#00a33f">'Your email'</span>,
+    photo: <span style="color:#00a33f">'http://site.com/profile.png'</span>
+};
 
-            <p>
-                <a href="https://rtcmulticonnection.herokuapp.com/">HOME</a>
-                <span> &copy; </span>
-                <a href="http://www.MuazKhan.com/" target="_blank">Muaz Khan</a> .
-                <a href="http://twitter.com/WebRTCWeb" target="_blank" title="Twitter profile for WebRTC Experiments">@WebRTCWeb</a> .
-                <a href="https://github.com/muaz-khan?tab=repositories" target="_blank" title="Github Profile">Github</a> .
-                <a href="https://github.com/muaz-khan/RTCMultiConnection/issues?state=open" target="_blank">Latest issues</a> .
-                <a href="https://github.com/muaz-khan/RTCMultiConnection/commits/master" target="_blank">What's New?</a>
-            </p>
-        </header>
+connection.openOrJoin(<span style="color:#00a33f">'the-room-id'</span>);
+</pre>
+  </section>
 
-        <div class="github-stargazers"></div>
-
-        <blockquote>
-            RTCMultiConnection.extra object allows you share extra information among all participants. E.g. you can share user full-name, email, phone-numbers, profile photos or whatever. All participants in the meeting will get extra information.
-
-            <br><br>
-
-            <iframe src="http://www.youtube.com/embed/r4eA7TX4ZEk?autoplay=0&vq=hd720&hd=1" style="width: 100%;" height="460" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
-        </blockquote>
-
-        <section class="experiment">
-          <h2 class="specific-h2"><a id="set-extra-information" href="#set-extra-information">How to set extra information?</a></h2>
-
-          <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/extra/">extra</a> = {
-  username: 'muazkh',
-  fullname: 'Muaz Khan',
-  email: 'muazkh@gmail.com',
-  boolean: true,
-  integer: 123,
-  objects: {},
-  whatever: 'whatever'
+  <section id="description">
+    <h2><a href="#description">Description</a></h2>
+    <div class="datagrid">
+    <table>
+    <thead><tr><th>parameter</th><th>description</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>extra</td>
+        <td>
+            it is a javascript object which accepts any kind of value<br>
+            it can be a string<br>
+            it can be a number<br>
+            it can be a boolean<br>
+            it can be a javascript object<br>
+            etc.
+            <pre style="background:#fff;color:#000">connection.extra <span style="color:#ff5600">=</span> {
+    username: <span style="color:#00a33f">'muazkh'</span>,
+    fullname: <span style="color:#00a33f">'Muaz Khan'</span>,
+    email: <span style="color:#00a33f">'muazkh@gmail.com'</span>,
+    <span style="color:#ff5600">boolean</span>: <span style="color:#a535ae">true</span>,
+    integer: 123,
+    objects: {},
+    whatever: <span style="color:#00a33f">'whatever'</span>
 };
 </pre>
+        </td>
+      </tr>
+    </tbody>
+    </table>
+    </div>
+  </section>
 
-          <blockquote>
-            You can set above object anywhere, anytime. However please make sure to call <a href="http://www.rtcmulticonnection.org/docs/updateExtraData/">updateExtraData</a> if you are modifying above object in a LIVE session.
-          </blockquote>
+  <section id="video-presentation">
+    <h2><a href="#video-presentation">Video presentation</a></h2>
+    <div style="text-align: center;">
+      <iframe src="https://www.youtube.com/embed/r4eA7TX4ZEk?autoplay=0&vq=hd720&hd=1" style="width: 1280px;" height="720" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
+    </div>
+  </section>
 
-          <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/extra/">extra</a>.modifiedValue = 'new value';
-connection.<a href="http://www.RTCMultiConnection.org/docs/updateExtraData/">updateExtraData</a>(); // this method requires v3 or newer release
-</pre>
-        </section>
+  <section id="updateExtraData">
+    <h2><a href="#updateExtraData">Update extra data</a></h2>
+    <pre style="background:#fff;color:#000">connection.extra.modifiedValue <span style="color:#ff5600">=</span> <span style="color:#00a33f">'new value'</span>;
+connection.updateExtraData();
 
-        <section class="experiment">
-          <h2 class="specific-h2"><a id="extra-with-video" href="#extra-with-video">Read extra information along with video</a></h2>
-
-          <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/onstream/">onstream</a> = function(event) {
-  var extraInformation = event.extra;
-  alert(extraInformation.fullName);
+<span style="color:#a535ae">connection</span>.<span style="color:#21439c">onExtraDataUpdated</span> <span style="color:#ff5600">=</span> <span style="color:#ff5600">function</span>(event) {
+    <span style="color:#ff5600">var</span> modifiedValue <span style="color:#ff5600">=</span> <span style="color:#a535ae">event</span>.extra.modifiedValue;
+    <span style="color:#ff5600">var</span> whoModified <span style="color:#ff5600">=</span> <span style="color:#a535ae">event</span>.userid; <span style="color:#919191">// or event.extra.fullName</span>
 };
 </pre>
-        </section>
+      <p>Please check this for more information: <a href="../updateExtraData/">updateExtraData</a></p>
+  </section>
+  
+  <section id="demo">
+    <h2><a href="#demo">Demo</a></h2>
+    <pre style="background:#fff;color:#000"><span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
+<span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
 
-        <section class="experiment">
-          <h2 class="specific-h2"><a id="extra-with-chat" href="#extra-with-chat">Read extra information along with chat messages</a></h2>
+<span style="color:#ff5600">&lt;</span>script<span style="color:#ff5600">></span>
+<span style="color:#ff5600">var</span> connection <span style="color:#ff5600">=</span> <span style="color:#ff5600">new</span> <span style="color:#21439c">RTCMultiConnection</span>();
 
-          <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/onmessage/">onmessage</a> = function(event) {
-  var extraInformation = event.extra;
-  alert(extraInformation.fullName);
+<span style="color:#919191">// this line is VERY_important</span>
+connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00a33f">'https://rtcmulticonnection.herokuapp.com:443/'</span>;
+
+<span style="color:#919191">// if you want audio+video conferencing</span>
+connection.session <span style="color:#ff5600">=</span> {
+    audio: <span style="color:#a535ae">true</span>,
+    video: <span style="color:#a535ae">true</span>
 };
-</pre>
-        </section>
 
-        <section class="experiment">
-          <h2 class="specific-h2"><a id="extra-with-files" href="#extra-with-files">Read extra information along with files</a></h2>
-
-          <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/onFileStart/">onFileStart</a> = function(file) {};
-connection.<a href="http://www.RTCMultiConnection.org/docs/onFileProgress/">onFileProgress</a> = function(fileChunk) {};
-
-connection.<a href="http://www.RTCMultiConnection.org/docs/onFileEnd/">onFileEnd</a> = function(file) {
-  var extraInformation = file.extra;
-  alert(extraInformation.fullName);
+connection.extra <span style="color:#ff5600">=</span> {
+    joinedAt: (<span style="color:#ff5600">new</span> <span style="color:#21439c">Date</span>).toISOString()
 };
-</pre>
-        </section>
 
-        <section class="experiment">
-          <h2 class="specific-h2"><a id="extra-with-onExtraDataUpdated" href="#extra-with-onExtraDataUpdated">Listen for event as soon as someone updates his extra information</a></h2>
-
-          <pre class="sh_javascript">
-connection.<a href="http://www.RTCMultiConnection.org/docs/onExtraDataUpdated/">onExtraDataUpdated</a> = function(event) {
-  var extraInformation = event.extra;
-  alert(extraInformation.fullName);
+<span style="color:#a535ae">connection</span>.<span style="color:#21439c">onstream</span> <span style="color:#ff5600">=</span> <span style="color:#ff5600">function</span>(event) {
+    <span style="color:#a535ae">document</span>.<span style="color:#a535ae">body</span>.<span style="color:#a535ae">appendChild</span>(<span style="color:#a535ae">event</span>.mediaElement);
+    <span style="color:#ff5600">if</span> (<span style="color:#a535ae">event</span>.<span style="color:#a535ae">type</span> <span style="color:#ff5600">===</span> <span style="color:#00a33f">'remote'</span>) {
+        <span style="color:#ff5600">var</span> heJoinedAt <span style="color:#ff5600">=</span> <span style="color:#ff5600">new</span> <span style="color:#21439c">Date</span>(<span style="color:#a535ae">event</span>.extra.joinedAt).<span style="color:#a535ae">getTime</span>();
+        <span style="color:#ff5600">var</span> currentDate <span style="color:#ff5600">=</span> <span style="color:#ff5600">new</span> <span style="color:#21439c">Date</span>().<span style="color:#a535ae">getTime</span>();
+        <span style="color:#ff5600">var</span> latency <span style="color:#ff5600">=</span> currentDate <span style="color:#ff5600">-</span> heJoinedAt;
+    }
 };
+
+connection.openOrJoin(<span style="color:#00a33f">'your-room-id'</span>);
+<span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
 </pre>
-        </section>
+  </section>
 
-        <section class="experiment own-widgets">
-            <h2 class="header" id="updates" style="color: red;padding-bottom: .1em;"><a href="https://github.com/muaz-khan/RTCMultiConnection/issues">Latest Issues</a></h2>
-            <div id="github-issues"></div>
-        </section>
+  <footer>
+    <small id="send-message"></small>
+  </footer>
 
-        <section style="border: 1px solid rgb(189, 189, 189); border-radius: .2em; margin: 1em 3em;">
-            <h2 id="feedback" style="border-bottom: 1px solid rgb(189, 189, 189); padding: .2em .4em;">Want to ask a Question?</h2>
-            <div>
-                <textarea id="message" style="border: 1px solid rgb(189, 189, 189); height: 8em; margin: .2em; outline: none; resize: vertical; width: 98%;" placeholder="Feel free to ask any question regarding RTCMultiConnection.js!"></textarea>
-            </div>
-            <button id="send-message" style="font-size: 1em;">Ask a Question</button><small style="margin-left: 1em;">You can include your email for private conversation!</small>
-        </section>
-
-        <section class="experiment own-widgets latest-commits">
-            <h2 class="header" id="updates" style="color: red; padding-bottom: .1em;"><a href="https://github.com/muaz-khan/WebRTC-Experiment/commits/master" target="_blank">Latest Updates</a></h2>
-            <div id="github-commits"></div>
-        </section>
-    </article>
-
-    <a href="https://github.com/muaz-khan/RTCMultiConnection" class="fork-left"></a>
-
-    <footer>
-        <p>
-            <a href="https://www.webrtc-experiment.com">WebRTC Experiments</a> © <a href="https://plus.google.com/+MuazKhan" rel="author" target="_blank">Muaz Khan</a>
-            <a href="mailto:muazkh@gmail.com" target="_blank">muazkh@gmail.com</a>
-            <a href="https://github.com/muaz-khan" target="_blank">Github</a>
-        </p>
-    </footer>
-
-    <script>
-        window.useThisGithubPath = 'muaz-khan/RTCMultiConnection';
-    </script>
-    <script src="https://cdn.webrtc-experiment.com/commits.js"></script>
+  <script src="https://cdn.webrtc-experiment.com/common.js"></script>
 </body>
-
 </html>
