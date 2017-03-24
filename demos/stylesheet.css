@@ -71,11 +71,18 @@ ul li, nav li {
 }
 
 a {
-    margin-right: 10px;
-    color: black;
+    margin: 0 10px;
 }
 
-a:hover, h2 a, nav a, .highlighted {
+a, h2 {
+    color: #EC008C;
+}
+
+a:hover {
+    color: #671345;
+}
+
+.highlighted {
     color: #EC008C;
 }
 
