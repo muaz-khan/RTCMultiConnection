@@ -1,178 +1,139 @@
 ﻿<!DOCTYPE html>
-<html id="home" lang="en">
-
+<html lang="en" dir="ltr">
 <head>
-    <title>RTCMultiConnection.open | "method"</title>
-    <meta name="description" content="RTCMultiConnection.open method allows you open a WebRTC room." />
-    <meta name="keywords" content="RTCMultiConnection,JavaScript,WebRTC,Demos,Experiments,Samples,Examples" />
-
-
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
-    <meta name="author" content="Muaz Khan">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-
-    <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
-
-    <style>
-        p {
-            padding: .8em;
-        }
-        li {
-            border-bottom: 1px solid rgb(189, 189, 189);
-            border-left: 1px solid rgb(189, 189, 189);
-            padding: .5em;
-        }
-        .image-container {
-            margin: 2em 0;
-            text-align: center;
-        }
-        .image-parent {
-            border: 2px solid black;
-            border-radius: 5px;
-            margin: 0 2em;
-        }
-        .image-parent img {
-            width: 100%;
-        }
-    </style>
-    <!-- for HTML5 el styling -->
-    <script>
-        document.createElement('article');
-        document.createElement('footer');
-    </script>
-
-    <script src="https://cdn.webrtc-experiment.com/syntax/sh_main.min.js" type="text/javascript"> </script>
-    <script src="https://cdn.webrtc-experiment.com/syntax/sh_javascript.min.js" type="text/javascript"> </script>
-    <script src="https://cdn.webrtc-experiment.com/syntax/sh_html.min.js" type="text/javascript"> </script>
-    <link href="https://cdn.webrtc-experiment.com/syntax/sh_style.css" type="text/css" rel="stylesheet">
+  <meta charset="utf-8">
+  <title>open | RTCMultiConnection</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <link rel="shortcut icon" href="../../images/logo.png">
+  <meta name="google-site-verification" content="0ZfJnHomOzZDWKIkhkRYklDwdYnyEFEnZ7neD7gzHPU" />
+  <link rel="stylesheet" type="text/css" href="../../css/stylesheet.css">
 </head>
+<body>
+  <header>
+    <a class="logo" href="../../"><img src="../../images/logo.png" alt="RTCMultiConnection"></a>
+    <nav>
+      <li>
+        <a href="../../">Home</a>
+      </li>
+      <li>
+        <a href="../getting-started/">Getting Started</a>
+      </li>
+      <li>
+        <a href="../../FAQ/">FAQ</a>
+      </li>
+      <li>
+        <a href="https://www.youtube.com/playlist?list=PLPRQUXAnRydKdyun-vjKPMrySoow2N4tl">YouTube</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection#v3-demos">Demos</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection">Github</a>
+      </li>
+    </nav>
+  </header>
 
-<body onload="sh_highlightDocument();">
-    <article>
-        <a href="http://www.RTCMultiConnection.org/docs/" style="border-bottom: 1px solid #2844FA; font-size: 1.2em; position: absolute; right: 0; text-decoration: none; top: 0;">RTCMultiConnection Docs</a>
+  <h1>
+    open | RTCMultiConnection
+    <p>Open rooms.</p>
+  </h1>
 
-        <header style="text-align: center;">
+  <section id="usage">
+    <h2><a href="#usage">Usage</a></h2>
+    <pre style="background:#fff;color:#000">connection.open(<span style="color:#00a33f">'room-id'</span>);
+</pre>
+  </section>
 
-            <h1>
-                RTCMultiConnection.<strong>open</strong> | "method"
-            </h1>
-
-            <p>
-                <a href="https://rtcmulticonnection.herokuapp.com/">HOME</a>
-                <span> &copy; </span>
-                <a href="http://www.MuazKhan.com/" target="_blank">Muaz Khan</a> .
-                <a href="http://twitter.com/WebRTCWeb" target="_blank" title="Twitter profile for WebRTC Experiments">@WebRTCWeb</a> .
-                <a href="https://github.com/muaz-khan?tab=repositories" target="_blank" title="Github Profile">Github</a> .
-                <a href="https://github.com/muaz-khan/RTCMultiConnection/issues?state=open" target="_blank">Latest issues</a> .
-                <a href="https://github.com/muaz-khan/RTCMultiConnection/commits/master" target="_blank">What's New?</a>
-            </p>
-        </header>
-
-        <div class="github-stargazers"></div>
-
-        <blockquote>
-            "connection.open" method allows you open a WebRTC room.
-        </blockquote>
-
-        <section class="experiment" id="v3">
-            <h2>
-                <a href="#v3">RTCMultiConnection v3:</a>
-            </h2>
-
-            <p>
-                "connection.open" method accepts "room-id" as first argument; and [optional] callback as second argument:
-            </p>
-
-            <pre class="sh_javascript">
-connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>( 'room-id' );
-
-// or
-connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>( 'room-id', function() {
-    alert('Room has been created.');
+  <section id="best-practice">
+    <h2><a href="#best-practice">Best practice</a></h2>
+    <pre style="background:#fff;color:#000">connection.checkPresence(<span style="color:#00a33f">'room-id'</span>, <span style="color:#ff5600">function</span>(isRoomExist, roomid) {
+    <span style="color:#ff5600">if</span> (isRoomExist <span style="color:#ff5600">===</span> <span style="color:#a535ae">true</span>) {
+        connection.<span style="color:#a535ae">join</span>(roomid);
+    } <span style="color:#ff5600">else</span> {
+        connection.<span style="color:#a535ae">open</span>(roomid);
+    }
 });
-
-// or
-var isPublicRoom = true;
-connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>( 'room-id', isPublicRoom );
 </pre>
-        </section>
+  </section>
 
-        <section class="experiment" id="v2">
-            <h2>
-                <a href="#v2">RTCMultiConnection v2:</a>
-            </h2>
-
-            <p>
-                "connection.open" method accepts object parameter as well; also now it returns "sessionDescription" object:
-            </p>
-
-            <pre class="sh_javascript">
-// you can pass object instead on string!
-if(you_are_initiator) {
-    var sessionDescription = connection.<a href="http://www.rtcmulticonnection.org/docs/open/">open</a>({
-        dontTransmit: true,    // optional --- disable default room-forwarding behaviour!
-        <a href="http://www.rtcmulticonnection.org/docs/sessionid/">sessionid</a>: 'something', // optional
-        <a href="http://www.rtcmulticonnection.org/docs/transmitRoomOnce/">transmitRoomOnce</a>: true // optional
-    });
-}
-
-// you can share "sessionDescription" object using socket.io or any gateway
-// and target users can directly join using "join" method:
-if(you_are_participant) {
-    connection.<a href="http://www.rtcmulticonnection.org/docs/join/">join</a>( sessionDescription );
-}
-
-// or
-
-if(you_are_initiator) {
-    connection.<a href="http://www.RTCMultiConnection.org/docs/open/">open</a>('session-id'); // i.e. room-id
-}
-
-// or
-if(you_are_initiator) {
-    connection.<a href="http://www.RTCMultiConnection.org/docs/sessionid/">sessionid</a> = 'session-id';
-    connection.<a href="http://www.RTCMultiConnection.org/docs/open/">open</a>();
-}
+  <section id="description">
+    <h2><a href="#description">Description</a></h2>
+    <div class="datagrid">
+    <table>
+    <thead><tr><th>parameter</th><th>description</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>roomid</td>
+        <td>it is a string</td>
+      </tr>
+      <tr>
+        <td>callback</td>
+        <td>
+            it is an optional function callback
+            <pre style="background:#fff;color:#000">connection.<span style="color:#a535ae">open</span>(<span style="color:#00a33f">'room-id'</span>, <span style="color:#ff5600">function</span>() {
+    <span style="color:#919191">// open callback</span>
+});
 </pre>
-        </section>
+        </td>
+      </tr>
+    </tbody>
+    </table>
+    </div>
+  </section>
 
-        <section class="experiment own-widgets">
-            <h2 class="header" id="updates" style="color: red;padding-bottom: .1em;"><a href="https://github.com/muaz-khan/RTCMultiConnection/issues">Latest Issues</a></h2>
-            <div id="github-issues"></div>
-        </section>
+  <section id="open-public-room">
+    <h2><a href="#open-public-room">Open public room</a></h2>
+    <pre style="background:#fff;color:#000"><span style="color:#919191">// look at second parameter</span>
+<span style="color:#919191">// it is a boolean</span>
+<span style="color:#919191">// "true" means make it a public-room</span>
+connection.<span style="color:#a535ae">open</span>(<span style="color:#00a33f">'room-id'</span>, <span style="color:#a535ae">true</span>);
+</pre>
+  </section>
 
-        <section style="border: 1px solid rgb(189, 189, 189); border-radius: .2em; margin: 1em 3em;">
-            <h2 id="feedback" style="border-bottom: 1px solid rgb(189, 189, 189); padding: .2em .4em;">Want to ask a Question?</h2>
-            <div>
-                <textarea id="message" style="border: 1px solid rgb(189, 189, 189); height: 8em; margin: .2em; outline: none; resize: vertical; width: 98%;" placeholder="Feel free to ask any question regarding RTCMultiConnection.js!"></textarea>
-            </div>
-            <button id="send-message" style="font-size: 1em;">Ask a Question</button><small style="margin-left: 1em;">You can include your email for private conversation!</small>
-        </section>
+  <section id="v2">
+    <h2><a href="#v2">v2 (old codes)</a> [does not applies to v3 or newer releases]</h2>
+    <pre style="background:#fff;color:#000">connection.<span style="color:#a535ae">open</span>({
+    sessionid: <span style="color:#00a33f">'room-id'</span>,
+    transmitRoomOnce: <span style="color:#a535ae">true</span>
+});
+</pre>
+  </section>
 
-        <section class="experiment own-widgets latest-commits">
-            <h2 class="header" id="updates" style="color: red; padding-bottom: .1em;"><a href="https://github.com/muaz-khan/WebRTC-Experiment/commits/master" target="_blank">Latest Updates</a></h2>
-            <div id="github-commits"></div>
-        </section>
-    </article>
+  <section id="demo">
+    <h2><a href="#demo">Demo</a></h2>
+    <pre style="background:#fff;color:#000"><span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
+<span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
 
-    <a href="https://github.com/muaz-khan/RTCMultiConnection" class="fork-left"></a>
+<span style="color:#ff5600">&lt;</span>script<span style="color:#ff5600">></span>
+<span style="color:#ff5600">var</span> connection <span style="color:#ff5600">=</span> <span style="color:#ff5600">new</span> <span style="color:#21439c">RTCMultiConnection</span>();
 
-    <footer>
-        <p>
-            <a href="https://www.webrtc-experiment.com">WebRTC Experiments</a> © <a href="https://plus.google.com/+MuazKhan" rel="author" target="_blank">Muaz Khan</a>
-            <a href="mailto:muazkh@gmail.com" target="_blank">muazkh@gmail.com</a>
-            <a href="https://github.com/muaz-khan" target="_blank">Github</a>
-        </p>
-    </footer>
+<span style="color:#919191">// this line is VERY_important</span>
+connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00a33f">'https://rtcmulticonnection.herokuapp.com:443/'</span>;
 
-    <script>
-        window.useThisGithubPath = 'muaz-khan/RTCMultiConnection';
-    </script>
-    <script src="https://cdn.webrtc-experiment.com/commits.js">
-    </script>
+<span style="color:#919191">// if you want audio+video conferencing</span>
+connection.session <span style="color:#ff5600">=</span> {
+    audio: <span style="color:#a535ae">true</span>,
+    video: <span style="color:#a535ae">true</span>
+};
+
+<span style="color:#a535ae">btnJoinRoom</span>.<span style="color:#21439c">onclick</span> <span style="color:#ff5600">=</span> <span style="color:#ff5600">function</span>() {
+    connection.<span style="color:#a535ae">join</span>(<span style="color:#00a33f">'room-id'</span>);
+};
+
+<span style="color:#a535ae">btnOpenRoom</span>.<span style="color:#21439c">onclick</span> <span style="color:#ff5600">=</span> <span style="color:#ff5600">function</span>() {
+    connection.<span style="color:#a535ae">open</span>(<span style="color:#00a33f">'room-id'</span>);
+};
+<span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
+</pre>
+  </section>
+
+  <footer>
+    <small id="send-message"></small>
+  </footer>
+
+  <script src="https://cdn.webrtc-experiment.com/common.js"></script>
 </body>
-
 </html>
