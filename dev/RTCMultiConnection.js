@@ -361,6 +361,12 @@
             options = {};
         }
 
+        var password = false;
+        if (typeof options === 'string') {
+            password = options;
+            options = {};
+        }
+        
         if (typeof options.localPeerSdpConstraints !== 'undefined') {
             localPeerSdpConstraints = options.localPeerSdpConstraints;
         }
@@ -387,7 +393,7 @@
                 remotePeerSdpConstraints: remotePeerSdpConstraints
             },
             sender: connection.userid,
-            password: false
+            password: options.password || password
         };
 
         beforeJoin(connectionDescription.message, function() {
