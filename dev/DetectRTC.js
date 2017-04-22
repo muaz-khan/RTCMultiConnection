@@ -428,8 +428,7 @@
             s: 'Search Bot',
             r: /(nuhk|Googlebot|Yammybot|Openbot|Slurp|MSNBot|Ask Jeeves\/Teoma|ia_archiver)/
         }];
-        for (var id in clientStrings) {
-            var cs = clientStrings[id];
+        for (var i = 0, cs; cs = clientStrings[i]; i++) {
             if (cs.r.test(nAgt)) {
                 os = cs.s;
                 break;
