@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-03-13 7:32:23 AM UTC
+// Last time updated: 2017-04-22 3:11:44 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -1668,8 +1668,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 s: 'Search Bot',
                 r: /(nuhk|Googlebot|Yammybot|Openbot|Slurp|MSNBot|Ask Jeeves\/Teoma|ia_archiver)/
             }];
-            for (var id in clientStrings) {
-                var cs = clientStrings[id];
+            for (var i = 0, cs; cs = clientStrings[i]; i++) {
                 if (cs.r.test(nAgt)) {
                     os = cs.s;
                     break;
@@ -2325,7 +2324,6 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             });
         }
     })();
-
     // ios-hacks.js
 
     function setCordovaAPIs() {
