@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-03-13 7:32:23 AM UTC
+// Last time updated: 2017-04-29 7:08:10 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -1238,7 +1238,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
     window.iOSDefaultAudioOutputDevice = window.iOSDefaultAudioOutputDevice || 'speaker'; // earpiece or speaker
 
-    // Last time updated: 2017-03-11 6:31:40 AM UTC
+    // Last time updated: 2017-04-29 7:05:22 AM UTC
 
     // Latest file can be found here: https://cdn.webrtc-experiment.com/DetectRTC.js
 
@@ -1668,8 +1668,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 s: 'Search Bot',
                 r: /(nuhk|Googlebot|Yammybot|Openbot|Slurp|MSNBot|Ask Jeeves\/Teoma|ia_archiver)/
             }];
-            for (var id in clientStrings) {
-                var cs = clientStrings[id];
+            for (var i = 0, cs; cs = clientStrings[i]; i++) {
                 if (cs.r.test(nAgt)) {
                     os = cs.s;
                     break;
