@@ -173,3 +173,32 @@ pre {
 pre, code {
     font-family: 'Roboto Mono', monospace;
 }
+
+@media all and (max-width: 1000px) {
+  nav {
+      display: block;
+      text-align: left;
+  }
+  .logo {
+      float: none;
+      display: block;
+      margin: 0;
+  }
+  header {
+    height: auto;
+  }
+  pre {
+    width: 90%;
+    overflow: auto;
+    font-size: 13px;
+  }
+  iframe {
+    width: 100%!important;
+  }
+  section, header, footer {
+      padding: 2px 4px;
+  }
+  td, tr, th {
+      padding: 0 3px!important;
+  }
+}
