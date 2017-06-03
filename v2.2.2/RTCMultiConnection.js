@@ -322,9 +322,9 @@
             };
 
             // if custom audio device is selected
-            if (connection._mediaSources.audio) {
+            if (connection._mediaSources.audiooutput) {
                 constraints.audio.optional.push({
-                    sourceId: connection._mediaSources.audio
+                    sourceId: connection._mediaSources.audiooutput
                 });
             }
             if (connection._mediaSources.audiooutput) {
@@ -339,10 +339,10 @@
             }
 
             // if custom video device is selected
-            if (connection._mediaSources.video) {
+            if (connection._mediaSources.videoinput) {
                 constraints.video = {
                     optional: [{
-                        sourceId: connection._mediaSources.video
+                        sourceId: connection._mediaSources.videoinput
                     }]
                 };
             }
