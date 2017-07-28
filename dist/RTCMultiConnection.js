@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-04-29 7:08:10 AM UTC
+// Last time updated: 2017-06-09 7:19:08 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -2403,6 +2403,18 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
     }
 
     function PeerInitiator(config) {
+        if (typeof window.RTCPeerConnection !== 'undefined') {
+            RTCPeerConnection = window.RTCPeerConnection;
+        } else if (typeof mozRTCPeerConnection !== 'undefined') {
+            RTCPeerConnection = mozRTCPeerConnection;
+        } else if (typeof webkitRTCPeerConnection !== 'undefined') {
+            RTCPeerConnection = webkitRTCPeerConnection;
+        }
+
+        RTCSessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription;
+        RTCIceCandidate = window.RTCIceCandidate || window.mozRTCIceCandidate;
+        MediaStreamTrack = window.MediaStreamTrack;
+
         if (!RTCPeerConnection) {
             throw 'WebRTC 1.0 (RTCPeerConnection) API are NOT available in this browser.';
         }
@@ -2458,11 +2470,21 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 }
             }
 
-            peer = new RTCPeerConnection(navigator.onLine ? {
-                iceServers: connection.iceServers,
-                iceTransportPolicy: connection.iceTransportPolicy || iceTransports,
-                rtcpMuxPolicy: connection.rtcpMuxPolicy || 'negotiate'
-            } : null, window.PluginRTC ? null : connection.optionalArgument);
+            try {
+                peer = new RTCPeerConnection(navigator.onLine ? {
+                    iceServers: connection.iceServers,
+                    iceTransportPolicy: connection.iceTransportPolicy || iceTransports,
+                    // rtcpMuxPolicy: connection.rtcpMuxPolicy || 'negotiate'
+                } : null, window.PluginRTC ? null : connection.optionalArgument);
+            } catch (e) {
+                try {
+                    peer = new RTCPeerConnection({
+                        iceServers: connection.iceServers
+                    });
+                } catch (e) {
+                    peer = new RTCPeerConnection();
+                }
+            }
 
             if (!connection.iceServers.length) {
                 peer = new RTCPeerConnection(null, null);
@@ -3329,11 +3351,24 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 return;
             }
 
+            if (DetectRTC.browser.name === 'Safari') {
+                if (options.localMediaConstraints.audio !== false) {
+                    options.localMediaConstraints.audio = true;
+                }
+
+                if (options.localMediaConstraints.video !== false) {
+                    options.localMediaConstraints.video = true;
+                }
+            }
+
             navigator.mediaDevices.getUserMedia(options.localMediaConstraints).then(function(stream) {
                 stream.streamid = stream.streamid || stream.id || getRandomString();
                 stream.idInstance = idInstance;
                 streaming(stream);
             }).catch(function(error) {
+                if (DetectRTC.browser.name === 'Safari') {
+                    return;
+                }
                 options.onLocalMediaError(error, options.localMediaConstraints);
             });
         }
