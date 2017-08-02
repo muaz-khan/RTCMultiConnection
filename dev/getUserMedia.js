@@ -81,19 +81,6 @@ function getUserMediaHandler(options) {
     if (currentUserMediaRequest.streams[idInstance]) {
         streaming(currentUserMediaRequest.streams[idInstance].stream, true);
     } else {
-        if (isPluginRTC && window.PluginRTC) {
-            var mediaElement = document.createElement('video');
-            window.PluginRTC.getUserMedia({
-                audio: true,
-                video: true
-            }, function(stream) {
-                stream.streamid = stream.id || getRandomString();
-                streaming(stream);
-            }, function(error) {});
-
-            return;
-        }
-
         var isBlackBerry = !!(/BB10|BlackBerry/i.test(navigator.userAgent || ''));
         if (isBlackBerry || typeof navigator.mediaDevices === 'undefined' || typeof navigator.mediaDevices.getUserMedia !== 'function') {
             navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;

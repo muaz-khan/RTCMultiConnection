@@ -40,7 +40,6 @@
                 userid: connection.userid,
                 extra: connection.extra,
                 streamid: stream.streamid,
-                blobURL: mediaElement.src || URL.createObjectURL(stream),
                 isAudioMuted: true
             };
 
@@ -71,8 +70,7 @@
                 userid: remoteUserId,
                 extra: connection.peers[remoteUserId] ? connection.peers[remoteUserId].extra : {},
                 mediaElement: mediaElement,
-                streamid: stream.streamid,
-                blobURL: mediaElement.src || URL.createObjectURL(stream)
+                streamid: stream.streamid
             };
 
             setMuteHandlers(connection, connection.streamEvents[stream.streamid]);
@@ -1295,8 +1293,14 @@
 
         if (e.muteType === 'both' || e.muteType === 'video') {
             e.mediaElement.src = null;
-            e.mediaElement.pause();
-            e.mediaElement.poster = e.snapshot || 'https://cdn.webrtc-experiment.com/images/muted.png';
+            var paused = e.mediaElement.pause();
+            if (typeof paused !== 'undefined') {
+                paused.then(function() {
+                    e.mediaElement.poster = e.snapshot || 'https://cdn.webrtc-experiment.com/images/muted.png';
+                });
+            } else {
+                e.mediaElement.poster = e.snapshot || 'https://cdn.webrtc-experiment.com/images/muted.png';
+            }
         } else if (e.muteType === 'audio') {
             e.mediaElement.muted = true;
         }
@@ -1309,7 +1313,7 @@
 
         if (e.unmuteType === 'both' || e.unmuteType === 'video') {
             e.mediaElement.poster = null;
-            e.mediaElement.src = URL.createObjectURL(e.stream);
+            e.mediaElement.srcObject = e.stream;
             e.mediaElement.play();
         } else if (e.unmuteType === 'audio') {
             e.mediaElement.muted = false;

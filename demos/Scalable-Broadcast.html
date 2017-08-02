@@ -157,13 +157,8 @@ connection.onstream = function(event) {
         return;
     }
 
-    if (event.mediaElement) {
-        event.mediaElement.pause();
-        delete event.mediaElement;
-    }
-
     connection.isUpperUserLeft = false;
-    videoPreview.src = URL.createObjectURL(event.stream);
+    videoPreview.srcObject = event.stream;
     videoPreview.play();
 
     videoPreview.userid = event.userid;
@@ -191,7 +186,9 @@ connection.onstream = function(event) {
                     peer.getLocalStreams().forEach(function(localStream) {
                         peer.removeStream(localStream);
                     });
-                    peer.addStream(event.stream);
+                    event.stream.getTracks().forEach(function(track) {
+                        peer.addTrack(track, event.stream);
+                    });
                     connection.dontAttachStream = true;
                     connection.renegotiate(p);
                     connection.dontAttachStream = false;
@@ -279,7 +276,7 @@ connection.onleave = function(event) {
         recorder.stopRecording(function() {
             if (!connection.isUpperUserLeft) return;
 
-            videoPreview.src = URL.createObjectURL(recorder.blob);
+            videoPreview.src = URL.createObjectURL(recorder.getBlob());
             videoPreview.play();
         });
     }
@@ -309,7 +306,7 @@ function repeatedlyRecordStream(stream) {
         }
 
         connection.currentRecorder.stopRecording(function() {
-            allRecordedBlobs.push(connection.currentRecorder.blob);
+            allRecordedBlobs.push(connection.currentRecorder.getBlob());
 
             if (connection.isUpperUserLeft) {
                 return;

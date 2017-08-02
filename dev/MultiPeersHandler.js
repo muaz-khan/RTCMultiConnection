@@ -174,16 +174,6 @@ function MultiPeers(connection) {
                     connection.peers[remoteUserId].streams.push(stream);
                 }
 
-                if (isPluginRTC && window.PluginRTC) {
-                    var mediaElement = document.createElement('video');
-                    var body = connection.videosContainer;
-                    body.insertBefore(mediaElement, body.firstChild);
-                    setTimeout(function() {
-                        window.PluginRTC.attachMediaStream(mediaElement, stream);
-                    }, 3000);
-                    return;
-                }
-
                 self.onGettingRemoteMedia(stream, remoteUserId);
             },
             onRemoteStreamRemoved: function(stream) {
@@ -513,6 +503,4 @@ function MultiPeers(connection) {
         remoteUserId = remoteUserId || connection.peers.getAllParticipants()[0];
         return connection.peers[remoteUserId] ? connection.peers[remoteUserId].streams : [];
     };
-
-    this.isPluginRTC = connection.isPluginRTC = isPluginRTC;
 }

@@ -18,12 +18,6 @@ if (navigator && navigator.userAgent && navigator.userAgent.indexOf('Crosswalk')
     isChrome = true;
 }
 
-var isPluginRTC = !isMobileDevice && (isSafari || isIE);
-
-if (isPluginRTC && typeof URL !== 'undefined') {
-    URL.createObjectURL = function() {};
-}
-
 // detect node-webkit
 var isNodeWebkit = !!(window.process && (typeof window.process === 'object') && window.process.versions && window.process.versions['node-webkit']);
 
@@ -128,25 +122,13 @@ function getRandomString() {
 
 function getRMCMediaElement(stream, callback, connection) {
     var isAudioOnly = false;
-    if (!!stream.getVideoTracks && !stream.getVideoTracks().length) {
+    if (!!stream.getVideoTracks && !stream.getVideoTracks().length && !stream.isVideo && !stream.isScreen) {
         isAudioOnly = true;
     }
 
     var mediaElement = document.createElement(isAudioOnly ? 'audio' : 'video');
 
-    if (isPluginRTC && window.PluginRTC) {
-        connection.videosContainer.insertBefore(mediaElement, connection.videosContainer.firstChild);
-
-        setTimeout(function() {
-            window.PluginRTC.attachMediaStream(mediaElement, stream);
-            callback(mediaElement);
-        }, 1000);
-
-        return;
-    }
-
-    // "mozSrcObject" is always preferred over "src"!!
-    mediaElement[isFirefox ? 'mozSrcObject' : 'src'] = isFirefox ? stream : window.URL.createObjectURL(stream);
+    mediaElement.srcObject = stream;
     mediaElement.controls = true;
 
     // http://goo.gl/WZ5nFl

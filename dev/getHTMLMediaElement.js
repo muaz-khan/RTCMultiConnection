@@ -11,7 +11,12 @@ function getHTMLMediaElement(mediaElement, config) {
 
         var mediaStream = mediaElement;
         mediaElement = document.createElement(mediaStream.getVideoTracks().length ? 'video' : 'audio');
-        mediaElement[!!navigator.mozGetUserMedia ? 'mozSrcObject' : 'src'] = !!navigator.mozGetUserMedia ? mediaStream : window.webkitURL.createObjectURL(mediaStream);
+
+        if ('srcObject' in mediaElement) {
+            mediaElement.srcObject = mediaStream;
+        } else {
+            mediaElement[!!navigator.mozGetUserMedia ? 'mozSrcObject' : 'src'] = !!navigator.mozGetUserMedia ? mediaStream : window.webkitURL.createObjectURL(mediaStream);
+        }
     }
 
     if (mediaElement.nodeName && mediaElement.nodeName.toLowerCase() == 'audio') {
@@ -323,7 +328,12 @@ function getAudioElement(mediaElement, config) {
     if (!mediaElement.nodeName || (mediaElement.nodeName.toLowerCase() != 'audio' && mediaElement.nodeName.toLowerCase() != 'video')) {
         var mediaStream = mediaElement;
         mediaElement = document.createElement('audio');
-        mediaElement[!!navigator.mozGetUserMedia ? 'mozSrcObject' : 'src'] = !!navigator.mozGetUserMedia ? mediaStream : window.webkitURL.createObjectURL(mediaStream);
+
+        if ('srcObject' in mediaElement) {
+            mediaElement.mediaElement = mediaStream;
+        } else {
+            mediaElement[!!navigator.mozGetUserMedia ? 'mozSrcObject' : 'src'] = !!navigator.mozGetUserMedia ? mediaStream : window.webkitURL.createObjectURL(mediaStream);
+        }
     }
 
     config.toggle = config.toggle || [];
