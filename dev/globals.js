@@ -180,8 +180,14 @@ function getRMCMediaElement(stream, callback, connection) {
         }, false);
     }
 
-    mediaElement.play();
-    callback(mediaElement);
+    var played = mediaElement.play();
+    if (typeof played !== 'undefined') {
+        played.then(function() {
+            callback(mediaElement);
+        });
+    } else {
+        callback(mediaElement);
+    }
 }
 
 // if IE
@@ -320,3 +326,24 @@ function getAudioScreenConstraints(screen_constraints) {
 }
 
 window.iOSDefaultAudioOutputDevice = window.iOSDefaultAudioOutputDevice || 'speaker'; // earpiece or speaker
+
+if (typeof adapter === 'undefined' || !adapter.browserShim) {
+    if (typeof URL.createObjectURL === 'undefined') {
+        URL.createObjectURL = function(stream) {
+            return 'blob:https://' + document.domain + '/' + getRandomString();
+        };
+    }
+
+    if (!('srcObject' in HTMLMediaElement.prototype)) {
+        HTMLMediaElement.prototype.srcObject = function(stream) {
+            if ('mozSrcObject' in this) {
+                this.mozSrcObject = stream;
+                return;
+            }
+
+            this.src = URL.createObjectURL(stream);
+        };
+    }
+
+    // need RTCPeerConnection shim here
+}

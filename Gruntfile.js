@@ -40,7 +40,7 @@ module.exports = function(grunt) {
                     'dev/SocketConnection.js', // You can replace it with: FirebaseConnection.js || PubNubConnection.js
                     'dev/MultiPeersHandler.js',
 
-                    'dev/adapter.js',
+                    // 'dev/adapter.js', ---- optional
                     'dev/globals.js',
                     'dev/DetectRTC.js',
 

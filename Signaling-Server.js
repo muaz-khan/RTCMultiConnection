@@ -94,7 +94,7 @@ module.exports = exports = function(app, socketCallback) {
         socket.userid = params.userid;
         appendUser(socket);
 
-        if (autoCloseEntireSession == 'false' && sessionid == socket.userid) {
+        if (autoCloseEntireSession == 'false' && Object.keys(listOfUsers).length == 1) {
             socket.shiftModerationControlBeforeLeaving = true;
         }
 

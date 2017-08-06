@@ -811,10 +811,20 @@
     connection.onstream = function(e) {
         var parentNode = connection.videosContainer;
         parentNode.insertBefore(e.mediaElement, parentNode.firstChild);
-        e.mediaElement.play();
+        var played = e.mediaElement.play();
+
+        if (typeof played !== 'undefined') {
+            played.then(function() {
+                setTimeout(function() {
+                    e.mediaElement.play();
+                }, 2000);
+            });
+            return;
+        }
+
         setTimeout(function() {
             e.mediaElement.play();
-        }, 5000);
+        }, 2000);
     };
 
     connection.onstreamended = function(e) {

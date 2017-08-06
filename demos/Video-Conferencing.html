@@ -1,3 +1,4 @@
+<!-- Demo version: 2017.08.06 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -52,10 +53,12 @@
   </section>
 
 <script src="/dist/RTCMultiConnection.min.js"></script>
+<script src="/dev/adapter.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 
 <!-- custom layout for HTML5 audio/video elements -->
-<script src="https://cdn.webrtc-experiment.com/getMediaElement.js"></script>
+<link rel="stylesheet" href="/dev/getHTMLMediaElement.css">
+<script src="/dev/getHTMLMediaElement.js"></script>
 <script>
 // ......................................................
 // .......................UI Code........................
@@ -74,8 +77,8 @@ document.getElementById('join-room').onclick = function() {
 
 document.getElementById('open-or-join-room').onclick = function() {
     disableInputButtons();
-    connection.openOrJoin(document.getElementById('room-id').value, function(isRoomExists, roomid) {
-        if (!isRoomExists) {
+    connection.openOrJoin(document.getElementById('room-id').value, function(isRoomExist, roomid) {
+        if (!isRoomExist) {
             showRoomURL(roomid);
         }
     });
@@ -108,7 +111,7 @@ connection.sdpConstraints.mandatory = {
 connection.videosContainer = document.getElementById('videos-container');
 connection.onstream = function(event) {
     var width = parseInt(connection.videosContainer.clientWidth / 2) - 20;
-    var mediaElement = getMediaElement(event.mediaElement, {
+    var mediaElement = getHTMLMediaElement(event.mediaElement, {
         title: event.userid,
         buttons: ['full-screen'],
         width: width,
@@ -198,8 +201,8 @@ if (roomid && roomid.length) {
 
     // auto-join-room
     (function reCheckRoomPresence() {
-        connection.checkPresence(roomid, function(isRoomExists) {
-            if (isRoomExists) {
+        connection.checkPresence(roomid, function(isRoomExist) {
+            if (isRoomExist) {
                 connection.join(roomid);
                 return;
             }
