@@ -41,8 +41,8 @@ module.exports = function(grunt) {
                     'dev/MultiPeersHandler.js',
 
                     // 'dev/adapter.js', ---- optional
-                    'dev/globals.js',
                     'dev/DetectRTC.js',
+                    'dev/globals.js',
 
                     'dev/ios-hacks.js', // to support ios
                     'dev/RTCPeerConnection.js',

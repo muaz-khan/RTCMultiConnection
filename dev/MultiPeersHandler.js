@@ -453,7 +453,7 @@ function MultiPeers(connection) {
         }, {
             userid: connection.userid,
             // extra: connection.extra,
-            chunkSize: isFirefox ? 15 * 1000 : connection.chunkSize || 0
+            chunkSize: DetectRTC.browser.name === 'Firefox' ? 15 * 1000 : connection.chunkSize || 0
         });
     };
 

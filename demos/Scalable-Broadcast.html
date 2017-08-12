@@ -1,4 +1,4 @@
-<!-- Demo version: 2017.08.06 -->
+<!-- Demo version: 2017.08.08 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -7,12 +7,18 @@
   <title>WebRTC Scalable Broadcast using RTCMultiConnection</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
   <link rel="shortcut icon" href="/demos/logo.png">
-  <link rel="stylesheet" type="text/css" href="/demos/stylesheet.css">
+  <link rel="stylesheet" href="/demos/stylesheet.css">
+  <script src="/demos/menu.js"></script>
 </head>
 <body>
   <header>
-    <a class="logo" href="/"><img src="/demos/logo.png" alt="RTCMultiConnection"></a>
+    <a class="logo" href="/demos/"><img src="/demos/logo.png" alt="RTCMultiConnection"></a>
+    <a href="/demos/" class="menu-explorer">Menu<img src="/demos/menu-icon.png" alt="Menu"></a>
     <nav>
+      <li>
+        <a href="/demos/">Home</a>
+      </li>
+
       <li>
         <a href="http://www.rtcmulticonnection.org/docs/getting-started/">Getting Started</a>
       </li>
@@ -36,7 +42,7 @@
 
   <h1>
     WebRTC Scalable Broadcast using RTCMultiConnection
-    <p>
+    <p class="no-mobile">
       Use peer-to-peer protocol to broadcast your video over 20+ users.
     </p>
   </h1>
@@ -406,7 +412,7 @@ connection.onNumberOfBroadcastViewersUpdated = function(event) {
 };
 </script>
 
-  <section>
+  <section class="no-mobile">
     <h2>How this works?</h2>
     <p>
       This module simply initializes socket.io and configures it in a way that single audio/video/screen stream can be shared/relayed over unlimited users without any <a href="https://www.webrtc-experiment.com/docs/RTP-usage.html">bandwidth/CPU usage issues</a>. Everything happens peer-to-peer!
@@ -416,13 +422,14 @@ connection.onNumberOfBroadcastViewersUpdated = function(event) {
     </p>
   </section>
 
-  <section>
+  <section class="no-mobile">
     <h2>iOS or Android</h2>
     <p>
-      This demo <a href="http://webrtcweb.com/cordova-apps/scalable-broadcast/" target="_blank">has built-in (open-sourced)</a> cordova apps both for <b>iOS</b> and <b>Android</b>.
+      You can write <a href="http://www.rtcmulticonnection.org/docs/Write-iOS-Apps/" target="_blank">iOS</a> or <a href="http://www.rtcmulticonnection.org/docs/Write-Android-Apps/" target="_blank">Android</a> apps for this demo as well. 
     </p>
+
     <p>
-      Google AppStore Link: <a href="https://play.google.com/store/apps/details?id=com.webrtc.scalablebroadcast" target="_blank">https://play.google.com/store/apps/details?id=com.webrtc.scalablebroadcast</a>
+      Install following Android app and join broadcasts from this demo: <a href="https://play.google.com/store/apps/details?id=com.webrtc.scalablebroadcast" target="_blank">https://play.google.com/store/apps/details?id=com.webrtc.scalablebroadcast</a>
     </p>
   </section>
 

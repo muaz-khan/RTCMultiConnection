@@ -64,7 +64,7 @@ var screenCallback;
 function isChromeExtensionAvailable(callback) {
     if (!callback) return;
 
-    if (isFirefox) return isFirefoxExtensionAvailable(callback);
+    if (DetectRTC.browser.name === 'Firefox') return isFirefoxExtensionAvailable(callback);
 
     if (window.IsAndroidChrome) {
         chromeMediaSource = 'screen';
@@ -90,7 +90,7 @@ function isChromeExtensionAvailable(callback) {
 function isFirefoxExtensionAvailable(callback) {
     if (!callback) return;
 
-    if (!isFirefox) return isChromeExtensionAvailable(callback);
+    if (DetectRTC.browser.name !== 'Firefox') return isChromeExtensionAvailable(callback);
 
     var isFirefoxAddonResponded = false;
 
@@ -154,7 +154,7 @@ function getChromeExtensionStatus(extensionid, callback) {
         extensionid = window.RMCExtensionID || 'ajhifddimkapgcifgcodmmfdlknahffk'; // default extension-id
     }
 
-    if (isFirefox) return callback('not-chrome');
+    if (DetectRTC.browser.name === 'Firefox') return callback('not-chrome');
 
     var image = document.createElement('img');
     image.src = 'chrome-extension://' + extensionid + '/icon.png';
@@ -182,7 +182,7 @@ function getScreenConstraints(callback, audioPlusTab) {
         height: 8640
     };
 
-    if (isFirefox) return callback(null, firefoxScreenConstraints);
+    if (DetectRTC.browser.name === 'Firefox') return callback(null, firefoxScreenConstraints);
 
     // support recapture again & again
     sourceId = null;

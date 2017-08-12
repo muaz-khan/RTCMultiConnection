@@ -554,9 +554,9 @@
 
     // all values in kbps
     connection.bandwidth = {
-        screen: 512,
-        audio: 128,
-        video: 512
+        screen: false,
+        audio: false,
+        video: false
     };
 
     connection.codecs = {
@@ -565,21 +565,29 @@
     };
 
     connection.processSdp = function(sdp) {
-        if (isMobileDevice || isFirefox) {
+        if (DetectRTC.browser.name === 'Firefox') {
             return sdp;
         }
 
-        sdp = CodecsHandler.setApplicationSpecificBandwidth(sdp, connection.bandwidth, !!connection.session.screen);
-        sdp = CodecsHandler.setVideoBitrates(sdp, {
-            min: connection.bandwidth.video * 8 * 1024,
-            max: connection.bandwidth.video * 8 * 1024
-        });
-        sdp = CodecsHandler.setOpusAttributes(sdp, {
-            maxaveragebitrate: connection.bandwidth.audio * 8 * 1024,
-            maxplaybackrate: connection.bandwidth.audio * 8 * 1024,
-            stereo: 1,
-            maxptime: 3
-        });
+        if (connection.bandwidth.video || connection.bandwidth.screen) {
+            sdp = CodecsHandler.setApplicationSpecificBandwidth(sdp, connection.bandwidth, !!connection.session.screen);
+        }
+
+        if (connection.bandwidth.video) {
+            sdp = CodecsHandler.setVideoBitrates(sdp, {
+                min: connection.bandwidth.video * 8 * 1024,
+                max: connection.bandwidth.video * 8 * 1024
+            });
+        }
+
+        if (connection.bandwidth.audio) {
+            sdp = CodecsHandler.setOpusAttributes(sdp, {
+                maxaveragebitrate: connection.bandwidth.audio * 8 * 1024,
+                maxplaybackrate: connection.bandwidth.audio * 8 * 1024,
+                stereo: 1,
+                maxptime: 3
+            });
+        }
 
         if (connection.codecs.video === 'VP9') {
             sdp = CodecsHandler.preferVP9(sdp);
@@ -603,28 +611,30 @@
     connection.mediaConstraints = {
         audio: {
             mandatory: {},
-            optional: [{
+            optional: connection.bandwidth.audio ? [{
                 bandwidth: connection.bandwidth.audio * 8 * 1024 || 128 * 8 * 1024
-            }]
+            }] : []
         },
         video: {
             mandatory: {},
-            optional: [{
+            optional: connection.bandwidth.video ? [{
                 bandwidth: connection.bandwidth.video * 8 * 1024 || 128 * 8 * 1024
             }, {
+                facingMode: 'user'
+            }] : [{
                 facingMode: 'user'
             }]
         }
     };
 
-    if (isFirefox) {
+    if (DetectRTC.browser.name === 'Firefox') {
         connection.mediaConstraints = {
             audio: true,
             video: true
         };
     }
 
-    if (!forceOptions.useDefaultDevices && !isMobileDevice) {
+    if (!forceOptions.useDefaultDevices && !DetectRTC.isMobileDevice) {
         DetectRTC.load(function() {
             var lastAudioDevice, lastVideoDevice;
             // it will force RTCMultiConnection to capture last-devices
@@ -640,7 +650,7 @@
             });
 
             if (lastAudioDevice) {
-                if (isFirefox) {
+                if (DetectRTC.browser.name === 'Firefox') {
                     if (connection.mediaConstraints.audio !== true) {
                         connection.mediaConstraints.audio.deviceId = lastAudioDevice.id;
                     } else {
@@ -670,7 +680,7 @@
             }
 
             if (lastVideoDevice) {
-                if (isFirefox) {
+                if (DetectRTC.browser.name === 'Firefox') {
                     if (connection.mediaConstraints.video !== true) {
                         connection.mediaConstraints.video.deviceId = lastVideoDevice.id;
                     } else {
@@ -711,7 +721,7 @@
         }]
     };
 
-    connection.rtcpMuxPolicy = 'negotiate'; // or "required"
+    connection.rtcpMuxPolicy = 'require'; // "require" or "negotiate"
     connection.iceTransportPolicy = null; // "relay" or "all"
     connection.optionalArgument = {
         optional: [{
@@ -1572,9 +1582,9 @@
         connection.isLowBandwidth = navigator.connection.type.toString().toLowerCase().search(/wifi|cell/g) !== -1;
         if (connection.isLowBandwidth) {
             connection.bandwidth = {
-                audio: 30,
-                video: 30,
-                screen: 30
+                audio: false,
+                video: false,
+                screen: false
             };
 
             if (connection.mediaConstraints.audio && connection.mediaConstraints.audio.optional && connection.mediaConstraints.audio.optional.length) {
