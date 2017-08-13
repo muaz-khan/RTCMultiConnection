@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-08-12 5:08:10 AM UTC
+// Last time updated: 2017-08-13 5:48:46 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -2651,7 +2651,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             } else {
                 event.stream.isVideo = !!event.stream.getVideoTracks().length;
                 event.stream.isAudio = !event.stream.isVideo;
-                event.track.isScreen = false;
+                event.stream.isScreen = false;
             }
 
             event.stream.streamid = event.stream.id;

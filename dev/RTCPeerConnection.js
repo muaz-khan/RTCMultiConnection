@@ -299,7 +299,7 @@ function PeerInitiator(config) {
         } else {
             event.stream.isVideo = !!event.stream.getVideoTracks().length;
             event.stream.isAudio = !event.stream.isVideo;
-            event.track.isScreen = false;
+            event.stream.isScreen = false;
         }
 
         event.stream.streamid = event.stream.id;
