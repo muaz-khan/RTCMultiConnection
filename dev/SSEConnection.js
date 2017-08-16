@@ -5,7 +5,11 @@ function SSEConnection(connection, connectCallback) {
 
     var sseDirPath = 'https://webrtcweb.com/SSE/';
 
-    connection.socket = new EventSource(sseDirPath + 'SSE.php?me=' + connection.userid);
+    connection.socket = new EventSource(sseDirPath + 'SSE.php?me=' + connection.userid, {
+        withCredentials: false
+    });
+
+    document.querySelector('h1').innerHTML = connection.userid;
 
     var skipDuplicate = {};
     connection.socket.onmessage = function(e) {
@@ -34,10 +38,13 @@ function SSEConnection(connection, connectCallback) {
             }
         });
     };
+
     connection.socket.emit = function(eventName, data, callback) {
+        callback = callback || function() {};
+
         if (!eventName || !data) return;
-        if (eventName === 'changed-uuid') return;
-        if (data.message && data.message.shiftedModerationControl) return;
+        if (eventName === 'changed-uuid') return callback();
+        if (data.message && data.message.shiftedModerationControl) return callback();
 
         if (!data.remoteUserId) return;
 
@@ -63,11 +70,19 @@ function SSEConnection(connection, connectCallback) {
     connection.socket.onopen = function() {
         if (connectCallback) {
             if (connection.enableLogs) {
-                console.info('SSE connection is opened.');
+                console.log('SSE connection is opened.');
             }
 
             connectCallback(connection.socket);
             connectCallback = null;
+
+            if (connection.isInitiator) {
+                connection.socket.emit(connection.socketMessageEvent, {
+                    remoteUserId: connection.userid,
+                    message: 'test',
+                    sender: connection.userid
+                }, function() {});
+            }
         }
     };
 

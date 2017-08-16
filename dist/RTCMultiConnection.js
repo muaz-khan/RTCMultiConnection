@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-08-13 5:48:46 AM UTC
+// Last time updated: 2017-08-14 7:41:06 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -615,7 +615,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         this.renegotiatePeer = function(remoteUserId, userPreferences, remoteSdp) {
             if (!connection.peers[remoteUserId]) {
                 if (connection.enableLogs) {
-                    console.error('This peer (' + remoteUserId + ') does not exist. Renegotiation skipped.');
+                    console.error('Peer (' + remoteUserId + ') does not exist. Renegotiation skipped.');
                 }
                 return;
             }
@@ -4206,9 +4206,10 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
 
         mPeer.onNegotiationNeeded = function(message, remoteUserId, callback) {
+            remoteUserId = remoteUserId || message.remoteUserId;
             connectSocket(function() {
                 connection.socket.emit(connection.socketMessageEvent, 'password' in message ? message : {
-                    remoteUserId: message.remoteUserId || remoteUserId,
+                    remoteUserId: remoteUserId,
                     message: message,
                     sender: connection.userid
                 }, callback || function() {});
@@ -4340,16 +4341,16 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 if (isPublicModerator == true) {
                     connection.becomePublicModerator();
                 }
-            });
 
-            if (isData(connection.session)) {
-                if (typeof isPublicModerator === 'function') {
-                    isPublicModerator();
+                if (isData(connection.session)) {
+                    if (typeof isPublicModerator === 'function') {
+                        isPublicModerator();
+                    }
+                    return;
                 }
-                return;
-            }
 
-            connection.captureUserMedia(typeof isPublicModerator === 'function' ? isPublicModerator : null);
+                connection.captureUserMedia(typeof isPublicModerator === 'function' ? isPublicModerator : null);
+            });
         };
 
         connection.becomePublicModerator = function() {

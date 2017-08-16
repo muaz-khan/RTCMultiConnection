@@ -102,9 +102,10 @@
     };
 
     mPeer.onNegotiationNeeded = function(message, remoteUserId, callback) {
+        remoteUserId = remoteUserId || message.remoteUserId;
         connectSocket(function() {
             connection.socket.emit(connection.socketMessageEvent, 'password' in message ? message : {
-                remoteUserId: message.remoteUserId || remoteUserId,
+                remoteUserId: remoteUserId,
                 message: message,
                 sender: connection.userid
             }, callback || function() {});
@@ -236,16 +237,16 @@
             if (isPublicModerator == true) {
                 connection.becomePublicModerator();
             }
-        });
 
-        if (isData(connection.session)) {
-            if (typeof isPublicModerator === 'function') {
-                isPublicModerator();
+            if (isData(connection.session)) {
+                if (typeof isPublicModerator === 'function') {
+                    isPublicModerator();
+                }
+                return;
             }
-            return;
-        }
 
-        connection.captureUserMedia(typeof isPublicModerator === 'function' ? isPublicModerator : null);
+            connection.captureUserMedia(typeof isPublicModerator === 'function' ? isPublicModerator : null);
+        });
     };
 
     connection.becomePublicModerator = function() {

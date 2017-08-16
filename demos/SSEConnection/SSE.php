@@ -7,8 +7,8 @@ require('write-json.php');
 require('get-param.php');
 require('enableCORS.php');
 
-// date_default_timezone_set("America/New_York");
-header("Content-Type: text/event-stream\n\n");
+header('Content-Type: text/event-stream');
+header('Cache-Control: no-cache');
 
 // "me" stands for "Current User Unique ID"
 $me = getParam('me');
