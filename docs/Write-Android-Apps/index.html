@@ -7,8 +7,13 @@
   <link rel="shortcut icon" href="../../images/logo.png">
   <meta name="google-site-verification" content="0ZfJnHomOzZDWKIkhkRYklDwdYnyEFEnZ7neD7gzHPU" />
   <link rel="stylesheet" type="text/css" href="../../css/stylesheet.css">
+
+  <script src="https://cdn.webrtc-experiment.com/syntax/sh_main.min.js" type="text/javascript"> </script>
+  <script src="https://cdn.webrtc-experiment.com/syntax/sh_javascript.min.js" type="text/javascript"> </script>
+  <script src="https://cdn.webrtc-experiment.com/syntax/sh_html.min.js" type="text/javascript"> </script>
+  <link href="https://cdn.webrtc-experiment.com/syntax/sh_style.css" type="text/css" rel="stylesheet">
 </head>
-<body>
+<body onload="sh_highlightDocument();">
   <header>
     <a class="logo" href="../../"><img src="../../images/logo.png" alt="RTCMultiConnection"></a>
     <nav>
@@ -38,26 +43,10 @@
 
   <h1>
     Write Android apps using RTCMultiConnection
-    <p>Please check all open-sourced apps here: <a href="http://webrtcweb.com/cordova-apps/" target="_blank">http://webrtcweb.com/cordova-apps/</a></p>
+    <p>RTCMultiConnection v3 supports cordova/ionic/phonegap (webviews).</p>
+    <p>For more information: <a href="https://github.com/muaz-khan/RTCMultiConnection/blob/master/docs/ios-android.md" target="_blank">docs/ios-android.md</a></p>
+    <p>Want to build iOS apps? Check this: <a href="../Write-iOS-Apps/">Write iOS apps</a></p>
   </h1>
-
-  <section id="download-apps">
-    <h2><a href="#download-apps">Download any application</a></h2>
-    <p style="padding-left: 20px">Download any application from <a href="http://webrtcweb.com/cordova-apps/">this page</a>, for example video-conferencing app:</p>
-    <p style="padding-left: 20px"><a href="http://webrtcweb.com/cordova-apps/video-conferencing/">http://webrtcweb.com/cordova-apps/video-conferencing/</a></p>
-    <p style="padding-left: 20px">You should <a href="http://webrtcweb.com/cordova-apps/video-conferencing/Download-Source.zip">download the ZIP file</a>; and extract on MacOSX. (you must use MacOSX)</p>
-  </section>
-
-  <section id="compile-Android">
-    <h2><a href="#compile-Android">How to compile Android app?</a></h2>
-    <p style="padding-left: 20px">You can use following command to compile APK:</p>
-    <pre style="background:#fff;color:#000;padding-left: 20px">cordova build android
-</pre>
-    <p style="padding-left: 20px">You can find the generated APK here:</p>
-    <pre style="background:#fff;color:#000;padding-left: 20px">project<span style="color:#ff5600">-</span>directory/platforms/android/build/outputs/apk/android<span style="color:#ff5600">-</span>armv7<span style="color:#ff5600">-</span>debug.apk
-</pre>
-    <p style="padding-left: 20px">For more information, please check: <a href="http://webrtcweb.com/cordova-apps/video-conferencing/#how-to-test.txt" target="_blank">how-to-test.txt</a></p>
-  </section>
 
   <section id="dev-environment">
     <h2><a href="#dev-environment">Development Environment Prerequisites</a></h2>
@@ -87,12 +76,6 @@
     <p style="padding-left: 20px">For a clear (comprehensive) guide, please check: <a href="https://cordova.apache.org/docs/en/latest/guide/platforms/android/#installing-the-requirements" target="_blank">appache: installing-the-requirements</a></p>
   </section>
 
-  <section id="cordova">
-    <h2><a href="#cordova">Cordova Prerequisites</a></h2>
-    <pre style="background:#fff;color:#000;padding-left: 20px">npm install -g cordova
-</pre>
-  </section>
-
   <section id="verify-prerequisites">
     <h2><a href="#verify-prerequisites">Check if your system is ready</a></h2>
     <pre style="background:#fff;color:#000;padding-left: 20px">cordova requirements
@@ -107,15 +90,113 @@ Gradle: installed <span style="color:#ff5600">--</span><span style="color:#ff560
     <p style="padding-left: 20px" class="highlighted">Please make sure to re-install the prerequisites if you get different result.</p>
   </section>
 
-  <section id="config-xml">
-    <h2><a href="#config-xml">Modify Config.xml</a></h2>
-    <pre style="background:#fff;color:#000;padding-left: 20px">&lt;?xml version=<span style="color:#00a33f">'1.0'</span> encoding=<span style="color:#00a33f">'utf-8'</span>?>
-&lt;widget id=<span style="color:#00a33f">"com.yourdomain"</span> version=<span style="color:#00a33f">"3.0.0"</span> xmlns=<span style="color:#00a33f">"http://www.w3.org/ns/widgets"</span> xmlns:cdv=<span style="color:#00a33f">"http://cordova.apache.org/ns/1.0"</span>
-    &lt;name>yourAppName&lt;/name>
-    &lt;icon src=<span style="color:#00a33f">"www/img/icon.png"</span> />
-&lt;/widget>
+  <section id="create-cordova">
+    <h2><a href="#create-cordova">Create Your First Cordova App</a></h2>
+<pre class="sh_javascript" style="background:#fff;color:#000;padding-left: 20px">cordova create RTCMultiConnection com.rtcmulticonnection.demo RTCMultiConnection
+cd RTCMultiConnection
 </pre>
-    <p style="padding-left: 20px">Please modify following XML attributes:</p>
+
+    <p>
+      Now you need to change following files:
+    </p>
+
+    <div class="datagrid">
+    <table>
+    <thead><tr><th>name</th><th>path</th><th>description</th><th>demo file</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>index.html</td>
+        <td>www/index.html</td>
+        <td>Android app shows this HTML</td>
+        <td><a href="http://webrtcweb.com/cordova-apps/video-conferencing/www/index.html" target="_blank">demo file</a></td>
+      </tr>
+
+      <tr>
+        <td>index.js</td>
+        <td>www/js/index.js</td>
+        <td>this is the backbone; here you do everything!</td>
+        <td><a href="http://webrtcweb.com/cordova-apps/video-conferencing/www/js/index.js" target="_blank">demo file</a></td>
+      </tr>
+
+      <tr>
+        <td>config.xml</td>
+        <td>config.xml</td>
+        <td>here you set plugins, platforms, and attributes</td>
+        <td><a href="http://webrtcweb.com/cordova-apps/video-conferencing/config.xml" target="_blank">demo file</a></td>
+      </tr>
+
+      <tr>
+        <td>AndroidManifest.xml</td>
+        <td>platforms/android/AndroidManifest.xml</td>
+        <td>your android APK requires this file</td>
+        <td><a href="http://webrtcweb.com/cordova-apps/video-conferencing/platforms/android/AndroidManifest.xml" target="_blank">demo file</a></td>
+      </tr>
+    </tbody>
+    </table>
+    </div>
+  </section>
+
+  <section id="index-html">
+    <h2><a href="#index-html">Modify index.html</a></h2>
+<pre class="sh_html" style="background:#fff;color:#000;padding-left: 20px">&lt;link type="text/css" href="css/index.css"&gt;
+&lt;script src="cordova.js"&gt;&lt;/script&gt;
+&lt;script src="js/socket.io.js"&gt;&lt;/script&gt;
+&lt;script src="js/RTCMultiConnection.js"&gt;&lt;/script&gt;
+&lt;script src="js/index.js"&gt;&lt;/script&gt;
+</pre>
+  </section>
+
+  <section id="index-js">
+    <h2><a href="#index-js">Modify index.js</a></h2>
+<pre class="sh_javascript" style="background:#fff;color:#000;padding-left: 20px">var app = {
+    initialize: function() {
+        app.bindEvents();
+    },
+    bindEvents: function() {
+        document.addEventListener('deviceready', app.onDeviceReady, false);
+    },
+    onDeviceReady: function() {
+        // here goes your real RTCMultiConnection codes
+        var connection = new RTCMultiConnection();
+        connection.socketURL = 'https://yourWebSite.com:9001/';
+        connection.openOrJoin('roomid');
+    }
+};
+
+app.initialize();
+</pre>
+  </section>
+
+  <section id="config-xml">
+    <h2><a href="#config-xml">Modify config.xml</a></h2>
+<pre class="sh_html" style="background:#fff;color:#000;padding-left: 20px">&lt;?xml version='1.0' encoding='utf-8'?&gt;
+&lt;widget id="com.rtcmulticonnection.demo" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0"&gt;
+    &lt;name&gt;RTCMultiConnection&lt;/name&gt;
+    &lt;icon src="www/img/icon.png" /&gt;
+    &lt;content src="index.html" /&gt;
+    
+    &lt;allow-navigation href="*" /&gt;
+    &lt;allow-intent href="*" /&gt;
+    &lt;access origin="*" /&gt;
+
+    &lt;platform name="android"&gt;
+        &lt;preference name="Orientation" value="default" /&gt;
+        &lt;preference name="KeepRunning" value="true" /&gt;
+        &lt;preference name="AndroidLaunchMode" value="singleTop" /&gt;
+    &lt;/platform&gt;
+    
+    &lt;preference name="xwalkVersion" value="23+" /&gt;
+    &lt;preference name="xwalkCommandLine" value="--disable-pull-to-refresh-effect" /&gt;
+    &lt;preference name="xwalkMode" value="embedded" /&gt;
+    &lt;preference name="xwalkMultipleApk" value="true" /&gt;
+
+    &lt;plugin name="cordova-plugin-whitelist" spec="latest" /&gt;
+    &lt;plugin name="cordova-plugin-device" spec="latest" /&gt;
+    &lt;plugin name="cordova-plugin-crosswalk-webview" spec="latest" /&gt;
+&lt;/widget&gt;
+</pre>
+
+      <p style="padding-left: 20px">Please modify following XML attributes:</p>
 
     <div class="datagrid">
     <table>
@@ -124,7 +205,7 @@ Gradle: installed <span style="color:#ff5600">--</span><span style="color:#ff560
       <tr>
         <td>"id" attribute: It should be something like this:</td>
         <td>
-          <pre style="background:#fff;color:#000;">&lt;widget id=<span style="color:#00a33f">"com.yourdomain"</span>
+          <pre class="sh_javascript" style="background:#fff;color:#000;">&lt;widget id=<span style="color:#00a33f">"com.yourdomain"</span>
 </pre>
         </td>
       </tr>
@@ -132,7 +213,7 @@ Gradle: installed <span style="color:#ff5600">--</span><span style="color:#ff560
       <tr>
         <td>"name" attribute: Name should NOT have spaces or special characters. Consider it as a "username":</td>
         <td>
-          <pre style="background:#fff;color:#000;">&lt;<span style="color:#ff5600">name</span>yourAppName&lt;/<span style="color:#ff5600">name</span>
+          <pre class="sh_javascript" style="background:#fff;color:#000;">&lt;<span style="color:#ff5600">name</span>yourAppName&lt;/<span style="color:#ff5600">name</span>
 </pre>
         </td>
       </tr>
@@ -147,62 +228,35 @@ Gradle: installed <span style="color:#ff5600">--</span><span style="color:#ff560
     </div>
   </section>
 
-  <section id="re-add-cordova">
-    <h2><a href="#re-add-cordova">Now Re-Add Cordova-based Android platform</a></h2>
-    <p style="padding-left: 20px">First of all remove old platforms, then re-add them:</p>
-    <pre style="background:#fff;color:#000;padding-left: 20px"><span style="color:#919191"># first of all, remove old android platforms</span>
-cordova platform remove android
-
-<span style="color:#919191"># now re-add the platform</span>
-cordova platform add android --save
+  <section id="AndroidManifest-xml">
+    <h2><a href="#AndroidManifest-xml">Modify AndroidManifest.xml</a></h2>
+<pre class="sh_html" style="background:#fff;color:#000;padding-left: 20px">&lt;?xml version='1.0' encoding='utf-8'?&gt;
+&lt;manifest android:versionName="1.0.0" package="com.rtcmulticonnection.demo"&gt;
+    &lt;uses-sdk android:minSdkVersion="16" android:targetSdkVersion="25" /&gt;
+    &lt;uses-permission android:name="android.permission.CAMERA" /&gt;
+    &lt;uses-permission android:name="android.permission.MICROPHONE" /&gt;
+    &lt;uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" /&gt;
+    &lt;uses-permission android:name="android.permission.RECORD_AUDIO" /&gt;
+    &lt;uses-permission android:name="android.permission.WAKE_LOCK" /&gt;
+    &lt;uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /&gt;
+    &lt;uses-permission android:name="android.permission.ACCESS_WIFI_STATE" /&gt;
+&lt;/manifest&gt;
 </pre>
-
-    <p style="padding-left: 20px" class="highlighted">It will re-generate android application according to your app's new name, id, and icon.</p>
   </section>
 
-  <section id="build-apk">
-    <h2><a href="#build-apk">Now build APK file</a></h2>
-    <p style="padding-left: 20px">You can use following command to build APK:</p>
-    <pre style="background:#fff;color:#000;padding-left: 20px">cordova build android
+  <section id="android-platform">
+    <h2><a href="#android-platform">Add Android platform</a></h2>
+<pre class="sh_javascript" style="background:#fff;color:#000;padding-left: 20px">cordova platform add android
+</pre>
+  </section>
+
+  <section id="build-android">
+    <h2><a href="#build-android">Build Android</a></h2>
+<pre class="sh_javascript" style="background:#fff;color:#000;padding-left: 20px">cordova build android
 </pre>
     <p style="padding-left: 20px">You can find the generated APK here:</p>
-    <pre style="background:#fff;color:#000;padding-left: 20px">project<span style="color:#ff5600">-</span>directory/platforms/android/build/outputs/apk/android<span style="color:#ff5600">-</span>armv7<span style="color:#ff5600">-</span>debug.apk
+    <pre class="sh_javascript" style="background:#fff;color:#000;padding-left: 20px">project<span style="color:#ff5600">-</span>directory/platforms/android/build/outputs/apk/android<span style="color:#ff5600">-</span>armv7<span style="color:#ff5600">-</span>debug.apk
 </pre>
-  </section>
-
-  <section id="modify-codes">
-    <h2><a href="#modify-codes">How to Modify Codes</a></h2>
-    <div class="datagrid">
-    <table>
-    <thead><tr><th>File path</th><th>description</th></tr></thead>
-    <tbody>
-      <tr>
-        <td><a href="http://webrtcweb.com/cordova-apps/video-conferencing/#index.js">www/js/index.js</a></td>
-        <td>this is your file; this is your code; everything goes here; open or join rooms, manage videos or layout, manage everything using this file.</td>
-      </tr>
-
-      <tr>
-        <td><a href="http://webrtcweb.com/cordova-apps/video-conferencing/#index.html">www/index.html</a></td>
-        <td>this is your HTML file; all the layout code goes here; your css+javascript will be linked through this file.</td>
-      </tr>
-
-      <tr>
-        <td><a href="http://webrtcweb.com/cordova-apps/video-conferencing/#config.xml">config.xml</a></td>
-        <td>cordova relies totally on this file; cordova will check and compile plugins and platforms via this file.</td>
-      </tr>
-
-      <tr>
-        <td><a href="http://webrtcweb.com/cordova-apps/video-conferencing/#RTCMultiConnection.js">www/js/RTCMultiConnection.js</a></td>
-        <td>here goes RTCMultiConnection; you can always replace it with latest (recent) versions.</td>
-      </tr>
-
-      <tr>
-        <td><a href="http://webrtcweb.com/cordova-apps/video-conferencing/#AndroidManifest.xml">platforms/android/AndroidManifest.xml</a></td>
-        <td>your android APK requires this file; you must enable permissions for camera+microphone through this file.</td>
-      </tr>
-    </tbody>
-    </table>
-    </div>
   </section>
 
   <footer>

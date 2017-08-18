@@ -1,136 +1,68 @@
 <!DOCTYPE html>
-<html id="home" lang="en">
-
+<html lang="en" dir="ltr">
 <head>
-    <title>RTCMultiConnection Docs | API Reference</title>
-    <meta name="description" content="RTCMultiConnection is a JavaScript library which supports conferencing, broadcasting, file sharing, screen sharing, scalable broadcast, recording and huge number of APIs & features. It supports Windows, Mac, Linux, Android and iOS." />
-    <meta name="keywords" content="iOS,Android,Cordova,CrossWalk-Project,RTCMultiConnection,JavaScript,WebRTC,Demos,Experiments,Samples,Examples" />
+  <meta charset="utf-8">
+  <title>RTCMultiConnection Docs | API Reference</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  <link rel="shortcut icon" href="../images/logo.png">
+  <meta name="google-site-verification" content="0ZfJnHomOzZDWKIkhkRYklDwdYnyEFEnZ7neD7gzHPU" />
+  <link rel="stylesheet" type="text/css" href="../css/stylesheet.css">
 
+  <script src="https://cdn.webrtc-experiment.com/syntax/sh_main.min.js" type="text/javascript"> </script>
+  <script src="https://cdn.webrtc-experiment.com/syntax/sh_javascript.min.js" type="text/javascript"> </script>
+  <script src="https://cdn.webrtc-experiment.com/syntax/sh_html.min.js" type="text/javascript"> </script>
+  <link href="https://cdn.webrtc-experiment.com/syntax/sh_style.css" type="text/css" rel="stylesheet">
 
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
-    <meta name="author" content="Muaz Khan">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <style>
+    ol li {
+      border: 1px solid #95d4e7;
+      border-top: 0;
+      padding: 10px 20px;
+    }
 
-    <link rel="stylesheet" href="https://cdn.webrtc-experiment.com/style.css">
+    ol li:first-child {
+      border-top: 1px solid #95d4e7;
+    }
 
-    <style>
-        p {
-            padding: .8em;
-        }
-        li {
-            border-bottom: 1px solid rgb(189, 189, 189);
-            border-left: 1px solid rgb(189, 189, 189);
-            padding: .5em;
-        }
-        .image-container {
-            margin: 2em 0;
-            text-align: center;
-        }
-        .image-parent {
-            border: 2px solid black;
-            border-radius: 5px;
-            margin: 0 2em;
-        }
-        .image-parent img {
-            width: 100%;
-        }
-
-        p {
-          margin-top: 0!important;
-          margin-bottom: 0!important;
-          padding: 10px 10px!important;
-        }
-
-        blockquote {
-          margin: 10px;
-          border-radius: 10px;
-          background: rgb(253, 253, 253);
-          padding: 8px 20px;
-          font-size: 25px;
-          font-weight: 200;
-          line-height: 1.5;
-          word-spacing: 5px;
-        }
-
-        section blockquote {
-          color: #EC008C;
-        }
-
-        .specific-h2, h1 {
-          font-size: 35px;
-          font-weight: 200;
-          padding: 5px 10px;
-          border-bottom: 1px dotted #EC008C;
-        }
-
-        .specific-h2 a {
-          color: #EC008C;
-        }
-
-        h1 {
-          font-size: 40px;
-          color: #EC008C;
-        }
-
-        li, li a, p a, pre {
-          font-weight: 200;
-          line-height: 1.5;
-          word-spacing: 5px;
-        }
-
-        #search {
-          font-size: 20px;
-          border: 2px solid black;
-          padding: 8px 14px;
-          width: 55%;
-          margin: 5px;
-          border-radius: 6px;
-          background-repeat: no-repeat;
-          background-size: 32px;
-          background-position: center right;
-          background-image: url(https://cdn.webrtc-experiment.com/images/search-icon.png);
-        }
-    </style>
-    <!-- for HTML5 el styling -->
-    <script>
-        document.createElement('article');
-        document.createElement('footer');
-    </script>
-
-    <script src="https://cdn.webrtc-experiment.com/syntax/sh_main.min.js" type="text/javascript"> </script>
-    <script src="https://cdn.webrtc-experiment.com/syntax/sh_javascript.min.js" type="text/javascript"> </script>
-    <script src="https://cdn.webrtc-experiment.com/syntax/sh_html.min.js" type="text/javascript"> </script>
-    <link href="https://cdn.webrtc-experiment.com/syntax/sh_style.css" type="text/css" rel="stylesheet">
+    ol li pre {
+      margin-left: 55px;
+    }
+  </style>
 </head>
-
 <body onload="sh_highlightDocument();">
-    <article>
-        <header style="text-align: center;">
-            <h1>
-                RTCMultiConnection Docs | API Reference
-            </h1>
+  <header>
+    <a class="logo" href="../"><img src="../images/logo.png" alt="RTCMultiConnection"></a>
+    <nav>
+      <li>
+        <a href="../">Home</a>
+      </li>
+      <li>
+        <a href="../getting-started/">Getting Started</a>
+      </li>
+      <li>
+        <a href="../FAQ/">FAQ</a>
+      </li>
+      <li>
+        <a href="https://www.youtube.com/playlist?list=PLPRQUXAnRydKdyun-vjKPMrySoow2N4tl">YouTube</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection#v3-demos">Demos</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki</a>
+      </li>
+      <li>
+        <a href="https://github.com/muaz-khan/RTCMultiConnection">Github</a>
+      </li>
+    </nav>
+  </header>
 
-            <p>
-                <a href="https://rtcmulticonnection.herokuapp.com/">HOME</a>
-                <span> &copy; </span>
-                <a href="http://www.MuazKhan.com/" target="_blank">Muaz Khan</a> .
-                <a href="http://twitter.com/WebRTCWeb" target="_blank" title="Twitter profile for WebRTC Experiments">@WebRTCWeb</a> .
-                <a href="https://github.com/muaz-khan?tab=repositories" target="_blank" title="Github Profile">Github</a> .
-                <a href="https://github.com/muaz-khan/RTCMultiConnection/issues?state=open" target="_blank">Latest issues</a> .
-                <a href="https://github.com/muaz-khan/RTCMultiConnection/commits/master" target="_blank">What's New?</a>
-            </p>
-        </header>
+  <h1>
+    RTCMultiConnection Docs | API Reference
+    <p>You can <a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs">search missing API</a> or <a href="https://github.com/muaz-khan/RTCMultiConnection/tree/gh-pages">contribute to improve these documents</a>.</p>
+  </h1>
 
-        <div class="github-stargazers"></div>
-
-        <blockquote>
-            You can <a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs">search missing API</a> or <a href="https://github.com/muaz-khan/RTCMultiConnection/tree/gh-pages">contribute to improve these documents</a>.
-        </blockquote>
-
-        <section class="experiment">
+        <section>
           <ol>
               <li><a href="http://www.RTCMultiConnection.org/docs/getting-started/">Getting Started Guide</a></li>
               <li><a href="http://www.RTCMultiConnection.org/docs/Write-Android-Apps/">Write Android apps</a></li>
@@ -142,10 +74,9 @@
           </blockquote>
         </section>
 
-        <section class="experiment">
-          <h2 class="specific-h2" style="display:block;text-align:center;">
+        <section>
+          <h2 class="specific-h2" style="display:block;text-align:center; margin-top: 10px;">
               API Reference
-              <input id="search" type="search" placeholder="Search APIs" autofocus autosave>
           </h2>
 
           <ol class="api-reference">
@@ -2074,101 +2005,10 @@ navigator.webkitGetUserMedia({
           </ol>
         </section>
 
-        <script>
-            var apiRef = document.querySelector('.api-reference');
-            var li = apiRef.querySelectorAll('li');
-            var liLength = li.length;
+  <footer>
+    <small id="send-message"></small>
+  </footer>
 
-            var direction = 'one-way,oneway,broadcast,many-to-many,multi-user,video-conferencing,audio-conferencing,videoconferencing';
-            var signaling = 'signaling,firebase,socket.io,socketio,websocket,php,asp.net,aspnet,.net,custom';
-            var session = 'audio,video,screen,data,oneway,two-way,one-way,twoway,multi-user,share,media,type,broadcast';
-            var sdpConstraints = 'sdp,constraints,OfferToReceiveAudio,OfferToReceiveVideo,VoiceActivityDetection,IceRestart,createOffer,createAnswer';
-
-            var search = document.querySelector('#search');
-            search.onkeyup = search.onblur = search.onfocus = search.onsearch = function() {
-                var value = search.value.toLowerCase();
-                var newValue;
-
-                if(value.length && value.indexOf('connection') !== -1) {
-                  newValue = value.replace(/connection|\./g, '');
-                }
-
-                for (var i = 0; i < liLength; i++) {
-                    if(value.length && li[i].querySelector('a').innerHTML.toLowerCase().indexOf(value) == -1 ) {
-                      li[i].style.display = 'none';
-                    }
-                    else {
-                      li[i].style.display = '';
-                    }
-
-                    if(newValue && newValue.length && li[i].querySelector('a').innerHTML.toLowerCase().indexOf(newValue) == -1 ) {
-                      li[i].style.display = 'none';
-                    }
-                    else if(newValue && newValue.length) {
-                      li[i].style.display = '';
-                    }
-                }
-
-                if (direction.indexOf(this.value) != -1) {
-                    document.querySelector('#direction').style.display = '';
-                }
-
-                if (session.indexOf(this.value) != -1) {
-                    document.querySelector('#session').style.display = '';
-                }
-
-                if (sdpConstraints.indexOf(this.value) != -1) {
-                    document.querySelector('#sdpConstraints').style.display = '';
-                }
-
-                if (signaling.indexOf(this.value) != -1) {
-                    document.querySelector('#openSignalingChannel').style.display = '';
-                }
-            };
-
-            if(location.hash.replace('#', '').length && location.hash.replace('#', '').indexOf('comment-') == -1) {
-                search.value = location.hash.replace('#', '');
-                search.focus();
-            }
-            window.onhashchange = function() {
-                search.value = location.hash.replace('#', '');
-                search.focus();
-            };
-        </script>
-
-        <section class="experiment own-widgets">
-            <h2 class="header" id="updates" style="color: red;padding-bottom: .1em;"><a href="https://github.com/muaz-khan/RTCMultiConnection/issues">Latest Issues</a></h2>
-            <div id="github-issues"></div>
-        </section>
-
-        <section style="border: 1px solid rgb(189, 189, 189); border-radius: .2em; margin: 1em 3em;">
-            <h2 id="feedback" style="border-bottom: 1px solid rgb(189, 189, 189); padding: .2em .4em;">Want to ask a Question?</h2>
-            <div>
-                <textarea id="message" style="border: 1px solid rgb(189, 189, 189); height: 8em; margin: .2em; outline: none; resize: vertical; width: 98%;" placeholder="Feel free to ask any question regarding RTCMultiConnection.js!"></textarea>
-            </div>
-            <button id="send-message" style="font-size: 1em;">Ask a Question</button><small style="margin-left: 1em;">You can include your email for private conversation!</small>
-        </section>
-
-        <section class="experiment own-widgets latest-commits">
-            <h2 class="header" id="updates" style="color: red; padding-bottom: .1em;"><a href="https://github.com/muaz-khan/WebRTC-Experiment/commits/master" target="_blank">Latest Updates</a></h2>
-            <div id="github-commits"></div>
-        </section>
-    </article>
-
-    <a href="https://github.com/muaz-khan/RTCMultiConnection" class="fork-left"></a>
-
-    <footer>
-        <p>
-            <a href="https://www.webrtc-experiment.com">WebRTC Experiments</a> © <a href="https://plus.google.com/+MuazKhan" rel="author" target="_blank">Muaz Khan</a>
-            <a href="mailto:muazkh@gmail.com" target="_blank">muazkh@gmail.com</a>
-            <a href="https://github.com/muaz-khan" target="_blank">Github</a>
-        </p>
-    </footer>
-
-    <script>
-        window.useThisGithubPath = 'muaz-khan/RTCMultiConnection';
-    </script>
-    <script src="https://cdn.webrtc-experiment.com/commits.js"></script>
+  <script src="https://cdn.webrtc-experiment.com/common.js"></script>
 </body>
-
 </html>
