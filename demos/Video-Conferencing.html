@@ -58,12 +58,15 @@
   </section>
 
 <script src="/dist/RTCMultiConnection.min.js"></script>
+<script src="/dev/adapter.js"></script>
 <script src="/socket.io/socket.io.js"></script>
 
 <!-- custom layout for HTML5 audio/video elements -->
 <link rel="stylesheet" href="/dev/getHTMLMediaElement.css">
 <script src="/dev/getHTMLMediaElement.js"></script>
 <script>
+window.enableAdapter = true; // enable adapter.js
+
 // ......................................................
 // .......................UI Code........................
 // ......................................................
@@ -114,8 +117,18 @@ connection.sdpConstraints.mandatory = {
 
 connection.videosContainer = document.getElementById('videos-container');
 connection.onstream = function(event) {
+    event.mediaElement.removeAttribute('src');
+    event.mediaElement.removeAttribute('srcObject');
+
+    var video = document.createElement('video');
+    video.controls = true;
+    if(event.type === 'local') {
+        video.muted = true;
+    }
+    video.srcObject = event.stream;
+
     var width = parseInt(connection.videosContainer.clientWidth / 2) - 20;
-    var mediaElement = getHTMLMediaElement(event.mediaElement, {
+    var mediaElement = getHTMLMediaElement(video, {
         title: event.userid,
         buttons: ['full-screen'],
         width: width,

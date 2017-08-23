@@ -1,4 +1,4 @@
-// Last time updated at Sunday, July 30th, 2017, 11:34:00 AM 
+// Last time updated at Wednesday, August 23rd, 2017, 9:02:27 PM 
 
 // Quick-Demo for newbies: http://jsfiddle.net/c46de0L8/
 // Another simple demo: http://jsfiddle.net/zar6fg60/
@@ -4141,7 +4141,9 @@
 
                     this.iceServers = {
                         iceServers: this.iceServers,
-                        iceTransports: this.rtcConfiguration.iceTransports
+                        iceTransportPolicy: this.rtcConfiguration.iceTransports,
+                        rtcpMuxPolicy: 'require', // or negotiate
+                        bundlePolicy: 'max-bundle'
                     };
                 } else this.iceServers = null;
 
@@ -6534,6 +6536,19 @@
         };
 
         connection.Plugin = Plugin;
+
+        connection.resetScreen = function() {
+            sourceId = null;
+            if (DetectRTC && DetectRTC.screen) {
+                delete DetectRTC.screen.sourceId;
+            }
+
+            currentUserMediaRequest = {
+                streams: [],
+                mutex: false,
+                queueRequests: []
+            };
+        };
     }
 
 })();

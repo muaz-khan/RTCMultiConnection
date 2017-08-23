@@ -1288,4 +1288,17 @@ function setDefaults(connection) {
     };
 
     connection.Plugin = Plugin;
+
+    connection.resetScreen = function() {
+        sourceId = null;
+        if (DetectRTC && DetectRTC.screen) {
+            delete DetectRTC.screen.sourceId;
+        }
+
+        currentUserMediaRequest = {
+            streams: [],
+            mutex: false,
+            queueRequests: []
+        };
+    };
 }

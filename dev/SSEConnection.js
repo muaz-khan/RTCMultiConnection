@@ -1,15 +1,11 @@
 // SSEConnection.js
 
 function SSEConnection(connection, connectCallback) {
-    connection.trickleIce = false;
+    // connection.trickleIce = false;
 
     var sseDirPath = 'https://webrtcweb.com/SSE/';
 
-    connection.socket = new EventSource(sseDirPath + 'SSE.php?me=' + connection.userid, {
-        withCredentials: false
-    });
-
-    document.querySelector('h1').innerHTML = connection.userid;
+    connection.socket = new EventSource(sseDirPath + 'SSE.php?me=' + connection.userid);
 
     var skipDuplicate = {};
     connection.socket.onmessage = function(e) {
@@ -27,9 +23,29 @@ function SSEConnection(connection, connectCallback) {
         }
         if (!data) return;
 
+        if (data.remoteUserId) {
+            if (data.eventName === connection.socketMessageEvent) {
+                onMessagesCallback(data.data);
+            }
+            return;
+        }
+
         Object.keys(data).forEach(function(key) {
             var message = data[key];
             if (!message.length) return;
+
+            if (message instanceof Array) {
+                message.forEach(function(m) {
+                    m = JSON.parse(m);
+                    if (!m) return;
+
+                    if (m.eventName === connection.socketMessageEvent) {
+                        onMessagesCallback(m.data);
+                    }
+                });
+                return;
+            }
+
             message = JSON.parse(message);
             if (!message) return;
 
@@ -38,13 +54,10 @@ function SSEConnection(connection, connectCallback) {
             }
         });
     };
-
     connection.socket.emit = function(eventName, data, callback) {
-        callback = callback || function() {};
-
         if (!eventName || !data) return;
-        if (eventName === 'changed-uuid') return callback();
-        if (data.message && data.message.shiftedModerationControl) return callback();
+        if (eventName === 'changed-uuid') return;
+        if (data.message && data.message.shiftedModerationControl) return;
 
         if (!data.remoteUserId) return;
 
@@ -70,19 +83,11 @@ function SSEConnection(connection, connectCallback) {
     connection.socket.onopen = function() {
         if (connectCallback) {
             if (connection.enableLogs) {
-                console.log('SSE connection is opened.');
+                console.info('SSE connection is opened.');
             }
 
             connectCallback(connection.socket);
             connectCallback = null;
-
-            if (connection.isInitiator) {
-                connection.socket.emit(connection.socketMessageEvent, {
-                    remoteUserId: connection.userid,
-                    message: 'test',
-                    sender: connection.userid
-                }, function() {});
-            }
         }
     };
 

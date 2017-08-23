@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-08-14 7:41:06 AM UTC
+// Last time updated: 2017-08-23 5:50:53 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -5752,6 +5752,19 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 console.info('Server says "Room ', roomid, 'already exist. Joining instead.');
             }
             connection.join(roomid);
+        };
+
+        connection.resetScreen = function() {
+            sourceId = null;
+            if (DetectRTC && DetectRTC.screen) {
+                delete DetectRTC.screen.sourceId;
+            }
+
+            currentUserMediaRequest = {
+                streams: [],
+                mutex: false,
+                queueRequests: []
+            };
         };
     })(this);
 

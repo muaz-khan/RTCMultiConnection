@@ -60,7 +60,7 @@ function serverHandler(request, response) {
             return;
         }
 
-        if(filename && filename.indexOf('Video-Broadcasting.html') !== -1) {
+        if (filename && filename.indexOf('Video-Broadcasting.html') !== -1) {
             filename = filename.replace('Video-Broadcasting.html', 'video-broadcasting.html');
         }
 
