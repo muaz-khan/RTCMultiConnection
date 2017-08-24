@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-08-23 5:50:53 PM UTC
+// Last time updated: 2017-08-24 1:08:27 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -2075,6 +2075,12 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         var isAudioOnly = false;
         if (!!stream.getVideoTracks && !stream.getVideoTracks().length && !stream.isVideo && !stream.isScreen) {
             isAudioOnly = true;
+        }
+
+        if (DetectRTC.browser.name === 'Firefox') {
+            if (connection.session.video || connection.session.screen) {
+                isAudioOnly = false;
+            }
         }
 
         var mediaElement = document.createElement(isAudioOnly ? 'audio' : 'video');
