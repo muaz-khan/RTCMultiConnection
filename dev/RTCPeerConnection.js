@@ -122,8 +122,9 @@ function PeerInitiator(config) {
                 params = {
                     iceServers: connection.iceServers,
                     iceTransportPolicy: connection.iceTransportPolicy || iceTransports,
-                    rtcpMuxPolicy: connection.rtcpMuxPolicy || 'negotiate',
-                    bundlePolicy: 'max-bundle'
+                    // rtcpMuxPolicy: connection.rtcpMuxPolicy || 'require', // or negotiate
+                    bundlePolicy: 'max-bundle',
+                    iceCandidatePoolSize: connection.iceCandidatePoolSize || 0
                 };
             }
 

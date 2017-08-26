@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-08-13 4:33:11 PM UTC
+// Last time updated: 2017-08-26 5:42:35 AM UTC
 
 // _______________
 // getStats v1.0.4
@@ -55,6 +55,11 @@ window.getStats = function(mediaStreamTrack, callback, interval) {
             },
             bytesSent: 0,
             bytesReceived: 0
+        },
+        bandwidth: {
+            systemBandwidth: 0,
+            sentPerSecond: 0,
+            encodedPerSecond: 0
         },
         results: {},
         connectionType: {
@@ -135,6 +140,10 @@ window.getStats = function(mediaStreamTrack, callback, interval) {
                         getStatsParser[key](result);
                     }
                 });
+
+                if (result.type !== 'local-candidate' && result.type !== 'remote-candidate' && result.type !== 'candidate-pair') {
+                    // console.error('result', result);
+                }
             });
 
             try {
@@ -323,21 +332,19 @@ window.getStats = function(mediaStreamTrack, callback, interval) {
     getStatsParser.bweforvideo = function(result) {
         if (result.type !== 'VideoBwe') return;
 
-        // id === 'bweforvideo'
+        getStatsResult.bandwidth.availableSendBandwidth = result.googAvailableSendBandwidth;
 
-        getStatsResult.video.bandwidth = {
-            googActualEncBitrate: result.googActualEncBitrate,
-            googAvailableSendBandwidth: result.googAvailableSendBandwidth,
-            googAvailableReceiveBandwidth: result.googAvailableReceiveBandwidth,
-            googRetransmitBitrate: result.googRetransmitBitrate,
-            googTargetEncBitrate: result.googTargetEncBitrate,
-            googBucketDelay: result.googBucketDelay,
-            googTransmitBitrate: result.googTransmitBitrate
-        };
+        getStatsResult.bandwidth.googActualEncBitrate = result.googActualEncBitrate;
+        getStatsResult.bandwidth.googAvailableSendBandwidth = result.googAvailableSendBandwidth;
+        getStatsResult.bandwidth.googAvailableReceiveBandwidth = result.googAvailableReceiveBandwidth;
+        getStatsResult.bandwidth.googRetransmitBitrate = result.googRetransmitBitrate;
+        getStatsResult.bandwidth.googTargetEncBitrate = result.googTargetEncBitrate;
+        getStatsResult.bandwidth.googBucketDelay = result.googBucketDelay;
+        getStatsResult.bandwidth.googTransmitBitrate = result.googTransmitBitrate;
     };
 
-    getStatsParser.googCandidatePair = function(result) {
-        if (result.type !== 'googCandidatePair') return;
+    getStatsParser.candidatePair = function(result) {
+        if (result.type !== 'googCandidatePair' && result.type !== 'candidate-pair') return;
 
         // result.googActiveConnection means either STUN or TURN is used.
 
@@ -347,8 +354,22 @@ window.getStats = function(mediaStreamTrack, callback, interval) {
 
             // bytesSent, bytesReceived
 
-            getStatsResult.connectionType.local.ipAddress = result.googLocalAddress;
-            getStatsResult.connectionType.remote.ipAddress = result.googRemoteAddress;
+            Object.keys(getStatsResult.internal.candidates).forEach(function(cid) {
+                var candidate = getStatsResult.internal.candidates[cid];
+                if (candidate.ipAddress.indexOf(result.googLocalAddress) !== -1) {
+                    getStatsResult.connectionType.local.candidateType = candidate.candidateType;
+                    getStatsResult.connectionType.local.ipAddress = candidate.ipAddress;
+                    getStatsResult.connectionType.local.networkType = candidate.networkType;
+                    getStatsResult.connectionType.local.transport = candidate.transport;
+                }
+                if (candidate.ipAddress.indexOf(result.googRemoteAddress) !== -1) {
+                    getStatsResult.connectionType.remote.candidateType = candidate.candidateType;
+                    getStatsResult.connectionType.remote.ipAddress = candidate.ipAddress;
+                    getStatsResult.connectionType.remote.networkType = candidate.networkType;
+                    getStatsResult.connectionType.remote.transport = candidate.transport;
+                }
+            });
+
             getStatsResult.connectionType.transport = result.googTransportType;
 
             var localCandidate = getStatsResult.internal.candidates[result.localCandidateId];
@@ -365,90 +386,134 @@ window.getStats = function(mediaStreamTrack, callback, interval) {
                 }
             }
         }
+
+        if (result.type === 'candidate-pair') {
+            if (result.selected === true && result.nominated === true && result.state === 'succeeded') {
+                // remoteCandidateId, localCandidateId, componentId
+                var localCandidate = getStatsResult.internal.candidates[result.remoteCandidateId];
+                var remoteCandidate = getStatsResult.internal.candidates[result.remoteCandidateId];
+
+                // Firefox used above two pairs for connection
+            }
+        }
     };
 
-    var LOCAL_candidateType = [];
-    var LOCAL_transport = [];
-    var LOCAL_ipAddress = [];
-    var LOCAL_networkType = [];
+    var LOCAL_candidateType = {};
+    var LOCAL_transport = {};
+    var LOCAL_ipAddress = {};
+    var LOCAL_networkType = {};
 
     getStatsParser.localcandidate = function(result) {
-        if (result.type !== 'localcandidate') return;
+        if (result.type !== 'localcandidate' && result.type !== 'local-candidate') return;
+        if (!result.id) return;
 
-        if (result.candidateType && LOCAL_candidateType.indexOf(result.candidateType) === -1) {
-            LOCAL_candidateType.push(result.candidateType);
+        if (!LOCAL_candidateType[result.id]) {
+            LOCAL_candidateType[result.id] = [];
         }
 
-        if (result.transport && LOCAL_transport.indexOf(result.transport) === -1) {
-            LOCAL_transport.push(result.transport);
+        if (!LOCAL_transport[result.id]) {
+            LOCAL_transport[result.id] = [];
         }
 
-        if (result.ipAddress && LOCAL_ipAddress.indexOf(result.ipAddress + ':' + result.portNumber) === -1) {
-            LOCAL_ipAddress.push(result.ipAddress + ':' + result.portNumber);
+        if (!LOCAL_ipAddress[result.id]) {
+            LOCAL_ipAddress[result.id] = [];
         }
 
-        if (result.networkType && LOCAL_networkType.indexOf(result.networkType) === -1) {
-            LOCAL_networkType.push(result.networkType);
+        if (!LOCAL_networkType[result.id]) {
+            LOCAL_networkType[result.id] = [];
+        }
+
+        if (result.candidateType && LOCAL_candidateType[result.id].indexOf(result.candidateType) === -1) {
+            LOCAL_candidateType[result.id].push(result.candidateType);
+        }
+
+        if (result.transport && LOCAL_transport[result.id].indexOf(result.transport) === -1) {
+            LOCAL_transport[result.id].push(result.transport);
+        }
+
+        if (result.ipAddress && LOCAL_ipAddress[result.id].indexOf(result.ipAddress + ':' + result.portNumber) === -1) {
+            LOCAL_ipAddress[result.id].push(result.ipAddress + ':' + result.portNumber);
+        }
+
+        if (result.networkType && LOCAL_networkType[result.id].indexOf(result.networkType) === -1) {
+            LOCAL_networkType[result.id].push(result.networkType);
         }
 
         getStatsResult.internal.candidates[result.id] = {
-            candidateType: LOCAL_candidateType,
-            ipAddress: LOCAL_ipAddress,
+            candidateType: LOCAL_candidateType[result.id],
+            ipAddress: LOCAL_ipAddress[result.id],
             portNumber: result.portNumber,
-            networkType: LOCAL_networkType,
+            networkType: LOCAL_networkType[result.id],
             priority: result.priority,
-            transport: LOCAL_transport,
+            transport: LOCAL_transport[result.id],
             timestamp: result.timestamp,
             id: result.id,
             type: result.type
         };
 
-        getStatsResult.connectionType.local.candidateType = LOCAL_candidateType;
-        getStatsResult.connectionType.local.ipAddress = LOCAL_ipAddress;
-        getStatsResult.connectionType.local.networkType = LOCAL_networkType;
-        getStatsResult.connectionType.local.transport = LOCAL_transport;
+        getStatsResult.connectionType.local.candidateType = LOCAL_candidateType[result.id];
+        getStatsResult.connectionType.local.ipAddress = LOCAL_ipAddress[result.id];
+        getStatsResult.connectionType.local.networkType = LOCAL_networkType[result.id];
+        getStatsResult.connectionType.local.transport = LOCAL_transport[result.id];
     };
 
-    var REMOTE_candidateType = [];
-    var REMOTE_transport = [];
-    var REMOTE_ipAddress = [];
-    var REMOTE_networkType = [];
+    var REMOTE_candidateType = {};
+    var REMOTE_transport = {};
+    var REMOTE_ipAddress = {};
+    var REMOTE_networkType = {};
 
     getStatsParser.remotecandidate = function(result) {
-        if (result.type !== 'remotecandidate') return;
+        if (result.type !== 'remotecandidate' && result.type !== 'remote-candidate') return;
+        if (!result.id) return;
 
-        if (result.candidateType && REMOTE_candidateType.indexOf(result.candidateType) === -1) {
-            REMOTE_candidateType.push(result.candidateType);
+        if (!REMOTE_candidateType[result.id]) {
+            REMOTE_candidateType[result.id] = [];
         }
 
-        if (result.transport && REMOTE_transport.indexOf(result.transport) === -1) {
-            REMOTE_transport.push(result.transport);
+        if (!REMOTE_transport[result.id]) {
+            REMOTE_transport[result.id] = [];
         }
 
-        if (result.ipAddress && REMOTE_ipAddress.indexOf(result.ipAddress + ':' + result.portNumber) === -1) {
-            REMOTE_ipAddress.push(result.ipAddress + ':' + result.portNumber);
+        if (!REMOTE_ipAddress[result.id]) {
+            REMOTE_ipAddress[result.id] = [];
         }
 
-        if (result.networkType && REMOTE_networkType.indexOf(result.networkType) === -1) {
-            REMOTE_networkType.push(result.networkType);
+        if (!REMOTE_networkType[result.id]) {
+            REMOTE_networkType[result.id] = [];
+        }
+
+        if (result.candidateType && REMOTE_candidateType[result.id].indexOf(result.candidateType) === -1) {
+            REMOTE_candidateType[result.id].push(result.candidateType);
+        }
+
+        if (result.transport && REMOTE_transport[result.id].indexOf(result.transport) === -1) {
+            REMOTE_transport[result.id].push(result.transport);
+        }
+
+        if (result.ipAddress && REMOTE_ipAddress[result.id].indexOf(result.ipAddress + ':' + result.portNumber) === -1) {
+            REMOTE_ipAddress[result.id].push(result.ipAddress + ':' + result.portNumber);
+        }
+
+        if (result.networkType && REMOTE_networkType[result.id].indexOf(result.networkType) === -1) {
+            REMOTE_networkType[result.id].push(result.networkType);
         }
 
         getStatsResult.internal.candidates[result.id] = {
-            candidateType: REMOTE_candidateType,
-            ipAddress: REMOTE_ipAddress,
+            candidateType: REMOTE_candidateType[result.id],
+            ipAddress: REMOTE_ipAddress[result.id],
             portNumber: result.portNumber,
-            networkType: REMOTE_networkType,
+            networkType: REMOTE_networkType[result.id],
             priority: result.priority,
-            transport: REMOTE_transport,
+            transport: REMOTE_transport[result.id],
             timestamp: result.timestamp,
             id: result.id,
             type: result.type
         };
 
-        getStatsResult.connectionType.remote.candidateType = REMOTE_candidateType;
-        getStatsResult.connectionType.remote.ipAddress = REMOTE_ipAddress;
-        getStatsResult.connectionType.remote.networkType = REMOTE_networkType;
-        getStatsResult.connectionType.remote.transport = REMOTE_transport;
+        getStatsResult.connectionType.remote.candidateType = REMOTE_candidateType[result.id];
+        getStatsResult.connectionType.remote.ipAddress = REMOTE_ipAddress[result.id];
+        getStatsResult.connectionType.remote.networkType = REMOTE_networkType[result.id];
+        getStatsResult.connectionType.remote.transport = REMOTE_transport[result.id];
     };
 
     getStatsParser.dataSentReceived = function(result) {

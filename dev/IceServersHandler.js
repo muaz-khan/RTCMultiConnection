@@ -6,7 +6,8 @@ var IceServersHandler = (function() {
         var iceServers = [{
                 'urls': [
                     'turn:webrtcweb.com:7788', // coTURN 7788+8877
-                    'turn:webrtcweb.com:4455' // restund 4455+5544
+                    'turn:webrtcweb.com:4455', // restund udp
+                    'turn:webrtcweb.com:5544' // restund tcp
                 ],
                 'username': 'muazkh',
                 'credential': 'muazkh'
@@ -17,10 +18,6 @@ var IceServersHandler = (function() {
                 ]
             }
         ];
-
-        if (DetectRTC.browser.name === 'Firefox' && DetectRTC.browser.version >= 54) {
-            iceServers[0].urls = [iceServers[0].urls[0]];
-        }
 
         return iceServers;
     }

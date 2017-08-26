@@ -253,6 +253,8 @@ function onGettingWebRTCStats(stats, remoteUserId) {
   }
 
   var statsData = 'UserID: ' + remoteUserId + '\n';
+  statsData += 'Available Send Bandwidth: ' + bytesToSize(stats.bandwidth.availableSendBandwidth);
+  statsData += '\n';
   statsData += 'Encryption: ' + stats.encryption;
   statsData += '\n';
   statsData += 'Codecs: ' + stats.audio.recv.codecs.concat(stats.video.recv.codecs).join(', ');

@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-08-24 1:08:27 PM UTC
+// Last time updated: 2017-08-26 6:13:11 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -2480,8 +2480,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     params = {
                         iceServers: connection.iceServers,
                         iceTransportPolicy: connection.iceTransportPolicy || iceTransports,
-                        rtcpMuxPolicy: connection.rtcpMuxPolicy || 'negotiate',
-                        bundlePolicy: 'max-bundle'
+                        // rtcpMuxPolicy: connection.rtcpMuxPolicy || 'require', // or negotiate
+                        bundlePolicy: 'max-bundle',
+                        iceCandidatePoolSize: connection.iceCandidatePoolSize || 0
                     };
                 }
 
@@ -3249,7 +3250,8 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             var iceServers = [{
                     'urls': [
                         'turn:webrtcweb.com:7788', // coTURN 7788+8877
-                        'turn:webrtcweb.com:4455' // restund 4455+5544
+                        'turn:webrtcweb.com:4455', // restund udp
+                        'turn:webrtcweb.com:5544' // restund tcp
                     ],
                     'username': 'muazkh',
                     'credential': 'muazkh'
@@ -3260,10 +3262,6 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     ]
                 }
             ];
-
-            if (DetectRTC.browser.name === 'Firefox' && DetectRTC.browser.version >= 54) {
-                iceServers[0].urls = [iceServers[0].urls[0]];
-            }
 
             return iceServers;
         }
