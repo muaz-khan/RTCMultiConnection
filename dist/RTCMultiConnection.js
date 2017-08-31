@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-08-26 6:13:11 AM UTC
+// Last time updated: 2017-08-31 6:18:40 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -22,6 +22,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         parameters += '&msgEvent=' + connection.socketMessageEvent;
         parameters += '&socketCustomEvent=' + connection.socketCustomEvent;
         parameters += '&autoCloseEntireSession=' + !!connection.autoCloseEntireSession;
+        parameters += '&oneToMany=' + !!connection.session.broadcast;
 
         parameters += '&maxParticipantsAllowed=' + connection.maxParticipantsAllowed;
 
@@ -2577,7 +2578,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 try {
                     peer.addStream(localStream);
                 } catch (e) {
-                    localStream.getTracks().forEach(function(track) {
+                    localStream && localStream.getTracks().forEach(function(track) {
                         peer.addTrack(track, localStream);
                     });
                 }
@@ -3263,6 +3264,11 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 }
             ];
 
+            if (typeof window.InstallTrigger !== 'undefined') {
+                iceServers[0].urls = iceServers[0].urls.pop();
+                iceServers[1].urls = iceServers[1].urls.pop();
+            }
+
             return iceServers;
         }
 
@@ -3587,7 +3593,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
     })();
 
-    // Last time updated at Nov 07, 2016, 08:32:23
+    // Last time updated at August 29, 2017, 08:32:23
 
     // Latest file can be found here: https://cdn.webrtc-experiment.com/Screen-Capturing.js
 
@@ -3762,13 +3768,19 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
     }
 
+    function getAspectRatio(w, h) {
+        function gcd(a, b) {
+            return (b == 0) ? a : gcd(b, a % b);
+        }
+        var r = gcd(w, h);
+        return (w / r) / (h / r);
+    }
+
     // this function explains how to use above methods/objects
     function getScreenConstraints(callback, audioPlusTab) {
         var firefoxScreenConstraints = {
             mozMediaSource: 'window',
-            mediaSource: 'window',
-            width: 29999,
-            height: 8640
+            mediaSource: 'window'
         };
 
         if (DetectRTC.browser.name === 'Firefox') return callback(null, firefoxScreenConstraints);
@@ -3782,11 +3794,14 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             var screen_constraints = {
                 mandatory: {
                     chromeMediaSource: chromeMediaSource,
-                    maxWidth: 29999,
-                    maxHeight: 8640,
-                    minFrameRate: 30,
-                    maxFrameRate: 128,
-                    minAspectRatio: 1.77 // 2.39
+                    maxWidth: screen.width,
+                    maxHeight: screen.height,
+                    minWidth: screen.width,
+                    minHeight: screen.height,
+                    minAspectRatio: getAspectRatio(screen.width, screen.height),
+                    maxAspectRatio: getAspectRatio(screen.width, screen.height),
+                    minFrameRate: 64,
+                    maxFrameRate: 128
                 },
                 optional: []
             };

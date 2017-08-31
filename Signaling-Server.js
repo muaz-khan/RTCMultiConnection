@@ -328,6 +328,8 @@ module.exports = exports = function(app, socketCallback) {
                 }
                 keepUnique.push(userSocket.userid);
 
+                if (params.oneToMany && userSocket.userid !== roomInitiator.socket.userid) return;
+
                 message.remoteUserId = userSocket.userid;
                 userSocket.emit(socketMessageEvent, message);
             });

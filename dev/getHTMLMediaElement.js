@@ -241,7 +241,7 @@ function getHTMLMediaElement(mediaElement, config) {
     if (config.title) {
         var h2 = document.createElement('h2');
         h2.innerHTML = config.title;
-        h2.setAttribute('style', 'position: absolute;color:white;font-size:17px;text-shadow: 1px 1px black;padding:0;margin:0;text-align: left; margin-top: 10px; margin-left: 10px;');
+        h2.setAttribute('style', 'position: absolute;color:white;font-size:17px;text-shadow: 1px 1px black;padding:0;margin:0;text-align: left; margin-top: 10px; margin-left: 10px; display: block; border: 0;line-height:1.5;z-index:1;');
         mediaBox.appendChild(h2);
     }
 

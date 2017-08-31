@@ -219,7 +219,7 @@ function PeerInitiator(config) {
             try {
                 peer.addStream(localStream);
             } catch (e) {
-                localStream.getTracks().forEach(function(track) {
+                localStream && localStream.getTracks().forEach(function(track) {
                     peer.addTrack(track, localStream);
                 });
             }
