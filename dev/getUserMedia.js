@@ -94,16 +94,6 @@ function getUserMediaHandler(options) {
             return;
         }
 
-        if (!window.enableAdapter && DetectRTC.browser.name === 'Safari') {
-            if (options.localMediaConstraints.audio !== false) {
-                options.localMediaConstraints.audio = true;
-            }
-
-            if (options.localMediaConstraints.video !== false) {
-                options.localMediaConstraints.video = true;
-            }
-        }
-
         if (typeof navigator.mediaDevices === 'undefined') {
             navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
             var getUserMediaSuccess = function() {};
@@ -151,9 +141,6 @@ function getUserMediaHandler(options) {
 
             streaming(stream);
         }).catch(function(error) {
-            if (!window.enableAdapter && DetectRTC.browser.name === 'Safari') {
-                return;
-            }
             options.onLocalMediaError(error, options.localMediaConstraints);
         });
     }
