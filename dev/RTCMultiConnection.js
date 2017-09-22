@@ -825,7 +825,7 @@
         var played = e.mediaElement.play();
 
         if (typeof played !== 'undefined') {
-            played.then(function() {
+            played.catch(function(){ /*** iOS 11 doesn't allow automatic play and rejects ***/}).then(function() {
                 setTimeout(function() {
                     e.mediaElement.play();
                 }, 2000);
