@@ -6,7 +6,10 @@ function SocketConnection(connection, connectCallback) {
     parameters += '&msgEvent=' + connection.socketMessageEvent;
     parameters += '&socketCustomEvent=' + connection.socketCustomEvent;
     parameters += '&autoCloseEntireSession=' + !!connection.autoCloseEntireSession;
-    parameters += '&oneToMany=' + !!connection.session.broadcast;
+
+    if (connection.session.broadcast === true) {
+        parameters += '&oneToMany=true';
+    }
 
     parameters += '&maxParticipantsAllowed=' + connection.maxParticipantsAllowed;
 

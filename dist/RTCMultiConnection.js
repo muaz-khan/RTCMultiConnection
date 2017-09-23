@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-09-22 5:45:42 AM UTC
+// Last time updated: 2017-09-23 12:09:30 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -22,7 +22,10 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         parameters += '&msgEvent=' + connection.socketMessageEvent;
         parameters += '&socketCustomEvent=' + connection.socketCustomEvent;
         parameters += '&autoCloseEntireSession=' + !!connection.autoCloseEntireSession;
-        parameters += '&oneToMany=' + !!connection.session.broadcast;
+
+        if (connection.session.broadcast === true) {
+            parameters += '&oneToMany=true';
+        }
 
         parameters += '&maxParticipantsAllowed=' + connection.maxParticipantsAllowed;
 
