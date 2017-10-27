@@ -2,51 +2,51 @@
 // MIT License    - www.WebRTC-Experiment.com/licence
 // Documentation  - github.com/muaz-khan/RTCMultiConnection
 
-function resolveURL(url) {
+/*function resolveURL(url) {
     var isWin = !!process.platform.match(/^win/);
     if (!isWin) return url;
     return url.replace(/\//g, '\\');
-}
+}*/
 
 // Please use HTTPs on non-localhost domains.
-var isUseHTTPs = false;
+// var isUseHTTPs = false;
 
 // var port = 443;
 var port = process.env.PORT || 9001;
 
-var fs = require('fs');
-var path = require('path');
+// var fs = require('fs');
+// var path = require('path');
 
 // see how to use a valid certificate:
 // https://github.com/muaz-khan/WebRTC-Experiment/issues/62
-var options = {
-    key: fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/privatekey.pem'))),
-    cert: fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/certificate.pem')))
-};
+// var options = {
+//     key: fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/privatekey.pem'))),
+//     cert: fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/certificate.pem')))
+// };
 
 // force auto reboot on failures
-var autoRebootServerOnFailure = false;
+// var autoRebootServerOnFailure = false;
 
 
 // skip/remove this try-catch block if you're NOT using "config.json"
-try {
-    var config = require(resolveURL('./config.json'));
-
-    if ((config.port || '').toString() !== '9001') {
-        port = parseInt(config.port);
-    }
-
-    if ((config.autoRebootServerOnFailure || '').toString() !== true) {
-        autoRebootServerOnFailure = true;
-    }
-} catch (e) {}
+// try {
+//     var config = require(resolveURL('./config.json'));
+//
+//     if ((config.port || '').toString() !== '9001') {
+//         port = parseInt(config.port);
+//     }
+//
+//     if ((config.autoRebootServerOnFailure || '').toString() !== true) {
+//         autoRebootServerOnFailure = true;
+//     }
+// } catch (e) {}
 
 // You don't need to change anything below
 
-var server = require(isUseHTTPs ? 'https' : 'http');
-var url = require('url');
+// var server = require(isUseHTTPs ? 'https' : 'http');
+// var url = require('url');
 
-function serverHandler(request, response) {
+/*function serverHandler(request, response) {
     try {
         var uri = url.parse(request.url).pathname,
             filename = path.join(process.cwd(), uri);
@@ -175,15 +175,24 @@ function serverHandler(request, response) {
         response.write('<h1>Unexpected error:</h1><br><br>' + e.stack || e.message || JSON.stringify(e));
         response.end();
     }
-}
+}*/
 
-var app;
+var express = require( 'express' );
+var app = express();
+var server = require( 'http' ).Server( app );
+server.listen( port );
 
-if (isUseHTTPs) {
-    app = server.createServer(options, serverHandler);
-} else {
-    app = server.createServer(serverHandler);
-}
+app.use( express.static( __dirname + '/public' ) );
+app.get( '/', function ( req, res ) {
+    res.sendfile( 'index.html' );
+} );
+// var app;
+//
+// if (isUseHTTPs) {
+//     app = server.createServer(options, serverHandler);
+// } else {
+//     app = server.createServer(serverHandler);
+// }
 
 function cmd_exec(cmd, args, cb_stdout, cb_end) {
     var spawn = require('child_process').spawn,
@@ -214,7 +223,7 @@ function log_console() {
 }
 
 function runServer() {
-    app.on('error', function(e) {
+    /*app.on('error', function(e) {
         if (e.code == 'EADDRINUSE') {
             if (e.address === '0.0.0.0') {
                 e.address = 'localhost';
@@ -266,9 +275,9 @@ function runServer() {
 
         console.log('------------------------------');
         console.log('Need help? http://bit.ly/2ff7QGk');
-    });
+    });*/
 
-    require('./Signaling-Server.js')(app, function(socket) {
+    require('./Signaling-Server.js')(server, function(socket) {
         try {
             var params = socket.handshake.query;
 
@@ -293,7 +302,7 @@ function runServer() {
     });
 }
 
-if (autoRebootServerOnFailure) {
+/*if (autoRebootServerOnFailure) {
     // auto restart app on failure
     var cluster = require('cluster');
     if (cluster.isMaster) {
@@ -309,4 +318,5 @@ if (autoRebootServerOnFailure) {
     }
 } else {
     runServer();
-}
+}*/
+runServer();
