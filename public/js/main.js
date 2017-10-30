@@ -27,6 +27,13 @@ function disableInputButtons() {
     document.getElementById('room-id').disabled = true;
 }
 
+function enableInputButtons(){
+    document.getElementById('open-or-join-room').disabled = false;
+    document.getElementById('open-room').disabled = false;
+    document.getElementById('join-room').disabled = false;
+    document.getElementById('room-id').disabled = false;
+}
+
 // ......................................................
 // ..................RTCMultiConnection Code.............
 // ......................................................
@@ -157,10 +164,7 @@ connection.onRoomFull = function(roomid) {
         stream.stop();
     });
 
-    document.getElementById('open-or-join-room').disabled = false;
-    document.getElementById('open-room').disabled = false;
-    document.getElementById('join-room').disabled = false;
-    document.getElementById('room-id').disabled = false;
+    enableInputButtons();
 
     alert('Room is full.');
 };
