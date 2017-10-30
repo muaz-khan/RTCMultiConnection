@@ -13,7 +13,7 @@ app.get( '/', function ( req, res ) {
     res.sendFile( 'index.html' );
 } );
 
-app.get('/robot/',function(req,res){
+app.get('/robot',function(req,res){
 	res.sendFile(__dirname+'/public/index_robot.html');
 });
 
