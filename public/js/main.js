@@ -8,7 +8,7 @@ function disableInputButtons() {
     document.getElementById('join-room').style.display = "none"
     document.getElementById('room-id').disabled = true;
     document.getElementById('txt-cam').style.display = "block";
-    document.getElementById('buttons-robot').style.display = "block";
+    document.getElementById('div-buttons-robot').style.display = "block";
 }
 
 function enableInputButtons(){
