@@ -7,11 +7,66 @@ document.getElementById('join-room').onclick = function() {
 function disableInputButtons() {
     document.getElementById('join-room').disabled = true;
     document.getElementById('room-id').disabled = true;
+    document.getElementById('txt-cam').style.display = "block";
 }
 
 function enableInputButtons(){
     document.getElementById('join-room').disabled = false;
     document.getElementById('room-id').disabled = false;
+}
+
+document.getElementById('avant').onclick = function() {
+    MoveRobotUp();
+};
+
+document.getElementById('arriere').onclick = function() {
+    MoveRobotDown();
+};
+
+document.getElementById('gauche').onclick = function() {
+    MoveRobotLeft();
+};
+
+document.getElementById('droite').onclick = function() {
+    MoveRobotRight();
+};
+
+document.addEventListener('keydown', (event) => {
+
+  switch (event.key) {
+    case "ArrowUp":
+      MoveRobotUp();
+      break;
+    case "ArrowDown":
+      MoveRobotDown();
+      break;
+    case "ArrowLeft":
+      MoveRobotLeft();
+      break;
+    case "ArrowRight":
+      MoveRobotRight();
+      break;
+    default:
+
+  }
+});
+
+// FONCTIONS TO MOVE ROBOT
+
+function MoveRobotUp() {
+  console.log("En AVANT !!!");
+}
+
+function MoveRobotDown() {
+  console.log("En ARRIERE !!!");
+}
+
+function MoveRobotLeft() {
+  console.log("GAUCHE TOUTE !!!");
+}
+
+function MoveRobotRight() {
+  console.log("DROITE TOUTE !!!");
 }
 
 // ......................................................

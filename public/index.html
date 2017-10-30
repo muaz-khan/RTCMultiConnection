@@ -7,7 +7,7 @@
 
     <title>Makers' chat</title>
 
-    <!-- <link rel="stylesheet" href="/css/style.css"> -->
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <body>
@@ -15,8 +15,29 @@
         <div class="make-center">
             <input type="text" id="room-id" value="abcdef" autocorrect=off autocapitalize=off size=20>
             <button id="join-room">Join Room</button>
+          <div id="div-buttons-robot" class="buttons-robot">
+            <br>
+              <div class="top-button">
+                <button id="avant">AVANT</button>
+              </div>
+              <div class="middle-button">
+                  <div class="left-button">
+                    <button id="gauche">GAUCHE</button>
+                  </div>
+                  <div class="right-button">
+                    <button id="droite">DROITE</button>
+                  </div>
+              </div>
+              <div class="bottom-button">
+                <button id="arriere">ARRIERE</button>
+              </div>
+          </div>
 
-            <div id="room-urls"></div>
+          <br>
+          <div id="txt-cam" style="display:none;">
+            <div class="left-robot">USER CONNECTED :</div>
+            <div class="right-user">ROBOT :</div>
+          </div>
         </div>
 
         <div id="videos-container"></div>
