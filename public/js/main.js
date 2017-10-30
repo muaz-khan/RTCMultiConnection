@@ -96,11 +96,11 @@ connection.sdpConstraints.mandatory = {
 
 connection.videosContainer = document.getElementById('videos-container');
 connection.onstream = function(event) {
-    var width = parseInt(connection.videosContainer.clientWidth / 2) - 20;
+    var width = parseInt(connection.videosContainer.clientWidth / 4) - 20;
     var mediaElement = getMediaElement(event.mediaElement, {
         title: event.userid,
         buttons: ['full-screen'],
-        height: 600,
+        width: width,
         showOnMouseEnter: false
     });
 
