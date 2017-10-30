@@ -24,8 +24,9 @@ select {
 
 .buttons-robot {
   width: 100%;
-  height: 100px;
+  height: 80px;
   text-align: center;
+  display: none;
 }
 
 .top-button,

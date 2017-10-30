@@ -5,9 +5,10 @@ document.getElementById('join-room').onclick = function() {
 };
 
 function disableInputButtons() {
-    document.getElementById('join-room').disabled = true;
+    document.getElementById('join-room').style.display = "none"
     document.getElementById('room-id').disabled = true;
     document.getElementById('txt-cam').style.display = "block";
+    document.getElementById('buttons-robot').style.display = "block";
 }
 
 function enableInputButtons(){
