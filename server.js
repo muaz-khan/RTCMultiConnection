@@ -10,8 +10,12 @@ server.listen( port, function(){
 
 app.use( express.static( __dirname + '/public' ) );
 app.get( '/', function ( req, res ) {
-    res.sendfile( 'index.html' );
+    res.sendFile( 'index.html' );
 } );
+
+app.get('/robot',function(req,res){
+	res.sendFile(__dirname+'/public/index_robot.html');
+});
 
 function runServer() {
     require( './Signaling-Server.js' )( server, function( socket ) {

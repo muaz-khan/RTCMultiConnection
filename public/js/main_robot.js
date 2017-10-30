@@ -6,31 +6,13 @@ document.getElementById('open-room').onclick = function() {
     });
 };
 
-document.getElementById('join-room').onclick = function() {
-    disableInputButtons();
-    connection.join(document.getElementById('room-id').value);
-};
-
-document.getElementById('open-or-join-room').onclick = function() {
-    disableInputButtons();
-    connection.openOrJoin(document.getElementById('room-id').value, function(isRoomExists, roomid) {
-        if (!isRoomExists) {
-            showRoomURL(roomid);
-        }
-    });
-};
-
 function disableInputButtons() {
-    document.getElementById('open-or-join-room').disabled = true;
     document.getElementById('open-room').disabled = true;
-    document.getElementById('join-room').disabled = true;
     document.getElementById('room-id').disabled = true;
 }
 
 function enableInputButtons(){
-    document.getElementById('open-or-join-room').disabled = false;
     document.getElementById('open-room').disabled = false;
-    document.getElementById('join-room').disabled = false;
     document.getElementById('room-id').disabled = false;
 }
 
