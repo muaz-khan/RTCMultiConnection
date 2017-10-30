@@ -1,0 +1,33 @@
+* {
+    word-wrap:break-word;
+}
+video {
+    object-fit: fill;
+    width: 30%;
+}
+button,
+input,
+select {
+    font-weight: normal;
+    padding: 2px 4px;
+    text-decoration: none;
+    display: inline-block;
+    text-shadow: none;
+    font-size: 16px;
+    outline: none;
+}
+
+.make-center {
+    text-align: center;
+    padding: 5px 10px;
+}
+
+img, input, textarea {
+  max-width: 100%
+}
+
+@media all and (max-width: 500px) {
+    .fork-left, .fork-right, .github-stargazers {
+        display: none;
+    }
+}
