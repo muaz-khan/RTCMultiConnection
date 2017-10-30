@@ -22,6 +22,18 @@ select {
     padding: 5px 10px;
 }
 
+.left-robot {
+  float: left;
+  width: 50%;
+  text-align: center;
+}
+
+.right-user {
+  float: left;
+  width: 50%;
+  text-align: center;
+}
+
 img, input, textarea {
   max-width: 100%
 }

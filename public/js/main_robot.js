@@ -7,13 +7,14 @@ document.getElementById('open-room').onclick = function() {
 };
 
 function disableInputButtons() {
-    document.getElementById('open-room').disabled = true;
-    document.getElementById('room-id').disabled = true;
+    document.getElementById('open-room').style.display = "none";
+    document.getElementById('room-id').style.display = "none"
+    document.getElementById('txt-cam').style.display = "block";
 }
 
 function enableInputButtons(){
-    document.getElementById('open-room').disabled = false;
-    document.getElementById('room-id').disabled = false;
+    document.getElementById('open-room').style.display = "block";
+    document.getElementById('room-id').style.display = "block";
 }
 
 // ......................................................
@@ -74,7 +75,7 @@ function showRoomURL(roomid) {
     var roomHashURL = '#' + roomid;
     var roomQueryStringURL = '?roomid=' + roomid;
 
-    var html = '<h2>Unique URL for your room:</h2>';
+    var html = '<h2>Unique URL to connect to the robot:</h2>';
 
     html += 'Hash URL: ' + 'https://makerschat.herokuapp.com/' + roomHashURL + '</a>';
     html += '<br>';
