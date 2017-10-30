@@ -100,7 +100,7 @@ connection.onstream = function(event) {
     var mediaElement = getMediaElement(event.mediaElement, {
         title: event.userid,
         buttons: ['full-screen'],
-        width: width,
+        height: 600,
         showOnMouseEnter: false
     });
 
