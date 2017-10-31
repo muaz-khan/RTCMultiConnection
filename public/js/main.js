@@ -1,10 +1,9 @@
-let socket;
+let socket, socketReady = false;
 
 // UI / buttons events
 document.getElementById('join-room').onclick = function() {
     disableInputButtons();
     connection.join(document.getElementById('room-id').value);
-    socket = connection.getSocket();
 };
 
 function disableInputButtons() {
@@ -57,22 +56,22 @@ document.addEventListener('keydown', (event) => {
 
 function MoveRobotUp() {
     console.log("En AVANT !!!");
-    socket.emit('cmd', {cmd:'u'});
+    if(socketReady) socket.emit('cmd', {cmd:'u'});
 }
 
 function MoveRobotDown() {
     console.log("En ARRIERE !!!");
-    socket.emit('cmd', {cmd:'d'});
+    if(socketReady) socket.emit('cmd', {cmd:'d'});
 }
 
 function MoveRobotLeft() {
     console.log("GAUCHE TOUTE !!!");
-    socket.emit('cmd', {cmd:'l'});
+    if(socketReady) socket.emit('cmd', {cmd:'l'});
 }
 
 function MoveRobotRight() {
     console.log("DROITE TOUTE !!!");
-    socket.emit('cmd', {cmd:'r'});
+    if(socketReady) socket.emit('cmd', {cmd:'r'});
 }
 
 // ......................................................
@@ -101,6 +100,9 @@ connection.sdpConstraints.mandatory = {
 
 connection.videosContainer = document.getElementById('videos-container');
 connection.onstream = function(event) {
+    socket = connection.getSocket();
+    socketReady = true;
+
     var width = parseInt(connection.videosContainer.clientWidth / 4) - 20;
     var mediaElement = getMediaElement(event.mediaElement, {
         title: event.userid,
