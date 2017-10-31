@@ -176,6 +176,7 @@ if (roomid && roomid.length) {
     })();
 
     disableInputButtons();
+
 }
 
 // to make it one-to-one
@@ -190,3 +191,8 @@ connection.onRoomFull = function(roomid) {
 
     alert('Room is full.');
 };
+
+
+let socket = connection.getSocket();
+socket.on('test', data => console.log(data) );
+socket.emit('test', {yo:'yo'} );

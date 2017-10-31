@@ -8,17 +8,13 @@ server.listen( port, function(){
     console.log( 'server listening on ' + port );
 } );
 
-app.use( express.static( __dirname + '/public' ) );
-app.get( '/', ( req, res ) => {
-    res.sendFile( 'index.html' );
-} );
-
-app.get( '/robot', ( req, res ) => {
-	res.sendFile( __dirname + '/public/index_robot.html' );
-} );
-
 
 require( './Signaling-Server.js' )( server, socket => {
+    socket.on( 'test', data => {
+        console.log(data)
+        socket.emit( 'test', data );
+    });
+
     try {
         let params = socket.handshake.query;
 
@@ -31,9 +27,15 @@ require( './Signaling-Server.js' )( server, socket => {
                 socket.broadcast.emit( params.socketCustomEvent, message );
             } catch( e ) {}
         } );
-
-        socket.on( 'test', data => {
-            socket.broadcast.emit( 'test', data )
-        })
     } catch( e ) {}
+} );
+
+
+app.use( express.static( __dirname + '/public' ) );
+app.get( '/', ( req, res ) => {
+    res.sendFile( 'index.html' );
+} );
+
+app.get( '/robot', ( req, res ) => {
+	res.sendFile( __dirname + '/public/index_robot.html' );
 } );
