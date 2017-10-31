@@ -42,8 +42,12 @@ document.querySelectorAll( '.cmd' ).forEach( d => d.addEventListener( 'click', e
 
 addEventListener('load', e => {
     mobileConsole.init();
-    console.log('v0.3');
-    console.log('sw.js back');
+
+    const socket = io();
+
+	socket.on( 'connected', data => {
+		console.log( socket.id, data );
+	} );
 });
 
 
