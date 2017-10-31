@@ -42,12 +42,6 @@ document.querySelectorAll( '.cmd' ).forEach( d => d.addEventListener( 'click', e
 
 addEventListener('load', e => {
     mobileConsole.init();
-
-    const socket = io();
-
-	socket.on( 'connected', data => {
-		console.log( socket.id, data );
-	} );
 });
 
 
@@ -182,6 +176,16 @@ if (roomid && roomid.length) {
     })();
 
     disableInputButtons();
+
+    SocketService.init( 'my-awesome-room', socket => {
+        socket.on( 'my-event', data => console.log( data ) );
+
+        socket.on( 'room-joined', room => {
+            console.log( `socket joined ${ room }` );
+
+            socket.emit( 'my-event', { msg: `hello from ${ window.location }` } );
+        } );
+    } );
 }
 
 // to make it one-to-one
