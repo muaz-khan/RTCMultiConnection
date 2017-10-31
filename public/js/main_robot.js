@@ -46,8 +46,7 @@ addEventListener('load', e => {
 
 
 // UI / buttons events
-document.getElementById('open-room').addEventListener( 'click', function() {
-    disableInputButtons();
+document.querySelector('#open-room').addEventListener( 'click', function() {
     terminal.connect().then(() => {
         console.log( `connected to ${terminal.getDeviceName()}`)
     });
@@ -67,6 +66,8 @@ document.getElementById('open-room').addEventListener( 'click', function() {
 
 
     });
+
+    disableInputButtons();
 });
 
 function disableInputButtons() {
