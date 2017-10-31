@@ -56,8 +56,8 @@ document.getElementById('open-room').onclick = function() {
         });
 
         let socket = connection.getSocket();
-        socket.on( 'test', data => console.log(data) );
-        socket.emit('test', {yo:'yo'} );
+        socket.on( 'cmd', data => console.log(data) );
+        socket.emit('cmd', {roomid, cmd:'yo'} );
 
     });
 };
