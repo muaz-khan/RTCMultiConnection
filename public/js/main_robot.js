@@ -18,27 +18,27 @@ terminal._log = function(...messages) {
 };
 
 // Bind event listeners to the UI elements
-let connectButton = document.getElementById('connect');
-connectButton.addEventListener('click', function() {
-    terminal.connect().then(() => {
-        console.log( `connected to ${terminal.getDeviceName()}`)
-    });
-});
+// let connectButton = document.getElementById('connect');
+// connectButton.addEventListener('click', function() {
+//     terminal.connect().then(() => {
+//         console.log( `connected to ${terminal.getDeviceName()}`)
+//     });
+// });
 
-let disconnectButton = document.getElementById('disconnect');
-disconnectButton.addEventListener('click', function() {
-    terminal.disconnect();
-    console.log( 'disconnected' );
-});
+// let disconnectButton = document.getElementById('disconnect');
+// disconnectButton.addEventListener('click', function() {
+//     terminal.disconnect();
+//     console.log( 'disconnected' );
+// });
 
 // Implement own send function to log outcoming data to the terminal
-function send(data) {
-    terminal.send(data).then(() => console.log(data, 'out')).catch(error => console.log(error));
-}
-document.querySelectorAll( '.cmd' ).forEach( d => d.addEventListener( 'click', e => {
-    console.log( d.dataset.cmd );
-    send( d.dataset.cmd );
-} ) );
+// function send(data) {
+//     terminal.send(data).then(() => console.log(data, 'out')).catch(error => console.log(error));
+// }
+// document.querySelectorAll( '.cmd' ).forEach( d => d.addEventListener( 'click', e => {
+//     console.log( d.dataset.cmd );
+//     send( d.dataset.cmd );
+// } ) );
 
 addEventListener('load', e => {
     mobileConsole.init();
@@ -50,9 +50,15 @@ document.getElementById('open-room').onclick = function() {
     disableInputButtons();
     connection.open(document.getElementById('room-id').value, function() {
         showRoomURL(connection.sessionid);
+
+        terminal.connect().then(() => {
+            console.log( `connected to ${terminal.getDeviceName()}`)
+        });
+
         let socket = connection.getSocket();
-        socket.on('test', data => console.log(data) );
+        socket.on( 'test', data => console.log(data) );
         socket.emit('test', {yo:'yo'} );
+
     });
 };
 
