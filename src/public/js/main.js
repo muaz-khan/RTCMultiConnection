@@ -2,8 +2,7 @@ let socket, socketReady = false;
 
 // UI / buttons events
 document.getElementById('join-room').onclick = function() {
-    connection.join(document.getElementById('room-id').value);
-    disableInputButtons();
+    location = 'https://makerschat.herokuapp.com/' + document.getElementById('room-id').value;
 };
 
 function disableInputButtons() {
@@ -16,6 +15,8 @@ function disableInputButtons() {
 function enableInputButtons() {
     document.getElementById('join-room').disabled = false;
     document.getElementById('room-id').disabled = false;
+    document.getElementById('txt-cam').style.display = "none";
+    document.getElementById('div-buttons-robot').style.display = "none";
 }
 
 document.getElementById('avant').onclick = function() {
@@ -81,12 +82,9 @@ function MoveRobotRight() {
 var connection = new RTCMultiConnection();
 
 // by default, socket.io server is assumed to be deployed on your own URL
-connection.socketURL = '/';
+// connection.socketURL = '/';
 
-// comment-out below line if you do not have your own socket.io server
-// connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
-
-connection.socketMessageEvent = 'video-conference-demo';
+// connection.socketMessageEvent = 'video-conference-demo';
 
 connection.session = {
     audio: true,
@@ -127,20 +125,33 @@ connection.onstreamended = function(event) {
     }
 };
 
+// to make it one-to-one
+connection.maxParticipantsAllowed = 1;
+connection.onRoomFull = function(roomid) {
+    connection.closeSocket();
+    connection.attachStreams.forEach(function(stream) {
+        stream.stop();
+    });
+
+    enableInputButtons();
+
+    alert('Room is full.');
+};
+
 // ......................................................
 // ......................Handling Room-ID................
 // ......................................................
 
 var roomid = '';
-if (localStorage.getItem(connection.socketMessageEvent)) {
-    roomid = localStorage.getItem(connection.socketMessageEvent);
-} else {
-    roomid = connection.token();
-}
-document.getElementById('room-id').value = roomid;
-document.getElementById('room-id').onkeyup = function() {
-    localStorage.setItem(connection.socketMessageEvent, this.value);
-};
+// if (localStorage.getItem(connection.socketMessageEvent)) {
+//     roomid = localStorage.getItem(connection.socketMessageEvent);
+// } else {
+    // roomid = connection.token();
+// }
+// document.getElementById('room-id').value = roomid;
+// document.getElementById('room-id').onkeyup = function() {
+//     localStorage.setItem(connection.socketMessageEvent, this.value);
+// };
 
 var hashString = location.hash.replace('#', '');
 if (hashString.length && hashString.indexOf('comment-') == 0) {
@@ -169,16 +180,3 @@ if (roomid && roomid.length) {
 
     disableInputButtons();
 }
-
-// to make it one-to-one
-connection.maxParticipantsAllowed = 1;
-connection.onRoomFull = function(roomid) {
-    connection.closeSocket();
-    connection.attachStreams.forEach(function(stream) {
-        stream.stop();
-    });
-
-    enableInputButtons();
-
-    alert('Room is full.');
-};
