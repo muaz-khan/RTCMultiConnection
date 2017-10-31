@@ -50,6 +50,9 @@ document.getElementById('open-room').onclick = function() {
     disableInputButtons();
     connection.open(document.getElementById('room-id').value, function() {
         showRoomURL(connection.sessionid);
+        let socket = connection.getSocket();
+        socket.on('test', data => console.log(data) );
+        socket.emit('test', {yo:'yo'} );
     });
 };
 
@@ -191,8 +194,3 @@ connection.onRoomFull = function(roomid) {
 
     alert('Room is full.');
 };
-
-
-let socket = connection.getSocket();
-socket.on('test', data => console.log(data) );
-socket.emit('test', {yo:'yo'} );
