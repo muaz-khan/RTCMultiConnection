@@ -9,37 +9,43 @@
     <title>Makers' chat</title>
 
     <!-- <link rel="stylesheet" href="/css/style.css"> -->
+    <style>
+        .hidden{
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
-    <section class="experiment" style="max-width:100%; height:100%;">
-        <div class="make-center">
-            <select id="room-id">
-                <option value="#robot-ecully1">robot ecully 1</option>
-                <option value="#robot-ecully2">robot ecully 2</option>
-                <option value="#robot-ecully3">robot ecully 3</option>
-                <option value="#robot-ecully4">robot ecully 4</option>
-            </select>
-            <button id="join-room">Join Room</button>
+    <h1><a href="/">HOME</a></h1>
+    <div id="pre-room">
+        <select id="room-id">
+            <option value="#robot-ecully1">robot ecully 1</option>
+            <option value="#robot-ecully2">robot ecully 2</option>
+            <option value="#robot-ecully3">robot ecully 3</option>
+            <option value="#robot-ecully4">robot ecully 4</option>
+        </select>
 
-            <div id="div-buttons-robot" style="display:none;">
-                <button class="cmd-btn" data-cmd="f">FRONT</button>
-                <button class="cmd-btn" data-cmd="l">LEFT</button>
-                <button class="cmd-btn" data-cmd="r">RIGHT</button>
-                <button class="cmd-btn" data-cmd="b">BACK</button>
-                <button class="cmd-btn" data-cmd="u">UP</button>
-                <button class="cmd-btn" data-cmd="d">DOWN</button>
-            </div>
+        <button id="join-room">Join Room</button>
+    </div>
 
-            <br>
-            <div id="txt-cam" style="display:none;">
-                <div class="left-robot">USER CONNECTED :</div>
-                <div class="right-user">ROBOT :</div>
-            </div>
+    <div id="in-room" class="hidden">
+        <div id="div-buttons-robot">
+            <button class="cmd-btn" data-cmd="f">FRONT</button>
+            <button class="cmd-btn" data-cmd="l">LEFT</button>
+            <button class="cmd-btn" data-cmd="r">RIGHT</button>
+            <button class="cmd-btn" data-cmd="b">BACK</button>
+            <button class="cmd-btn" data-cmd="u">UP</button>
+            <button class="cmd-btn" data-cmd="d">DOWN</button>
         </div>
 
-        <div id="videos-container" style="text-align:center;"></div>
-    </section>
+        <div id="txt-cam">
+            <div class="left-robot">USER CONNECTED :</div>
+            <div class="right-user">ROBOT :</div>
+        </div>
+
+        <div id="videos-container"></div>
+    </div>
 
     <script src="https://socketservice.herokuapp.com/SocketService.min.js"></script>
     <script src="/js/RTCMultiConnection.min.js"></script>
