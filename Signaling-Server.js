@@ -111,7 +111,7 @@ module.exports = exports = function(app, socketCallback) {
                     listOfUsers[user].socket.emit('extra-data-updated', socket.userid, extra);
                 }
             } catch (e) {
-                pushLogs('extra-data-updated', e);
+                console.log('extra-data-updated', e);
             }
         });
 
@@ -129,7 +129,7 @@ module.exports = exports = function(app, socketCallback) {
                 if (!listOfUsers[socket.userid]) return;
                 listOfUsers[socket.userid].isPublic = true;
             } catch (e) {
-                pushLogs('become-a-public-moderator', e);
+                console.log('become-a-public-moderator', e);
             }
         });
 
@@ -150,7 +150,7 @@ module.exports = exports = function(app, socketCallback) {
                 if (!listOfUsers[socket.userid]) return;
                 listOfUsers[socket.userid].isPublic = false;
             } catch (e) {
-                pushLogs('dont-make-me-moderator', e);
+                console.log('dont-make-me-moderator', e);
             }
         });
 
@@ -170,7 +170,7 @@ module.exports = exports = function(app, socketCallback) {
 
                 callback(allPublicModerators);
             } catch (e) {
-                pushLogs('get-public-moderators', e);
+                console.log('get-public-moderators', e);
             }
         });
 
@@ -200,7 +200,7 @@ module.exports = exports = function(app, socketCallback) {
 
                 callback();
             } catch (e) {
-                pushLogs('changed-uuid', e);
+                console.log('changed-uuid', e);
             }
         });
 
@@ -210,7 +210,7 @@ module.exports = exports = function(app, socketCallback) {
                     listOfUsers[socket.userid].password = password;
                 }
             } catch (e) {
-                pushLogs('set-password', e);
+                console.log('set-password', e);
             }
         });
 
@@ -229,7 +229,7 @@ module.exports = exports = function(app, socketCallback) {
                 }
                 callback();
             } catch (e) {
-                pushLogs('disconnect-with', e);
+                console.log('disconnect-with', e);
             }
         });
 
@@ -247,7 +247,7 @@ module.exports = exports = function(app, socketCallback) {
                 delete shiftedModerationControls[socket.userid];
                 callback();
             } catch (e) {
-                pushLogs('close-entire-session', e);
+                console.log('close-entire-session', e);
             }
         });
 
@@ -292,7 +292,7 @@ module.exports = exports = function(app, socketCallback) {
                     listOfUsers[message.sender].connectedWith[message.remoteUserId].emit(socketMessageEvent, message);
                 }
             } catch (e) {
-                pushLogs('onMessageCallback', e);
+                console.log('onMessageCallback', e);
             }
         }
 
@@ -429,7 +429,7 @@ module.exports = exports = function(app, socketCallback) {
 
                 onMessageCallback(message);
             } catch (e) {
-                pushLogs('on-socketMessageEvent', e);
+                console.log('on-socketMessageEvent', e);
             }
         });
 
@@ -439,7 +439,7 @@ module.exports = exports = function(app, socketCallback) {
                     delete socket.namespace.sockets[this.id];
                 }
             } catch (e) {
-                pushLogs('disconnect', e);
+                console.log('disconnect', e);
             }
 
             try {
@@ -450,7 +450,7 @@ module.exports = exports = function(app, socketCallback) {
                     onMessageCallback(message);
                 }
             } catch (e) {
-                pushLogs('disconnect', e);
+                console.log('disconnect', e);
             }
 
             try {
@@ -476,7 +476,7 @@ module.exports = exports = function(app, socketCallback) {
                     }
                 }
             } catch (e) {
-                pushLogs('disconnect', e);
+                console.log('disconnect', e);
             }
 
             delete listOfUsers[socket.userid];
@@ -487,72 +487,3 @@ module.exports = exports = function(app, socketCallback) {
         }
     }
 };
-
-var enableLogs = false;
-
-try {
-    var _enableLogs = require('./config.json').enableLogs;
-
-    if (_enableLogs) {
-        enableLogs = true;
-    }
-} catch (e) {
-    enableLogs = false;
-}
-
-var fs = require('fs');
-
-function pushLogs() {
-    if (!enableLogs) return;
-
-    var logsFile = process.cwd() + '/logs.json';
-
-    var utcDateString = (new Date).toUTCString().replace(/ |-|,|:|\./g, '');
-
-    // uncache to fetch recent (up-to-dated)
-    uncache(logsFile);
-
-    var logs = {};
-
-    try {
-        logs = require(logsFile);
-    } catch (e) {}
-
-    if (arguments[1] && arguments[1].stack) {
-        arguments[1] = arguments[1].stack;
-    }
-
-    try {
-        logs[utcDateString] = JSON.stringify(arguments, null, '\t');
-        fs.writeFileSync(logsFile, JSON.stringify(logs, null, '\t'));
-    } catch (e) {
-        logs[utcDateString] = arguments.toString();
-    }
-}
-
-// removing JSON from cache
-function uncache(jsonFile) {
-    searchCache(jsonFile, function(mod) {
-        delete require.cache[mod.id];
-    });
-
-    Object.keys(module.constructor._pathCache).forEach(function(cacheKey) {
-        if (cacheKey.indexOf(jsonFile) > 0) {
-            delete module.constructor._pathCache[cacheKey];
-        }
-    });
-}
-
-function searchCache(jsonFile, callback) {
-    var mod = require.resolve(jsonFile);
-
-    if (mod && ((mod = require.cache[mod]) !== undefined)) {
-        (function run(mod) {
-            mod.children.forEach(function(child) {
-                run(child);
-            });
-
-            callback(mod);
-        })(mod);
-    }
-}
