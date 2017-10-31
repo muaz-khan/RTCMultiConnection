@@ -46,27 +46,28 @@ addEventListener('load', e => {
 
 
 // UI / buttons events
-document.getElementById('open-room').onclick = function() {
+document.getElementById('open-room').addEventListener( 'click', function() {
     disableInputButtons();
+    terminal.connect().then(() => {
+        console.log( `connected to ${terminal.getDeviceName()}`)
+    });
+
     connection.open(document.getElementById('room-id').value, function() {
         showRoomURL(connection.sessionid);
 
-        terminal.connect().then(() => {
-            console.log( `connected to ${terminal.getDeviceName()}`)
 
-            let socket = connection.getSocket();
-            socket.on( 'cmd', data => {
-                console.log( data )
-                if( data.roomid === roomid ){
-                    terminal.send( data.cmd );
-                }
-            } );
-            socket.emit('cmd', {roomid, cmd:'yo'} );
-        });
+        let socket = connection.getSocket();
+        socket.on( 'cmd', data => {
+            console.log( data )
+            if( data.roomid === roomid ){
+                terminal.send( data.cmd );
+            }
+        } );
+        setInterval( function(){socket.emit('cmd', {roomid, cmd:'yo'} )},2000);
 
 
     });
-};
+});
 
 function disableInputButtons() {
     document.getElementById('open-room').style.display = "none";
