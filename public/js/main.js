@@ -1,7 +1,10 @@
+let socket;
+
 // UI / buttons events
 document.getElementById('join-room').onclick = function() {
     disableInputButtons();
     connection.join(document.getElementById('room-id').value);
+    socket = connection.getSocket();
 };
 
 function disableInputButtons() {
@@ -54,18 +57,22 @@ document.addEventListener('keydown', (event) => {
 
 function MoveRobotUp() {
     console.log("En AVANT !!!");
+    socket.emit('cmd', {cmd:'u'});
 }
 
 function MoveRobotDown() {
     console.log("En ARRIERE !!!");
+    socket.emit('cmd', {cmd:'d'});
 }
 
 function MoveRobotLeft() {
     console.log("GAUCHE TOUTE !!!");
+    socket.emit('cmd', {cmd:'l'});
 }
 
 function MoveRobotRight() {
     console.log("DROITE TOUTE !!!");
+    socket.emit('cmd', {cmd:'r'});
 }
 
 // ......................................................

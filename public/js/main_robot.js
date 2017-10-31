@@ -62,7 +62,7 @@ document.querySelector('#open-room').addEventListener( 'click', function() {
                 terminal.send( data.cmd );
             }
         } );
-        setInterval( function(){socket.emit('cmd', {roomid, cmd:'yo'} )},2000);
+        // setInterval( function(){socket.emit('cmd', {roomid, cmd:'yo'} )},2000);
 
 
     });
