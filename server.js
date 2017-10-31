@@ -1,38 +1,35 @@
 
-var express = require( 'express' );
-var app = express();
-var server = require( 'http' ).Server( app );
+const express = require( 'express' );
+const app = express();
+const server = require( 'http' ).Server( app );
 
-var port = process.env.PORT || 9001;
+const port = process.env.PORT || 9001;
 server.listen( port, function(){
     console.log( 'server listening on ' + port );
 } );
 
 app.use( express.static( __dirname + '/public' ) );
-app.get( '/', function ( req, res ) {
+app.get( '/', ( req, res ) => {
     res.sendFile( 'index.html' );
 } );
 
-app.get('/robot',function(req,res){
-	res.sendFile(__dirname+'/public/index_robot.html');
-});
+app.get( '/robot', ( req, res ) => {
+	res.sendFile( __dirname + '/public/index_robot.html' );
+} );
 
-function runServer() {
-    require( './Signaling-Server.js' )( server, function( socket ) {
-        try {
-            var params = socket.handshake.query;
 
-            if ( !params.socketCustomEvent ) {
-                params.socketCustomEvent = 'custom-message';
-            }
+require( './Signaling-Server.js' )( server, socket => {
+    try {
+        let params = socket.handshake.query;
 
-            socket.on( params.socketCustomEvent, function( message ) {
-                try {
-                    socket.broadcast.emit( params.socketCustomEvent, message );
-                } catch( e ) {}
-            } );
-        } catch( e ) {}
-    } );
-}
+        if ( !params.socketCustomEvent ) {
+            params.socketCustomEvent = 'custom-message';
+        }
 
-runServer();
+        socket.on( params.socketCustomEvent, message => {
+            try {
+                socket.broadcast.emit( params.socketCustomEvent, message );
+            } catch( e ) {}
+        } );
+    } catch( e ) {}
+} );
