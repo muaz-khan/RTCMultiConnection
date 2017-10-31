@@ -21,22 +21,14 @@
                 <option value="#robot-ecully4">robot ecully 4</option>
             </select>
             <button id="join-room">Join Room</button>
-            <div id="div-buttons-robot" class="buttons-robot">
-                <br>
-                <div class="top-button">
-                    <button id="avant">AVANT</button>
-                </div>
-                <div class="middle-button">
-                    <div class="left-button">
-                        <button id="gauche">GAUCHE</button>
-                    </div>
-                    <div class="right-button">
-                        <button id="droite">DROITE</button>
-                    </div>
-                </div>
-                <div class="bottom-button">
-                    <button id="arriere">ARRIERE</button>
-                </div>
+
+            <div id="div-buttons-robot" style="display:none;">
+                <button class="cmd-btn" data-cmd="f">FRONT</button>
+                <button class="cmd-btn" data-cmd="l">LEFT</button>
+                <button class="cmd-btn" data-cmd="r">RIGHT</button>
+                <button class="cmd-btn" data-cmd="b">BACK</button>
+                <button class="cmd-btn" data-cmd="u">UP</button>
+                <button class="cmd-btn" data-cmd="d">DOWN</button>
             </div>
 
             <br>

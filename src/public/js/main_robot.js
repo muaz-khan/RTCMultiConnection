@@ -47,9 +47,9 @@ addEventListener('load', e => {
 
 // UI / buttons events
 document.querySelector('#open-room').addEventListener( 'click', function() {
-    terminal.connect().then(() => {
-        console.log( `connected to ${terminal.getDeviceName()}`)
-    });
+    // terminal.connect().then(() => {
+    //     console.log( `connected to ${terminal.getDeviceName()}`)
+    // });
 
     connection.open(document.getElementById('room-id').value, function() {
         showRoomURL(connection.sessionid);
@@ -59,7 +59,7 @@ document.querySelector('#open-room').addEventListener( 'click', function() {
         socket.on( 'cmd', data => {
             console.log( data )
             if( data.roomid === roomid ){
-                terminal.send( data.cmd );
+                // terminal.send( data.cmd );
             }
         } );
         // setInterval( function(){socket.emit('cmd', {roomid, cmd:'yo'} )},2000);
