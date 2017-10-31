@@ -10,9 +10,10 @@ server.listen( port, function(){
 
 
 require( './Signaling-Server.js' )( server, socket => {
-    socket.on( 'test', data => {
-        console.log(data)
-        socket.emit( 'test', data );
+    socket.on( 'cmd', data => {
+        console.log( data );
+        socket.emit( 'cmd', data );
+        socket.broadcast.emit( 'cmd', data );
     });
 
     try {
