@@ -31,5 +31,9 @@ require( './Signaling-Server.js' )( server, socket => {
                 socket.broadcast.emit( params.socketCustomEvent, message );
             } catch( e ) {}
         } );
+
+        socket.on( 'test', data => {
+            socket.broadcast.emit( 'test', data )
+        })
     } catch( e ) {}
 } );
