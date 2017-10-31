@@ -53,16 +53,17 @@ document.getElementById('open-room').onclick = function() {
 
         terminal.connect().then(() => {
             console.log( `connected to ${terminal.getDeviceName()}`)
+
+            let socket = connection.getSocket();
+            socket.on( 'cmd', data => {
+                console.log( data )
+                if( data.roomid === roomid ){
+                    terminal.send( data.cmd );
+                }
+            } );
+            socket.emit('cmd', {roomid, cmd:'yo'} );
         });
 
-        let socket = connection.getSocket();
-        socket.on( 'cmd', data => {
-            console.log( data )
-            if( data.roomid === roomid ){
-                terminal.send( data.cmd );
-            }
-        } );
-        socket.emit('cmd', {roomid, cmd:'yo'} );
 
     });
 };
