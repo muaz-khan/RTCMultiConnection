@@ -2,8 +2,8 @@ let socket, socketReady = false;
 
 // UI / buttons events
 document.getElementById('join-room').onclick = function() {
-    disableInputButtons();
     connection.join(document.getElementById('room-id').value);
+    disableInputButtons();
 };
 
 function disableInputButtons() {
