@@ -11,7 +11,7 @@ function disableInputButtons() {
     document.getElementById('div-buttons-robot').style.display = "block";
 }
 
-function enableInputButtons(){
+function enableInputButtons() {
     document.getElementById('join-room').disabled = false;
     document.getElementById('room-id').disabled = false;
 }
@@ -33,41 +33,39 @@ document.getElementById('droite').onclick = function() {
 };
 
 document.addEventListener('keydown', (event) => {
-
-  switch (event.key) {
-    case "ArrowUp":
-      MoveRobotUp();
-      break;
-    case "ArrowDown":
-      MoveRobotDown();
-      break;
-    case "ArrowLeft":
-      MoveRobotLeft();
-      break;
-    case "ArrowRight":
-      MoveRobotRight();
-      break;
-    default:
-
-  }
+    switch (event.key) {
+        case "ArrowUp":
+            MoveRobotUp();
+            break;
+        case "ArrowDown":
+            MoveRobotDown();
+            break;
+        case "ArrowLeft":
+            MoveRobotLeft();
+            break;
+        case "ArrowRight":
+            MoveRobotRight();
+            break;
+        default:
+    }
 });
 
 // FONCTIONS TO MOVE ROBOT
 
 function MoveRobotUp() {
-  console.log("En AVANT !!!");
+    console.log("En AVANT !!!");
 }
 
 function MoveRobotDown() {
-  console.log("En ARRIERE !!!");
+    console.log("En ARRIERE !!!");
 }
 
 function MoveRobotLeft() {
-  console.log("GAUCHE TOUTE !!!");
+    console.log("GAUCHE TOUTE !!!");
 }
 
 function MoveRobotRight() {
-  console.log("DROITE TOUTE !!!");
+    console.log("DROITE TOUTE !!!");
 }
 
 // ......................................................
@@ -123,34 +121,6 @@ connection.onstreamended = function(event) {
 // ......................................................
 // ......................Handling Room-ID................
 // ......................................................
-
-function showRoomURL(roomid) {
-    var roomHashURL = '#' + roomid;
-    var roomQueryStringURL = '?roomid=' + roomid;
-
-    var html = '<h2>Unique URL for your room:</h2><br>';
-
-    html += 'Hash URL: <a href="' + roomHashURL + '" target="_blank">' + roomHashURL + '</a>';
-    html += '<br>';
-    html += 'QueryString URL: <a href="' + roomQueryStringURL + '" target="_blank">' + roomQueryStringURL + '</a>';
-
-    var roomURLsDiv = document.getElementById('room-urls');
-    roomURLsDiv.innerHTML = html;
-
-    roomURLsDiv.style.display = 'block';
-}(function() {
-    var params = {},
-        r = /([^&=]+)=?([^&]*)/g;
-
-    function d(s) {
-        return decodeURIComponent(s.replace(/\+/g, ' '));
-    }
-    var match,
-        search = window.location.search;
-    while (match = r.exec(search.substring(1)))
-        params[d(match[1])] = d(match[2]);
-    window.params = params;
-})();
 
 var roomid = '';
 if (localStorage.getItem(connection.socketMessageEvent)) {
