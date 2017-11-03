@@ -34,8 +34,21 @@ document.querySelector( '#join-room' ).addEventListener( 'click', e => {
         document.querySelector( '#in-room' ).classList.toggle( 'hidden' );
     }
 
-    document.querySelectorAll( '.cmd-btn' ).forEach( d => d.addEventListener( 'click', e => {
-        console.log( d.dataset.cmd );
-        if( socketReady ) socket.emit( 'cmd', { roomid, cmd: d.dataset.cmd } );
-    } ) );
+    let cmd = '';
+    document.querySelectorAll( '.cmd-btn' ).forEach( d => {
+        d.addEventListener( 'mousedown', e => {
+            cmd = d.dataset.cmd;
+            sendCmd();
+        } );
+        d.addEventListener( 'mouseup', e => {
+            cmd = '';
+        } );
+    } );
+
+    function sendCmd(){
+        if( cmd != '' && socketReady ){
+            socket.emit( 'cmd', { roomid, cmd } );
+            setTimeout( sendCmd, 500 );
+        }
+    }
 } );
