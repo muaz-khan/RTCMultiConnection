@@ -13,13 +13,13 @@ if( navigator.bluetooth ) {
         console.log( data, 'in' );
     };
 
-    terminal._log = ( ...messages ) => {
-        messages.forEach( message => {
-            let p = document.createElement( 'p' );
-            p.innerText = message;
-            document.body.appendChild(p);
-        } );
-    };
+    // terminal._log = ( ...messages ) => {
+    //     messages.forEach( message => {
+    //         let p = document.createElement( 'p' );
+    //         p.innerText = message;
+    //         // document.body.appendChild(p);
+    //     } );
+    // };
 }
 
 // UI / buttons events
