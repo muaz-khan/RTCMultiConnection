@@ -1,4 +1,3 @@
-
 document.querySelector( '#join-room' ).addEventListener( 'click', e => {
     let socket, socketReady = false;
 
@@ -18,6 +17,7 @@ document.querySelector( '#join-room' ).addEventListener( 'click', e => {
                         connection.getSocket( _socket => {
                             socket = _socket;
                             socketReady = true;
+                            socket.on( 'cmd', data => console.log( data ) );
                         } );
                     } );
                     toggleButtons();
