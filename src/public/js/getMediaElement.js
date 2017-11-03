@@ -245,15 +245,15 @@ function getMediaElement(mediaElement, config) {
 
     mediaBox.appendChild(mediaElement);
 
-    if (!config.width) config.width = (innerWidth / 2) - 50;
+    // if (!config.width) config.width = (innerWidth / 2) - 50;
 
-    mediaElementContainer.style.width = config.width + 'px';
+    // mediaElementContainer.style.width = config.width + 'px';
 
-    if (config.height) {
-        mediaBox.style.height = config.height + 'px';
-    }
+    // if (config.height) {
+    //     mediaBox.style.height = config.height + 'px';
+    // }
 
-    mediaBox.querySelector('video').style.maxHeight = innerHeight + 'px';
+    // mediaBox.querySelector('video').style.maxHeight = innerHeight + 'px';
 
     var times = 0;
 

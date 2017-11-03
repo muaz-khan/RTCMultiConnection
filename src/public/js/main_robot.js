@@ -34,9 +34,8 @@ document.querySelector( '#open-room' ).addEventListener( 'click', () => {
         console.log( `Join bot here: https://makerschat.herokuapp.com/#${ connection.sessionid }` );
 
         connection.getSocket( socket => {
-            console.log( socket );
             socket.on( 'cmd', data => {
-                console.log( data )
+                console.log( data );
                 if( data.roomid === roomid ){
                     // terminal.send( data.cmd );
                 }

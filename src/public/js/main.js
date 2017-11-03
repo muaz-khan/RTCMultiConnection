@@ -2,7 +2,7 @@
 document.querySelector( '#join-room' ).addEventListener( 'click', e => {
     let socket, socketReady = false;
 
-    location = location.origin + document.querySelector( '#room-id' ).value;
+    location = location.origin + '/#' + document.querySelector( '#room-id' ).value;
 
     let roomid = location.hash.replace('#', '');
     if ( roomid != '' ) {

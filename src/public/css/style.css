@@ -2,6 +2,39 @@
     margin: 0;
 }
 
+body{
+    background: black;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
 .hidden{
     display: none;
+}
+
+video{
+    position:absolute;
+}
+
+.second{
+    z-index: -1;
+    top: 10px;
+    left: 10px;
+    width: 20%;
+    height: 20%;
+}
+
+.full{
+    z-index: -2;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+h1{
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
 }

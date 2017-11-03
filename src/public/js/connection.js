@@ -10,8 +10,7 @@ connection.socketURL = '/';
 connection.socketMessageEvent = 'video-conference-demo';
 
 connection.session = {
-    // audio: true,
-    audio: false,
+    audio: true,
     video: true
 };
 
@@ -34,6 +33,13 @@ connection.onstream = event => {
     setTimeout( () => mediaElement.media.play(), 5000 );
 
     mediaElement.id = event.streamid;
+
+    let videos = connection.videosContainer.querySelectorAll( 'video' );
+    videos[ videos.length - 1 ].classList.toggle( 'full', true );
+    if( videos.length == 2 ){
+        videos[ 0 ].classList.toggle( 'full', false );
+        videos[ 0 ].classList.toggle( 'second', true );
+    }
 };
 
 connection.onstreamended = event => {
