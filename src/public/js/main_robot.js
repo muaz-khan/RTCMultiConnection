@@ -4,23 +4,19 @@
 // } );
 
 // Blue web
-let terminal, hasBT = false;
-if( navigator.bluetooth ) {
-    hasBT = true;
-    terminal = new BluetoothTerminal();
+let terminal = new BluetoothTerminal();
 
-    terminal.receive = data => {
-        console.log( data, 'in' );
-    };
+terminal.receive = data => {
+    console.log( data, 'in' );
+};
 
-    // terminal._log = ( ...messages ) => {
-    //     messages.forEach( message => {
-    //         let p = document.createElement( 'p' );
-    //         p.innerText = message;
-    //         // document.body.appendChild(p);
-    //     } );
-    // };
-}
+// terminal._log = ( ...messages ) => {
+//     messages.forEach( message => {
+//         let p = document.createElement( 'p' );
+//         p.innerText = message;
+//         // document.body.appendChild(p);
+//     } );
+// };
 
 // UI / buttons events
 document.querySelector( '#open-room' ).addEventListener( 'click', () => {
@@ -28,11 +24,9 @@ document.querySelector( '#open-room' ).addEventListener( 'click', () => {
 
     localStorage.setItem( connection.socketMessageEvent, roomid );
 
-    if( hasBT ){
-        terminal.connect().then(() => {
-            console.log( `connected to ${ terminal.getDeviceName() }`)
-        } );
-    }
+    terminal.connect().then(() => {
+        console.log( `connected to ${ terminal.getDeviceName() }`)
+    } );
 
     connection.open( roomid, () => {
         document.querySelector( '#pre-room' ).classList.toggle( 'hidden' );
@@ -43,7 +37,7 @@ document.querySelector( '#open-room' ).addEventListener( 'click', () => {
             socket.on( 'cmd', data => {
                 console.log( data );
                 if( data.roomid === roomid ){
-                    if( hasBT ) terminal.send( data.cmd );
+                    terminal.send( data.cmd );
                 }
             } );
         } );
