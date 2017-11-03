@@ -24,8 +24,8 @@ document.querySelector( '#open-room' ).addEventListener( 'click', () => {
 
     localStorage.setItem( connection.socketMessageEvent, roomid );
 
-    terminal.connect().then(() => {
-        console.log( `connected to ${ terminal.getDeviceName() }`)
+    terminal.connect().then( () => {
+        console.log( `connected to ${ terminal.getDeviceName() }` );
     } );
 
     connection.open( roomid, () => {
@@ -35,6 +35,10 @@ document.querySelector( '#open-room' ).addEventListener( 'click', () => {
 
         connection.getSocket( socket => {
             socket.on( 'cmd', data => {
+                let p = document.createElement( 'p' );
+                p.innerText = data.toString();
+                document.body.appendChild( p );
+
                 console.log( data );
                 if( data.roomid === roomid ){
                     terminal.send( data.cmd );
