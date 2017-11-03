@@ -41,7 +41,7 @@ document.querySelector( '#open-room' ).addEventListener( 'click', () => {
 
                 console.log( data );
                 if( data.roomid === roomid ){
-                    terminal.send( data.cmd );
+                    terminal.send( data ).then( () => console.log( data, 'out' ) ).catch( error => console.log( error ) );
                 }
             } );
         } );
