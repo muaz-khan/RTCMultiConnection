@@ -10,7 +10,8 @@ connection.socketURL = '/';
 connection.socketMessageEvent = 'video-conference-demo';
 
 connection.session = {
-    audio: true,
+    // audio: true,
+    audio: false,
     video: true
 };
 
