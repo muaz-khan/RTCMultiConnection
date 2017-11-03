@@ -1,6 +1,7 @@
-let socket, socketReady = false;
 
 document.querySelector( '#join-room' ).addEventListener( 'click', e => {
+    let socket, socketReady = false;
+
     location = location.origin + document.querySelector( '#room-id' ).value;
 
     let roomid = location.hash.replace('#', '');
@@ -12,7 +13,13 @@ document.querySelector( '#join-room' ).addEventListener( 'click', e => {
         ( function reCheckRoomPresence() {
             connection.checkPresence( roomid, isRoomExists => {
                 if ( isRoomExists ) {
-                    connection.join( roomid );
+                    connection.join( roomid, () => {
+                        console.log( 'connection joined' );
+                        connection.getSocket( _socket => {
+                            socket = _socket;
+                            socketReady = true;
+                        } );
+                    } );
                     toggleButtons();
                     return;
                 }
@@ -21,14 +28,14 @@ document.querySelector( '#join-room' ).addEventListener( 'click', e => {
             } );
         } )();
     }
+
+    function toggleButtons() {
+        document.querySelector( '#pre-room' ).classList.toggle( 'hidden' );
+        document.querySelector( '#in-room' ).classList.toggle( 'hidden' );
+    }
+
+    document.querySelectorAll( '.cmd-btn' ).forEach( d => d.addEventListener( 'click', e => {
+        console.log( d.dataset.cmd );
+        if( socketReady ) socket.emit( 'cmd', { roomid, cmd: d.dataset.cmd } );
+    } ) );
 } );
-
-function toggleButtons() {
-    document.querySelector( '#pre-room' ).classList.toggle( 'hidden' );
-    document.querySelector( '#in-room' ).classList.toggle( 'hidden' );
-}
-
-document.querySelectorAll( '.cmd-btn' ).forEach( d => d.addEventListener( 'click', e => {
-    console.log( d.dataset.cmd );
-    if( socketReady ) socket.emit( 'cmd', { cmd: d.dataset.cmd } );
-} ) );

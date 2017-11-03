@@ -22,9 +22,6 @@ connection.sdpConstraints.mandatory = {
 
 connection.videosContainer = document.querySelector( '#videos-container' );
 connection.onstream = event => {
-    socket = connection.getSocket();
-    socketReady = true;
-
     let mediaElement = getMediaElement( event.mediaElement, {
         // title: event.userid,
         // buttons: [ 'full-screen' ],
