@@ -1,72 +1,7 @@
-* {
-    word-wrap:break-word;
-}
-video {
-    object-fit: fill;
-    width: 30%;
-}
-button,
-input,
-select {
-    font-weight: normal;
-    padding: 2px 4px;
-    text-decoration: none;
-    display: inline-block;
-    text-shadow: none;
-    font-size: 16px;
-    outline: none;
+*{
+    margin: 0;
 }
 
-.make-center {
-    text-align: center;
-    padding: 5px 10px;
-}
-
-.buttons-robot {
-  width: 100%;
-  height: 80px;
-  text-align: center;
-  display: none;
-}
-
-.top-button,
-.middle-button,
-.bottom-button {
-  width: 100%;
-  float: left;
-}
-
-.left-button {
-  width: 50%;
-  float: left;
-  text-align: right;
-}
-
-
-.right-button {
-  width: 50%;
-  float: left;
-  text-align: left;
-}
-
-.left-robot {
-  float: left;
-  width: 50%;
-  text-align: center;
-}
-
-.right-user {
-  float: left;
-  width: 50%;
-  text-align: center;
-}
-
-img, input, textarea {
-  max-width: 100%
-}
-
-@media all and (max-width: 500px) {
-    .fork-left, .fork-right, .github-stargazers {
-        display: none;
-    }
+.hidden{
+    display: none;
 }

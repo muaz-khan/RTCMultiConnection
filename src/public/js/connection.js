@@ -25,10 +25,11 @@ const connection = new RTCMultiConnection();
         socket = connection.getSocket();
         socketReady = true;
 
-        let width = parseInt( connection.videosContainer.clientWidth / 4 ) - 20;
+        // let width = parseInt( connection.videosContainer.clientWidth / 4 ) - 20;
         let mediaElement = getMediaElement( event.mediaElement, {
             // title: event.userid,
             // buttons: [ 'full-screen' ],
+            buttons: [],
             // width: width,
             showOnMouseEnter: false
         } );
