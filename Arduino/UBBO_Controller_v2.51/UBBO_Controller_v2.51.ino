@@ -88,11 +88,6 @@
    Pin 39 : Dock relay Pin
    Pin 40 : Docked Digital Pin
    Pin A0 : Battery Voltage Pin
-   Pin A6 : Proximity sensor Front
-   Pin A7 : Proximity sensor Left
-   Pin A8 : Proximity sensor Back
-   Pin A9 : Proximity sensor Right
-
 
    M1 Red Wire: ((+)1 ASM 1)
    M1 black Wire: ((-)1 ASM 1)
@@ -129,7 +124,6 @@
    Arduino Servo controller
    ////////////////////////
    Pin 11: Servomotor for Tablet
-
  */
 
 #include "MotorWheel.h"
@@ -138,38 +132,9 @@
 #include "PinChangeInt.h"
 #include "PinChangeIntConfig.h"
 
-
-//Debug
-//#define DEBUG
-
-
 #include "Definitions.h"
-#include "FastIR.h"
 
-/*
- ************************************************************************************
-   Back View           IR back (Pin 26)
-   ------------------------------
- |      |
-   M3 ( back left)|      |M2 (back right)
- |      |
- |       |
- |       |
-   IR left ( Pin 27)|        |IR right (Pin 25)
- |      |
- |       |
- |       |
- |       |
-   -------------------------------
- |      |
-   M4 (front left)|      |M1 (front right)
- |      |
-   -------------------------------
-   IR front (Pin 24)
- ************************************************************************************
- */
-
-
+//#define DEBUG
 
 // internal data
 boolean bDataReceived = false;  // whether the data is received
@@ -187,10 +152,9 @@ byte byCmd = 0;
 byte byPosition = 0;
 byte byPreviousCmd = 0;
 int iPreviousAngle = 0;
-byte byMessage[MAX_VAR];       // a char to hold incoming data
+byte byMessage[MAX_VAR]; // a char to hold incoming data
 byte byVarType[MAX_VAR];
 byte byVarValue[MAX_VAR];
-
 
 //Timer data
 unsigned long ulTime; //Time in milliseconds
@@ -293,6 +257,7 @@ void loop(){
                     else
                     dbg_println("bad \"move tablet\" message format");
                     break;
+
                 default: // Other
                     dbg_println("Unknown command");
                     break;
