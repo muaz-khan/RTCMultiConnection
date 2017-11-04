@@ -9,13 +9,7 @@ server.listen( port, function(){
 } );
 
 
-require( './Signaling-Server.js' )( server, socket => {
-    socket.on( 'cmd', data => {
-        console.log( data );
-        socket.emit( 'cmd', data );
-        socket.broadcast.emit( 'cmd', data );
-    });
-
+require( './Signaling-Server.js' )( server, ( socket, io ) => {
     try {
         let params = socket.handshake.query;
 
@@ -29,6 +23,11 @@ require( './Signaling-Server.js' )( server, socket => {
             } catch( e ) {}
         } );
     } catch( e ) {}
+
+    socket.on( 'cmd', data => {
+        console.log( data );
+        io.emit( 'cmd', data );
+    } );
 } );
 
 

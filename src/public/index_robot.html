@@ -8,48 +8,43 @@
 
     <title>Makers' chat</title>
 
-    <!-- <link rel="stylesheet" href="/css/style.css"> -->
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <body>
-    <!-- <button id="connect">connect</button>
-    <button id="disconnect">disconnect</button>
-    <br>
-    <button id="a" class="cmd" data-cmd="a">a</button>
-    <button id="b" class="cmd" data-cmd="b">b</button>
-    <button id="c" class="cmd" data-cmd="c">c</button> -->
+    <h1><a href="/robot">HOME</a></h1>
 
-    <!--  -->
+    <div id="pre-room">
+        <select id="room-id">
+            <option value="ecu1">robot Écully 1</option>
+            <option value="ecu2">robot Écully 2</option>
+            <option value="ecu3">robot Écully 3</option>
+            <option value="ecu4">robot Écully 4</option>
+            <option value="par1">robot Paris 1</option>
+            <option value="par2">robot Paris 2</option>
+            <option value="par3">robot Paris 3</option>
+            <option value="par4">robot Paris 4</option>
+            <option value="ste1">robot Saint-Étienne 1</option>
+            <option value="ste2">robot Saint-Étienne 2</option>
+            <option value="ste3">robot Saint-Étienne 3</option>
+            <option value="ste4">robot Saint-Étienne 4</option>
+        </select>
 
-    <section class="experiment">
-        <div class="make-center">
-            <select id="room-id">
-                <option value="robot-ecully1">robot ecully 1</option>
-                <option value="robot-ecully2">robot ecully 2</option>
-                <option value="robot-ecully3">robot ecully 3</option>
-                <option value="robot-ecully4">robot ecully 4</option>
-            </select>
-            <button id="open-room">Open Room</button>
+        <button id="open-room">Open Room</button>
+    </div>
 
-            <div id="room-urls"></div>
-            <br>
-            <div id="txt-cam" style="display:none;">
-                <div class="left-robot">ROBOT :</div>
-                <div class="right-user">USER CONNECTED :</div>
-            </div>
-        </div>
-
+    <div id="in-room" class="hidden">
+        <div id="room-urls"></div>
         <div id="videos-container"></div>
-    </section>
+    </div>
 
-    <!--  -->
-
-    <script src="https://cdn.rawgit.com/c-kick/2d717790aadd3aa86884ee0b07c3119f/raw/66e7176bedadd493f0df4444b770dad43ffa8efa/hnl.mobileConsole.js"></script>
+    <!-- <script src="https://cdn.rawgit.com/c-kick/2d717790aadd3aa86884ee0b07c3119f/raw/66e7176bedadd493f0df4444b770dad43ffa8efa/hnl.mobileConsole.js"></script> -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/RTCMultiConnection.min.js"></script>
     <script src="/js/getMediaElement.js"></script>
     <script src="/js/BluetoothTerminal.js"></script>
     <!-- <script src="/js/companion.js" data-service-worker="sw.js"></script>/ -->
+    <script src="/js/connection.js"></script>
     <script src="/js/main_robot.js"></script>
 </body>
 
