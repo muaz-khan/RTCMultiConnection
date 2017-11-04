@@ -8,43 +8,94 @@
 
     <title>Makers' chat</title>
 
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link type="text/css" rel="stylesheet" href="css/materialize.min.css" media="screen,projection" />
+
     <link rel="stylesheet" href="/css/style.css">
 </head>
 
 <body>
-    <h1><a href="/">HOME</a></h1>
 
-    <div id="pre-room">
-        <select id="room-id">
-            <option value="ecu1">robot Écully 1</option>
-            <option value="ecu2">robot Écully 2</option>
-            <option value="ecu3">robot Écully 3</option>
-            <option value="ecu4">robot Écully 4</option>
-            <option value="par1">robot Paris 1</option>
-            <option value="par2">robot Paris 2</option>
-            <option value="par3">robot Paris 3</option>
-            <option value="par4">robot Paris 4</option>
-            <option value="ste1">robot Saint-Étienne 1</option>
-            <option value="ste2">robot Saint-Étienne 2</option>
-            <option value="ste3">robot Saint-Étienne 3</option>
-            <option value="ste4">robot Saint-Étienne 4</option>
-        </select>
+    <div class="main">
+        <div id="mainContainer" class="wrapper">
+            <div style="display:flex;align-items:center;">
+                <div id="pre-room" class="center-align">
 
-        <button id="join-room">Join Room</button>
-    </div>
+                    <!-- Dropdown Structure -->
+                    <div class="row">
+                        <form class="col s12">
+                            <div class="row">
+                                <div class="row">
+                                    <div id="container-pre-room">
+                                        <div id="makers_logo">
+                                            <img src="images/logo_makers_lab.png" />
+                                        </div>
+                                        <div id="mario">
 
-    <div id="in-room" class="hidden">
-        <div id="div-buttons-robot">
-            <button class="cmd-btn" data-cmd="f">FRONT</button>
-            <button class="cmd-btn" data-cmd="l">LEFT</button>
-            <button class="cmd-btn" data-cmd="r">RIGHT</button>
-            <button class="cmd-btn" data-cmd="b">BACK</button>
-            <button class="cmd-btn" data-cmd="u">UP</button>
-            <button class="cmd-btn" data-cmd="d">DOWN</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="input-field col s12">
+                                    <select id="room-id">
+                                        <option value="" disabled selected>Select your robot</option>
+                                        <option value="ecu1">Écully 1</option>
+                                        <option value="ecu2">Écully 2</option>
+                                        <option value="ecu3">Écully 3</option>
+                                        <option value="ecu4">Écully 4</option>
+                                        <option value="par1">Paris 1</option>
+                                        <option value="par2">Paris 2</option>
+                                        <option value="par3">Paris 3</option>
+                                        <option value="par4">Paris 4</option>
+                                        <option value="ste1">Saint-Étienne 1</option>
+                                        <option value="ste2">Saint-Étienne 2</option>
+                                        <option value="ste3">Saint-Étienne 3</option>
+                                        <option value="ste4">Saint-Étienne 4</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <a class="waves-effect waves-light btn grey darken-2" id="join-room">Join Room</a>
+                                <a class="waves-effect waves-light btn grey darken-2" href="/">RELOAD</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div id="in-room" class="hidden">
+                    <div class="row">
+                        <div id="videos-container"></div>
+                    </div>
+                    <div class="row no-margin">
+                        <div class="card no-margin">
+
+                            <div class="card-image">
+
+                            </div>
+                            <div class="card-content">
+                                <p id="robotName" class="robot-name"></p>
+                            </div>
+                            <div class="card-action">
+                                <div id="div-buttons-robot" class="center-align">
+                                    <a class="cmd-btn waves-effect waves-light btn grey darken-2" data-cmd="f">FRONT</a>
+                                    <a class="cmd-btn waves-effect waves-light btn grey darken-2" data-cmd="b">BACK</a>
+                                    <a class="cmd-btn waves-effect waves-light btn grey darken-2" data-cmd="l">LEFT</a>
+                                    <a class="cmd-btn waves-effect waves-light btn grey darken-2" data-cmd="r">RIGHT</a>
+                                    <a class="cmd-btn waves-effect waves-light btn grey darken-2" data-cmd="u">UP</a>
+                                    <a class="cmd-btn waves-effect waves-light btn grey darken-2" data-cmd="d">DOWN</a>
+                                    <a class="cmd-btn waves-effect waves-light btn red darken-3" href="/">BACK</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-
-        <div id="videos-container"></div>
     </div>
+
+    <!--Import jQuery before materialize.js-->
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script type="text/javascript" src="js/materialize.min.js"></script>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/RTCMultiConnection.min.js"></script>
