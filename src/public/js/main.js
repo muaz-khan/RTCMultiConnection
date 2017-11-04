@@ -15,6 +15,7 @@ document.querySelector( '#join-room' ).addEventListener( 'click', e => {
                     connection.join( roomid, () => {
                         console.log( 'connection joined' );
                         connection.getSocket( _socket => {
+                            console.log( 'get socket' );
                             socket = _socket;
                             socketReady = true;
                             socket.on( 'cmd', data => console.log( data ) );
