@@ -19,3 +19,4 @@ config.gypi
 CVS
 npm-debug.log
 rmc-debug.log
+*.old.*

@@ -1,0 +1,83 @@
+*{
+    margin: 0;
+}
+
+body{
+    background: white;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.hidden{
+    display: none;
+}
+
+video{
+    position:absolute;
+}
+
+.second{
+    z-index: -1;
+    top: 10px;
+    left: 10px;
+    width: 20%;
+    height: 20%;
+}
+
+.full{
+    z-index: -2;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+h1{
+    position: absolute;
+    bottom: 10px;
+    left: 10px;
+}
+
+#pre-room {
+    max-width: 640px;
+    margin: auto;
+}
+
+#in-room {
+    width: 100%
+}
+
+html, body {
+    height: 100%;
+}
+.main {
+    height: 100%;
+    width: 100%;
+    display: table;
+}
+.wrapper {
+    display: table-cell;
+    height: 100%;
+    vertical-align: middle;
+}
+
+ul.dropdown-content.select-dropdown li span {
+    color: #000; /* no need for !important :) */
+}
+
+.no-margin {
+    margin: 0;
+}
+
+.bottom {
+    vertical-align: bottom!important;
+}
+
+.robot-name {
+    text-align: center;
+}
+
+.cmd-btn {
+    
+}

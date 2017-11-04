@@ -1,70 +1,29 @@
 {
-  "name": "rtcmulticonnection-v3",
-  "preferGlobal": false,
-  "version": "3.4.4",
-  "author": {
-    "name": "Muaz Khan",
-    "email": "muazkh@gmail.com",
-    "url": "http://www.muazkhan.com/"
-  },
-  "description": "RTCMultiConnection is a WebRTC JavaScript wrapper library runs top over RTCPeerConnection API to support all possible peer-to-peer features.",
-  "main": "server.js",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/muaz-khan/RTCMultiConnection.git"
-  },
-  "scripts": {
-    "start": "node server.js"
-  },
-  "engines": {
-    "node": "latest"
-  },
-  "main": "RTCMultiConnection.js",
-  "keywords": [
-    "peer-to-peer",
-    "peer2peer",
-    "peer",
-    "webrtc",
-    "rtcmulticonnection",
-    "webrtc-library",
-    "library",
-    "javascript",
-    "chrome",
-    "firefox",
-    "opera",
-    "ie",
-    "internet-explorer",
-    "android",
-    "rtcweb",
-    "rtcmulticonnection.js",
-    "multirtc",
-    "webrtc-experiment",
-    "javascript-library",
-    "muaz",
-    "muaz-khan"
-  ],
-  "dependencies": {
-    "socket.io": "latest"
-  },
-  "analyze": false,
-  "license": "MIT",
-  "readmeFilename": "README.md",
-  "bugs": {
-    "url": "https://github.com/muaz-khan/RTCMultiConnection/issues",
-    "email": "muazkh@gmail.com"
-  },
-  "homepage": "https://rtcmulticonnection.herokuapp.com/",
-  "_from": "rtcmulticonnection-v3@",
-  "devDependencies": {
-    "grunt": "0.4.5",
-    "grunt-bump": "0.7.0",
-    "grunt-cli": "0.1.13",
-    "grunt-contrib-clean": "0.6.0",
-    "grunt-contrib-concat": "0.5.1",
-    "grunt-contrib-copy": "0.8.2",
-    "grunt-contrib-uglify": "0.11.0",
-    "grunt-jsbeautifier": "0.2.10",
-    "grunt-replace": "0.11.0",
-    "load-grunt-tasks": "3.4.0"
-  }
+    "name": "makerschat",
+    "version": "2.0.0",
+    "description": "",
+    "engines": {
+        "node": "8.4.0"
+    },
+    "main": "index.js",
+    "scripts": {
+        "start": "node src/server.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.16.1",
+        "socket.io": "^2.0.3"
+    },
+    "devDependencies": {
+        "babelify": "^7.3.0",
+        "browserify": "^14.4.0",
+        "envify": "^4.1.0",
+        "gulp": "^3.9.1",
+        "gulp-develop-server": "^0.5.2",
+        "gulp-livereload": "^3.8.1",
+        "vinyl-buffer": "^1.0.0",
+        "vinyl-source-stream": "^1.1.0"
+    }
 }
