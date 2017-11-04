@@ -1,10 +1,6 @@
-// VERSION
-const int VER_HIGH_BYTE = 2;
-const int VER_LOW_BYTE = 51;
-
 // For tablet serial prot
-const byte STX = 0x02;
-const byte ETX = 0x03;
+const char STX = '<';
+const char ETX = '>';
 
 //Speed / accel parameters
 const int iSpeed = 400; // Initially 300
@@ -77,11 +73,11 @@ const int FRONT_PROX_SENSOR_ANALOG_DISTANCE = 30;
 const int LEFT_PROX_SENSOR_ANALOG_DISTANCE = 30;
 const int BACK_PROX_SENSOR_ANALOG_DISTANCE = 30;
 const int RIGHT_PROX_SENSOR_ANALOG_DISTANCE = 27;
-//pin                                     
-const int FRONT_PROX_SENSOR_PIN = A6;   
-const int LEFT_PROX_SENSOR_PIN = A7;    
-const int BACK_PROX_SENSOR_PIN = A8;    
-const int RIGHT_PROX_SENSOR_PIN = A9;   
+//pin
+const int FRONT_PROX_SENSOR_PIN = A6;
+const int LEFT_PROX_SENSOR_PIN = A7;
+const int BACK_PROX_SENSOR_PIN = A8;
+const int RIGHT_PROX_SENSOR_PIN = A9;
 // cache value
 boolean FRONT_PROX_SENSOR_VALUE = true;
 boolean LEFT_PROX_SENSOR_VALUE = true;
@@ -160,4 +156,3 @@ const byte END_OF_FRAME_3 = 0x7F;
 #define dbg_line()
 #define dbg_lineln()
 #endif
-

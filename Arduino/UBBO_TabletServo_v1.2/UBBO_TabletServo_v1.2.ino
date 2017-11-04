@@ -48,13 +48,13 @@
     #define dbg_println_hex(x)
 #endif
 
-const byte STX = 0x02;
-const byte ETX = 0x03;
+const char STX = '<';
+const char ETX = '>';
 
 // Tablet data
 Servo oTabletServo;
 const int iTabletServoPin = 12;
-int iTabletPos = 0;
+int iTabletPos = 30;
 int iCmd = 0;
 boolean bDataReceived = false;
 
@@ -72,7 +72,7 @@ void setup(){
     dbg_println( "Wait for a command:" );
 
     //Set Servo at init position
-    oTabletServo.write( 30 );   // tell servo to go to position in variable 'pos'
+    oTabletServo.write( iTabletPos );
 }
 
 void loop(){
