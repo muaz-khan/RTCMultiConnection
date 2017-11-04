@@ -12,6 +12,7 @@ terminal.receive = data => {
 
 terminal._log = ( ...messages ) => {
     messages.forEach( message => {
+        console.log( message );
         let p = document.createElement( 'p' );
         p.innerText = message;
         document.body.appendChild(p);
@@ -24,9 +25,9 @@ document.querySelector( '#open-room' ).addEventListener( 'click', () => {
 
     localStorage.setItem( connection.socketMessageEvent, roomid );
 
-    // terminal.connect().then( () => {
-    //     console.log( `connected to ${ terminal.getDeviceName() }` );
-    // } );
+    terminal.connect().then( () => {
+        console.log( `connected to ${ terminal.getDeviceName() }` );
+    } );
 
     connection.open( roomid, () => {
         document.querySelector( '#pre-room' ).classList.toggle( 'hidden' );
@@ -37,7 +38,7 @@ document.querySelector( '#open-room' ).addEventListener( 'click', () => {
             socket.on( 'cmd', data => {
                 console.log( data );
                 if( data.roomid === roomid ){
-                    // terminal.send( data ).then( () => console.log( data, 'out' ) ).catch( error => console.log( error ) );
+                    terminal.send( data ).then( () => console.log( data, 'out' ) ).catch( error => console.log( error ) );
                 }
             } );
         } );
