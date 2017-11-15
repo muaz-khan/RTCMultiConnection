@@ -19,7 +19,7 @@ var ScalableBroadcast;
 module.exports = exports = function(app, socketCallback) {
     socketCallback = socketCallback || function() {};
 
-    if(!!app.listen) {
+    if (!!app.listen) {
         var io = require('socket.io');
 
         try {
@@ -41,8 +41,7 @@ module.exports = exports = function(app, socketCallback) {
 
             io.sockets.on('connection', onConnection);
         }
-    }
-    else {
+    } else {
         onConnection(app);
     }
 
