@@ -9,10 +9,10 @@ function resolveURL(url) {
 }
 
 // Please use HTTPs on non-localhost domains.
-var isUseHTTPs = false;
+var isUseHTTPs = true;
 
-// var port = 443;
-var port = process.env.PORT || 9001;
+var port = 443;
+// var port = process.env.PORT || 9001;
 
 var fs = require('fs');
 var path = require('path');
