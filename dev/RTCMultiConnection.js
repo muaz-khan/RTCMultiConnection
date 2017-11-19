@@ -566,6 +566,22 @@
     };
 
     connection.processSdp = function(sdp) {
+        if (connection.codecs.video.toUpperCase() === 'VP8') {
+            sdp = CodecsHandler.preferCodec(sdp, 'vp8');
+        }
+
+        if (connection.codecs.video.toUpperCase() === 'VP9') {
+            sdp = CodecsHandler.preferCodec(sdp, 'vp9');
+        }
+
+        if (connection.codecs.video.toUpperCase() === 'H264') {
+            sdp = CodecsHandler.preferCodec(sdp, 'h264');
+        }
+
+        if (connection.codecs.audio === 'G722') {
+            sdp = CodecsHandler.removeNonG722(sdp);
+        }
+
         if (DetectRTC.browser.name === 'Firefox') {
             return sdp;
         }
@@ -588,18 +604,6 @@
                 stereo: 1,
                 maxptime: 3
             });
-        }
-
-        if (connection.codecs.video === 'VP9') {
-            sdp = CodecsHandler.preferVP9(sdp);
-        }
-
-        if (connection.codecs.video === 'H264') {
-            sdp = CodecsHandler.removeVPX(sdp);
-        }
-
-        if (connection.codecs.audio === 'G722') {
-            sdp = CodecsHandler.removeNonG722(sdp);
         }
 
         return sdp;

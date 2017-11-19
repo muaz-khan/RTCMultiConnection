@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-11-15 1:53:55 PM UTC
+// Last time updated: 2017-11-19 5:19:39 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -2925,30 +2925,105 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
     // CodecsHandler.js
 
     var CodecsHandler = (function() {
-        // "removeVPX" and "removeNonG722" methods are taken from github/mozilla/webrtc-landing
-        function removeVPX(sdp) {
-            if (!sdp || typeof sdp !== 'string') {
-                throw 'Invalid arguments.';
+        function preferCodec(sdp, codecName) {
+            var info = splitLines(sdp);
+
+            if (codecName === 'vp8' && info.vp8LineNumber === info.videoCodecNumbers[0]) {
+                return sdp;
             }
 
-            // this method is NOT reliable
+            if (codecName === 'vp9' && info.vp9LineNumber === info.videoCodecNumbers[0]) {
+                return sdp;
+            }
 
-            sdp = sdp.replace('a=rtpmap:100 VP8/90000\r\n', '');
-            sdp = sdp.replace('a=rtpmap:101 VP9/90000\r\n', '');
+            if (codecName === 'h264' && info.h264LineNumber === info.videoCodecNumbers[0]) {
+                return sdp;
+            }
 
-            sdp = sdp.replace(/m=video ([0-9]+) RTP\/SAVPF ([0-9 ]*) 100/g, 'm=video $1 RTP\/SAVPF $2');
-            sdp = sdp.replace(/m=video ([0-9]+) RTP\/SAVPF ([0-9 ]*) 101/g, 'm=video $1 RTP\/SAVPF $2');
+            sdp = preferCodecHelper(sdp, codecName, info);
 
-            sdp = sdp.replace(/m=video ([0-9]+) RTP\/SAVPF 100([0-9 ]*)/g, 'm=video $1 RTP\/SAVPF$2');
-            sdp = sdp.replace(/m=video ([0-9]+) RTP\/SAVPF 101([0-9 ]*)/g, 'm=video $1 RTP\/SAVPF$2');
+            return sdp;
+        }
 
-            sdp = sdp.replace('a=rtcp-fb:120 nack\r\n', '');
-            sdp = sdp.replace('a=rtcp-fb:120 nack pli\r\n', '');
-            sdp = sdp.replace('a=rtcp-fb:120 ccm fir\r\n', '');
+        function preferCodecHelper(sdp, codec, info, ignore) {
+            var preferCodecNumber = '';
 
-            sdp = sdp.replace('a=rtcp-fb:101 nack\r\n', '');
-            sdp = sdp.replace('a=rtcp-fb:101 nack pli\r\n', '');
-            sdp = sdp.replace('a=rtcp-fb:101 ccm fir\r\n', '');
+            if (codec === 'vp8') {
+                if (!info.vp8LineNumber) {
+                    return sdp;
+                }
+                preferCodecNumber = info.vp8LineNumber;
+            }
+
+            if (codec === 'vp9') {
+                if (!info.vp9LineNumber) {
+                    return sdp;
+                }
+                preferCodecNumber = info.vp9LineNumber;
+            }
+
+            if (codec === 'h264') {
+                if (!info.h264LineNumber) {
+                    return sdp;
+                }
+
+                preferCodecNumber = info.h264LineNumber;
+            }
+
+            var newLine = info.videoCodecNumbersOriginal.split('SAVPF')[0] + 'SAVPF ';
+
+            var newOrder = [preferCodecNumber];
+
+            if (ignore) {
+                newOrder = [];
+            }
+
+            info.videoCodecNumbers.forEach(function(codecNumber) {
+                if (codecNumber === preferCodecNumber) return;
+                newOrder.push(codecNumber);
+            });
+
+            newLine += newOrder.join(' ');
+
+            sdp = sdp.replace(info.videoCodecNumbersOriginal, newLine);
+            return sdp;
+        }
+
+        function splitLines(sdp) {
+            var info = {};
+            sdp.split('\n').forEach(function(line) {
+                if (line.indexOf('m=video') === 0) {
+                    info.videoCodecNumbers = [];
+                    line.split('SAVPF')[1].split(' ').forEach(function(codecNumber) {
+                        codecNumber = codecNumber.trim();
+                        if (!codecNumber || !codecNumber.length) return;
+                        info.videoCodecNumbers.push(codecNumber);
+                        info.videoCodecNumbersOriginal = line;
+                    });
+                }
+
+                if (line.indexOf('VP8/90000') !== -1 && !info.vp8LineNumber) {
+                    info.vp8LineNumber = line.replace('a=rtpmap:', '').split(' ')[0];
+                }
+
+                if (line.indexOf('VP9/90000') !== -1 && !info.vp9LineNumber) {
+                    info.vp9LineNumber = line.replace('a=rtpmap:', '').split(' ')[0];
+                }
+
+                if (line.indexOf('H264/90000') !== -1 && !info.h264LineNumber) {
+                    info.h264LineNumber = line.replace('a=rtpmap:', '').split(' ')[0];
+                }
+            });
+
+            return info;
+        }
+
+        function removeVPX(sdp) {
+            var info = splitLines(sdp);
+
+            // last parameter below means: ignore these codecs
+            sdp = preferCodecHelper(sdp, 'vp9', info, true);
+            sdp = preferCodecHelper(sdp, 'vp8', info, true);
 
             return sdp;
         }
@@ -3154,14 +3229,6 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             return sdp;
         }
 
-        function preferVP9(sdp) {
-            if (sdp.indexOf('SAVPF 96 98') === -1 || sdp.indexOf('VP9/90000') === -1) {
-                return sdp;
-            }
-
-            return sdp.replace('SAVPF 96 98', 'SAVPF 98 96');
-        }
-
         // forceStereoAudio => via webrtcexample.com
         // requires getUserMedia => echoCancellation:false
         function forceStereoAudio(sdp) {
@@ -3202,7 +3269,10 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             setOpusAttributes: function(sdp, params) {
                 return setOpusAttributes(sdp, params);
             },
-            preferVP9: preferVP9,
+            preferVP9: function(sdp) {
+                return preferCodec(sdp, 'vp9');
+            },
+            preferCodec: preferCodec,
             forceStereoAudio: forceStereoAudio
         };
     })();
@@ -4699,6 +4769,22 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
 
         connection.processSdp = function(sdp) {
+            if (connection.codecs.video.toUpperCase() === 'VP8') {
+                sdp = CodecsHandler.preferCodec(sdp, 'vp8');
+            }
+
+            if (connection.codecs.video.toUpperCase() === 'VP9') {
+                sdp = CodecsHandler.preferCodec(sdp, 'vp9');
+            }
+
+            if (connection.codecs.video.toUpperCase() === 'H264') {
+                sdp = CodecsHandler.preferCodec(sdp, 'h264');
+            }
+
+            if (connection.codecs.audio === 'G722') {
+                sdp = CodecsHandler.removeNonG722(sdp);
+            }
+
             if (DetectRTC.browser.name === 'Firefox') {
                 return sdp;
             }
@@ -4721,18 +4807,6 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     stereo: 1,
                     maxptime: 3
                 });
-            }
-
-            if (connection.codecs.video === 'VP9') {
-                sdp = CodecsHandler.preferVP9(sdp);
-            }
-
-            if (connection.codecs.video === 'H264') {
-                sdp = CodecsHandler.removeVPX(sdp);
-            }
-
-            if (connection.codecs.audio === 'G722') {
-                sdp = CodecsHandler.removeNonG722(sdp);
             }
 
             return sdp;

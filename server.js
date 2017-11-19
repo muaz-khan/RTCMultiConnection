@@ -264,7 +264,7 @@ function runServer() {
         console.log('socket.io is listening at:');
         console.log('\x1b[31m%s\x1b[0m ', '\t' + domainURL);
 
-        if(!isUseHTTPs) {
+        if (!isUseHTTPs) {
             console.log('use --ssl to enable HTTPs:');
             console.log('\x1b[31m%s\x1b[0m ', '\t' + 'node server.js --ssl');
         }
