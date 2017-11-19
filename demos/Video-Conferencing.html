@@ -1,4 +1,4 @@
-<!-- Demo version: 2017.08.12 -->
+<!-- Demo version: 2017.11.19 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -117,6 +117,11 @@ connection.sdpConstraints.mandatory = {
 
 connection.videosContainer = document.getElementById('videos-container');
 connection.onstream = function(event) {
+    var existing = document.getElementById(event.streamid);
+    if(existing && existing.parentNode) {
+      existing.parentNode.removeChild(existing);
+    }
+
     event.mediaElement.removeAttribute('src');
     event.mediaElement.removeAttribute('srcObject');
 

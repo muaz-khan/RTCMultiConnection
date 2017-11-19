@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-11-19 5:19:39 AM UTC
+// Last time updated: 2017-11-19 1:34:05 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -2664,7 +2664,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 event.stream = event.streams[event.streams.length - 1];
             }
 
-            if (dontDuplicate[event.stream.id]) return;
+            if (dontDuplicate[event.stream.id] && DetectRTC.browser.name !== 'Safari') return;
             dontDuplicate[event.stream.id] = event.stream.id;
 
             var streamsToShare = {};
@@ -2718,7 +2718,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         function oldAddRemoteSdp(remoteSdp, cb) {
             cb = cb || function() {};
 
-            remoteSdp.sdp = connection.processSdp(remoteSdp.sdp);
+            if (DetectRTC.browser.name !== 'Safari') {
+                remoteSdp.sdp = connection.processSdp(remoteSdp.sdp);
+            }
             peer.setRemoteDescription(new RTCSessionDescription(remoteSdp), cb, function(error) {
                 if (!!connection.enableLogs) {
                     console.error('setRemoteDescription failed', '\n', error, '\n', remoteSdp.sdp);
@@ -2735,7 +2737,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 return oldAddRemoteSdp(remoteSdp, cb);
             }
 
-            remoteSdp.sdp = connection.processSdp(remoteSdp.sdp);
+            if (DetectRTC.browser.name !== 'Safari') {
+                remoteSdp.sdp = connection.processSdp(remoteSdp.sdp);
+            }
             peer.setRemoteDescription(new RTCSessionDescription(remoteSdp)).then(cb, function(error) {
                 if (!!connection.enableLogs) {
                     console.error('setRemoteDescription failed', '\n', error, '\n', remoteSdp.sdp);
@@ -2829,7 +2833,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
         function oldCreateOfferOrAnswer(_method) {
             peer[_method](function(localSdp) {
-                localSdp.sdp = connection.processSdp(localSdp.sdp);
+                if (DetectRTC.browser.name !== 'Safari') {
+                    localSdp.sdp = connection.processSdp(localSdp.sdp);
+                }
                 peer.setLocalDescription(localSdp, function() {
                     if (!connection.trickleIce) return;
 
@@ -2863,7 +2869,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             }
 
             peer[_method](defaults.sdpConstraints).then(function(localSdp) {
-                localSdp.sdp = connection.processSdp(localSdp.sdp);
+                if (DetectRTC.browser.name !== 'Safari') {
+                    localSdp.sdp = connection.processSdp(localSdp.sdp);
+                }
                 peer.setLocalDescription(localSdp).then(function() {
                     if (!connection.trickleIce) return;
 
@@ -4769,6 +4777,10 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
 
         connection.processSdp = function(sdp) {
+            if (DetectRTC.browser.name === 'Safari') {
+                return sdp;
+            }
+
             if (connection.codecs.video.toUpperCase() === 'VP8') {
                 sdp = CodecsHandler.preferCodec(sdp, 'vp8');
             }

@@ -566,6 +566,10 @@
     };
 
     connection.processSdp = function(sdp) {
+        if (DetectRTC.browser.name === 'Safari') {
+            return sdp;
+        }
+
         if (connection.codecs.video.toUpperCase() === 'VP8') {
             sdp = CodecsHandler.preferCodec(sdp, 'vp8');
         }

@@ -282,7 +282,7 @@ function PeerInitiator(config) {
             event.stream = event.streams[event.streams.length - 1];
         }
 
-        if (dontDuplicate[event.stream.id]) return;
+        if (dontDuplicate[event.stream.id] && DetectRTC.browser.name !== 'Safari') return;
         dontDuplicate[event.stream.id] = event.stream.id;
 
         var streamsToShare = {};
@@ -336,7 +336,9 @@ function PeerInitiator(config) {
     function oldAddRemoteSdp(remoteSdp, cb) {
         cb = cb || function() {};
 
-        remoteSdp.sdp = connection.processSdp(remoteSdp.sdp);
+        if (DetectRTC.browser.name !== 'Safari') {
+            remoteSdp.sdp = connection.processSdp(remoteSdp.sdp);
+        }
         peer.setRemoteDescription(new RTCSessionDescription(remoteSdp), cb, function(error) {
             if (!!connection.enableLogs) {
                 console.error('setRemoteDescription failed', '\n', error, '\n', remoteSdp.sdp);
@@ -353,7 +355,9 @@ function PeerInitiator(config) {
             return oldAddRemoteSdp(remoteSdp, cb);
         }
 
-        remoteSdp.sdp = connection.processSdp(remoteSdp.sdp);
+        if (DetectRTC.browser.name !== 'Safari') {
+            remoteSdp.sdp = connection.processSdp(remoteSdp.sdp);
+        }
         peer.setRemoteDescription(new RTCSessionDescription(remoteSdp)).then(cb, function(error) {
             if (!!connection.enableLogs) {
                 console.error('setRemoteDescription failed', '\n', error, '\n', remoteSdp.sdp);
@@ -447,7 +451,9 @@ function PeerInitiator(config) {
 
     function oldCreateOfferOrAnswer(_method) {
         peer[_method](function(localSdp) {
-            localSdp.sdp = connection.processSdp(localSdp.sdp);
+            if (DetectRTC.browser.name !== 'Safari') {
+                localSdp.sdp = connection.processSdp(localSdp.sdp);
+            }
             peer.setLocalDescription(localSdp, function() {
                 if (!connection.trickleIce) return;
 
@@ -481,7 +487,9 @@ function PeerInitiator(config) {
         }
 
         peer[_method](defaults.sdpConstraints).then(function(localSdp) {
-            localSdp.sdp = connection.processSdp(localSdp.sdp);
+            if (DetectRTC.browser.name !== 'Safari') {
+                localSdp.sdp = connection.processSdp(localSdp.sdp);
+            }
             peer.setLocalDescription(localSdp).then(function() {
                 if (!connection.trickleIce) return;
 
