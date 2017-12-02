@@ -4,6 +4,10 @@ var CodecsHandler = (function() {
     function preferCodec(sdp, codecName) {
         var info = splitLines(sdp);
 
+        if (!info.videoCodecNumbers) {
+            return sdp;
+        }
+
         if (codecName === 'vp8' && info.vp8LineNumber === info.videoCodecNumbers[0]) {
             return sdp;
         }

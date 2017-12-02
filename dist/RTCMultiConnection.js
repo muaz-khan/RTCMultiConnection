@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-11-19 2:11:44 PM UTC
+// Last time updated: 2017-12-02 11:07:45 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -891,7 +891,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
     'use strict';
 
-    // Last Updated On: 2017-11-19 2:09:51 PM UTC
+    // Last Updated On: 2017-12-02 7:00:56 AM UTC
 
     // ________________
     // DetectRTC v1.3.6
@@ -1627,13 +1627,25 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     }
 
                     if (!device.label) {
-                        device.label = 'Please invoke getUserMedia once.';
+                        device.isCustomLabel = true;
+
+                        if (device.kind === 'videoinput') {
+                            device.label = 'Camera ' + (videoInputDevices.length + 1);
+                        } else if (device.kind === 'audioinput') {
+                            device.label = 'Microphone ' + (audioInputDevices.length + 1);
+                        } else if (device.kind === 'audiooutput') {
+                            device.label = 'Speaker ' + (audioOutputDevices.length + 1);
+                        } else {
+                            device.label = 'Please invoke getUserMedia once.';
+                        }
+
                         if (typeof DetectRTC !== 'undefined' && DetectRTC.browser.isChrome && DetectRTC.browser.version >= 46 && !/^(https:|chrome-extension:)$/g.test(location.protocol || '')) {
                             if (typeof document !== 'undefined' && typeof document.domain === 'string' && document.domain.search && document.domain.search(/localhost|127.0./g) === -1) {
                                 device.label = 'HTTPs is required to get label of this ' + device.kind + ' device.';
                             }
                         }
                     } else {
+                        // Firefox on Android still returns empty label
                         if (device.kind === 'videoinput' && !isWebsiteHasWebcamPermissions) {
                             isWebsiteHasWebcamPermissions = true;
                         }
@@ -2934,6 +2946,10 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
     var CodecsHandler = (function() {
         function preferCodec(sdp, codecName) {
             var info = splitLines(sdp);
+
+            if (!info.videoCodecNumbers) {
+                return sdp;
+            }
 
             if (codecName === 'vp8' && info.vp8LineNumber === info.videoCodecNumbers[0]) {
                 return sdp;
