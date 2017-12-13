@@ -154,7 +154,9 @@ function PeerInitiator(config) {
         if (typeof window.InstallTrigger !== 'undefined' && 'getSenders' in peer && typeof peer.getSenders === 'function') {
             var streamObject2 = new MediaStream();
             peer.getSenders().forEach(function(sender) {
-                streamObject2.addTrack(sender.track);
+                try {
+                    streamObject2.addTrack(sender.track);
+                } catch (e) {}
             });
             return streamObject2;
         }
@@ -211,7 +213,9 @@ function PeerInitiator(config) {
 
         if (localStream && typeof peer.addTrack === 'function') {
             localStream.getTracks().forEach(function(track) {
-                peer.addTrack(track, localStream);
+                try {
+                    peer.addTrack(track, localStream);
+                } catch (e) {}
             });
         } else if (localStream && typeof peer.addStream === 'function') {
             peer.addStream(localStream);
@@ -220,7 +224,9 @@ function PeerInitiator(config) {
                 peer.addStream(localStream);
             } catch (e) {
                 localStream && localStream.getTracks().forEach(function(track) {
-                    peer.addTrack(track, localStream);
+                    try {
+                        peer.addTrack(track, localStream);
+                    } catch (e) {}
                 });
             }
         }

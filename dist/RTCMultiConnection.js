@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-12-02 11:07:45 AM UTC
+// Last time updated: 2017-12-13 4:01:28 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -891,7 +891,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
     'use strict';
 
-    // Last Updated On: 2017-12-02 7:00:56 AM UTC
+    // Last Updated On: 2017-12-09 2:29:22 PM UTC
 
     // ________________
     // DetectRTC v1.3.6
@@ -1605,7 +1605,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                         } catch (e) {}
                     }
 
-                    if (alreadyUsedDevices[device.deviceId + device.label]) {
+                    if (alreadyUsedDevices[device.deviceId + device.label + device.kind]) {
                         return;
                     }
 
@@ -1682,7 +1682,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     // there is no 'videoouput' in the spec.
                     MediaDevices.push(device);
 
-                    alreadyUsedDevices[device.deviceId + device.label] = device;
+                    alreadyUsedDevices[device.deviceId + device.label + device.kind] = device;
                 });
 
                 if (typeof DetectRTC !== 'undefined') {
@@ -2547,7 +2547,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             if (typeof window.InstallTrigger !== 'undefined' && 'getSenders' in peer && typeof peer.getSenders === 'function') {
                 var streamObject2 = new MediaStream();
                 peer.getSenders().forEach(function(sender) {
-                    streamObject2.addTrack(sender.track);
+                    try {
+                        streamObject2.addTrack(sender.track);
+                    } catch (e) {}
                 });
                 return streamObject2;
             }
@@ -2604,7 +2606,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
             if (localStream && typeof peer.addTrack === 'function') {
                 localStream.getTracks().forEach(function(track) {
-                    peer.addTrack(track, localStream);
+                    try {
+                        peer.addTrack(track, localStream);
+                    } catch (e) {}
                 });
             } else if (localStream && typeof peer.addStream === 'function') {
                 peer.addStream(localStream);
@@ -2613,7 +2617,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     peer.addStream(localStream);
                 } catch (e) {
                     localStream && localStream.getTracks().forEach(function(track) {
-                        peer.addTrack(track, localStream);
+                        try {
+                            peer.addTrack(track, localStream);
+                        } catch (e) {}
                     });
                 }
             }

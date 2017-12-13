@@ -1,6 +1,6 @@
 'use strict';
 
-// Last Updated On: 2017-12-02 7:00:56 AM UTC
+// Last Updated On: 2017-12-09 2:29:22 PM UTC
 
 // ________________
 // DetectRTC v1.3.6
@@ -714,7 +714,7 @@
                     } catch (e) {}
                 }
 
-                if (alreadyUsedDevices[device.deviceId + device.label]) {
+                if (alreadyUsedDevices[device.deviceId + device.label + device.kind]) {
                     return;
                 }
 
@@ -791,7 +791,7 @@
                 // there is no 'videoouput' in the spec.
                 MediaDevices.push(device);
 
-                alreadyUsedDevices[device.deviceId + device.label] = device;
+                alreadyUsedDevices[device.deviceId + device.label + device.kind] = device;
             });
 
             if (typeof DetectRTC !== 'undefined') {
