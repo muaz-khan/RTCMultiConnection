@@ -98,6 +98,11 @@ function getRandomString() {
 // Get HTMLAudioElement/HTMLVideoElement accordingly
 
 function getRMCMediaElement(stream, callback, connection) {
+    if (!connection.autoCreateMediaElement) {
+        callback({});
+        return;
+    }
+
     var isAudioOnly = false;
     if (!!stream.getVideoTracks && !stream.getVideoTracks().length && !stream.isVideo && !stream.isScreen) {
         isAudioOnly = true;

@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2017-12-13 4:01:28 PM UTC
+// Last time updated: 2017-12-16 10:52:57 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -2107,6 +2107,11 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
     // Get HTMLAudioElement/HTMLVideoElement accordingly
 
     function getRMCMediaElement(stream, callback, connection) {
+        if (!connection.autoCreateMediaElement) {
+            callback({});
+            return;
+        }
+
         var isAudioOnly = false;
         if (!!stream.getVideoTracks && !stream.getVideoTracks().length && !stream.isVideo && !stream.isScreen) {
             isAudioOnly = true;
@@ -5902,6 +5907,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 queueRequests: []
             };
         };
+
+        // if disabled, "event.mediaElement" for "onstream" will be NULL
+        connection.autoCreateMediaElement = true;
     })(this);
 
 };

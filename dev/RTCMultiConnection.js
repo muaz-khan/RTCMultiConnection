@@ -1670,4 +1670,7 @@
             queueRequests: []
         };
     };
+
+    // if disabled, "event.mediaElement" for "onstream" will be NULL
+    connection.autoCreateMediaElement = true;
 })(this);
