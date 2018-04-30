@@ -1,4 +1,4 @@
-<!-- Demo version: 2017.12.13 -->
+<!-- Demo version: 2018.04.30 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -126,9 +126,21 @@ connection.onstream = function(event) {
     event.mediaElement.removeAttribute('srcObject');
 
     var video = document.createElement('video');
-    video.controls = true;
+
+    try {
+        video.setAttributeNode(document.createAttribute('autoplay'));
+        video.setAttributeNode(document.createAttribute('playsinline'));
+    } catch (e) {
+        video.setAttribute('autoplay', true);
+        video.setAttribute('playsinline', true);
+    }
+
     if(event.type === 'local') {
-        video.muted = true;
+      try {
+          video.setAttributeNode(document.createAttribute('muted'));
+      } catch (e) {
+          video.setAttribute('muted', true);
+      }
     }
     video.srcObject = event.stream;
 
