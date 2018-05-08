@@ -46,7 +46,7 @@ try {
         port = parseInt(config.port);
     }
 
-    if ((config.autoRebootServerOnFailure || '').toString() !== true) {
+    if ((config.autoRebootServerOnFailure || '').toString() === 'true') {
         autoRebootServerOnFailure = true;
     }
 } catch (e) {}
