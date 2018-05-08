@@ -1,4 +1,4 @@
-<!-- Demo version: 2018.04.30 -->
+<!-- Demo version: 2018.05.08 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -124,6 +124,8 @@ connection.onstream = function(event) {
 
     event.mediaElement.removeAttribute('src');
     event.mediaElement.removeAttribute('srcObject');
+    event.mediaElement.muted = true;
+    event.mediaElement.volume = 0;
 
     var video = document.createElement('video');
 
@@ -136,6 +138,7 @@ connection.onstream = function(event) {
     }
 
     if(event.type === 'local') {
+      video.volume = 0;
       try {
           video.setAttributeNode(document.createAttribute('muted'));
       } catch (e) {
