@@ -52,9 +52,9 @@
     <button id="join-room">Join Room</button>
     <button id="open-or-join-room">Auto Open Or Join Room</button>
 
-    <div id="room-urls" style="text-align: center;display: none;background: #F1EDED;margin: 15px -10px;border: 1px solid rgb(189, 189, 189);border-left: 0;border-right: 0;"></div>
+    <div id="videos-container" style="margin: 20px 0;"></div>
 
-    <div id="videos-container"></div>
+    <div id="room-urls" style="text-align: center;display: none;background: #F1EDED;margin: 15px -10px;border: 1px solid rgb(189, 189, 189);border-left: 0;border-right: 0;"></div>
   </section>
 
 <script src="/dist/RTCMultiConnection.min.js"></script>
@@ -85,7 +85,8 @@ document.getElementById('join-room').onclick = function() {
 document.getElementById('open-or-join-room').onclick = function() {
     disableInputButtons();
     connection.openOrJoin(document.getElementById('room-id').value, function(isRoomExist, roomid) {
-        if (!isRoomExist) {
+        if (isRoomExist === false && connection.isInitiator === true) {
+            // if room doesn't exist, it means that current user will create the room
             showRoomURL(roomid);
         }
     });

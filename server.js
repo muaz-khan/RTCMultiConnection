@@ -70,9 +70,11 @@ function serverHandler(request, response) {
             return;
         }
 
-        if (filename && filename.indexOf('Video-Broadcasting.html') !== -1) {
-            filename = filename.replace('Video-Broadcasting.html', 'video-broadcasting.html');
-        }
+        ['Video-Broadcasting', 'Screen-Sharing', 'Switch-Cameras'].forEach(function(fname) {
+            if (filename && filename.indexOf(fname + '.html') !== -1) {
+                filename = filename.replace(fname + '.html', fname.toLowerCase() + '.html');
+            }
+        });
 
         var stats;
 

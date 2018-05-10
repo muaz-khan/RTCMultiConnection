@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2018-05-05 1:24:19 PM UTC
+// Last time updated: 2018-05-10 3:35:03 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.4
@@ -89,7 +89,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             connection.peersBackup[remoteUserId].extra = extra;
         });
 
-        connection.socket.on(connection.socketMessageEvent, function(message) {
+        function onMessageEvent(message) {
             if (message.remoteUserId != connection.userid) return;
 
             if (connection.peers[message.sender] && connection.peers[message.sender].extra != message.message.extra) {
@@ -190,6 +190,15 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             }
 
             if (message.message.readyForOffer || message.message.addMeAsBroadcaster) {
+                if (connection.waitingForLocalMedia) {
+                    // if someone is waiting to join you
+                    // make sure that we've local media before making a handshake
+                    setTimeout(function() {
+                        onMessageEvent(message);
+                    }, 1000);
+                    return;
+                }
+
                 connection.addNewBroadcaster(message.sender);
             }
 
@@ -252,7 +261,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             }
 
             mPeer.addNegotiatedMessage(message.message, message.sender);
-        });
+        }
+
+        connection.socket.on(connection.socketMessageEvent, onMessageEvent);
 
         connection.socket.on('user-left', function(userid) {
             onUserLeft(userid);
@@ -3477,7 +3488,6 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
         function streaming(stream, returnBack) {
             setStreamType(options.localMediaConstraints, stream);
-            options.onGettingLocalMedia(stream, returnBack);
 
             var streamEndedEvent = 'ended';
 
@@ -3502,6 +3512,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             if (currentUserMediaRequest.queueRequests.length) {
                 getUserMediaHandler(currentUserMediaRequest.queueRequests.shift());
             }
+
+            // callback
+            options.onGettingLocalMedia(stream, returnBack);
         }
 
         if (currentUserMediaRequest.streams[idInstance]) {
@@ -4265,7 +4278,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         var mPeer = new MultiPeers(connection);
 
         var preventDuplicateOnStreamEvents = {};
-        mPeer.onGettingLocalMedia = function(stream) {
+        mPeer.onGettingLocalMedia = function(stream, callback) {
+            callback = callback || function() {};
+
             if (preventDuplicateOnStreamEvents[stream.streamid]) {
                 return;
             }
@@ -4304,6 +4319,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 setMuteHandlers(connection, connection.streamEvents[stream.streamid]);
 
                 connection.onstream(connection.streamEvents[stream.streamid]);
+                callback();
             }, connection);
         };
 
@@ -4417,14 +4433,20 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             });
         }
 
-        connection.openOrJoin = function(localUserid, password) {
-            connection.checkPresence(localUserid, function(isRoomExists, roomid) {
-                if (typeof password === 'function') {
-                    password(isRoomExists, roomid);
+        // 1st paramter is roomid
+        // 2nd paramter can be either password or a callback function
+        // 3rd paramter is a callback function
+        connection.openOrJoin = function(localUserid, password, callback) {
+            callback = callback || function() {};
+
+            connection.checkPresence(localUserid, function(isRoomExist, roomid) {
+                // i.e. 2nd parameter is a callback function
+                if (typeof password === 'function' && typeof password !== 'undefined') {
+                    callback = password; // switch callback functions
                     password = null;
                 }
 
-                if (isRoomExists) {
+                if (isRoomExist) {
                     connection.sessionid = roomid;
 
                     var localPeerSdpConstraints = false;
@@ -4457,9 +4479,15 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
                     beforeJoin(connectionDescription.message, function() {
                         mPeer.onNegotiationNeeded(connectionDescription);
+
+                        // tell user if room was joined
+                        callback(isRoomExist, roomid);
                     });
                     return;
                 }
+
+                connection.waitingForLocalMedia = true;
+                connection.isInitiator = true;
 
                 var oldUserId = connection.userid;
                 connection.userid = connection.sessionid = localUserid || connection.sessionid;
@@ -4471,22 +4499,36 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     connection.socket.emit('set-password', password);
                 }
 
-                connection.isInitiator = true;
-
                 if (isData(connection.session)) {
+                    connection.waitingForLocalMedia = false;
                     return;
                 }
 
-                connection.captureUserMedia();
+                connection.captureUserMedia(function() {
+                    connection.waitingForLocalMedia = false;
+
+                    // tell user if room was opened
+                    callback(isRoomExist, roomid);
+                });
             });
         };
 
-        connection.open = function(localUserid, isPublicModerator) {
+        // don't allow someone to join this person until he has the media
+        connection.waitingForLocalMedia = false;
+
+        connection.open = function(localUserid, isPublicModerator, callback) {
+            connection.waitingForLocalMedia = true;
+            connection.isInitiator = true;
+
+            callback = callback || function() {};
+            if (typeof isPublicModerator === 'function') {
+                callback = isPublicModerator;
+                isPublicModerator = false;
+            }
+
             var oldUserId = connection.userid;
             connection.userid = connection.sessionid = localUserid || connection.sessionid;
             connection.userid += '';
-
-            connection.isInitiator = true;
 
             connectSocket(function() {
                 connection.socket.emit('changed-uuid', connection.userid);
@@ -4496,13 +4538,15 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 }
 
                 if (isData(connection.session)) {
-                    if (typeof isPublicModerator === 'function') {
-                        isPublicModerator();
-                    }
+                    connection.waitingForLocalMedia = false;
+                    callback();
                     return;
                 }
 
-                connection.captureUserMedia(typeof isPublicModerator === 'function' ? isPublicModerator : null);
+                connection.captureUserMedia(function() {
+                    connection.waitingForLocalMedia = false;
+                    callback();
+                });
             });
         };
 
@@ -5223,11 +5267,11 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                         stream.isAudio = !stream.isVideo && stream.getAudioTracks().length;
                     }
 
-                    mPeer.onGettingLocalMedia(stream);
-
-                    if (callback) {
-                        callback(stream);
-                    }
+                    mPeer.onGettingLocalMedia(stream, function() {
+                        if (typeof callback === 'function') {
+                            callback(stream);
+                        }
+                    });
                 },
                 onLocalMediaError: function(error, constraints) {
                     mPeer.onLocalMediaError(error, constraints);
@@ -5736,7 +5780,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             }
         };
 
-        // default value is 15k because Firefox's receiving limit is 16k!
+        // default value should be 15k because [old]Firefox's receiving limit is 16k!
         // however 64k works chrome-to-chrome
         connection.chunkSize = 65 * 1000;
 
@@ -5745,6 +5789,8 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         // eject or leave single user
         connection.disconnectWith = mPeer.disconnectWith;
 
+        // check if room exist on server
+        // we will pass roomid to the server and wait for callback (i.e. server's response)
         connection.checkPresence = function(remoteUserId, callback) {
             if (!connection.socket) {
                 connection.connectSocket(function() {
