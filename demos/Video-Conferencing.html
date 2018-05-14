@@ -267,12 +267,19 @@ if (roomid && roomid.length) {
 
     disableInputButtons();
 }
+
+// detect 2G
+if(navigator.connection &&
+   navigator.connection.type === 'cellular' &&
+   navigator.connection.downlinkMax <= 0.115) {
+  alert('2G is not supported. Please use a better internet service.');
+}
 </script>
 
   <section class="no-mobile">
     <h2>iOS or Android</h2>
     <p>
-      You can write <a href="http://www.rtcmulticonnection.org/docs/Write-iOS-Apps/" target="_blank">iOS</a> or <a href="http://www.rtcmulticonnection.org/docs/Write-Android-Apps/" target="_blank">Android</a> apps for this demo as well. 
+      You can write <a href="http://www.rtcmulticonnection.org/docs/Write-iOS-Apps/" target="_blank">iOS</a> or <a href="http://www.rtcmulticonnection.org/docs/Write-Android-Apps/" target="_blank">Android</a> apps for this demo as well. You can run same demo on Safari-11 as well. (both on MacOSX & iOS)
     </p>
 
     <p>
