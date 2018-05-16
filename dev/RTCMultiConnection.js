@@ -1522,6 +1522,24 @@
     // check if room exist on server
     // we will pass roomid to the server and wait for callback (i.e. server's response)
     connection.checkPresence = function(remoteUserId, callback) {
+        if (SocketConnection.name && SocketConnection.name === 'SSEConnection') {
+            SSEConnection.checkPresence(remoteUserId, function(isRoomExist, roomid) {
+                if (!isRoomExist) {
+                    connection.sessionid = connection.userid = roomid;
+                    connection.isInitiator = true;
+                }
+
+                if (!connection.socket) {
+                    connection.connectSocket(function() {
+                        callback(isRoomExist, roomid);
+                    });
+                    return;
+                }
+                callback(isRoomExist, roomid);
+            });
+            return;
+        }
+
         if (!connection.socket) {
             connection.connectSocket(function() {
                 connection.checkPresence(remoteUserId, callback);

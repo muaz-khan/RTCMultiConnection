@@ -1,10 +1,12 @@
 // SSEConnection.js
+var sseDirPath = 'https://webrtcweb.com/SSE/';
 
 function SSEConnection(connection, connectCallback) {
+    if (connection.socketURL && connection.socketURL !== '/') {
+        sseDirPath = connection.socketURL;
+    }
+
     // connection.trickleIce = false;
-
-    var sseDirPath = 'https://webrtcweb.com/SSE/';
-
     connection.socket = new EventSource(sseDirPath + 'SSE.php?me=' + connection.userid);
 
     var skipDuplicate = {};
@@ -54,9 +56,12 @@ function SSEConnection(connection, connectCallback) {
             }
         });
     };
+
     connection.socket.emit = function(eventName, data, callback) {
         if (!eventName || !data) return;
-        if (eventName === 'changed-uuid') return;
+        if (eventName === 'changed-uuid' || eventName === 'check-presence') {
+            return;
+        }
         if (data.message && data.message.shiftedModerationControl) return;
 
         if (!data.remoteUserId) return;
@@ -255,4 +260,41 @@ function SSEConnection(connection, connectCallback) {
     function isData(session) {
         return !session.audio && !session.video && !session.screen && session.data;
     }
+}
+
+SSEConnection.checkPresence = function(roomid, callback) {
+    callback = callback || function() {};
+
+    if (connection.socketURL && connection.socketURL !== '/') {
+        sseDirPath = connection.socketURL;
+    }
+
+    var hr = new XMLHttpRequest();
+    hr.responseType = 'json';
+    hr.response = {
+        isRoomExist: false
+    };
+    hr.addEventListener('load', function() {
+        if (connection.enableLogs) {
+            console.log('XMLHttpRequest', hr.response);
+        }
+        callback(hr.response.isRoomExist, roomid);
+    });
+    hr.addEventListener('error', function() {
+        callback(hr.response.isRoomExist, roomid);
+    });
+    hr.open('GET', sseDirPath + 'checkPresence.php?roomid=' + roomid);
+    hr.send();
+
+    /*
+    var script = document.createElement('script');
+    script.onload = function() {
+        callback(true, roomid);
+    };
+    script.onerror = function() {
+        callback(false, roomid);
+    };
+    script.src = sseDirPath + 'rooms/' + roomid + '.json';
+    (document.body || document.documentElement).appendChild(script);
+    */
 }
