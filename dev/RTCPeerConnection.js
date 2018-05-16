@@ -533,18 +533,9 @@ function PeerInitiator(config) {
         }
 
         try {
-            if (peer.iceConnectionState.search(/closed|failed/gi) === -1) {
-                peer.getRemoteStreams().forEach(function(stream) {
-                    var streamEndedEvent = 'ended';
-
-                    if ('oninactive' in stream) {
-                        streamEndedEvent = 'inactive';
-                    }
-
-                    fireEvent(stream, streamEndedEvent);
-                });
+            if (peer.nativeClose !== peer.close) {
+                peer.nativeClose();
             }
-            peer.nativeClose();
         } catch (e) {}
 
         peer = null;

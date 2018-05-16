@@ -78,13 +78,15 @@ document.getElementById('join-room').onclick = function() {
 
 document.getElementById('open-or-join-room').onclick = function() {
     disableInputButtons();
+    // connection.openOrJoin(document.getElementById('room-id').value);
     connection.checkPresence(document.getElementById('room-id').value, function(isRoomExist, roomid) {
-      disableInputButtons('enable');
-      if(isRoomExist === true) {
-        document.getElementById('join-room').onclick();
+      console.info('checkPresence', isRoomExist, roomid);
+
+      if(isRoomExist) {
+        connection.join(roomid);
       }
       else {
-        document.getElementById('open-room').onclick();
+        connection.open(roomid);
       }
     });
 };
@@ -126,11 +128,11 @@ connection.onstreamended = function(event) {
     }
 };
 
-function disableInputButtons(enable) {
-    document.getElementById('open-room').disabled = !enable;
-    document.getElementById('join-room').disabled = !enable;
-    document.getElementById('open-or-join-room').disabled = !enable;
-    document.getElementById('room-id').disabled = !enable;
+function disableInputButtons() {
+    document.getElementById('open-room').disabled = true;
+    document.getElementById('join-room').disabled = true;
+    document.getElementById('open-or-join-room').disabled = true;
+    document.getElementById('room-id').disabled = true;
 }
 
 // ......................................................

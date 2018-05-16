@@ -91,6 +91,11 @@ function SSEConnection(connection, connectCallback) {
                 console.info('SSE connection is opened.');
             }
 
+            // this event tries to open json file on server
+            connection.socket.emit('fake_EventName', {
+                remoteUserId: connection.userid
+            });
+
             connectCallback(connection.socket);
             connectCallback = null;
         }
@@ -276,7 +281,7 @@ SSEConnection.checkPresence = function(roomid, callback) {
     };
     hr.addEventListener('load', function() {
         if (connection.enableLogs) {
-            console.log('XMLHttpRequest', hr.response);
+            console.info('XMLHttpRequest', hr.response);
         }
         callback(hr.response.isRoomExist, roomid);
     });
@@ -285,16 +290,4 @@ SSEConnection.checkPresence = function(roomid, callback) {
     });
     hr.open('GET', sseDirPath + 'checkPresence.php?roomid=' + roomid);
     hr.send();
-
-    /*
-    var script = document.createElement('script');
-    script.onload = function() {
-        callback(true, roomid);
-    };
-    script.onerror = function() {
-        callback(false, roomid);
-    };
-    script.src = sseDirPath + 'rooms/' + roomid + '.json';
-    (document.body || document.documentElement).appendChild(script);
-    */
 }

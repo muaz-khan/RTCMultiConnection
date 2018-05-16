@@ -956,7 +956,15 @@
                         audio: isAudioPlusTab(connection) ? getAudioScreenConstraints(screen_constraints) : false,
                         video: screen_constraints,
                         isScreen: true
-                    }, (session.audio || session.video) && !isAudioPlusTab(connection) ? connection.invokeGetUserMedia(null, gumCallback) : gumCallback);
+                    }, function(stream) {
+                        if ((session.audio || session.video) && !isAudioPlusTab(connection)) {
+                            connection.invokeGetUserMedia(null, function(stream) {
+                                gumCallback(stream);
+                            });
+                        } else {
+                            gumCallback(stream);
+                        }
+                    });
                 });
             } else if (session.audio || session.video) {
                 connection.invokeGetUserMedia(null, gumCallback);
@@ -1522,14 +1530,13 @@
     // check if room exist on server
     // we will pass roomid to the server and wait for callback (i.e. server's response)
     connection.checkPresence = function(remoteUserId, callback) {
-        if (SocketConnection.name && SocketConnection.name === 'SSEConnection') {
+        if (SocketConnection.name === 'SSEConnection') {
             SSEConnection.checkPresence(remoteUserId, function(isRoomExist, roomid) {
-                if (!isRoomExist) {
-                    connection.sessionid = connection.userid = roomid;
-                    connection.isInitiator = true;
-                }
-
                 if (!connection.socket) {
+                    if (!isRoomExist) {
+                        connection.userid = roomid;
+                    }
+
                     connection.connectSocket(function() {
                         callback(isRoomExist, roomid);
                     });
