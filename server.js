@@ -27,20 +27,16 @@ try {
 var fs = require('fs');
 var path = require('path');
 
-// see how to use a valid certificate:
-// https://github.com/muaz-khan/WebRTC-Experiment/issues/62
-var options = {
-    key: fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/privatekey.pem'))),
-    cert: fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/certificate.pem')))
-};
+var ssl_key = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/privatekey.pem')));
+var ssl_cert = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/certificate.pem')));
+var ssl_cabundle = null;
 
 // force auto reboot on failures
 var autoRebootServerOnFailure = false;
 
-
 // skip/remove this try-catch block if you're NOT using "config.json"
 try {
-    var config = require(resolveURL('./config.json'));
+    var config = require('./config.json');
 
     if ((config.port || '').toString() !== '9001') {
         port = parseInt(config.port);
@@ -49,7 +45,39 @@ try {
     if ((config.autoRebootServerOnFailure || '').toString() === 'true') {
         autoRebootServerOnFailure = true;
     }
+
+    if ((config.isUseHTTPs || '').toString() === 'true') {
+        isUseHTTPs = true;
+    }
+
+    ['ssl_key', 'ssl_cert', 'ssl_cabundle'].forEach(function(key) {
+        if(!config['key'] || config['key'].toString().length) {
+            return;
+        }
+
+        if(config['key'].indexOf('/path/to/') === -1) {
+            if(key === 'ssl_key') {
+                ssl_key = fs.readFileSync(path.join(__dirname, resolveURL(config['ssl_key'])));
+            }
+
+            if(key === 'ssl_cert') {
+                ssl_cert = fs.readFileSync(path.join(__dirname, resolveURL(config['ssl_cert'])));
+            }
+
+            if(key === 'ssl_cabundle') {
+                ssl_cabundle = fs.readFileSync(path.join(__dirname, resolveURL(config['ssl_cabundle'])));
+            }
+        }
+    });
 } catch (e) {}
+
+// see how to use a valid certificate:
+// https://github.com/muaz-khan/WebRTC-Experiment/issues/62
+var options = {
+    key: ssl_key,
+    cert: ssl_cert,
+    ca: ssl_cabundle
+};
 
 // You don't need to change anything below
 
@@ -61,7 +89,7 @@ function serverHandler(request, response) {
         var uri = url.parse(request.url).pathname,
             filename = path.join(process.cwd(), uri);
 
-        if (request.method !== 'GET') {
+        if (request.method !== 'GET' || path.join('/', uri).indexOf('../') !== -1) {
             response.writeHead(401, {
                 'Content-Type': 'text/plain'
             });
