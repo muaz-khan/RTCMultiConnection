@@ -57,15 +57,15 @@ try {
 
         if(config['key'].indexOf('/path/to/') === -1) {
             if(key === 'ssl_key') {
-                ssl_key = fs.readFileSync(path.join(__dirname, resolveURL(config['ssl_key'])));
+                ssl_key = fs.readFileSync(path.join(__dirname, config['ssl_key']));
             }
 
             if(key === 'ssl_cert') {
-                ssl_cert = fs.readFileSync(path.join(__dirname, resolveURL(config['ssl_cert'])));
+                ssl_cert = fs.readFileSync(path.join(__dirname, config['ssl_cert']));
             }
 
             if(key === 'ssl_cabundle') {
-                ssl_cabundle = fs.readFileSync(path.join(__dirname, resolveURL(config['ssl_cabundle'])));
+                ssl_cabundle = fs.readFileSync(path.join(__dirname, config['ssl_cabundle']));
             }
         }
     });
