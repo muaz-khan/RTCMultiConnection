@@ -33,7 +33,7 @@
         <a href="https://www.youtube.com/playlist?list=PLPRQUXAnRydKdyun-vjKPMrySoow2N4tl">YouTube</a>
       </li>
       <li>
-        <a href="https://github.com/muaz-khan/RTCMultiConnection#v3-demos">Demos</a>
+        <a href="https://rtcmulticonnection.herokuapp.com/demos/">Demos</a>
       </li>
       <li>
         <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki</a>
@@ -48,6 +48,8 @@
     RTCMultiConnection | WebRTC
     <p>WebRTC JavaScript library for peer-to-peer applications (screen sharing, audio/video conferencing, file sharing, media streaming etc.)</p>
     <p>You can <a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs">search missing API</a> or <a href="https://github.com/muaz-khan/RTCMultiConnection/tree/gh-pages">contribute to improve these documents</a>.</p>
+    <input type="search" id="txt-search" placeholder="Search API">
+    <small id="results" style="margin-left: 11px;font-size: 15px;">Results: 0</small>
   </h1>
 
   <section id="a">
@@ -580,6 +582,54 @@
   <footer>
     <small id="send-message"></small>
   </footer>
+
+   <script>
+      document.querySelectorAll('a[href="#noapi"]').forEach(function(link) {
+        if(link.parentNode.parentNode.parentNode.nodeName.toLowerCase() !== 'section') return;
+        link.onclick = function(event) {
+          event.preventDefault();
+          alert('The selected API (' + this.innerHTML + ') is NOT documented yet.');
+        };
+      });
+
+      function searchAPI(text) {
+        if(!text) text = '';
+        text = text.toString().toLowerCase().trim();
+
+        var found = 0;
+        var foundParent = {};
+        document.querySelectorAll('a').forEach(function(link) {
+          if(!link.parentNode.parentNode.parentNode) return;
+          if(link.parentNode.parentNode.parentNode.nodeName.toLowerCase() !== 'section') return;
+
+          var html = link.innerHTML.toString().toLowerCase();
+          if(!text || !text.length || html.indexOf(text) == -1) {
+            link.className = '';
+
+            if(text && text.length && html.indexOf(text) == -1 && !foundParent[link.parentNode.parentNode.parentNode.id]) {
+              link.parentNode.parentNode.parentNode.style.display = 'none';
+            }
+            else {
+              link.parentNode.parentNode.parentNode.style.display = 'block';
+            }
+            
+            return;
+          }
+          foundParent[link.parentNode.parentNode.parentNode.id] = true;
+          link.parentNode.parentNode.parentNode.style.display = 'block';
+
+          link.className = 'highlighted bg-yellow';
+          found++;
+        });
+
+        results.innerHTML = 'Results: ' + found;
+      }
+
+      var results = document.getElementById('results');
+      document.getElementById('txt-search').onkeyup = function() {
+        searchAPI(this.value);
+      };
+  </script>
 
   <script src="https://cdn.webrtc-experiment.com/common.js"></script>
 </body>

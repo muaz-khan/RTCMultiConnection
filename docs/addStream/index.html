@@ -25,7 +25,7 @@
         <a href="https://www.youtube.com/playlist?list=PLPRQUXAnRydKdyun-vjKPMrySoow2N4tl">YouTube</a>
       </li>
       <li>
-        <a href="https://github.com/muaz-khan/RTCMultiConnection#v3-demos">Demos</a>
+        <a href="https://rtcmulticonnection.herokuapp.com/demos/">Demos</a>
       </li>
       <li>
         <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki</a>
@@ -39,7 +39,23 @@
   <h1>
     addStream | RTCMultiConnection
     <p>Use this method to add additional streams in a LIVE session.</p>
+    <p>Do not call this method when you are alone in the room.</p>
   </h1>
+
+  <section>
+    <h2><a href="#toc">Table of contents</a></h2>
+    <ol>
+      <li><a href="#add-camera-microphone">Add camera and microphone</a></li>
+      <li><a href="#add-screen">Add screen</a></li>
+      <li><a href="#description">Description</a></li>
+      <li><a href="#best-practice">Best practice</a></li>
+      <li><a href="#open-datachannel">Open data channels</a></li>
+      <li><a href="#share-with-single-user">Share with single (unique) user</a></li>
+      <li><a href="#external-stream">Add external stream</a></li>
+      <li><a href="#demo">Try a demo (A demo is worth 1000 words!)</a></li>
+      <li><a href="#send-message">Ask a question</a></li>
+    </ol>
+  </section>
 
   <section id="add-camera-microphone">
     <h2><a href="#add-camera-microphone">Add camera and microphone</a></h2>
@@ -55,7 +71,10 @@
     <h2><a href="#add-screen">Add screen</a></h2>
     <pre style="background:#fff;color:#000">connection.addStream({
     screen: <span style="color:#a535ae">true</span>,
-    oneway: <span style="color:#a535ae">true</span>
+    oneway: <span style="color:#a535ae">true</span>,
+    streamCallback: function(<span style="color:#a535ae">stream</span>) {
+      console.log('Screen is successfully captured: ' + <span style="color:#a535ae">stream</span>.getVideoTracks().length);
+    }
 });
 </pre>
   </section>
@@ -81,6 +100,13 @@
       <tr>
         <td>oneway</td>
         <td>only you will share; all others will merely receive it</td>
+      </tr>
+      <tr>
+        <td>streamCallback</td>
+        <td>
+          this callback is fired if stream is successfully captured.<br>
+          use this callback to set <a href="https://www.webrtc-experiment.com/webrtcpedia/#stream-ended-listener">stream-stop-listeners</a> so that you can check if screen sharing is stopped etc.
+        </td>
       </tr>
     </tbody>
     </table>
@@ -124,6 +150,19 @@ connection.addStream({
 connection.peers[<span style="color:#00a33f">'user-id'</span>].addStream({
     <span style="color:#a535ae">screen</span>: <span style="color:#a535ae">true</span>,
     oneway: <span style="color:#a535ae">true</span>
+});
+</pre>
+  </section>
+
+  <section id="external-stream">
+    <h2><a href="#external-stream">Add external stream</a></h2>
+    <p>You can capture a stream yourself and share it using "addStream" method:</p>
+    <pre style="background:#fff;color:#3b3b3b">navigator.getDisplayMedia({
+    video: <span style="color:#a535ae">true</span>
+}).<span style="color:#069;font-weight:700">then</span>(externalStream <span style="color:#069;font-weight:700">=</span><span style="color:#069;font-weight:700">></span> {
+    connection.addStream(externalStream);
+}, <span style="color:#069;font-weight:700">error</span> <span style="color:#069;font-weight:700">=</span><span style="color:#069;font-weight:700">></span> {
+    alert(<span style="color:#069;font-weight:700">error</span>);
 });
 </pre>
   </section>

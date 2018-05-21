@@ -1,6 +1,6 @@
-# http://www.rtcmulticonnection.org/
+# https://www.rtcmulticonnection.org/
 
-This repository is for domain: www.RTCMultiConnection.org
+This repository is for domain: `www.RTCMultiConnection.org`
 
 Please check master branch for RTCMultiConnection demos:
 
