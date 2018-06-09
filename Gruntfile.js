@@ -89,8 +89,7 @@ module.exports = function(grunt) {
         uglify: {
             options: {
                 mangle: false,
-                banner: banner,
-                engine: require('uglify-js')
+                banner: banner
             },
             my_target: {
                 files: {
