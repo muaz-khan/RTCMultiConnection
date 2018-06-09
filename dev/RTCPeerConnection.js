@@ -123,8 +123,8 @@ function PeerInitiator(config) {
                     iceServers: connection.iceServers,
                     iceTransportPolicy: connection.iceTransportPolicy || iceTransports,
                     // rtcpMuxPolicy: connection.rtcpMuxPolicy || 'require', // or negotiate
-                    bundlePolicy: 'max-bundle',
-                    iceCandidatePoolSize: connection.iceCandidatePoolSize || 0
+                    // bundlePolicy: 'max-bundle',
+                    // iceCandidatePoolSize: connection.iceCandidatePoolSize || 0
                 };
             }
 

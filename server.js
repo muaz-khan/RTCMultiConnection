@@ -51,20 +51,20 @@ try {
     }
 
     ['ssl_key', 'ssl_cert', 'ssl_cabundle'].forEach(function(key) {
-        if(!config['key'] || config['key'].toString().length) {
+        if (!config['key'] || config['key'].toString().length) {
             return;
         }
 
-        if(config['key'].indexOf('/path/to/') === -1) {
-            if(key === 'ssl_key') {
+        if (config['key'].indexOf('/path/to/') === -1) {
+            if (key === 'ssl_key') {
                 ssl_key = fs.readFileSync(path.join(__dirname, config['ssl_key']));
             }
 
-            if(key === 'ssl_cert') {
+            if (key === 'ssl_cert') {
                 ssl_cert = fs.readFileSync(path.join(__dirname, config['ssl_cert']));
             }
 
-            if(key === 'ssl_cabundle') {
+            if (key === 'ssl_cabundle') {
                 ssl_cabundle = fs.readFileSync(path.join(__dirname, config['ssl_cabundle']));
             }
         }
@@ -119,10 +119,13 @@ function serverHandler(request, response) {
             stats = fs.lstatSync(filename);
 
             if (filename && filename.search(/demos/g) === -1 && stats.isDirectory()) {
-                response.writeHead(200, {
-                    'Content-Type': 'text/html'
-                });
-                response.write('<!DOCTYPE html><html><head><meta http-equiv="refresh" content="0;url=/demos/"></head><body></body></html>');
+                if (response.redirect) {
+                    response.redirect('/demos/');
+                } else {
+                    response.writeHead(301, {
+                        'Location': '/demos/'
+                    });
+                }
                 response.end();
                 return;
             }
