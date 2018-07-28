@@ -1,9 +1,9 @@
 'use strict';
 
-// Last time updated: 2018-06-09 7:47:25 AM UTC
+// Last time updated: 2018-07-28 4:49:51 AM UTC
 
 // _________________________
-// RTCMultiConnection v3.4.4
+// RTCMultiConnection v3.4.5
 
 // Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection
 
@@ -2568,19 +2568,24 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             peer = config.peerRef;
         }
 
-        function getLocalStreams() {
-            // if-block is temporarily disabled
-            if (typeof window.InstallTrigger !== 'undefined' && 'getSenders' in peer && typeof peer.getSenders === 'function') {
-                var streamObject2 = new MediaStream();
-                peer.getSenders().forEach(function(sender) {
-                    try {
-                        streamObject2.addTrack(sender.track);
-                    } catch (e) {}
+        if (!peer.getRemoteStreams && peer.getReceivers) {
+            peer.getRemoteStreams = function() {
+                var stream = new MediaStream();
+                peer.getReceivers().forEach(function(receiver) {
+                    stream.addTrack(receiver.track);
                 });
-                return streamObject2;
-            }
+                return [stream];
+            };
+        }
 
-            return peer.getLocalStreams();
+        if (!peer.getLocalStreams && peer.getSenders) {
+            peer.getLocalStreams = function() {
+                var stream = new MediaStream();
+                peer.getSenders().forEach(function(sender) {
+                    stream.addTrack(sender.track);
+                });
+                return [stream];
+            };
         }
 
         peer.onicecandidate = function(event) {
@@ -2622,13 +2627,11 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
             if (!localStream) return;
 
-            if (getLocalStreams().forEach) {
-                getLocalStreams().forEach(function(stream) {
-                    if (localStream && stream.id == localStream.id) {
-                        localStream = null;
-                    }
-                });
-            }
+            peer.getLocalStreams().forEach(function(stream) {
+                if (localStream && stream.id == localStream.id) {
+                    localStream = null;
+                }
+            });
 
             if (localStream && typeof peer.addTrack === 'function') {
                 localStream.getTracks().forEach(function(track) {
@@ -2864,15 +2867,13 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         }
 
         var streamsToShare = {};
-        if (getLocalStreams().forEach) {
-            getLocalStreams().forEach(function(stream) {
-                streamsToShare[stream.streamid] = {
-                    isAudio: !!stream.isAudio,
-                    isVideo: !!stream.isVideo,
-                    isScreen: !!stream.isScreen
-                };
-            });
-        }
+        peer.getLocalStreams().forEach(function(stream) {
+            streamsToShare[stream.streamid] = {
+                isAudio: !!stream.isAudio,
+                isVideo: !!stream.isVideo,
+                isScreen: !!stream.isScreen
+            };
+        });
 
         function oldCreateOfferOrAnswer(_method) {
             peer[_method](function(localSdp) {
@@ -3862,11 +3863,8 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
     // this function can be used to get "source-id" from the extension
     function getSourceId(callback, audioPlusTab) {
         if (!callback) throw '"callback" parameter is mandatory.';
-        if (sourceId) {
-            callback(sourceId);
-            sourceId = null;
-            return;
-        }
+
+        sourceId = null;
 
         screenCallback = callback;
 
@@ -3891,11 +3889,12 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
         if (DetectRTC.browser.name === 'Firefox') return callback('not-chrome');
 
+        sourceId = null;
+        chromeMediaSource = 'screen';
+
         var image = document.createElement('img');
         image.src = 'chrome-extension://' + extensionid + '/icon.png';
         image.onload = function() {
-            sourceId = null;
-            chromeMediaSource = 'screen';
             window.postMessage('are-you-there', '*');
             setTimeout(function() {
                 if (chromeMediaSource == 'screen') {
@@ -3970,7 +3969,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             }
 
             sourceId = null;
-            chromeMediaSource = 'screen'; // maybe this line is redundant?
+            // chromeMediaSource = 'screen'; // maybe this line is redundant?
             screenCallback = null;
 
             // now invoking native getUserMedia API
@@ -6052,7 +6051,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
 
         connection.trickleIce = true;
-        connection.version = '3.4.4';
+        connection.version = '3.4.5';
 
         connection.onSettingLocalDescription = function(event) {
             if (connection.enableLogs) {
