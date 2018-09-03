@@ -106,8 +106,9 @@
 
     mPeer.onNegotiationNeeded = function(message, remoteUserId, callback) {
         remoteUserId = remoteUserId || message.remoteUserId;
+        message = message || '';
         connectSocket(function() {
-            connection.socket.emit(connection.socketMessageEvent, 'password' in message ? message : {
+            connection.socket.emit(connection.socketMessageEvent, typeof message.password !== 'undefined' ? message : {
                 remoteUserId: remoteUserId,
                 message: message,
                 sender: connection.userid

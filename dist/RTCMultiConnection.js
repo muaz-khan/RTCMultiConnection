@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2018-07-28 4:49:51 AM UTC
+// Last time updated: 2018-09-03 3:03:03 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.5
@@ -2817,6 +2817,22 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             }
         }
 
+        this.enableDisableVideoEncoding = function(enable) {
+            var rtcp;
+            peer.getSenders().forEach(function(sender) {
+                if (!rtcp && sender.track.kind === 'video') {
+                    rtcp = sender;
+                }
+            });
+
+            if (!rtcp || !rtcp.getParameters) return;
+
+            var parameters = rtcp.getParameters();
+            parameters.encodings[1] && (parameters.encodings[1].active = !!enable);
+            parameters.encodings[2] && (parameters.encodings[2].active = !!enable);
+            rtcp.setParameters(parameters);
+        };
+
         if (config.remoteSdp) {
             if (config.remoteSdp.remotePeerSdpConstraints) {
                 sdpConstraints = config.remoteSdp.remotePeerSdpConstraints;
@@ -4368,8 +4384,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
         mPeer.onNegotiationNeeded = function(message, remoteUserId, callback) {
             remoteUserId = remoteUserId || message.remoteUserId;
+            message = message || '';
             connectSocket(function() {
-                connection.socket.emit(connection.socketMessageEvent, 'password' in message ? message : {
+                connection.socket.emit(connection.socketMessageEvent, typeof message.password !== 'undefined' ? message : {
                     remoteUserId: remoteUserId,
                     message: message,
                     sender: connection.userid
@@ -5822,7 +5839,16 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     return firstStream;
                 }
             },
-            selectAll: function() {}
+            selectAll: function() {
+                var streams = [];
+                for (var str in connection.streamEvents) {
+                    if (skipStreams.indexOf(str) === -1) {
+                        streams.push(connection.streamEvents[str]);
+                        continue;
+                    }
+                }
+                return streams;
+            }
         };
 
         connection.socketURL = '/'; // generated via config.json
