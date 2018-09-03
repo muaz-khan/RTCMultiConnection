@@ -1560,7 +1560,16 @@
                 return firstStream;
             }
         },
-        selectAll: function() {}
+        selectAll: function() {
+            var streams = [];
+            for (var str in connection.streamEvents) {
+                if (skipStreams.indexOf(str) === -1) {
+                    streams.push(connection.streamEvents[str]);
+                    continue;
+                }
+            }
+            return streams;
+        }
     };
 
     connection.socketURL = '@@socketURL'; // generated via config.json
