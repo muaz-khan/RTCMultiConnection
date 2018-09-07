@@ -89,7 +89,7 @@ function serverHandler(request, response) {
         var uri = url.parse(request.url).pathname,
             filename = path.join(process.cwd(), uri);
 
-        if (request.method !== 'GET' || path.join('/', uri).indexOf('../') !== -1) {
+        if (request.method !== 'GET' || uri.indexOf('..') !== -1) {
             response.writeHead(401, {
                 'Content-Type': 'text/plain'
             });
