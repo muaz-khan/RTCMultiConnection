@@ -10,6 +10,12 @@
 
 * https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/installation-guide.md
 
+```sh
+mkdir demo && cd demo
+git clone https://github.com/muaz-khan/RTCMultiConnection.git ./
+node server --port=9001
+```
+
 # YouTube videos
 
 1. [Getting started guide / RTCMultiConnection](https://www.youtube.com/watch?v=jqtC7mSTCgk)

@@ -8,31 +8,69 @@ function resolveURL(url) {
     return url.replace(/\//g, '\\');
 }
 
+// via: stackoverflow.com/a/41407246/552182
+var BASH_COLORS_HELPER = {
+    getBlackFG: function(str) {
+        return '\x1b[30m' + (str || '%s')  +'\x1b[0m';
+    },
+    getRedFG: function(str) {
+        return '\x1b[31m' + (str || '%s')  +'\x1b[0m';
+    },
+    getGreenFG: function(str) {
+        return '\x1b[32m' + (str || '%s')  +'\x1b[0m';
+    },
+    getYellowFG: function(str) {
+        return '\x1b[33m' + (str || '%s')  +'\x1b[0m';
+    },
+    getBlueFG: function() {
+        return '\x1b[34m' + (str || '%s')  +'\x1b[0m';
+    },
+    getPinkFG: function(str) {
+        return '\x1b[35m' + (str || '%s')  +'\x1b[0m';
+    },
+    getCyanFG: function(str) {
+        return '\x1b[36m' + (str || '%s')  +'\x1b[0m';
+    },
+    getWhiteFG: function(str) {
+        return '\x1b[37m' + (str || '%s')  +'\x1b[0m';
+    },
+    getCrimsonFG: function(str) {
+        return '\x1b[38m' + (str || '%s')  +'\x1b[0m';
+    },
+    underline: function(str) {
+        return '\x1b[4m' + (str || '%s')  +'\x1b[0m';
+    },
+    highlight: function(str) {
+        return '\x1b[7m' + (str || '%s')  +'\x1b[0m';
+    },
+    getYellowBG: function(str) {
+        // Black:40, Red:41, Green:42, Yellow:43, Blue:44, Magenta:45, Cyan:46, White:47, Crimson:48
+        return '\x1b[43m' + (str || '%s')  +'\x1b[0m';
+    },
+    getRedBG: function(str) {
+        return '\x1b[41m' + (str || '%s')  +'\x1b[0m';
+    }
+};
+
 // Please use HTTPs on non-localhost domains.
 var isUseHTTPs = false;
+
+// force auto reboot on failures
+var autoRebootServerOnFailure = false;
 
 // var port = 443;
 var port = process.env.PORT || 9001;
 
-try {
-    process.argv.forEach(function(val, index, array) {
-        if (!val) return;
-
-        if (val === '--ssl') {
-            isUseHTTPs = true;
-        }
-    });
-} catch (e) {}
-
 var fs = require('fs');
 var path = require('path');
 
-var ssl_key = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/privatekey.pem')));
-var ssl_cert = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/certificate.pem')));
-var ssl_cabundle = null;
+var ssl_key, ssl_cert, ssl_cabundle;
 
-// force auto reboot on failures
-var autoRebootServerOnFailure = false;
+try {
+    ssl_key = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/privatekey.pem')));
+    ssl_cert = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/certificate.pem')));
+}
+catch(e) {}
 
 // skip/remove this try-catch block if you're NOT using "config.json"
 try {
@@ -57,16 +95,127 @@ try {
 
         if (config['key'].indexOf('/path/to/') === -1) {
             if (key === 'ssl_key') {
-                ssl_key = fs.readFileSync(path.join(__dirname, config['ssl_key']));
+                ssl_key = fs.readFileSync(config['ssl_key']);
             }
 
             if (key === 'ssl_cert') {
-                ssl_cert = fs.readFileSync(path.join(__dirname, config['ssl_cert']));
+                ssl_cert = fs.readFileSync(config['ssl_cert']);
             }
 
             if (key === 'ssl_cabundle') {
-                ssl_cabundle = fs.readFileSync(path.join(__dirname, config['ssl_cabundle']));
+                ssl_cabundle = fs.readFileSync(config['ssl_cabundle']);
             }
+        }
+    });
+} catch (e) {}
+
+try {
+    var argv_array = [];
+    process.argv.forEach(function(val, index, array) {
+        if(argv_array.length) return;
+        argv_array = array;
+    });
+
+    argv_array.forEach(function(val) {
+        // node server.js --ssl
+        if (val === '--ssl') {
+            isUseHTTPs = true;
+        }
+
+        // node server.js --autoRebootServerOnFailure=false
+        if (val.indexOf('--autoRebootServerOnFailure=false') === 0) {
+            autoRebootServerOnFailure = false;
+        }
+
+        // node server.js --port=9002
+        if (val.indexOf('--port') === 0) {
+            var inner = val.split('--port=')[1];
+            if(inner) {
+                inner = inner.split(' ')[0].trim();
+                port = inner;
+            }
+        }
+
+        // node server.js --ssl_key=/home/ssl/ssl.key
+        if (val.indexOf('--ssl_key') === 0) {
+            var inner = val.split('--ssl_key=')[1];
+            if(inner) {
+                inner = inner.split(' ')[0].trim();
+                ssl_key = fs.readFileSync(inner);
+            }
+        }
+
+        // node server.js --ssl_cert=/home/ssl/ssl.crt
+        if (val.indexOf('--ssl_cert') === 0) {
+            var inner = val.split('--ssl_cert=')[1];
+            if(inner) {
+                inner = inner.split(' ')[0].trim();
+                ssl_cert = fs.readFileSync(inner);
+            }
+        }
+
+        // node server.js --ssl_cabundle=/home/ssl/ssl.cab
+        if (val.indexOf('--ssl_cabundle') === 0) {
+            var inner = val.split('--ssl_cabundle=')[1];
+            if(inner) {
+                inner = inner.split(' ')[0].trim();
+                ssl_cabundle = fs.readFileSync(inner);
+            }
+        }
+
+        // node server.js --version
+        if (val === '--version') {
+            var json = require(path.join(__dirname, resolveURL('package.json')));
+            console.log('\n');
+            console.log(BASH_COLORS_HELPER.getYellowFG(), '\t' + json.version);
+            process.exit(1);
+        }
+
+        // node server.js --dependencies
+        if (val === '--dependencies') {
+            var json = require(path.join(__dirname, resolveURL('package.json')));
+            console.log('\n');
+            console.log(BASH_COLORS_HELPER.getYellowFG(), 'dependencies:');
+            console.log(JSON.stringify(json.dependencies, null, '\t'));
+            console.log('\n');
+            console.log(BASH_COLORS_HELPER.getYellowFG(), 'devDependencies:');
+            console.log(JSON.stringify(json.devDependencies, null, '\t'));
+            process.exit(1);
+        }
+
+        // node server.js --help
+        if (val === '--help') {
+            console.log('\n');
+            console.log('You can manage configuration in the "config.json" file.');
+
+            console.log('\n');
+            console.log(BASH_COLORS_HELPER.getYellowFG(), 'Or use following commands:');
+            console.log('\tnode server.js');
+            console.log('\tnode server.js', BASH_COLORS_HELPER.getYellowFG('--port=9002'));
+            console.log('\tnode server.js',  BASH_COLORS_HELPER.getYellowFG('--port=9002 --ssl'));
+            console.log('\tnode server.js',  BASH_COLORS_HELPER.getYellowFG('--port=9002 --ssl --ssl_key=/home/ssl/ssl.key --ssl_cert=/home/ssl/ssl.crt'));
+
+            console.log('\n');
+            console.log('Here is list of all config parameters:');
+            console.log(BASH_COLORS_HELPER.getYellowFG(), '--port=80');
+            console.log('\tThis parameter allows you set any custom port.');
+            console.log(BASH_COLORS_HELPER.getYellowFG(), '--ssl');
+            console.log('\tThis parameter allows you force HTTPs. Remove/Skip/Ignore this parameter to use HTTP.');
+            console.log(BASH_COLORS_HELPER.getYellowFG(), '--ssl_key=path');
+            console.log('\tThis parameter allows you set your domain\'s .key file.');
+            console.log(BASH_COLORS_HELPER.getYellowFG(), '--ssl_cert=path');
+            console.log('\tThis parameter allows you set your domain\'s .crt file.');
+            console.log(BASH_COLORS_HELPER.getYellowFG(), '--ssl_cabundle=path');
+            console.log('\tThis parameter allows you set your domain\'s .cab file.');
+            console.log(BASH_COLORS_HELPER.getYellowFG(), '--version');
+            console.log('\tCheck RTCMultiConnection version number.');
+            console.log(BASH_COLORS_HELPER.getYellowFG(), '--dependencies');
+            console.log('\tCheck all RTCMultiConnection dependencies.');
+            console.log(BASH_COLORS_HELPER.getYellowFG(), '--autoRebootServerOnFailure=false');
+            console.log('\tDisable auto-restart server.js on failure.');
+            console.log('------------------------------');
+            console.log('Need more help? bit.ly/2ff7QGk');
+            process.exit(1);
         }
     });
 } catch (e) {}
@@ -301,26 +450,26 @@ function runServer() {
 
         var domainURL = (isUseHTTPs ? 'https' : 'http') + '://' + addr.address + ':' + addr.port + '/';
 
-        console.log('------------------------------');
+        console.log('\n');
 
-        console.log('socket.io is listening at:');
-        console.log('\x1b[31m%s\x1b[0m ', '\t' + domainURL);
+        console.log('Socket.io is listening at:');
+        console.log(BASH_COLORS_HELPER.getGreenFG(), '\t' + domainURL);
 
         if (!isUseHTTPs) {
-            console.log('use --ssl to enable HTTPs:');
-            console.log('\x1b[31m%s\x1b[0m ', '\t' + 'node server.js --ssl');
+            console.log('You can use --ssl to enable HTTPs:');
+            console.log(BASH_COLORS_HELPER.getYellowFG(), '\t' + 'node server --ssl');
         }
 
         console.log('Your web-browser (HTML file) MUST set this line:');
-        console.log('\x1b[31m%s\x1b[0m ', 'connection.socketURL = "' + domainURL + '";');
+        console.log(BASH_COLORS_HELPER.getGreenFG(), '\tconnection.socketURL = "' + domainURL + '";');
 
         if (addr.address != 'localhost' && !isUseHTTPs) {
-            console.log('Warning:');
-            console.log('\x1b[31m%s\x1b[0m ', 'Please set isUseHTTPs=true to make sure audio,video and screen demos can work on Google Chrome as well.');
+            console.log(BASH_COLORS_HELPER.getRedBG(), 'Warning:');
+            console.log(BASH_COLORS_HELPER.getRedBG(), 'Please run on HTTPs to make sure audio,video and screen demos can work on Google Chrome as well.');
         }
 
-        console.log('------------------------------');
-        console.log('Need help? http://bit.ly/2ff7QGk');
+        console.log('For more help: ', BASH_COLORS_HELPER.getYellowFG('node server.js --help'));
+        console.log('\n');
     });
 
     require('./Signaling-Server.js')(app, function(socket) {
