@@ -11,44 +11,44 @@ function resolveURL(url) {
 // via: stackoverflow.com/a/41407246/552182
 var BASH_COLORS_HELPER = {
     getBlackFG: function(str) {
-        return '\x1b[30m' + (str || '%s')  +'\x1b[0m';
+        return '\x1b[30m' + (str || '%s') + '\x1b[0m';
     },
     getRedFG: function(str) {
-        return '\x1b[31m' + (str || '%s')  +'\x1b[0m';
+        return '\x1b[31m' + (str || '%s') + '\x1b[0m';
     },
     getGreenFG: function(str) {
-        return '\x1b[32m' + (str || '%s')  +'\x1b[0m';
+        return '\x1b[32m' + (str || '%s') + '\x1b[0m';
     },
     getYellowFG: function(str) {
-        return '\x1b[33m' + (str || '%s')  +'\x1b[0m';
+        return '\x1b[33m' + (str || '%s') + '\x1b[0m';
     },
     getBlueFG: function() {
-        return '\x1b[34m' + (str || '%s')  +'\x1b[0m';
+        return '\x1b[34m' + (str || '%s') + '\x1b[0m';
     },
     getPinkFG: function(str) {
-        return '\x1b[35m' + (str || '%s')  +'\x1b[0m';
+        return '\x1b[35m' + (str || '%s') + '\x1b[0m';
     },
     getCyanFG: function(str) {
-        return '\x1b[36m' + (str || '%s')  +'\x1b[0m';
+        return '\x1b[36m' + (str || '%s') + '\x1b[0m';
     },
     getWhiteFG: function(str) {
-        return '\x1b[37m' + (str || '%s')  +'\x1b[0m';
+        return '\x1b[37m' + (str || '%s') + '\x1b[0m';
     },
     getCrimsonFG: function(str) {
-        return '\x1b[38m' + (str || '%s')  +'\x1b[0m';
+        return '\x1b[38m' + (str || '%s') + '\x1b[0m';
     },
     underline: function(str) {
-        return '\x1b[4m' + (str || '%s')  +'\x1b[0m';
+        return '\x1b[4m' + (str || '%s') + '\x1b[0m';
     },
     highlight: function(str) {
-        return '\x1b[7m' + (str || '%s')  +'\x1b[0m';
+        return '\x1b[7m' + (str || '%s') + '\x1b[0m';
     },
     getYellowBG: function(str) {
         // Black:40, Red:41, Green:42, Yellow:43, Blue:44, Magenta:45, Cyan:46, White:47, Crimson:48
-        return '\x1b[43m' + (str || '%s')  +'\x1b[0m';
+        return '\x1b[43m' + (str || '%s') + '\x1b[0m';
     },
     getRedBG: function(str) {
-        return '\x1b[41m' + (str || '%s')  +'\x1b[0m';
+        return '\x1b[41m' + (str || '%s') + '\x1b[0m';
     }
 };
 
@@ -69,8 +69,7 @@ var ssl_key, ssl_cert, ssl_cabundle;
 try {
     ssl_key = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/privatekey.pem')));
     ssl_cert = fs.readFileSync(path.join(__dirname, resolveURL('fake-keys/certificate.pem')));
-}
-catch(e) {}
+} catch (e) {}
 
 // skip/remove this try-catch block if you're NOT using "config.json"
 try {
@@ -112,7 +111,7 @@ try {
 try {
     var argv_array = [];
     process.argv.forEach(function(val, index, array) {
-        if(argv_array.length) return;
+        if (argv_array.length) return;
         argv_array = array;
     });
 
@@ -130,7 +129,7 @@ try {
         // node server.js --port=9002
         if (val.indexOf('--port') === 0) {
             var inner = val.split('--port=')[1];
-            if(inner) {
+            if (inner) {
                 inner = inner.split(' ')[0].trim();
                 port = inner;
             }
@@ -139,7 +138,7 @@ try {
         // node server.js --ssl_key=/home/ssl/ssl.key
         if (val.indexOf('--ssl_key') === 0) {
             var inner = val.split('--ssl_key=')[1];
-            if(inner) {
+            if (inner) {
                 inner = inner.split(' ')[0].trim();
                 ssl_key = fs.readFileSync(inner);
             }
@@ -148,7 +147,7 @@ try {
         // node server.js --ssl_cert=/home/ssl/ssl.crt
         if (val.indexOf('--ssl_cert') === 0) {
             var inner = val.split('--ssl_cert=')[1];
-            if(inner) {
+            if (inner) {
                 inner = inner.split(' ')[0].trim();
                 ssl_cert = fs.readFileSync(inner);
             }
@@ -157,7 +156,7 @@ try {
         // node server.js --ssl_cabundle=/home/ssl/ssl.cab
         if (val.indexOf('--ssl_cabundle') === 0) {
             var inner = val.split('--ssl_cabundle=')[1];
-            if(inner) {
+            if (inner) {
                 inner = inner.split(' ')[0].trim();
                 ssl_cabundle = fs.readFileSync(inner);
             }
@@ -192,8 +191,8 @@ try {
             console.log(BASH_COLORS_HELPER.getYellowFG(), 'Or use following commands:');
             console.log('\tnode server.js');
             console.log('\tnode server.js', BASH_COLORS_HELPER.getYellowFG('--port=9002'));
-            console.log('\tnode server.js',  BASH_COLORS_HELPER.getYellowFG('--port=9002 --ssl'));
-            console.log('\tnode server.js',  BASH_COLORS_HELPER.getYellowFG('--port=9002 --ssl --ssl_key=/home/ssl/ssl.key --ssl_cert=/home/ssl/ssl.crt'));
+            console.log('\tnode server.js', BASH_COLORS_HELPER.getYellowFG('--port=9002 --ssl'));
+            console.log('\tnode server.js', BASH_COLORS_HELPER.getYellowFG('--port=9002 --ssl --ssl_key=/home/ssl/ssl.key --ssl_cert=/home/ssl/ssl.crt'));
 
             console.log('\n');
             console.log('Here is list of all config parameters:');

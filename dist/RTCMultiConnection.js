@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2018-09-03 3:03:03 PM UTC
+// Last time updated: 2018-09-13 6:27:02 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.5
@@ -5827,26 +5827,86 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
         connection.streamEvents = {
             selectFirst: function(options) {
-                if (!options) {
-                    // in normal conferencing, it will always be "local-stream"
-                    var firstStream;
-                    for (var str in connection.streamEvents) {
-                        if (skipStreams.indexOf(str) === -1 && !firstStream) {
-                            firstStream = connection.streamEvents[str];
-                            continue;
-                        }
-                    }
-                    return firstStream;
-                }
+                return connection.streamEvents.selectAll(options)[0];
             },
-            selectAll: function() {
-                var streams = [];
-                for (var str in connection.streamEvents) {
-                    if (skipStreams.indexOf(str) === -1) {
-                        streams.push(connection.streamEvents[str]);
-                        continue;
-                    }
+            selectAll: function(options) {
+                if (!options) {
+                    // default will always be all streams
+                    options = {
+                        local: true,
+                        remote: true,
+                        isScreen: true,
+                        isAudio: true,
+                        isVideo: true
+                    };
                 }
+
+                if (options == 'local') {
+                    options = {
+                        local: true
+                    };
+                }
+
+                if (options == 'remote') {
+                    options = {
+                        remote: true
+                    };
+                }
+
+                if (options == 'screen') {
+                    options = {
+                        isScreen: true
+                    };
+                }
+
+                if (options == 'audio') {
+                    options = {
+                        isAudio: true
+                    };
+                }
+
+                if (options == 'video') {
+                    options = {
+                        isVideo: true
+                    };
+                }
+
+                var streams = [];
+                Object.keys(connection.streamEvents).forEach(function(key) {
+                    var event = connection.streamEvents[key];
+
+                    if (skipStreams.indexOf(key) !== -1) return;
+                    var ignore = true;
+
+                    if (options.local && event.type === 'local') {
+                        ignore = false;
+                    }
+
+                    if (options.remote && event.type === 'remote') {
+                        ignore = false;
+                    }
+
+                    if (options.isScreen && event.stream.isScreen) {
+                        ignore = false;
+                    }
+
+                    if (options.isVideo && event.stream.isVideo) {
+                        ignore = false;
+                    }
+
+                    if (options.isAudio && event.stream.isAudio) {
+                        ignore = false;
+                    }
+
+                    if (options.userid && event.userid === options.userid) {
+                        ignore = false;
+                    }
+
+                    if (ignore === false) {
+                        streams.push(event);
+                    }
+                });
+
                 return streams;
             }
         };
