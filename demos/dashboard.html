@@ -151,9 +151,7 @@ hr {
     <div id="other-videos"></div>
     <hr>
     <div style="padding: 5px 10px;">
-        <p style="margin: 0; margin-bottom: 10px; display: none;">Connected users: <b id="number-of-connected-users">0</b></p>
-
-        <div id="hide-on-datachannel-opened">
+        <div id="onUserStatusChanged">
             <label for="user-full-name">Name:</label>
             <input type="text" id="user-full-name" placeholder="Name" disabled style="margin: 5px; margin-right: 0;width: 55%;margin-right: 2px;">
             <br>
@@ -183,7 +181,6 @@ document.getElementById('open-room').onclick = function() {
         // Remove "true" from below line, if you want only presenter/moderator to share dashboard screen
         if(true || isRoomAlreadyCreatedBySomeoneElse === false) {
             onOpenRoom();
-            document.getElementById('open-room').parentNode.innerHTML = '<a href="#' + roomid + '" target="_blank">Please share this link</a>';
         }
         else {
             document.getElementById('open-room').parentNode.innerHTML = '';
@@ -253,26 +250,24 @@ if (location.hash.replace('#', '').length) {
 }
 
 connection.onUserStatusChanged = function(event) {
-    var infoBar = document.getElementById('hide-on-datachannel-opened');
-    if (event.status == 'online') {
-        infoBar.innerHTML = event.userid + ' is <b>online</b>.';
+    var infoBar = document.getElementById('onUserStatusChanged');
+    var names = [];
+    connection.getAllParticipants().forEach(function(pid) {
+        names.push(getFullName(pid));
+    });
+
+    if(!names.length) {
+        names = ['Only You'];
+    }
+    else {
+        names = [connection.extra.userFullName || 'You'].concat(names);
     }
 
-    if (event.status == 'offline') {
-        infoBar.innerHTML = event.userid + ' is <b>offline</b>.';
-    }
-
-    setConnectedUsers(connection.getAllParticipants().length);
+    infoBar.innerHTML = '<b>Active users:</b> ' + names.join(', ');
 };
 
-var numberOfConnectedUsers = document.getElementById('number-of-connected-users');
-function setConnectedUsers(length) {
-    numberOfConnectedUsers.style.display = length ? 'block' : 'none';
-    numberOfConnectedUsers.innerHTML = length;
-}
 connection.onopen = function(event) {
-    var infoBar = document.getElementById('hide-on-datachannel-opened');
-    infoBar.innerHTML = '<b>' + event.userid + '</b> is ready to collaborate with you.';
+    connection.onUserStatusChanged(event);
 
     if (designer.pointsLength <= 0) {
         // make sure that remote user gets all drawings synced.
@@ -281,15 +276,13 @@ connection.onopen = function(event) {
         }, 1000);
     }
 
-    setConnectedUsers(connection.getAllParticipants().length);
-
     document.getElementById('btn-chat-message').disabled = false;
     document.getElementById('txt-chat-message').disabled = false;
     document.getElementById('btn-attach-file').style.display = 'inline-block';
 };
 
-connection.onclose = connection.onerror = connection.onleave = function() {
-    setConnectedUsers(connection.getAllParticipants().length);
+connection.onclose = connection.onerror = connection.onleave = function(event) {
+    connection.onUserStatusChanged(event);
 };
 
 connection.onmessage = function(event) {
@@ -443,12 +436,15 @@ function getFileHTML(file) {
     return attachment;
 }
 
-connection.onFileEnd = function (file) {
-    var _userFullName = file.userid;
-    if(connection.peers[file.userid]) {
-        _userFullName = connection.peers[file.userid].extra.userFullName;
+function getFullName(userid) {
+    var _userFullName = userid;
+    if(connection.peers[userid] && connection.peers[userid].extra.userFullName) {
+        _userFullName = connection.peers[userid].extra.userFullName;
     }
+    return _userFullName;
+}
 
+connection.onFileEnd = function (file) {
     var html = getFileHTML(file);
     var div = progressHelper[file.uuid].div;
 
@@ -457,7 +453,7 @@ connection.onFileEnd = function (file) {
         div.style.background = '#cbffcb';
     }
     else {
-        div.innerHTML = '<b>' + _userFullName + ':</b><br>' + html;
+        div.innerHTML = '<b>' + getFullName(file.userid) + ':</b><br>' + html;
     }
 };
 
@@ -481,12 +477,7 @@ connection.onFileStart = function (file) {
         div.style.background = '#cbffcb';
     }
     else {
-        var _userFullName = file.userid;
-        if(connection.peers[file.userid]) {
-            _userFullName = connection.peers[file.userid].extra.userFullName;
-        }
-
-        div.innerHTML = '<b>' + _userFullName + ':</b><br><label>0%</label> <progress></progress>';
+        div.innerHTML = '<b>' + getFullName(file.userid) + ':</b><br><label>0%</label> <progress></progress>';
     }
 
     div.title = file.name;
