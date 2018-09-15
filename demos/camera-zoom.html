@@ -169,6 +169,9 @@
                     alert('Zoom is not supported by ' + track.label);
                   }
 
+                  mediaStream.streamid = mediaStream.id;
+                  connection.attachStreams = [mediaStream];
+
                   var event = {
                     type: 'local',
                     mediaElement: video,
@@ -255,7 +258,9 @@
                 (function reCheckRoomPresence() {
                     connection.checkPresence(roomid, function(isRoomExists) {
                         if(isRoomExists) {
-                            connection.join(roomid);
+                            beforeOpenOrJoin(function() {
+                                connection.join(roomid);
+                            });
                             return;
                         }
 
