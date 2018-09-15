@@ -52,7 +52,7 @@ button:hover, button:hover, input:focus {
     background: -webkit-gradient(linear, 0% 0%, 0% 100%, color-stop(5%, rgb(221, 221, 221)), to(rgb(250, 250, 250)));
     border: 1px solid rgb(142, 142, 142);
 }
-button[disabled], input[disabled] {
+button[disabled], input[disabled], textarea[disabled] {
     background: rgb(249, 249, 249);
     border: 1px solid rgb(218, 207, 207);
     color: rgb(197, 189, 189);
@@ -65,11 +65,6 @@ input {
 .extra-controls {
     position: absolute;
     right: 21%;
-}
-
-#room-id {
-    width: 55%;
-    margin-right: 2px;
 }
 
 #btn-comments {
@@ -156,11 +151,16 @@ hr {
     <div id="other-videos"></div>
     <hr>
     <div style="padding: 5px 10px;">
-        <p style="margin: 0; margin-bottom: 10px;">Number of users connected with you: <b id="number-of-connected-users">0</b></p>
+        <p style="margin: 0; margin-bottom: 10px; display: none;">Connected users: <b id="number-of-connected-users">0</b></p>
 
         <div id="hide-on-datachannel-opened">
-            <input type="text" id="room-id" placeholder="room-id" disabled style="margin: 5px; margin-right: 0;">
-            <button id="open-room" disabled style="margin: 5px; margin-left: 0;">Join</button>
+            <label for="user-full-name">Name:</label>
+            <input type="text" id="user-full-name" placeholder="Name" disabled style="margin: 5px; margin-right: 0;width: 55%;margin-right: 2px;">
+            <br>
+            <label for="room-name">Room:</label>
+            <input type="text" id="room-name" placeholder="room-name" disabled style="margin: 5px; margin-right: 0;width: 55%;margin-right: 2px;">
+            <br>
+            <button id="open-room" disabled style="margin: 5px; margin-left: 52px;">Join</button>
         </div>
     </div>
 
@@ -173,16 +173,8 @@ hr {
 </div>
 
 <script>
-document.getElementById('room-id').onkeyup = document.getElementById('room-id').onblur = function() {
-    localStorage.setItem('canvas-designer-roomid', this.value);
-};
-
-if (localStorage.getItem('canvas-designer-roomid')) {
-    document.getElementById('room-id').value = localStorage.getItem('canvas-designer-roomid');
-}
-
 document.getElementById('open-room').onclick = function() {
-    var roomid = document.getElementById('room-id').value;
+    var roomid = roomName.value;
     if (!roomid.length) return alert('Please enter roomid.');
 
     this.disabled = true;
@@ -231,15 +223,16 @@ designer.setTools({
 designer.appendTo(document.getElementById('widget-container'));
 </script>
 
-<script src="https://rtcmulticonnection.herokuapp.com/dev/adapter.js"></script>
-<script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
-<script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
+<script src="/dev/adapter.js"></script>
+<script src="/dist/RTCMultiConnection.min.js"></script>
+<script src="/socket.io/socket.io.js"></script>
 <script src="https://cdn.webrtc-experiment.com/FileBufferReader.js"></script>
 
 <script>
 var connection = new RTCMultiConnection();
 
-connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+connection.socketURL = '/';
+// connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
 connection.socketMessageEvent = 'canvas-designer';
 
 connection.chunkSize = 16000;
@@ -269,10 +262,14 @@ connection.onUserStatusChanged = function(event) {
         infoBar.innerHTML = event.userid + ' is <b>offline</b>.';
     }
 
-    numberOfConnectedUsers.innerHTML = connection.getAllParticipants().length;
+    setConnectedUsers(connection.getAllParticipants().length);
 };
 
 var numberOfConnectedUsers = document.getElementById('number-of-connected-users');
+function setConnectedUsers(length) {
+    numberOfConnectedUsers.style.display = length ? 'block' : 'none';
+    numberOfConnectedUsers.innerHTML = length;
+}
 connection.onopen = function(event) {
     var infoBar = document.getElementById('hide-on-datachannel-opened');
     infoBar.innerHTML = '<b>' + event.userid + '</b> is ready to collaborate with you.';
@@ -284,7 +281,7 @@ connection.onopen = function(event) {
         }, 1000);
     }
 
-    numberOfConnectedUsers.innerHTML = connection.getAllParticipants().length;
+    setConnectedUsers(connection.getAllParticipants().length);
 
     document.getElementById('btn-chat-message').disabled = false;
     document.getElementById('txt-chat-message').disabled = false;
@@ -292,7 +289,7 @@ connection.onopen = function(event) {
 };
 
 connection.onclose = connection.onerror = connection.onleave = function() {
-    numberOfConnectedUsers.innerHTML = connection.getAllParticipants().length;
+    setConnectedUsers(connection.getAllParticipants().length);
 };
 
 connection.onmessage = function(event) {
@@ -384,8 +381,7 @@ function appendChatMessage(event, checkmark_id) {
     div.className = 'message';
 
     if(event.data) {
-        // you can use "event.extra.fullName"
-        div.innerHTML = '<b>' + event.userid + ':</b><br>' + event.data.chatMessage;
+        div.innerHTML = '<b>' + (event.extra.userFullName || event.userid) + ':</b><br>' + event.data.chatMessage;
 
         if(event.data.checkmark_id) {
             connection.send({
@@ -448,6 +444,11 @@ function getFileHTML(file) {
 }
 
 connection.onFileEnd = function (file) {
+    var _userFullName = file.userid;
+    if(connection.peers[file.userid]) {
+        _userFullName = connection.peers[file.userid].extra.userFullName;
+    }
+
     var html = getFileHTML(file);
     var div = progressHelper[file.uuid].div;
 
@@ -456,7 +457,7 @@ connection.onFileEnd = function (file) {
         div.style.background = '#cbffcb';
     }
     else {
-        div.innerHTML = '<b>' + file.userid + ':</b><br>' + html;
+        div.innerHTML = '<b>' + _userFullName + ':</b><br>' + html;
     }
 };
 
@@ -480,7 +481,12 @@ connection.onFileStart = function (file) {
         div.style.background = '#cbffcb';
     }
     else {
-        div.innerHTML = '<b>' + file.userid + ':</b><br><label>0%</label> <progress></progress>';
+        var _userFullName = file.userid;
+        if(connection.peers[file.userid]) {
+            _userFullName = connection.peers[file.userid].extra.userFullName;
+        }
+
+        div.innerHTML = '<b>' + _userFullName + ':</b><br><label>0%</label> <progress></progress>';
     }
 
     div.title = file.name;
@@ -502,8 +508,38 @@ function updateLabel(progress, label) {
     label.innerHTML = position + '%';
 }
 
+var roomName = document.getElementById('room-name');
+var userFullName = document.getElementById('user-full-name');
+
 document.getElementById('open-room').disabled = false;
-document.getElementById('room-id').disabled = false;
+roomName.disabled = false;
+userFullName.disabled = false;
+
+roomName.onkeyup = roomName.onblur = roomName.oninput = roomName.onpaste = function() {
+    localStorage.setItem('canvas-designer-roomid', this.value);
+};
+
+if (localStorage.getItem('canvas-designer-roomid')) {
+    roomName.value = localStorage.getItem('canvas-designer-roomid');
+}
+
+userFullName.onkeyup = userFullName.onblur = userFullName.oninput = userFullName.onpaste = function() {
+    localStorage.setItem('canvas-designer-user-full-name', userFullName.value);
+
+    connection.extra.userFullName = userFullName.value;
+
+    if(connection.getAllParticipants().length) {
+        connection.updateExtraData();
+    }
+};
+
+if (localStorage.getItem('canvas-designer-user-full-name')) {
+    userFullName.value = localStorage.getItem('canvas-designer-user-full-name');
+}
+
+if(userFullName.value.length && userFullName.value.replace(/ /g, '').length) {
+    connection.extra.userFullName = userFullName.value;
+}
 </script>
 </body>
 </html>

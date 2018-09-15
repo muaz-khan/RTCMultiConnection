@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2018-09-15 5:47:30 AM UTC
+// Last time updated: 2018-09-15 3:49:42 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.7
@@ -3427,6 +3427,8 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 {
                     'urls': [
                         'stun:stun.l.google.com:19302',
+                        'stun:stun1.l.google.com:19302',
+                        'stun:stun2.l.google.com:19302',
                         'stun:stun.l.google.com:19302?transport=udp',
                     ]
                 }
