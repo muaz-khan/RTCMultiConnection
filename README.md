@@ -13,6 +13,7 @@
 ```sh
 mkdir demo && cd demo
 git clone https://github.com/muaz-khan/RTCMultiConnection.git ./
+npm install --production
 node server --port=9001
 ```
 
