@@ -12,6 +12,7 @@
 	<link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
 </head>
 <body>
+<!-- https://cdn.webrtc-experiment.com/Canvas-Designer/ -->
 <script src="https://cdn.webrtc-experiment.com/Canvas-Designer/canvas-designer-widget.js"></script>
 
 <style>
@@ -204,6 +205,7 @@ designer.setTools({
     pencil: true,
     text: true,
     image: true,
+    pdf: true,
     eraser: true,
     line: true,
     arrow: true,
@@ -211,10 +213,14 @@ designer.setTools({
     dragMultiple: true,
     arc: true,
     rectangle: true,
-    quadratic: true,
+    quadratic: false,
     bezier: true,
     marker: true,
-    zoom: true
+    zoom: true,
+    lineWidth: false,
+    colorsPicker: false,
+    extraOptions: false,
+    code: false
 });
 
 designer.appendTo(document.getElementById('widget-container'));
@@ -223,7 +229,7 @@ designer.appendTo(document.getElementById('widget-container'));
 <script src="/dev/adapter.js"></script>
 <script src="/dist/RTCMultiConnection.min.js"></script>
 <script src="/socket.io/socket.io.js"></script>
-<script src="https://cdn.webrtc-experiment.com/FileBufferReader.js"></script>
+<script src="/dev/FileBufferReader.js"></script>
 
 <script>
 var connection = new RTCMultiConnection();
@@ -244,10 +250,6 @@ connection.sdpConstraints.mandatory = {
     OfferToReceiveAudio: true,
     OfferToReceiveVideo: true
 };
-if (location.hash.replace('#', '').length) {
-    var roomid = location.hash.replace('#', '');
-    connection.join(roomid);
-}
 
 connection.onUserStatusChanged = function(event) {
     var infoBar = document.getElementById('onUserStatusChanged');

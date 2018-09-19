@@ -159,6 +159,15 @@ module.exports = function(grunt) {
                 pushTo: 'upstream',
                 gitDescribeOptions: '--tags --always --abbrev=1 --dirty=-d'
             }
+        },
+        watch: {
+          scripts: {
+            files: ['dev/*.js'],
+            tasks: ['concat', 'replace', 'jsbeautifier', 'uglify', 'copy', 'clean'],
+            options: {
+              spawn: false,
+            },
+          }
         }
     });
 
@@ -167,4 +176,5 @@ module.exports = function(grunt) {
     // set default tasks to run when grunt is called without parameters
     // http://gruntjs.com/api/grunt.task
     grunt.registerTask('default', ['concat', 'replace', 'jsbeautifier', 'uglify', 'copy', 'clean']);
+    grunt.loadNpmTasks('grunt-contrib-watch');
 };

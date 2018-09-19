@@ -17,6 +17,13 @@ npm install --production
 node server --port=9001
 ```
 
+# Free socket.io servers
+
+```javascript
+connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/'; // recommended
+connection.socketURL = 'https://webrtcweb.com:9001/';
+```
+
 # YouTube videos
 
 1. [Getting started guide / RTCMultiConnection](https://www.youtube.com/watch?v=jqtC7mSTCgk)
