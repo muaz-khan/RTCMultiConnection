@@ -1,4 +1,4 @@
-<!-- Demo version: 2018.09.15 -->
+<!-- Demo version: 2018.09.20 -->
 
 <!DOCTYPE html>
 <html lang="en">
@@ -137,56 +137,66 @@
             connection.dontCaptureUserMedia = true; // we will capture ourelves
 
             function beforeOpenOrJoin(callback) {
-                navigator.mediaDevices.getUserMedia({video: true})
-                .then(async mediaStream => {
-                  var video = document.createElement('video');
-                  video.muted =  true;
-                  video.srcObject = mediaStream;
+                // if you want to select special camera
+                // then please set
+                // window.deviceId = 'the-device-id';
+                var videoConstraints = {
+                    deviceId: window.deviceId ? {
+                        exact: window.deviceId
+                    } : null,
+                    width: 1920,
+                    height: 1080
+                };
+                navigator.mediaDevices.getUserMedia({
+                        video: videoConstraints
+                    })
+                    .then(async mediaStream => {
+                        var video = document.createElement('video');
+                        video.muted = true;
+                        video.srcObject = mediaStream;
+                        // Once crbug.com/711524 is fixed, we won't need to wait anymore. This is
+                        // currently needed because capabilities can only be retrieved after the
+                        // device starts streaming. This happens after and asynchronously w.r.t.
+                        // getUserMedia() returns.
+                        await sleep(1000);
+                        const track = mediaStream.getVideoTracks()[0];
+                        const capabilities = track.getCapabilities();
+                        const settings = track.getSettings();
+                        // Check whether zoom is supported or not.
+                        if ('zoom' in capabilities) {
+                            // Map zoom to a slider element.
+                            input_range.min = capabilities.zoom.min;
+                            input_range.max = capabilities.zoom.max;
+                            input_range.step = capabilities.zoom.step;
+                            input_range.value = settings.zoom;
+                            input_range.oninput = function(event) {
+                                track.applyConstraints({
+                                    advanced: [{
+                                        zoom: event.target.value
+                                    }]
+                                });
+                            }
+                            input_range.style.display = '';
+                        } else {
+                            alert('Zoom is not supported by ' + track.label);
+                        }
+                        mediaStream.streamid = mediaStream.id;
+                        connection.attachStreams = [mediaStream];
 
-                  // Once crbug.com/711524 is fixed, we won't need to wait anymore. This is
-                  // currently needed because capabilities can only be retrieved after the
-                  // device starts streaming. This happens after and asynchronously w.r.t.
-                  // getUserMedia() returns.
-                  await sleep(1000);
+                        var event = {
+                            type: 'local',
+                            mediaElement: video,
+                            stream: mediaStream,
+                            streamid: mediaStream.id
+                          };
+                          connection.onstream(event);
 
-                  const track = mediaStream.getVideoTracks()[0];
-                  const capabilities = track.getCapabilities();
-                  const settings = track.getSettings();
-
-                  // Check whether zoom is supported or not.
-                  if ('zoom' in capabilities) {
-                    // Map zoom to a slider element.
-                      input_range.min = capabilities.zoom.min;
-                      input_range.max = capabilities.zoom.max;
-                      input_range.step = capabilities.zoom.step;
-                      input_range.value = settings.zoom;
-                      input_range.oninput = function(event) {
-                        track.applyConstraints({advanced: [ {zoom: event.target.value} ]});
-                      }
-                      input_range.style.display = '';
-                  }
-                  else {
-                    alert('Zoom is not supported by ' + track.label);
-                  }
-
-                  mediaStream.streamid = mediaStream.id;
-                  connection.attachStreams = [mediaStream];
-
-                  var event = {
-                    type: 'local',
-                    mediaElement: video,
-                    stream: mediaStream,
-                    streamid: mediaStream.id
-                  };
-                  connection.onstream(event);
-
-                  callback();
-                });
+                        callback();
+                    });
 
                 /* Utils */
-
                 function sleep(ms = 0) {
-                  return new Promise(r => setTimeout(r, ms));
+                    return new Promise(r => setTimeout(r, ms));
                 }
             }
 
