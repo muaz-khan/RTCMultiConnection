@@ -88,11 +88,11 @@ try {
     }
 
     ['ssl_key', 'ssl_cert', 'ssl_cabundle'].forEach(function(key) {
-        if (!config['key'] || config['key'].toString().length) {
+        if (!config[key] || config[key].toString().length==0) {
             return;
         }
 
-        if (config['key'].indexOf('/path/to/') === -1) {
+        if (config[key].indexOf('/path/to/') === -1) {
             if (key === 'ssl_key') {
                 ssl_key = fs.readFileSync(config['ssl_key']);
             }
