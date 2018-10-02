@@ -12,7 +12,6 @@
 	<link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
 </head>
 <body>
-<!-- https://cdn.webrtc-experiment.com/Canvas-Designer/ -->
 <script src="https://cdn.webrtc-experiment.com/Canvas-Designer/canvas-designer-widget.js"></script>
 
 <style>
@@ -427,8 +426,8 @@ document.getElementById('btn-attach-file').onclick = function() {
 };
 
 function getFileHTML(file) {
-    var attachment = '<a href="' + url + '" target="_blank" download="' + file.name + '">Download: <b>' + file.name + '</b></a>';
     var url = file.url || URL.createObjectURL(file);
+    var attachment = '<a href="' + url + '" target="_blank" download="' + file.name + '">Download: <b>' + file.name + '</b></a>';
     if (file.name.match(/\.jpg|\.png|\.jpeg|\.gif/gi)) {
         attachment += '<br><img crossOrigin="anonymous" src="' + url + '">';
     } else if (file.name.match(/\.wav|\.mp3/gi)) {

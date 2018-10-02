@@ -14,7 +14,7 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 <script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.4.4/RTCMultiConnection.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/1.4.7/RTCMultiConnection.js"></script>
 
 <!-- or CDN -->
 <script src="https://rawgit.com/muaz-khan/RTCMultiConnection/master/dist/RTCMultiConnection.min.js"></script>
@@ -83,6 +83,8 @@ Here is a demo explaining how to use above `socketURL`:
 * https://jsfiddle.net/zd9Lsdfk/50/
 
 ## Integrate in your own applications?
+
+> Note: this section works only with v3.4.6 or earlier releases.
 
 ```javascript
 // node.js code

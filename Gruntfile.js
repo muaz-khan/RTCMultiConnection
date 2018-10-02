@@ -108,7 +108,7 @@ module.exports = function(grunt) {
             },
         },
         jsbeautifier: {
-            files: ['RTCMultiConnection.js', 'dev/*.js', 'Gruntfile.js', 'Signaling-Server.js', 'server.js'],
+            files: ['RTCMultiConnection.js', 'dev/*.js', 'Gruntfile.js', 'node_scripts/*.js'],
             options: {
                 js: {
                     braceStyle: "collapse",
@@ -161,13 +161,13 @@ module.exports = function(grunt) {
             }
         },
         watch: {
-          scripts: {
-            files: ['dev/*.js'],
-            tasks: ['concat', 'replace', 'jsbeautifier', 'uglify', 'copy', 'clean'],
-            options: {
-              spawn: false,
-            },
-          }
+            scripts: {
+                files: ['dev/*.js'],
+                tasks: ['concat', 'replace', 'jsbeautifier', 'uglify', 'copy', 'clean'],
+                options: {
+                    spawn: false,
+                },
+            }
         }
     });
 

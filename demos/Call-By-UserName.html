@@ -1,4 +1,4 @@
-<!-- Demo version: 2018.09.03 -->
+<!-- Demo version: 2018.10.01 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -120,6 +120,9 @@ connection.socketURL = '/';
 // connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
 
 connection.socketMessageEvent = 'call-by-username-demo';
+
+// do not shift room control to other users
+connection.autoCloseEntireSession = true;
 
 connection.session = {
     audio: true,
