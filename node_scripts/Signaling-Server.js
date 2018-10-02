@@ -430,6 +430,8 @@ module.exports = exports = function(app, socketCallback) {
 
         function joinARoom(message) {
             try {
+                if(!socket.admininfo || !socket.admininfo.sessionid) return;
+
                 // var roomid = message.remoteUserId;
                 var roomid = socket.admininfo.sessionid;
 
