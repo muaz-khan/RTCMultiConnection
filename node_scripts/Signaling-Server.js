@@ -148,40 +148,38 @@ module.exports = exports = function(app, socketCallback) {
                     pushLogs('', '', callback);
                 }
 
-                if(message.deleteUser === true) {
+                if (message.deleteUser === true) {
                     try {
                         var user = listOfUsers[message.userid];
-                        
-                        if(user) {
+
+                        if (user) {
                             user.socket.disconnect();
                         }
 
                         // delete listOfUsers[message.userid];
                         callback(true);
-                    }
-                    catch(e) {
+                    } catch (e) {
                         pushLogs('deleteUser', e);
                         callback(false);
                     }
                 }
 
-                if(message.deleteRoom === true) {
+                if (message.deleteRoom === true) {
                     try {
                         var room = listOfRooms[message.roomid];
-                        
-                        if(room) {
+
+                        if (room) {
                             var participants = room.participants;
                             delete listOfRooms[message.roomid];
                             participants.forEach(function(userid) {
                                 var user = listOfUsers[userid];
-                                if(user) {
+                                if (user) {
                                     user.socket.disconnect();
                                 }
                             });
                         }
                         callback(true);
-                    }
-                    catch(e) {
+                    } catch (e) {
                         pushLogs('deleteRoom', e);
                         callback(false);
                     }
@@ -430,7 +428,7 @@ module.exports = exports = function(app, socketCallback) {
 
         function joinARoom(message) {
             try {
-                if(!socket.admininfo || !socket.admininfo.sessionid) return;
+                if (!socket.admininfo || !socket.admininfo.sessionid) return;
 
                 // var roomid = message.remoteUserId;
                 var roomid = socket.admininfo.sessionid;

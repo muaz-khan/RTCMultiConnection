@@ -227,12 +227,12 @@ function getFirstAvailableBroadcaster(broadcastId, maxRelayLimitPerUser) {
         var broadcastInitiator = users[broadcastId];
 
         // if initiator is capable to receive users
-        if (broadcastInitiator.relayReceivers.length < maxRelayLimitPerUser) {
+        if (broadcastInitiator && broadcastInitiator.relayReceivers.length < maxRelayLimitPerUser) {
             return broadcastInitiator;
         }
 
         // otherwise if initiator knows who is current relaying user
-        if (broadcastInitiator.lastRelayuserid) {
+        if (broadcastInitiator && broadcastInitiator.lastRelayuserid) {
             var lastRelayUser = users[broadcastInitiator.lastRelayuserid];
             if (lastRelayUser && lastRelayUser.relayReceivers.length < maxRelayLimitPerUser) {
                 return lastRelayUser;
@@ -240,6 +240,7 @@ function getFirstAvailableBroadcaster(broadcastId, maxRelayLimitPerUser) {
         }
 
         // otherwise, search for a user who not relayed anything yet
+        // todo: why we're using "for-loop" here? it is not safe.
         var userFound;
         for (var n in users) {
             var user = users[n];
