@@ -1,4 +1,4 @@
-<!-- Demo version: 2018.09.23 -->
+<!-- Demo version: 2018.10.05 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -47,10 +47,17 @@
   </h1>
 
   <section class="make-center">
-    <input type="text" id="room-id" value="abcdef" autocorrect=off autocapitalize=off size=20>
-    <button id="open-room">Open Room</button>
-    <button id="join-room">Join Room</button>
-    <button id="open-or-join-room">Auto Open Or Join Room</button>
+    <div>
+      <label><input type="checkbox" id="record-entire-conference"> Record Entire Conference In The Browser?</label>
+      <span id="recording-status" style="display: none;"></span>
+      <button id="btn-stop-recording" style="display: none;">Stop Recording</button>
+      <br><br>
+
+      <input type="text" id="room-id" value="abcdef" autocorrect=off autocapitalize=off size=20>
+      <button id="open-room">Open Room</button>
+      <button id="join-room">Join Room</button>
+      <button id="open-or-join-room">Auto Open Or Join Room</button>
+    </div>
 
     <div id="videos-container" style="margin: 20px 0;"></div>
 
@@ -64,14 +71,21 @@
 <!-- custom layout for HTML5 audio/video elements -->
 <link rel="stylesheet" href="/dev/getHTMLMediaElement.css">
 <script src="/dev/getHTMLMediaElement.js"></script>
+
+<script src="https://cdn.webrtc-experiment.com/RecordRTC.js"></script>
 <script>
 // ......................................................
 // .......................UI Code........................
 // ......................................................
 document.getElementById('open-room').onclick = function() {
     disableInputButtons();
-    connection.open(document.getElementById('room-id').value, function() {
-        showRoomURL(connection.sessionid);
+    connection.open(document.getElementById('room-id').value, function(isRoomOpened, roomid, error) {
+        if(isRoomOpened === true) {
+          showRoomURL(connection.sessionid);
+        }
+        else {
+          alert(error);
+        }
     });
 };
 
@@ -164,6 +178,57 @@ connection.onstream = function(event) {
 
     // to keep room-id in cache
     localStorage.setItem(connection.socketMessageEvent, connection.sessionid);
+
+    chkRecordConference.parentNode.style.display = 'none';
+
+    if(chkRecordConference.checked === true) {
+      btnStopRecording.style.display = 'inline-block';
+      recordingStatus.style.display = 'inline-block';
+
+      var recorder = connection.recorder;
+      if(!recorder) {
+        recorder = RecordRTC([event.stream], {
+          type: 'video'
+        });
+        recorder.startRecording();
+        connection.recorder = recorder;
+      }
+      else {
+        recorder.getInternalRecorder().addStreams([event.stream]);
+      }
+
+      if(!connection.recorder.streams) {
+        connection.recorder.streams = [];
+      }
+
+      connection.recorder.streams.push(event.stream);
+      recordingStatus.innerHTML = 'Recording ' + connection.recorder.streams.length + ' streams';
+    }
+
+    if(event.type === 'local') {
+      connection.socket.on('disconnect', function() {
+        if(!connection.getAllParticipants().len) {
+          location.reload();
+        }
+      });
+    }
+};
+
+var recordingStatus = document.getElementById('recording-status');
+var chkRecordConference = document.getElementById('record-entire-conference');
+var btnStopRecording = document.getElementById('btn-stop-recording');
+btnStopRecording.onclick = function() {
+  var recorder = connection.recorder;
+  if(!recorder) return alert('No recorder found.');
+  recorder.stopRecording(function() {
+    var blob = recorder.getBlob();
+    invokeSaveAsDialog(blob);
+
+    connection.recorder = null;
+    btnStopRecording.style.display = 'none';
+    recordingStatus.style.display = 'none';
+    chkRecordConference.parentNode.style.display = 'inline-block';
+  });
 };
 
 connection.onstreamended = function(event) {
