@@ -45,10 +45,15 @@
                 isAudioMuted: true
             };
 
-            setHarkEvents(connection, connection.streamEvents[stream.streamid]);
-            setMuteHandlers(connection, connection.streamEvents[stream.streamid]);
+            try {
+                setHarkEvents(connection, connection.streamEvents[stream.streamid]);
+                setMuteHandlers(connection, connection.streamEvents[stream.streamid]);
 
-            connection.onstream(connection.streamEvents[stream.streamid]);
+                connection.onstream(connection.streamEvents[stream.streamid]);
+            } catch (e) {
+                //
+            }
+
             callback();
         }, connection);
     };
@@ -460,6 +465,10 @@
             password = null;
         }
 
+        if (connection.enableLogs) {
+            console.log('Sending open-room signal to socket.io');
+        }
+
         connection.waitingForLocalMedia = false;
         connection.socket.emit('open-room', {
             sessionid: connection.sessionid,
@@ -481,6 +490,8 @@
                 if (connection.enableLogs) {
                     console.warn('isRoomOpened: ', error, ' roomid: ', connection.sessionid);
                 }
+
+                callback(isRoomOpened, connection.sessionid, error);
             }
         });
     }

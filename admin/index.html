@@ -1,4 +1,4 @@
-<!-- Demo version: 2018.10.02 -->
+<!-- Demo version: 2018.10.05 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -236,7 +236,7 @@ section {
   border-bottom: 1px dotted blue;
   padding-bottom: 2px;
   cursor: pointer;
-  display: block;
+  display: inline-block;
 }
 
 .tab {
@@ -244,7 +244,7 @@ section {
   width: 20px;
 }
 
-header div span, header div button {
+header div .top-span, header div button {
   display: inline-block!important;
   margin-right: 25px;
   padding: 2px 8px;
@@ -273,6 +273,14 @@ input[disabled], button[disabled] {
   border-color: #dcd7d7!important;
   cursor: not-allowed!important;
 }
+
+.max-width {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
 </style>
 </head>
 <body>
@@ -282,8 +290,10 @@ input[disabled], button[disabled] {
     <div style="float: right;margin-top: 15px;">
       <button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Search User</button>
 
-      <span>Active rooms: <span id="active-rooms">0</span></span>
-      <span id="view-logs" class="clickable tooltip-test" title="View All Nodejs Coding Error Logs" data-toggle="modal" data-target=".bd-example-modal-lg">Error Logs</span>
+      <span class="top-span">Active users: <span id="active-users">0</span></span>
+      <span class="top-span">Active rooms: <span id="active-rooms">0</span></span>
+
+      <span id="view-logs" class="clickable tooltip-test top-span" title="View All Nodejs Coding Error Logs" data-toggle="modal" data-target=".bd-example-modal-lg">Error Logs</span>
     </div>
   </header>
 
@@ -381,11 +391,30 @@ input[disabled], button[disabled] {
           <th>Session</th>
           <th>Public Room?</th>
           <th>Participants</th>
-          <th>Max Participants Allowed</th>
           <th>Delete</th>
         </tr>
       </thead>
       <tbody id="rooms-list"></tbody>
+    </table>
+  </section>
+
+  <section style="min-height: 400px;">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>User ID</th>
+          <th>Room ID</th>
+          <th>Session</th>
+          <th>Extra</th>
+          <th>streams</th>
+          <th>mediaConstraints</th>
+          <th>sdpConstraints</th>
+          <th>connectedWith</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody id="users-list"></tbody>
     </table>
   </section>
 
@@ -396,6 +425,10 @@ socket.on('admin', function(message) {
     if (message.listOfRooms) {
         updateListOfRooms(message.listOfRooms);
     }
+
+    if (message.listOfUsers) {
+        updateListOfUsers(message.listOfUsers);
+    }
 });
 socket.on('connect', function() {
     socket.emit('admin', {
@@ -405,6 +438,84 @@ socket.on('connect', function() {
 socket.on('disconnect', function() {
     location.reload();
 });
+
+function updateListOfUsers(listOfUsers) {
+    $('#active-users').html(listOfUsers.length);
+
+    $('#users-list').html('');
+
+    if (!listOfUsers.length) {
+        $('#users-list').html('<tr><td colspan=8>No active user found on this server.</td></tr>');
+        return;
+    }
+
+    listOfUsers.forEach(function(user, idx) {
+        var tr = document.createElement('tr');
+        var html = '';
+
+        html += '<td><span>' + (idx + 1) + '</span></td>';
+        html += '<td><span class="clickable max-width" data-userid="' + user.userid + '" title="' + user.userid + '">' + user.userid + '</span></td>';
+        html += '<td><span class="max-width" title="' + user.admininfo.sessionid + '">' + user.admininfo.sessionid + '</span></td>';
+        html += '<td><span class="max-width" title="' + JSON.stringify(user.admininfo.session || {}).replace(/"/g, '`') + '">' + JSON.stringify(user.admininfo.session) + '</span></td>';
+        html += '<td><span class="max-width" title="' + JSON.stringify(user.admininfo.extra || {}).replace(/"/g, '`') + '">' + JSON.stringify(user.admininfo.extra) + '</span></td>';
+
+        if (true) {
+            // stream-ids
+            html += '<td>';
+            html += '<table>';
+            html += '<thead>';
+            html += '<th>streamid</th>';
+            html += '<th>tracks</th>';
+            html += '</thead>';
+            html += '<tbody>';
+
+            (user.admininfo.streams || []).forEach(function(stream) {
+                html += '<tr>';
+                html += '<td class="max-width" title="' + stream.streamid + '">' + stream.streamid + '</td>';
+                html += '<td>' + stream.tracks + '</td>';
+                html += '</tr>';
+            });
+            html += '</tbody>';
+            html += '</table>';
+            html += '</td>';
+        }
+
+        html += '<td><span class="max-width" title="' + JSON.stringify(user.admininfo.mediaConstraints || {}).replace(/"/g, '`') + '">' + JSON.stringify(user.admininfo.mediaConstraints) + '</span></td>';
+        html += '<td><span class="max-width" title="' + JSON.stringify(user.admininfo.sdpConstraints || {}).replace(/"/g, '`') + '">' + JSON.stringify(user.admininfo.sdpConstraints) + '</span></td>';
+        html += '<td><span class="max-width" title="' + JSON.stringify(user.connectedWith || {}).replace(/"/g, '`') + '">' + JSON.stringify(user.connectedWith) + '</span></td>';
+
+        html += '<td><button class="btn delete-user" data-userid="' + user.userid + '">Delete</button></td>';
+        $(tr).html(html);
+        $('#users-list').append(tr);
+
+        $(tr).find('.clickable').click(function() {
+            $('#txt-userid').val($(this).attr('data-userid'));
+            $('#view-userinfo').click();
+        });
+
+        $(tr).find('.delete-user').click(function() {
+            var userid = $(this).attr('data-userid');
+            confirmBox('User "<b>' + userid + '</b>" will be deleted from server.', function(isConfirmed) {
+                if (!isConfirmed) return;
+
+                socket.emit('admin', {
+                    deleteUser: true,
+                    userid: userid
+                }, function(isDeleted) {
+                    if (isDeleted) {
+                        $('.bd-example-modal-lg').modal('hide');
+
+                        socket.emit('admin', {
+                            all: true
+                        });
+                    } else {
+                        alertBox('Unable to delete this user.', 'Can Not Delete');
+                    }
+                });
+            });
+        });
+    });
+}
 
 function updateListOfRooms(rooms) {
     var keys = Object.keys(rooms);
@@ -422,8 +533,8 @@ function updateListOfRooms(rooms) {
         var tr = document.createElement('tr');
         var html = '';
         html += '<td>' + (idx + 1) + '</td>';
-        html += '<td>' + roomid + '</td>';
-        html += '<td>' + room.owner + '</td>';
+        html += '<td><span class="max-width" title="' + roomid + '">' + roomid + '</span></td>';
+        html += '<td><span class="max-width" title="' + room.owner + '">' + room.owner + '</span></td>';
         html += '<td>';
         Object.keys(room.session).forEach(function(key) {
             html += '<pre><b>' + key + ':</b> ' + room.session[key] + '</pre>';
@@ -433,11 +544,10 @@ function updateListOfRooms(rooms) {
 
         html += '<td>';
         room.participants.forEach(function(pid) {
-            html += '<span class="clickable userinfo" data-userid="' + pid + '">' + pid + '</span>';
+            html += '<span class="clickable userinfo" data-userid="' + pid + '"><span class="max-width" title="' + pid + '">' + pid + '</span></span><br>';
         });
         html += '</td>';
 
-        html += '<td>' + room.maxParticipantsAllowed + '</td>';
         html += '<td><button class="btn delete-room" data-roomid="' + roomid + '">Delete</button></td>';
         $(tr).html(html);
         $('#rooms-list').append(tr);
@@ -575,7 +685,7 @@ function getUserInfo(userid, callback) {
             if (typeof userinfo[item] === 'string') {
                 html += '<td>' + userinfo[item] + '</td>';
             } else {
-                if (item === 'streams') {
+                if (item === 'streams' && userinfo[item]) {
                     html += '<td>';
                     html += '<table>';
                     html += '<thead>';
@@ -583,6 +693,7 @@ function getUserInfo(userid, callback) {
                     html += '<th>tracks</th>';
                     html += '</thead>';
                     html += '<tbody>';
+
                     userinfo[item].forEach(function(stream) {
                         html += '<tr>';
                         html += '<td>' + stream.streamid + '</td>';
@@ -593,7 +704,7 @@ function getUserInfo(userid, callback) {
                     html += '</table>';
                     html += '</td>';
                 } else {
-                    html += '<td>' + JSON.stringify(userinfo[item]) + '</td>';
+                    html += '<td>' + JSON.stringify(userinfo[item] || '') + '</td>';
                 }
             }
             html += '</tr>';

@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2018-10-03 11:18:01 AM UTC
+// Last time updated: 2018-10-05 11:23:38 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.8
@@ -4201,10 +4201,15 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     isAudioMuted: true
                 };
 
-                setHarkEvents(connection, connection.streamEvents[stream.streamid]);
-                setMuteHandlers(connection, connection.streamEvents[stream.streamid]);
+                try {
+                    setHarkEvents(connection, connection.streamEvents[stream.streamid]);
+                    setMuteHandlers(connection, connection.streamEvents[stream.streamid]);
 
-                connection.onstream(connection.streamEvents[stream.streamid]);
+                    connection.onstream(connection.streamEvents[stream.streamid]);
+                } catch (e) {
+                    //
+                }
+
                 callback();
             }, connection);
         };
@@ -4616,6 +4621,10 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 password = null;
             }
 
+            if (connection.enableLogs) {
+                console.log('Sending open-room signal to socket.io');
+            }
+
             connection.waitingForLocalMedia = false;
             connection.socket.emit('open-room', {
                 sessionid: connection.sessionid,
@@ -4637,6 +4646,8 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     if (connection.enableLogs) {
                         console.warn('isRoomOpened: ', error, ' roomid: ', connection.sessionid);
                     }
+
+                    callback(isRoomOpened, connection.sessionid, error);
                 }
             });
         }

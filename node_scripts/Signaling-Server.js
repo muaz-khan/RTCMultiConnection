@@ -91,8 +91,33 @@ module.exports = exports = function(app, socketCallback) {
     function sendToAdmin() {
         try {
             if (adminSocket) {
+                var users = [];
+                Object.keys(listOfUsers).forEach(function(userid) {
+                    try {
+                        var item = listOfUsers[userid];
+                        if (!item) return; // maybe user just left?
+
+                        if (!item.connectedWith) {
+                            item.connectedWith = {};
+                        }
+
+                        if (!item.socket) {
+                            item.socket = {};
+                        }
+
+                        users.push({
+                            userid: userid,
+                            admininfo: item.socket.admininfo || '',
+                            connectedWith: Object.keys(item.connectedWith)
+                        });
+                    } catch (e) {
+                        pushLogs('admin.user-looper', e);
+                    }
+                });
+
                 adminSocket.emit('admin', {
-                    listOfRooms: listOfRooms
+                    listOfRooms: listOfRooms,
+                    listOfUsers: users
                 });
             }
         } catch (e) {
@@ -153,6 +178,10 @@ module.exports = exports = function(app, socketCallback) {
                         var user = listOfUsers[message.userid];
 
                         if (user) {
+                            if (user.socket.owner) {
+                                // delete listOfRooms[user.socket.owner];
+                            }
+
                             user.socket.disconnect();
                         }
 
@@ -704,9 +733,13 @@ module.exports = exports = function(app, socketCallback) {
                     listOfRooms[arg.sessionid].owner = socket.userid;
                     listOfRooms[arg.sessionid].session = arg.session;
 
-                    if (typeof arg.password !== 'undefined' && arg.password.length) {
-                        // password protected room?
-                        listOfRooms[arg.sessionid].password = arg.password;
+                    try {
+                        if (typeof arg.password !== 'undefined' && arg.password.toString().length) {
+                            // password protected room?
+                            listOfRooms[arg.sessionid].password = arg.password;
+                        }
+                    } catch (e) {
+                        pushLogs('open-room.password', e);
                     }
                 }
 
@@ -766,9 +799,13 @@ module.exports = exports = function(app, socketCallback) {
                     return;
                 }
 
-                if (listOfRooms[arg.sessionid].password && listOfRooms[arg.sessionid].password != arg.password) {
-                    callback(false, 'Invalid password.');
-                    return;
+                try {
+                    if (listOfRooms[arg.sessionid].password && listOfRooms[arg.sessionid].password != arg.password) {
+                        callback(false, 'Invalid password.');
+                        return;
+                    }
+                } catch (e) {
+                    pushLogs('join-room.password', e);
                 }
             } catch (e) {
                 pushLogs('join-room', e);
