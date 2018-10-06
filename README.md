@@ -47,12 +47,9 @@ connection.socketURL = 'https://webrtcweb.com:9001/';
 
 ## iOS+Android Demo Apps
 
-> Note: RTCMultiConnection supports Safari-11 browser both on iOS and MacOSX.
-> 
-> So you do not need to build a cordova or ionic application.
+* https://github.com/muaz-khan/cordova-mobile-apps
 
-* https://webrtcweb.com/cordova-apps/
-
+> Note: RTCMultiConnection supports Safari-11 and Edge.
 
 ## Wiki Pages
 

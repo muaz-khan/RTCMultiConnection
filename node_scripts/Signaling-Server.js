@@ -74,7 +74,9 @@ module.exports = exports = function(app, socketCallback) {
                 isPublic: false, // means: isPublicModerator
                 extra: extra || {},
                 admininfo: {},
-                maxParticipantsAllowed: params.maxParticipantsAllowed || 1000
+                maxParticipantsAllowed: params.maxParticipantsAllowed || 1000,
+                socketMessageEvent: params.socketMessageEvent || '',
+                socketCustomEvent: params.socketCustomEvent || ''
             };
         } catch (e) {
             pushLogs('appendUser', e);
@@ -222,7 +224,7 @@ module.exports = exports = function(app, socketCallback) {
     function onConnection(socket) {
         var params = socket.handshake.query;
 
-        if (params.userid != 'admin' && (!params.userid || !params.sessionid)) {
+        if (params.userid != 'admin' && (!params.userid /*|| !params.sessionid*/)) {
             pushLogs('invalid-socket', {
                 message: 'userid or sessionid is undefined',
                 stack: JSON.stringify(params || {}, null, '\n')
@@ -243,6 +245,9 @@ module.exports = exports = function(app, socketCallback) {
         }
 
         var socketMessageEvent = params.msgEvent || 'RTCMultiConnection-Message';
+
+        // for admin's record
+        params.socketMessageEvent = socketMessageEvent;
 
         var autoCloseEntireSession = params.autoCloseEntireSession === true || params.autoCloseEntireSession === 'true';
         var sessionid = params.sessionid;
@@ -591,6 +596,8 @@ module.exports = exports = function(app, socketCallback) {
                         owner: userid, // this can change if owner leaves and if control shifts
                         participants: [userid],
                         extra: {}, // usually owner's extra-data
+                        socketMessageEvent: '',
+                        socketCustomEvent: '',
                         session: {
                             audio: true,
                             video: true
@@ -787,7 +794,9 @@ module.exports = exports = function(app, socketCallback) {
                         isPublic: false, // means: isPublicModerator
                         extra: arg.extra,
                         admininfo: {},
-                        maxParticipantsAllowed: params.maxParticipantsAllowed || 1000
+                        maxParticipantsAllowed: params.maxParticipantsAllowed || 1000,
+                        socketMessageEvent: params.socketMessageEvent || '',
+                        socketCustomEvent: params.socketCustomEvent || ''
                     };
                 }
                 listOfUsers[socket.userid].extra = arg.extra;
@@ -814,6 +823,8 @@ module.exports = exports = function(app, socketCallback) {
                     listOfRooms[arg.sessionid].owner = socket.userid;
                     listOfRooms[arg.sessionid].session = arg.session;
                     listOfRooms[arg.sessionid].extra = arg.extra || {};
+                    listOfRooms[arg.sessionid].socketMessageEvent = listOfUsers[socket.userid].socketMessageEvent;
+                    listOfRooms[arg.sessionid].socketCustomEvent = listOfUsers[socket.userid].socketCustomEvent;
 
                     try {
                         if (typeof arg.password !== 'undefined' && arg.password.toString().length) {
@@ -867,7 +878,9 @@ module.exports = exports = function(app, socketCallback) {
                         isPublic: false, // means: isPublicModerator
                         extra: arg.extra,
                         admininfo: {},
-                        maxParticipantsAllowed: params.maxParticipantsAllowed || 1000
+                        maxParticipantsAllowed: params.maxParticipantsAllowed || 1000,
+                        socketMessageEvent: params.socketMessageEvent || '',
+                        socketCustomEvent: params.socketCustomEvent || ''
                     };
                 }
                 listOfUsers[socket.userid].extra = arg.extra;

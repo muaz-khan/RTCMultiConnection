@@ -388,9 +388,9 @@ input[disabled], button[disabled] {
           <th>#</th>
           <th>Room ID</th>
           <th>Owner ID</th>
+          <th>socketMessageEvent</th>
           <th>Session</th>
           <th>Extra</th>
-          <th>Public Room?</th>
           <th>Participants</th>
           <th>Delete</th>
         </tr>
@@ -537,6 +537,7 @@ function updateListOfRooms(rooms) {
         html += '<td>' + (idx + 1) + '</td>';
         html += '<td><span class="max-width" title="' + roomid + '">' + roomid + '</span></td>';
         html += '<td><span class="max-width" title="' + room.owner + '">' + room.owner + '</span></td>';
+        html += '<td><span class="max-width" title="' + room.socketMessageEvent + '">' + room.socketMessageEvent + '</span></td>';
         
         html += '<td>';
         Object.keys(room.session || {}).forEach(function(key) {
@@ -545,8 +546,6 @@ function updateListOfRooms(rooms) {
         html += '</td>';
 
         html += '<td><span class="max-width" title="' + JSON.stringify(room.extra || {}).replace(/"/g, '`') + '">' + JSON.stringify(room.extra || {}) + '</span></td>';
-
-        html += '<td>' + room.isPublic + '</td>';
 
         html += '<td>';
         room.participants.forEach(function(pid) {
@@ -642,7 +641,7 @@ $('#view-logs').click(function() {
         $(table).html(html);
 
         if (keys.length) {
-            $('#logs-viewer').html('<div style="text-align: center; margin-bottom: 10px;"><button id="clear-logs" class="btn btn-primary">Clear Error Logs</button> (permanently delete from logs.json)</div>');
+            $('#logs-viewer').html('<div style="text-align: center; margin-bottom: 10px;"><button id="clear-logs" class="btn btn-primary" style="padding: 4px 8px;font-size: 13px;line-height: 1;">Clear Error Logs</button> (permanently delete from logs.json)</div>');
             $('#logs-viewer').append(table);
         } else {
             $('#logs-viewer').html('<div style="text-align: center; margin-bottom: 10px;">Error logs file is empty.</div>');
