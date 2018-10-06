@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2018-10-05 11:23:38 AM UTC
+// Last time updated: 2018-10-06 6:44:28 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.8
@@ -33,6 +33,8 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             parameters += '&enableScalableBroadcast=true';
             parameters += '&maxRelayLimitPerUser=' + (connection.maxRelayLimitPerUser || 2);
         }
+
+        parameters += '&extra=' + JSON.stringify(connection.extra || {});
 
         if (connection.socketCustomParameters) {
             parameters += connection.socketCustomParameters;
@@ -4600,7 +4602,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     }
 
                     mPeer.onNegotiationNeeded(connectionDescription);
-                    cb();
+                    cb(isRoomJoined, connection.sessionid, error);
                 }
 
                 if (isRoomJoined === false) {
@@ -5837,14 +5839,14 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             roomid = roomid || connection.sessionid;
 
             if (SocketConnection.name === 'SSEConnection') {
-                SSEConnection.checkPresence(roomid, function(isRoomExist, _roomid) {
+                SSEConnection.checkPresence(roomid, function(isRoomExist, _roomid, extra) {
                     if (!connection.socket) {
                         if (!isRoomExist) {
                             connection.userid = _roomid;
                         }
 
                         connection.connectSocket(function() {
-                            callback(isRoomExist, _roomid);
+                            callback(isRoomExist, _roomid, extra);
                         });
                         return;
                     }
@@ -5859,11 +5861,11 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 });
                 return;
             }
-            connection.socket.emit('check-presence', roomid + '', function(isRoomExist, _roomid) {
+            connection.socket.emit('check-presence', roomid + '', function(isRoomExist, _roomid, extra) {
                 if (connection.enableLogs) {
                     console.log('checkPresence.isRoomExist: ', isRoomExist, ' roomid: ', _roomid);
                 }
-                callback(isRoomExist, _roomid);
+                callback(isRoomExist, _roomid, extra);
             });
         };
 

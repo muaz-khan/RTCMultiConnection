@@ -389,6 +389,7 @@ input[disabled], button[disabled] {
           <th>Room ID</th>
           <th>Owner ID</th>
           <th>Session</th>
+          <th>Extra</th>
           <th>Public Room?</th>
           <th>Participants</th>
           <th>Delete</th>
@@ -398,7 +399,7 @@ input[disabled], button[disabled] {
     </table>
   </section>
 
-  <section style="min-height: 400px;">
+  <section style="min-height: 400px; display: none;">
     <table class="table">
       <thead>
         <tr>
@@ -427,7 +428,8 @@ socket.on('admin', function(message) {
     }
 
     if (message.listOfUsers) {
-        updateListOfUsers(message.listOfUsers);
+        $('#active-users').html(message.listOfUsers);
+        // updateListOfUsers(message.listOfUsers);
     }
 });
 socket.on('connect', function() {
@@ -524,7 +526,7 @@ function updateListOfRooms(rooms) {
     $('#rooms-list').html('');
 
     if (!keys.length) {
-        $('#rooms-list').html('<tr><td colspan=8>No active room found on this server.</td></tr>');
+        $('#rooms-list').html('<tr><td colspan=9>No active room found on this server.</td></tr>');
         return;
     }
 
@@ -535,11 +537,15 @@ function updateListOfRooms(rooms) {
         html += '<td>' + (idx + 1) + '</td>';
         html += '<td><span class="max-width" title="' + roomid + '">' + roomid + '</span></td>';
         html += '<td><span class="max-width" title="' + room.owner + '">' + room.owner + '</span></td>';
+        
         html += '<td>';
-        Object.keys(room.session).forEach(function(key) {
+        Object.keys(room.session || {}).forEach(function(key) {
             html += '<pre><b>' + key + ':</b> ' + room.session[key] + '</pre>';
         });
         html += '</td>';
+
+        html += '<td><span class="max-width" title="' + JSON.stringify(room.extra || {}).replace(/"/g, '`') + '">' + JSON.stringify(room.extra || {}) + '</span></td>';
+
         html += '<td>' + room.isPublic + '</td>';
 
         html += '<td>';
@@ -597,6 +603,8 @@ updateViewLogsButton();
 
 $('#view-logs').click(function() {
     $('#view-logs').html('Loading...');
+    $('#logs-viewer').html('Loading...');
+
     var req = new XMLHttpRequest();
     req.open('GET', 'logs.json');
     req.onload = function() {

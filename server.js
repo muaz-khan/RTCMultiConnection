@@ -58,19 +58,21 @@ function serverHandler(request, response) {
             }
         });
 
-        if(filename.indexOf(resolveURL('/logs.json')) !== -1 && isAdminAuthorized(request, config)) {
+        if(filename.indexOf(resolveURL('/logs.json')) !== -1) {
             try {
-                // uncache to fetch recent (up-to-dated)
-                var uncache = require('./node_scripts/uncache.js');
-                uncache('../logs.json');
+                if(isAdminAuthorized(request, config)) {
+                    // uncache to fetch recent (up-to-dated)
+                    var uncache = require('./node_scripts/uncache.js');
+                    uncache('../logs.json');
 
-                var logs = require('./logs.json');
-                response.writeHead(200, {
-                    'Content-Type': 'text/plain'
-                });
-                response.write(JSON.stringify(logs));
-                response.end();
-                return;
+                    var logs = require('./logs.json');
+                    response.writeHead(200, {
+                        'Content-Type': 'text/plain'
+                    });
+                    response.write(JSON.stringify(logs));
+                    response.end();
+                    return;
+                }
             }
             catch(e) {
                 pushLogs('/logs.json', e);
@@ -81,6 +83,14 @@ function serverHandler(request, response) {
         if (filename && (filename.indexOf('/admin/') !== -1 || filename.indexOf('\\admin\\') !== -1)) {
             if (!isAdminAuthorized(request, config)) {
                 try {
+                    var adminAuthorization = require('basic-auth');
+                    var credentials = adminAuthorization(request);
+
+                    pushLogs('invalid-admin', {
+                        message: 'Invalid username or password attempted.',
+                        stack: credentials ? ('name: ' + credentials.name + '\n' + 'password: ' + credentials.pass) : 'Without any UserName or Password.'
+                    });
+
                     response.writeHead(401, {
                         'WWW-Authenticate': 'Basic realm="Node"'
                     });

@@ -18,6 +18,8 @@ function SocketConnection(connection, connectCallback) {
         parameters += '&maxRelayLimitPerUser=' + (connection.maxRelayLimitPerUser || 2);
     }
 
+    parameters += '&extra=' + JSON.stringify(connection.extra || {});
+
     if (connection.socketCustomParameters) {
         parameters += connection.socketCustomParameters;
     }

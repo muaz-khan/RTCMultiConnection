@@ -444,7 +444,7 @@
                 }
 
                 mPeer.onNegotiationNeeded(connectionDescription);
-                cb();
+                cb(isRoomJoined, connection.sessionid, error);
             }
 
             if (isRoomJoined === false) {
@@ -1681,14 +1681,14 @@
         roomid = roomid || connection.sessionid;
 
         if (SocketConnection.name === 'SSEConnection') {
-            SSEConnection.checkPresence(roomid, function(isRoomExist, _roomid) {
+            SSEConnection.checkPresence(roomid, function(isRoomExist, _roomid, extra) {
                 if (!connection.socket) {
                     if (!isRoomExist) {
                         connection.userid = _roomid;
                     }
 
                     connection.connectSocket(function() {
-                        callback(isRoomExist, _roomid);
+                        callback(isRoomExist, _roomid, extra);
                     });
                     return;
                 }
@@ -1703,11 +1703,11 @@
             });
             return;
         }
-        connection.socket.emit('check-presence', roomid + '', function(isRoomExist, _roomid) {
+        connection.socket.emit('check-presence', roomid + '', function(isRoomExist, _roomid, extra) {
             if (connection.enableLogs) {
                 console.log('checkPresence.isRoomExist: ', isRoomExist, ' roomid: ', _roomid);
             }
-            callback(isRoomExist, _roomid);
+            callback(isRoomExist, _roomid, extra);
         });
     };
 

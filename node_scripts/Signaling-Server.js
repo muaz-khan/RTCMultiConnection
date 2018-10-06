@@ -51,14 +51,9 @@ module.exports = exports = function(app, socketCallback) {
     // to secure your socket.io usage: (via: docs/tips-tricks.md)
     // io.set('origins', 'https://domain.com');
 
-    function appendUser(socket) {
+    function appendUser(socket, params) {
         try {
-            var alreadyExist = listOfUsers[socket.userid];
-            var extra = {};
-
-            if (alreadyExist && alreadyExist.extra) {
-                extra = alreadyExist.extra;
-            }
+            var extra = params.extra;
 
             var params = socket.handshake.query;
 
@@ -92,7 +87,8 @@ module.exports = exports = function(app, socketCallback) {
         try {
             if (adminSocket) {
                 var users = [];
-                Object.keys(listOfUsers).forEach(function(userid) {
+                // temporarily disabled
+                false && Object.keys(listOfUsers).forEach(function(userid) {
                     try {
                         var item = listOfUsers[userid];
                         if (!item) return; // maybe user just left?
@@ -117,7 +113,7 @@ module.exports = exports = function(app, socketCallback) {
 
                 adminSocket.emit('admin', {
                     listOfRooms: listOfRooms,
-                    listOfUsers: users
+                    listOfUsers: Object.keys(listOfUsers).length // users
                 });
             }
         } catch (e) {
@@ -125,8 +121,127 @@ module.exports = exports = function(app, socketCallback) {
         }
     }
 
+    function handleAdminSocket(socket, params) {
+        if (!app.request || !app.isAdminAuthorized || !app.config || !app.isAdminAuthorized(app.request, app.config)) {
+            var adminAuthorization = require('basic-auth');
+            var credentials = adminAuthorization(app.request);
+
+            pushLogs('invalid-admin', {
+                message: 'Invalid username or password attempted.',
+                stack: credentials ? ('name: ' + credentials.name + '\n' + 'password: ' + credentials.pass) : 'Without any UserName or Password.'
+            });
+
+            socket.disconnect();
+            return;
+        }
+
+        adminSocket = socket;
+        socket.on('admin', function(message, callback) {
+            if (!app.request || !app.isAdminAuthorized || !app.config || !app.isAdminAuthorized(app.request, app.config)) {
+                var adminAuthorization = require('basic-auth');
+                var credentials = adminAuthorization(app.request);
+
+                pushLogs('invalid-admin', {
+                    message: 'Invalid username or password attempted.',
+                    stack: credentials ? ('name: ' + credentials.name + '\n' + 'password: ' + credentials.pass) : 'Without any UserName or Password.'
+                });
+
+                socket.disconnect();
+                return;
+            }
+
+            callback = callback || function() {};
+
+            if (message.all === true) {
+                sendToAdmin();
+            }
+
+            if (message.userinfo === true && message.userid) {
+                try {
+                    var user = listOfUsers[message.userid];
+                    if (user) {
+                        callback(user.socket.admininfo || {});
+                    } else {
+                        callback({
+                            error: 'User-id "' + message.userid + '" does not exist.'
+                        });
+                    }
+                } catch (e) {
+                    pushLogs('userinfo', e);
+                }
+            }
+
+            if (message.clearLogs === true) {
+                // last callback parameter will force to clear logs
+                pushLogs('', '', callback);
+            }
+
+            if (message.deleteUser === true) {
+                try {
+                    var user = listOfUsers[message.userid];
+
+                    if (user) {
+                        if (user.socket.owner) {
+                            // delete listOfRooms[user.socket.owner];
+                        }
+
+                        user.socket.disconnect();
+                    }
+
+                    // delete listOfUsers[message.userid];
+                    callback(true);
+                } catch (e) {
+                    pushLogs('deleteUser', e);
+                    callback(false);
+                }
+            }
+
+            if (message.deleteRoom === true) {
+                try {
+                    var room = listOfRooms[message.roomid];
+
+                    if (room) {
+                        var participants = room.participants;
+                        delete listOfRooms[message.roomid];
+                        participants.forEach(function(userid) {
+                            var user = listOfUsers[userid];
+                            if (user) {
+                                user.socket.disconnect();
+                            }
+                        });
+                    }
+                    callback(true);
+                } catch (e) {
+                    pushLogs('deleteRoom', e);
+                    callback(false);
+                }
+            }
+        });
+    }
+
     function onConnection(socket) {
         var params = socket.handshake.query;
+
+        if (params.userid != 'admin' && (!params.userid || !params.sessionid)) {
+            pushLogs('invalid-socket', {
+                message: 'userid or sessionid is undefined',
+                stack: JSON.stringify(params || {}, null, '\n')
+            });
+            socket.disconnect();
+            return;
+        }
+
+        if (params.extra) {
+            try {
+                params.extra = JSON.parse(params.extra);
+            } catch (e) {
+                pushLogs('params.extra', e);
+                params.extra = {};
+            }
+        } else {
+            params.extra = {};
+        }
+
         var socketMessageEvent = params.msgEvent || 'RTCMultiConnection-Message';
 
         var autoCloseEntireSession = params.autoCloseEntireSession === true || params.autoCloseEntireSession === 'true';
@@ -135,85 +250,7 @@ module.exports = exports = function(app, socketCallback) {
         var enableScalableBroadcast = params.enableScalableBroadcast === true || params.enableScalableBroadcast === 'true';
 
         if (params.userid === 'admin') {
-            if (!app.request || !app.isAdminAuthorized || !app.config || !app.isAdminAuthorized(app.request, app.config)) {
-                socket.disconnect();
-                return;
-            }
-
-            adminSocket = socket;
-            socket.on('admin', function(message, callback) {
-                if (!app.request || !app.isAdminAuthorized || !app.config || !app.isAdminAuthorized(app.request, app.config)) {
-                    socket.disconnect();
-                    return;
-                }
-
-                callback = callback || function() {};
-
-                if (message.all === true) {
-                    sendToAdmin();
-                }
-
-                if (message.userinfo === true && message.userid) {
-                    try {
-                        var user = listOfUsers[message.userid];
-                        if (user) {
-                            callback(user.socket.admininfo || {});
-                        } else {
-                            callback({
-                                error: 'User-id "' + message.userid + '" does not exist.'
-                            });
-                        }
-                    } catch (e) {
-                        pushLogs('userinfo', e);
-                    }
-                }
-
-                if (message.clearLogs === true) {
-                    // last callback parameter will force to clear logs
-                    pushLogs('', '', callback);
-                }
-
-                if (message.deleteUser === true) {
-                    try {
-                        var user = listOfUsers[message.userid];
-
-                        if (user) {
-                            if (user.socket.owner) {
-                                // delete listOfRooms[user.socket.owner];
-                            }
-
-                            user.socket.disconnect();
-                        }
-
-                        // delete listOfUsers[message.userid];
-                        callback(true);
-                    } catch (e) {
-                        pushLogs('deleteUser', e);
-                        callback(false);
-                    }
-                }
-
-                if (message.deleteRoom === true) {
-                    try {
-                        var room = listOfRooms[message.roomid];
-
-                        if (room) {
-                            var participants = room.participants;
-                            delete listOfRooms[message.roomid];
-                            participants.forEach(function(userid) {
-                                var user = listOfUsers[userid];
-                                if (user) {
-                                    user.socket.disconnect();
-                                }
-                            });
-                        }
-                        callback(true);
-                    } catch (e) {
-                        pushLogs('deleteRoom', e);
-                        callback(false);
-                    }
-                }
-            });
+            handleAdminSocket(socket, params);
             return;
         }
 
@@ -244,7 +281,7 @@ module.exports = exports = function(app, socketCallback) {
         }
 
         socket.userid = params.userid;
-        appendUser(socket);
+        appendUser(socket, params);
 
         socket.on('extra-data-updated', function(extra) {
             try {
@@ -257,9 +294,46 @@ module.exports = exports = function(app, socketCallback) {
                 // todo: use "admininfo.extra" instead of below one
                 listOfUsers[socket.userid].extra = extra;
 
-                for (var user in listOfUsers[socket.userid].connectedWith) {
-                    listOfUsers[user].socket.emit('extra-data-updated', socket.userid, extra);
+                try {
+                    for (var user in listOfUsers[socket.userid].connectedWith) {
+                        try {
+                            listOfUsers[user].socket.emit('extra-data-updated', socket.userid, extra);
+                        } catch (e) {
+                            pushLogs('extra-data-updated.connectedWith', e);
+                        }
+                    }
+                } catch (e) {
+                    pushLogs('extra-data-updated.connectedWith', e);
                 }
+
+                // sent alert to all room participants
+                if (!socket.admininfo) {
+                    sendToAdmin();
+                    return;
+                }
+
+                var roomid = socket.admininfo.sessionid;
+                if (roomid && listOfRooms[roomid]) {
+                    if (socket.userid == listOfRooms[roomid].owner) {
+                        // room's extra must match owner's extra
+                        listOfRooms[roomid].extra = extra;
+                    }
+                    listOfRooms[roomid].participants.forEach(function(pid) {
+                        try {
+                            var user = listOfUsers[pid];
+                            if (!user) {
+                                // todo: remove this user from participants list
+                                return;
+                            }
+
+                            user.socket.emit('extra-data-updated', socket.userid, extra);
+                        } catch (e) {
+                            pushLogs('extra-data-updated.participants', e);
+                        }
+                    });
+                }
+
+                sendToAdmin();
             } catch (e) {
                 pushLogs('extra-data-updated', e);
             }
@@ -346,7 +420,7 @@ module.exports = exports = function(app, socketCallback) {
                 }
 
                 socket.userid = newUserId;
-                appendUser(socket);
+                appendUser(socket, params);
 
                 callback();
             } catch (e) {
@@ -356,8 +430,14 @@ module.exports = exports = function(app, socketCallback) {
 
         socket.on('set-password', function(password) {
             try {
-                if (listOfRooms[socket.roomid] && listOfRooms[socket.roomid].owner == socket.userid) {
-                    listOfRooms[socket.roomid].password = password;
+                if (!socket.admininfo) {
+                    return;
+                }
+
+                var roomid = socket.admininfo.sessionid;
+
+                if (listOfRooms[roomid] && listOfRooms[roomid].owner == socket.userid) {
+                    listOfRooms[roomid].password = password;
                 }
             } catch (e) {
                 pushLogs('set-password', e);
@@ -510,6 +590,7 @@ module.exports = exports = function(app, socketCallback) {
                         maxParticipantsAllowed: params.maxParticipantsAllowed || 1000,
                         owner: userid, // this can change if owner leaves and if control shifts
                         participants: [userid],
+                        extra: {}, // usually owner's extra-data
                         session: {
                             audio: true,
                             video: true
@@ -732,6 +813,7 @@ module.exports = exports = function(app, socketCallback) {
                     // for non-scalable-broadcast demos
                     listOfRooms[arg.sessionid].owner = socket.userid;
                     listOfRooms[arg.sessionid].session = arg.session;
+                    listOfRooms[arg.sessionid].extra = arg.extra || {};
 
                     try {
                         if (typeof arg.password !== 'undefined' && arg.password.toString().length) {

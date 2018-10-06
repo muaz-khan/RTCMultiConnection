@@ -14,7 +14,7 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 <script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
 
 <!-- or specific version -->
-<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/1.4.7/RTCMultiConnection.js"></script>
+<script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.4.7/RTCMultiConnection.js"></script>
 
 <!-- or CDN -->
 <script src="https://rawgit.com/muaz-khan/RTCMultiConnection/master/dist/RTCMultiConnection.min.js"></script>
