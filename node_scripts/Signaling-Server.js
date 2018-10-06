@@ -224,13 +224,12 @@ module.exports = exports = function(app, socketCallback) {
     function onConnection(socket) {
         var params = socket.handshake.query;
 
-        if (params.userid != 'admin' && (!params.userid /*|| !params.sessionid*/)) {
-            pushLogs('invalid-socket', {
-                message: 'userid or sessionid is undefined',
-                stack: JSON.stringify(params || {}, null, '\n')
-            });
-            socket.disconnect();
-            return;
+        if(!params.userid) {
+            params.userid = (Math.random() * 100).toString().replace('.', '');
+        }
+
+        if(!params.sessionid) {
+            params.sessionid = (Math.random() * 100).toString().replace('.', '');
         }
 
         if (params.extra) {
@@ -701,7 +700,7 @@ module.exports = exports = function(app, socketCallback) {
                             user.socket.emit(socketMessageEvent, message);
                         }
 
-                        if (listOfUsers[socket.userid].extra.broadcastId) {
+                        if (listOfUsers[socket.userid] && listOfUsers[socket.userid].extra.broadcastId) {
                             // for /admin/ page
                             appendToRoom(listOfUsers[socket.userid].extra.broadcastId, socket.userid);
                         }
