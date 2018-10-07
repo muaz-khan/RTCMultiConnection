@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2018-10-06 6:44:28 AM UTC
+// Last time updated: 2018-10-07 4:45:49 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.4.8
@@ -3630,7 +3630,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
     })();
 
-    // Last time updated on: 5th May 2018
+    // Last time updated on: June 08, 2018
 
     // Latest file can be found here: https://cdn.webrtc-experiment.com/Screen-Capturing.js
 
@@ -3642,7 +3642,21 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
     // ___________________
     // Screen-Capturing.js
 
-    // Listen for postMessage handler
+    // Source code: https://github.com/muaz-khan/Chrome-Extensions/tree/master/desktopCapture
+    // Google AppStore installation path: https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk
+
+    // This JavaScript file is aimed to explain steps needed to integrate above chrome extension
+    // in your own webpages
+
+    // Usage:
+    // getScreenConstraints(function(screen_constraints) {
+    //    navigator.mediaDevices.getUserMedia({ video: screen_constraints }).then(onSuccess).catch(onFailure );
+    // });
+
+    // First Step: Download the extension, modify "manifest.json" and publish to Google AppStore
+    //             https://github.com/muaz-khan/Chrome-Extensions/tree/master/desktopCapture#how-to-publish-yourself
+
+    // Second Step: Listen for postMessage handler
     // postMessage is used to exchange "sourceId" between chrome extension and you webpage.
     // though, there are tons other options as well, e.g. XHR-signaling, websockets, etc.
     window.addEventListener('message', function(event) {
@@ -3653,26 +3667,14 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         onMessageCallback(event.data);
     });
 
-    // via: https://bugs.chromium.org/p/chromium/issues/detail?id=487935#c17
-    // you can capture screen on Android Chrome >= 55 with flag: "Experimental ScreenCapture android"
-    window.IsAndroidChrome = false;
-    try {
-        if (navigator.userAgent.toLowerCase().indexOf("android") > -1 && /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor)) {
-            window.IsAndroidChrome = true;
-        }
-    } catch (e) {}
-
     // and the function that handles received messages
 
     function onMessageCallback(data) {
         // "cancel" button is clicked
         if (data == 'PermissionDeniedError') {
             chromeMediaSource = 'PermissionDeniedError';
-            if (screenCallback) {
-                return screenCallback('PermissionDeniedError');
-            } else {
-                throw new Error('PermissionDeniedError: User rejected to share his screen.');
-            }
+            if (screenCallback) return screenCallback('PermissionDeniedError');
+            else throw new Error('PermissionDeniedError');
         }
 
         // extension notified his presence
@@ -3682,8 +3684,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
         // extension shared temp sourceId
         if (data.sourceId && screenCallback) {
-            sourceId = data.sourceId;
-            screenCallback(sourceId);
+            screenCallback(sourceId = data.sourceId, data.canRequestAudioTrack === true);
         }
     }
 
@@ -3696,18 +3697,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
     function isChromeExtensionAvailable(callback) {
         if (!callback) return;
 
-        if (DetectRTC.browser.name === 'Firefox') return isFirefoxExtensionAvailable(callback);
-
-        if (window.IsAndroidChrome) {
-            chromeMediaSource = 'screen';
-            callback(true);
-            return;
-        }
-
-        if (chromeMediaSource == 'desktop') {
-            callback(true);
-            return;
-        }
+        if (chromeMediaSource == 'desktop') return callback(true);
 
         // ask extension if it is available
         window.postMessage('are-you-there', '*');
@@ -3719,78 +3709,53 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         }, 2000);
     }
 
-    function isFirefoxExtensionAvailable(callback) {
-        if (!callback) return;
-
-        if (DetectRTC.browser.name !== 'Firefox') return isChromeExtensionAvailable(callback);
-
-        var isFirefoxAddonResponded = false;
-
-        function messageCallback(event) {
-            var addonMessage = event.data;
-
-            if (!addonMessage || typeof addonMessage.isScreenCapturingEnabled === 'undefined') return;
-
-            isFirefoxAddonResponded = true;
-
-            if (addonMessage.isScreenCapturingEnabled === true) {
-                callback(true);
-            } else {
-                callback(false);
-            }
-
-            window.removeEventListener("message", messageCallback, false);
-        }
-
-        window.addEventListener("message", messageCallback, false);
-
-        window.postMessage({
-            checkIfScreenCapturingEnabled: true,
-            domains: [document.domain]
-        }, "*");
-
-        setTimeout(function() {
-            if (!isFirefoxAddonResponded) {
-                callback(true); // can be old firefox extension
-            }
-        }, 2000); // wait 2-seconds-- todo: is this enough limit?
-    }
-
     // this function can be used to get "source-id" from the extension
-    function getSourceId(callback, audioPlusTab) {
+    function getSourceId(callback) {
         if (!callback) throw '"callback" parameter is mandatory.';
-
-        sourceId = null;
+        if (sourceId) return callback(sourceId);
 
         screenCallback = callback;
-
-        if (!!audioPlusTab) {
-            window.postMessage('audio-plus-tab', '*');
-            return;
-        }
         window.postMessage('get-sourceId', '*');
     }
 
+    // this function can be used to get "source-id" from the extension
+    function getCustomSourceId(arr, callback) {
+        if (!arr || !arr.forEach) throw '"arr" parameter is mandatory and it must be an array.';
+        if (!callback) throw '"callback" parameter is mandatory.';
+
+        if (sourceId) return callback(sourceId);
+
+        screenCallback = callback;
+        window.postMessage({
+            'get-custom-sourceId': arr
+        }, '*');
+    }
+
+    // this function can be used to get "source-id" from the extension
+    function getSourceIdWithAudio(callback) {
+        if (!callback) throw '"callback" parameter is mandatory.';
+        if (sourceId) return callback(sourceId);
+
+        screenCallback = callback;
+        window.postMessage('audio-plus-tab', '*');
+    }
+
+    var isFirefox = typeof window.InstallTrigger !== 'undefined';
+    var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
+    var isChrome = !!window.chrome && !isOpera;
+
     function getChromeExtensionStatus(extensionid, callback) {
-        if (window.IsAndroidChrome) {
-            chromeMediaSource = 'screen';
-            callback('installed-enabled');
-            return;
-        }
+        if (isFirefox) return callback('not-chrome');
 
         if (arguments.length != 2) {
             callback = extensionid;
-            extensionid = window.RMCExtensionID || 'ajhifddimkapgcifgcodmmfdlknahffk'; // default extension-id
+            extensionid = 'ajhifddimkapgcifgcodmmfdlknahffk'; // default extension-id
         }
-
-        if (DetectRTC.browser.name === 'Firefox') return callback('not-chrome');
-
-        sourceId = null;
-        chromeMediaSource = 'screen';
 
         var image = document.createElement('img');
         image.src = 'chrome-extension://' + extensionid + '/icon.png';
         image.onload = function() {
+            chromeMediaSource = 'screen';
             window.postMessage('are-you-there', '*');
             setTimeout(function() {
                 if (chromeMediaSource == 'screen') {
@@ -3803,74 +3768,59 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
     }
 
-    function getAspectRatio(w, h) {
-        function gcd(a, b) {
-            return (b == 0) ? a : gcd(b, a % b);
-        }
-        var r = gcd(w, h);
-        return (w / r) / (h / r);
+    function getScreenConstraintsWithAudio(callback) {
+        getScreenConstraints(callback, true);
     }
 
     // this function explains how to use above methods/objects
-    function getScreenConstraints(callback, audioPlusTab) {
+    function getScreenConstraints(callback, captureSourceIdWithAudio) {
         var firefoxScreenConstraints = {
             mozMediaSource: 'window',
             mediaSource: 'window'
         };
 
-        if (DetectRTC.browser.name === 'Firefox') return callback(null, firefoxScreenConstraints);
+        if (isFirefox) return callback(null, firefoxScreenConstraints);
 
-        // support recapture again & again
-        sourceId = null;
+        // this statement defines getUserMedia constraints
+        // that will be used to capture content of screen
+        var screen_constraints = {
+            mandatory: {
+                chromeMediaSource: chromeMediaSource,
+                maxWidth: screen.width > 1920 ? screen.width : 1920,
+                maxHeight: screen.height > 1080 ? screen.height : 1080
+            },
+            optional: []
+        };
 
-        isChromeExtensionAvailable(function(isAvailable) {
-            // this statement defines getUserMedia constraints
-            // that will be used to capture content of screen
-            var screen_constraints = {
-                mandatory: {
-                    chromeMediaSource: chromeMediaSource,
-                    maxWidth: screen.width,
-                    maxHeight: screen.height,
-                    minWidth: screen.width,
-                    minHeight: screen.height,
-                    minAspectRatio: getAspectRatio(screen.width, screen.height),
-                    maxAspectRatio: getAspectRatio(screen.width, screen.height),
-                    minFrameRate: 64,
-                    maxFrameRate: 128
-                },
-                optional: []
-            };
+        // this statement verifies chrome extension availability
+        // if installed and available then it will invoke extension API
+        // otherwise it will fallback to command-line based screen capturing API
+        if (chromeMediaSource == 'desktop' && !sourceId) {
+            if (captureSourceIdWithAudio) {
+                getSourceIdWithAudio(function(sourceId, canRequestAudioTrack) {
+                    screen_constraints.mandatory.chromeMediaSourceId = sourceId;
 
-            if (window.IsAndroidChrome) {
-                // now invoking native getUserMedia API
-                callback(null, screen_constraints);
-                return;
-            }
-
-            // this statement verifies chrome extension availability
-            // if installed and available then it will invoke extension API
-            // otherwise it will fallback to command-line based screen capturing API
-            if (chromeMediaSource == 'desktop' && !sourceId) {
-                getSourceId(function() {
+                    if (canRequestAudioTrack) {
+                        screen_constraints.canRequestAudioTrack = true;
+                    }
+                    callback(sourceId == 'PermissionDeniedError' ? sourceId : null, screen_constraints);
+                });
+            } else {
+                getSourceId(function(sourceId) {
                     screen_constraints.mandatory.chromeMediaSourceId = sourceId;
                     callback(sourceId == 'PermissionDeniedError' ? sourceId : null, screen_constraints);
-                    sourceId = null;
-                }, audioPlusTab);
-                return;
+                });
             }
+            return;
+        }
 
-            // this statement sets gets 'sourceId" and sets "chromeMediaSourceId"
-            if (chromeMediaSource == 'desktop') {
-                screen_constraints.mandatory.chromeMediaSourceId = sourceId;
-            }
+        // this statement sets gets 'sourceId" and sets "chromeMediaSourceId" 
+        if (chromeMediaSource == 'desktop') {
+            screen_constraints.mandatory.chromeMediaSourceId = sourceId;
+        }
 
-            sourceId = null;
-            // chromeMediaSource = 'screen'; // maybe this line is redundant?
-            screenCallback = null;
-
-            // now invoking native getUserMedia API
-            callback(null, screen_constraints);
-        });
+        // now invoking native getUserMedia API
+        callback(null, screen_constraints);
     }
 
     // TextReceiver.js & TextSender.js

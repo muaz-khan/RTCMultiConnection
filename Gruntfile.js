@@ -41,7 +41,7 @@ module.exports = function(grunt) {
                     'dev/MultiPeersHandler.js',
 
                     // 'dev/adapter.js', ---- optional
-                    'dev/DetectRTC.js',
+                    'node_modules/detectrtc/DetectRTC.js', // npm install detectrtc
                     'dev/globals.js',
 
                     'dev/ios-hacks.js', // to support ios
@@ -54,7 +54,7 @@ module.exports = function(grunt) {
                     'dev/getUserMedia.js',
                     'dev/StreamsHandler.js',
 
-                    'dev/Screen-Capturing.js',
+                    'node_modules/webrtc-screen-capturing/Screen-Capturing.js', // npm install webrtc-screen-capturing
 
                     'dev/TextSenderReceiver.js',
                     'dev/FileProgressBarHandler.js',

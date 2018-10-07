@@ -27,6 +27,16 @@ connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
 connection.socketURL = 'https://webrtcweb.com:9001/';
 ```
 
+## Install ONLY socket.io server
+
+```sh
+npm install rtcmulticonnection-server
+```
+
+For more info, please check:
+
+* https://github.com/muaz-khan/RTCMultiConnection-Server
+
 ## YouTube videos
 
 1. [Getting started guide / RTCMultiConnection](https://www.youtube.com/watch?v=jqtC7mSTCgk)
