@@ -51,7 +51,8 @@
     "webrtc-screen-capturing": "latest",
     "socket.io": "latest",
     "basic-auth": "latest",
-    "tsscmp": "latest"
+    "tsscmp": "latest",
+    "webrtc-adapter": "latest"
   },
   "analyze": false,
   "license": "MIT",
