@@ -168,22 +168,11 @@
     }
 
     // 1st paramter is roomid
-    // 2nd paramter can be either password or a callback function
-    // 3rd paramter is a callback function
-    connection.openOrJoin = function(roomid, password, callback) {
+    // 2rd paramter is a callback function
+    connection.openOrJoin = function(roomid, callback) {
         callback = callback || function() {};
 
         connection.checkPresence(roomid, function(isRoomExist, roomid) {
-            // i.e. 2nd parameter is a callback function
-            if (typeof password === 'function' && typeof password !== 'undefined') {
-                callback = password; // switch callback functions
-                password = null;
-            }
-
-            if (!password && !!connection.password) {
-                password = connection.password;
-            }
-
             if (isRoomExist) {
                 connection.sessionid = roomid;
 
@@ -212,11 +201,11 @@
                         remotePeerSdpConstraints: remotePeerSdpConstraints
                     },
                     sender: connection.userid,
-                    password: password || false
+                    password: connection.password || false
                 };
 
                 beforeJoin(connectionDescription.message, function() {
-                    joinRoom(connectionDescription, password, function() {});
+                    joinRoom(connectionDescription, function() {});
                 });
                 return;
             }
@@ -224,20 +213,15 @@
             connection.waitingForLocalMedia = true;
             connection.isInitiator = true;
 
-            // var oldUserId = connection.userid;
-            // connection.userid = 
             connection.sessionid = roomid || connection.sessionid;
-            // connection.userid += '';
-
-            // connection.socket.emit('changed-uuid', connection.userid);
 
             if (isData(connection.session)) {
-                openRoom(callback, password);
+                openRoom(callback);
                 return;
             }
 
             connection.captureUserMedia(function() {
-                openRoom(callback, password);
+                openRoom(callback);
             });
         });
     };
@@ -245,46 +229,24 @@
     // don't allow someone to join this person until he has the media
     connection.waitingForLocalMedia = false;
 
-    connection.open = function(roomid, isPublicModerator, callback) {
+    connection.open = function(roomid, callback) {
+        callback = callback || function() {};
+
         connection.waitingForLocalMedia = true;
         connection.isInitiator = true;
 
-        callback = callback || function() {};
-        if (typeof isPublicModerator === 'function') {
-            callback = isPublicModerator;
-            isPublicModerator = false;
-        }
-
-        // var oldUserId = connection.userid;
-        // connection.userid = 
         connection.sessionid = roomid || connection.sessionid;
-        // connection.userid += '';
 
         connectSocket(function() {
-            // connection.socket.emit('changed-uuid', connection.userid);
-
-            if (isPublicModerator == true) {
-                connection.becomePublicModerator();
-            }
-
             if (isData(connection.session)) {
-                openRoom(callback, connection.password);
+                openRoom(callback);
                 return;
             }
 
             connection.captureUserMedia(function() {
-                openRoom(callback, connection.password);
+                openRoom(callback);
             });
         });
-    };
-
-    connection.becomePublicModerator = function() {
-        if (!connection.isInitiator) return;
-        connection.socket.emit('become-a-public-moderator');
-    };
-
-    connection.dontMakeMeModerator = function() {
-        connection.socket.emit('dont-make-me-moderator');
     };
 
     // this object keeps extra-data records for all connected users
@@ -413,17 +375,13 @@
 
         beforeJoin(connectionDescription.message, function() {
             connectSocket(function() {
-                joinRoom(connectionDescription, connection.password, cb);
+                joinRoom(connectionDescription, cb);
             });
         });
         return connectionDescription;
     };
 
-    function joinRoom(connectionDescription, password, cb) {
-        if (password && (typeof password === 'function' || password.prototype || typeof password === 'object')) {
-            password = null;
-        }
-
+    function joinRoom(connectionDescription, cb) {
         connection.socket.emit('join-room', {
             sessionid: connection.sessionid,
             session: connection.session,
@@ -431,7 +389,7 @@
             sdpConstraints: connection.sdpConstraints,
             streams: getStreamInfoForAdmin(),
             extra: connection.extra,
-            password: typeof password !== 'undefined' && typeof password !== 'object' ? (password || onnection.password) : ''
+            password: false // typeof onnection.password !== 'undefined' && typeof onnection.password !== 'object' ? onnection.password : ''
         }, function(isRoomJoined, error) {
             if (isRoomJoined === true) {
                 if (connection.enableLogs) {
@@ -454,17 +412,15 @@
 
                 // retry after 3 seconds
                 setTimeout(function() {
-                    joinRoom(connectionDescription, password, cb);
+                    joinRoom(connectionDescription, cb);
                 }, 3000);
             }
         });
     }
 
-    function openRoom(callback, password) {
-        if (password && (typeof password === 'function' || password.prototype || typeof password === 'object')) {
-            password = null;
-        }
+    connection.publicRoomIdentifier = '';
 
+    function openRoom(callback) {
         if (connection.enableLogs) {
             console.log('Sending open-room signal to socket.io');
         }
@@ -477,7 +433,8 @@
             sdpConstraints: connection.sdpConstraints,
             streams: getStreamInfoForAdmin(),
             extra: connection.extra,
-            password: typeof password !== 'undefined' && typeof password !== 'object' ? (password || onnection.password) : ''
+            identifier: connection.publicRoomIdentifier,
+            password: false // typeof onnection.password !== 'undefined' && typeof onnection.password !== 'object' ? onnection.password : ''
         }, function(isRoomOpened, error) {
             if (isRoomOpened === true) {
                 if (connection.enableLogs) {
@@ -638,10 +595,6 @@
     connection.onbeforeunload = function(arg1, dontCloseSocket) {
         if (!connection.closeBeforeUnload) {
             return;
-        }
-
-        if (connection.isInitiator === true) {
-            connection.dontMakeMeModerator();
         }
 
         connection.peers.getAllParticipants().forEach(function(participant) {
@@ -1417,20 +1370,6 @@
         var selector = new FileSelector();
         selector.accept = '*.*';
         selector.selectSingleFile(callback);
-    };
-
-    connection.getPublicModerators = connection.getPublicUsers = function(userIdStartsWith, callback) {
-        if (typeof userIdStartsWith === 'function') {
-            callback = userIdStartsWith;
-        }
-
-        connectSocket(function() {
-            connection.socket.emit(
-                'get-public-moderators',
-                typeof userIdStartsWith === 'string' ? userIdStartsWith : '',
-                callback
-            );
-        });
     };
 
     connection.onmute = function(e) {
