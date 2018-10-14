@@ -108,7 +108,7 @@ module.exports = function(grunt) {
             },
         },
         jsbeautifier: {
-            files: ['RTCMultiConnection.js', 'dev/*.js', 'Gruntfile.js', 'node_scripts/*.js'],
+            files: ['RTCMultiConnection.js', 'dev/*.js', 'Gruntfile.js', 'node_scripts/*.js', 'admin/js/admin-ui.js'],
             options: {
                 js: {
                     braceStyle: "collapse",

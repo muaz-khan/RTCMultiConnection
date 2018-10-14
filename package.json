@@ -1,7 +1,7 @@
 {
   "name": "rtcmulticonnection",
   "preferGlobal": false,
-  "version": "3.4.9",
+  "version": "3.5.0",
   "author": {
     "name": "Muaz Khan",
     "email": "muazkh@gmail.com",
@@ -52,7 +52,8 @@
     "socket.io": "latest",
     "basic-auth": "latest",
     "tsscmp": "latest",
-    "webrtc-adapter": "latest"
+    "webrtc-adapter": "latest",
+    "canvas-designer": "latest"
   },
   "analyze": false,
   "license": "MIT",

@@ -1,9 +1,9 @@
 'use strict';
 
-// Last time updated: 2018-10-12 10:09:55 AM UTC
+// Last time updated: 2018-10-14 8:31:55 AM UTC
 
 // _________________________
-// RTCMultiConnection v3.4.8
+// RTCMultiConnection v3.5.0
 
 // Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection
 
@@ -5903,7 +5903,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
 
         connection.trickleIce = true;
-        connection.version = '3.4.8';
+        connection.version = '3.5.0';
 
         connection.onSettingLocalDescription = function(event) {
             if (connection.enableLogs) {
