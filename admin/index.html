@@ -1,4 +1,4 @@
-<!-- Demo version: 2018.10.14 -->
+<!-- Demo version: 2018.10.15 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -50,6 +50,15 @@ a:hover {
     margin-left: 20px;
     display: block;
     height: 55px;
+}
+
+.logo-text {
+    font-size: 24px;
+    display: inline-block;
+    margin-top: 15px;
+    margin-left: 9px;
+    font-weight: bold;
+    color: #0194ff;
 }
 
 section {
@@ -274,17 +283,52 @@ input[disabled], button[disabled] {
   text-overflow: ellipsis;
   display: block;
 }
+
+.new-updates-notifier {
+  text-align: center;
+  display: none;
+}
+
+.new-updates-notifier span {
+    background: yellow;
+    display: inline-block;
+    border: 1px solid red;
+    padding: 5px 22px;
+    border-top: 0;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.new-updates-notifier a {
+  border-bottom: 1px dotted;
+  text-decoration: none!important;
+}
+
+.new-updates-notifier label {
+  margin: 0 5px;
+  color: #EC008C;
+  border-bottom: 1px dotted;
+  cursor: pointer;
+}
+
+.new-updates-notifier input {
+    vertical-align: middle;
+}
 </style>
 </head>
 <body>
+  <div class="new-updates-notifier">
+    <span>There are new updates. Do you want to refresh? <label><input type="checkbox"> auto update</label> or <a href="">Refresh</a></span>
+  </div>
+
   <header style="margin-bottom: 20px;">
-    <img class="logo" src="/demos/logo.png" alt="RTCMultiConnection" />
+    <img class="logo" src="/demos/logo.png" alt="RTCMultiConnection" /> <span class="logo-text">Admin</span>
 
     <div style="float: right;margin-top: 15px;">
       <button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Search User</button>
 
-      <span class="top-span">Signaling-Server ( Users: <span id="active-users">0</span>, Rooms: <span id="active-rooms">0</span> )</span>
-      <span class="top-span">Scalable-Broadcast ( Users: <span id="scalable-users">0</span> )</span>
+      <span class="top-span">Signaling-Server ( users: <span id="active-users">0</span>, rooms: <span id="active-rooms">0</span><!--, Sockets: <span id="all-sockts">0</span>  --> )</span>
+      <span class="top-span">Scalable-Broadcast ( users: <span id="scalable-users">0</span> )</span>
 
       <span id="view-logs" class="clickable tooltip-test top-span" title="View All Nodejs Coding Error Logs" data-toggle="modal" data-target=".bd-example-modal-lg">Error Logs</span>
     </div>

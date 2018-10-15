@@ -1,11 +1,34 @@
 var socket = io.connect('/?userid=admin');
 socket.on('admin', function(message) {
-    updateListOfRooms(message.listOfRooms || []);
+    if(message.newUpdates === true) {
+        if(socket.auto_update === true) {
+            socket.emit('admin', {
+                all: true
+            });
+            return;
+        }
+        $('.new-updates-notifier').show();
+    }
+
+    else {
+        updateListOfRooms(message.listOfRooms || []);
+        // updateListOfUsers(message.listOfUsers || []);
+    }
 
     $('#active-users').html(message.listOfUsers || 0);
     $('#scalable-users').html(message.scalableBroadcastUsers || 0);
-
-    // updateListOfUsers(message.listOfUsers || []);
+    // $('#all-sockts').html(message.allSockets || 0);
+});
+$('.new-updates-notifier a').click(function(e) {
+    e.preventDefault();
+    $('.new-updates-notifier').hide();
+    socket.emit('admin', {
+        all: true
+    });
+});
+$('.new-updates-notifier input').click(function() {
+    socket.auto_update = true;
+    $('.new-updates-notifier a').click();
 });
 socket.on('connect', function() {
     socket.emit('admin', {
