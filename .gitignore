@@ -1,3 +1,17 @@
+_site
+.sass-cache
+.jekyll-metadata
+*.iml
+.idea/*
+_site
+Gemfile.lock
+node_modules
+.DS_Store
+*.pyc
+dist/
+.vscode/
+v2.2.2
+
 node_modules
 bower_components
 
@@ -18,4 +32,3 @@ lib-cov
 config.gypi
 CVS
 npm-debug.log
-rmc-debug.log
