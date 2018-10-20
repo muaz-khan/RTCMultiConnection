@@ -1,16 +1,14 @@
 var socket = io.connect('/?userid=admin');
 socket.on('admin', function(message) {
-    if(message.newUpdates === true) {
-        if(socket.auto_update === true) {
+    if (message.newUpdates === true) {
+        if (socket.auto_update === true) {
             socket.emit('admin', {
                 all: true
             });
             return;
         }
         $('.new-updates-notifier').show();
-    }
-
-    else {
+    } else {
         updateListOfRooms(message.listOfRooms || []);
         // updateListOfUsers(message.listOfUsers || []);
     }

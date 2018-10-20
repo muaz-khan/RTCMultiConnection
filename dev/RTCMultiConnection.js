@@ -1785,7 +1785,8 @@
             console.warn('Userid already taken.', useridAlreadyTaken, 'Your new userid:', yourNewUserId);
         }
 
-        connection.join(useridAlreadyTaken);
+        connection.userid = connection.token();
+        connection.join(connection.sessionid);
     };
 
     connection.onRoomFull = function(roomid) {
@@ -1801,13 +1802,6 @@
         if (connection.enableLogs) {
             console.info('Set local description for remote user', event.userid);
         }
-    };
-
-    connection.oneRoomAlreadyExist = function(roomid) {
-        if (connection.enableLogs) {
-            console.info('Server says "Room ', roomid, 'already exist. Joining instead.');
-        }
-        connection.join(roomid);
     };
 
     connection.resetScreen = function() {

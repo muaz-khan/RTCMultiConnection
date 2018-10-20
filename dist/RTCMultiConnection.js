@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2018-10-14 8:31:55 AM UTC
+// Last time updated: 2018-10-20 6:44:42 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.5.0
@@ -5893,7 +5893,8 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 console.warn('Userid already taken.', useridAlreadyTaken, 'Your new userid:', yourNewUserId);
             }
 
-            connection.join(useridAlreadyTaken);
+            connection.userid = connection.token();
+            connection.join(connection.sessionid);
         };
 
         connection.onRoomFull = function(roomid) {
@@ -5909,13 +5910,6 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             if (connection.enableLogs) {
                 console.info('Set local description for remote user', event.userid);
             }
-        };
-
-        connection.oneRoomAlreadyExist = function(roomid) {
-            if (connection.enableLogs) {
-                console.info('Server says "Room ', roomid, 'already exist. Joining instead.');
-            }
-            connection.join(roomid);
         };
 
         connection.resetScreen = function() {
