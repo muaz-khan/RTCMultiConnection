@@ -1,7 +1,6 @@
 ---
 api_name: acceptParticipationRequest
 api_description: Validate person who is joining your room
-css: 
 ---
 
 {% capture html %}

@@ -17,6 +17,19 @@ connection.socketOptions = {
 </pre>
 </section>
 
+<section>
+    <h2>Otherwise</h2>
+    <pre>
+connection.socketOptions.resource = 'custom';
+connection.socketOptions.transport = 'polling';
+connection.socketOptions['try multiple transports'] = false;
+connection.socketOptions.secure = true;
+connection.socketOptions.port = '9001';
+connection.socketOptions['max reconnection attempts'] = 100;
+// etc.
+</pre>
+</section>
+
 {% endcapture %}
 {% include html_snippet.html html=html %}
 

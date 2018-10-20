@@ -1,7 +1,6 @@
 ---
 api_name: accept
 api_description: This method is deprecated since RTCMultiConnection version 3
-css: 
 ---
 
 {% capture html %}

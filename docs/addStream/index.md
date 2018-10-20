@@ -1,7 +1,6 @@
 ---
 api_name: addStream
 api_description: Use this method to add additional streams in a LIVE session
-css: 
 ---
 
 {% capture html %}

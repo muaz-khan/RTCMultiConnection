@@ -24,8 +24,8 @@ api_description: Open a room if does not exist, otherwise join it
       <tr>
         <td>callback</td>
         <td>
-            it is an optional function callback
-            <pre style="background:#fff;color:#000">connection.openOrJoin(<span style="color:#00a33f">'room-id'</span>, <span style="color:#ff5600">function</span>() {
+            it has an optional function callback
+            <pre style="background:#fff;color:#000">connection.openOrJoin(<span style="color:#00a33f">'room-id'</span>, <span style="color:#ff5600">function</span>(isRoomCreated, roomid, error) {
     <span style="color:#ff5600">if</span> (connection.isInitiator <span style="color:#ff5600">===</span> <span style="color:#a535ae">true</span>) {
         <span style="color:#919191">// you opened the room</span>
     } <span style="color:#ff5600">else</span> {
