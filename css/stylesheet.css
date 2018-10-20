@@ -1,7 +1,7 @@
 /* Fonts Copyright (C) 2011-2017 Hoefler & Co.*/
 @font-face {
     font-family: "Whitney SSm A";
-    src: url(../fonts/Whitney.woff2);
+    src: url(/fonts/Whitney.woff2);
     font-weight: 400;
     font-style: normal;
 }
@@ -167,38 +167,144 @@ pre {
   font-family: 'Roboto Mono';
   font-style: normal;
   font-weight: 400;
-  src: url(../fonts/RobotoMono.woff2) format('woff2');
+  src: url(/fonts/RobotoMono.woff2) format('woff2');
 }
 
 pre, code {
     font-family: 'Roboto Mono', monospace;
 }
 
-@media all and (max-width: 1000px) {
-  nav {
-      display: block;
-      text-align: left;
-  }
-  .logo {
-      float: none;
-      display: block;
-      margin: 0;
-  }
-  header {
-    height: auto;
-  }
-  pre {
-    width: 90%;
-    overflow: auto;
-    font-size: 13px;
-  }
-  iframe {
-    width: 100%!important;
-  }
-  section, header, footer {
-      padding: 2px 4px;
-  }
-  td, tr, th {
-      padding: 0 3px!important;
-  }
+table {
+  max-width: 100%;
+  border-left: 1px solid #eceeef;
+  border-bottom: 1px solid #eceeef;
 }
+
+table th,
+table td {
+  padding: 0.75rem;
+  vertical-align: top;
+  border-top: 1px solid #eceeef;
+  border-right: 1px solid #eceeef;
+}
+
+table thead th {
+  vertical-align: bottom;
+  border-bottom: 2px solid #eceeef;
+}
+
+table tbody + tbody {
+  border-top: 2px solid #eceeef;
+}
+
+.menu-explorer {
+    color: transparent!important;
+    display: block;
+    display: none;
+    text-align: center;
+    position: absolute;
+    margin-right: 12px;
+    margin-top: 12px;
+    right: 0;
+}
+
+.menu-explorer img {
+    vertical-align: middle;
+    width: 25px;
+}
+
+@media all and (max-width: 900px) {
+    tr, td, .logo {
+        display: block;
+    }
+
+    .logo {
+        text-align: center;
+    }
+
+    nav li {
+        border: 0;
+        display: block;
+        text-align: right;
+    }
+
+    nav li img {
+        float: right;
+        margin-right: 0;
+        margin-left: 12px;
+    }
+
+    nav {
+        height: auto;
+        margin: 0;
+        display: none;
+
+        position: fixed;
+        left: auto;
+        right: 0;
+        top: 0;
+        z-index: 9;
+        background: white;
+        width: auto;
+        height: 100%;
+        box-shadow: rgb(84, 145, 208) 0px 0 0px 2px;
+    }
+
+    nav li {
+        border-bottom: 1px solid rgb(84, 145, 208);
+        text-align: center;
+        line-height: 2;
+    }
+
+    nav li a {
+        padding-right: 3px;
+    }
+
+    .menu-explorer {
+        display: block;
+    }
+
+    .header {
+        position: static;
+        border: 0;
+        box-shadow: rgb(84, 145, 208) 0px 2px 0px 0px;
+    }
+
+    .no-mobile {
+        display: none!important;
+        opacity: 0!important;
+        visibility: hidden!important;
+        z-index: -1!important;
+        width: 0!important;
+        height: 0!important;
+        overflow: hidden!important;
+        border: 0!important;
+        box-shadow: none!important;
+    }
+
+    nav a, .menu-explorer {
+        font-size: 15px;
+    }
+}
+
+@media all and (max-width: 620px) {
+    button, input {
+        display: block;
+        margin: 5px 10px;
+    }
+}
+
+@media all and (max-width: 500px) {
+    h1 {
+        font-size: 18px;
+    }
+}
+
+@media screen and (orientation:portrait) and (min-width: 350px) {
+    .header {
+        position: fixed!important;
+        border-bottom: 1px solid white!important;
+        box-shadow: rgb(84, 145, 208) 0px 1px 0px 0px!important;
+    }
+}
+

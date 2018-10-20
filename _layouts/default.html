@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="{% if page.description %}{{ page.description }}{% else %} {{ page.api_description }}{% endif %}">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% if page.title %}{{ page.title }} {% else %} RTCMultiConnection.{{ page.api_name }}{% endif %}</title>
+    <meta name="google-site-verification" content="0ZfJnHomOzZDWKIkhkRYklDwdYnyEFEnZ7neD7gzHPU" />
+    {% assign sub_dirs = page.path | split: '/' | size | minus: 1 %}
+    {% capture relative_path_to_root %}{% for i in (1..sub_dirs) %}../{% endfor %}{% endcapture %}
+    <link rel="shortcut icon" href="/images/logo.png">
+    <link rel="stylesheet" href="/css/stylesheet.css">
+    {% if page.css %}{{ page.css }}{% endif %}
+    <script src="/js/menu.js"></script>
+  </head>
+
+  <body>
+    <header>
+      <a class="logo" href="/"><img src="/images/logo.png" alt="RTCMultiConnection"></a>
+      <a href="/demos/" class="menu-explorer">Menu<img src="/images/menu-icon.png" alt="Menu"></a>
+
+      <nav>
+        <li>
+          <a href="/docs/getting-started/">Getting Started</a>
+        </li>
+        <li>
+          <a href="/FAQ/">FAQ</a>
+        </li>
+        <li>
+          <a href="https://www.youtube.com/playlist?list=PLPRQUXAnRydKdyun-vjKPMrySoow2N4tl">YouTube</a>
+        </li>
+        <li>
+          <a href="https://rtcmulticonnection.herokuapp.com/demos/">Demos</a>
+        </li>
+        <li>
+          <a href="https://github.com/muaz-khan/RTCMultiConnection/wiki">Wiki</a>
+        </li>
+        <li>
+          <a href="https://github.com/muaz-khan/RTCMultiConnection">Github</a>
+        </li>
+      </nav>
+    </header>
+
+    <h1>
+      {% if page.title %}{{ page.title }} {% else %} RTCMultiConnection.<span style="color: #EC008C">{{ page.api_name }}</span>{% endif %}
+      <p>{% if page.description %}{{ page.description }}{% else %} {{ page.api_description }}{% endif %}</p>
+    </h1>
+    
+    {{ content }}
+
+    <footer><small id="send-message"></small></footer>
+    
+    <script src="https://cdn.webrtc-experiment.com/common.js"></script>
+  </body>
+</html>

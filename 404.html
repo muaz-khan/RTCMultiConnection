@@ -1,0 +1,13 @@
+---
+title: 404 Not Found
+description: Page Not Found
+css: 
+---
+
+{% capture html %}
+<section>
+  <p><strong>Page not found :(</strong></p>
+  <p>The requested page could not be found.</p>
+</section>
+{% endcapture %}
+{% include html_snippet.html html=html %}

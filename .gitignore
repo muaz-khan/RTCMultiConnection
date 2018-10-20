@@ -1,12 +1,24 @@
-# Node
+_site
+.sass-cache
+.jekyll-metadata
+*.iml
+.idea/*
+_site
+Gemfile.lock
 node_modules
+.DS_Store
+*.pyc
+dist/
+.vscode/
+v2.2.2
 
-# bower
+node_modules
 bower_components
 
-RTCMultiConnection-v3.0
-
 make-tar.sh
+
+*.tar.gz
+lib-cov
 
 .*.swp
 ._*
@@ -20,4 +32,3 @@ make-tar.sh
 config.gypi
 CVS
 npm-debug.log
-rmc-debug.log
