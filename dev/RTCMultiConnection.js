@@ -12,6 +12,7 @@
         callback = callback || function() {};
 
         if (preventDuplicateOnStreamEvents[stream.streamid]) {
+            callback();
             return;
         }
         preventDuplicateOnStreamEvents[stream.streamid] = true;
@@ -310,7 +311,7 @@
         }
     };
 
-    connection.join = connection.connect = function(remoteUserId, options) {
+    connection.join = function(remoteUserId, options) {
         connection.sessionid = (remoteUserId ? remoteUserId.sessionid || remoteUserId.remoteUserId || remoteUserId : false) || connection.sessionid;
         connection.sessionid += '';
 
@@ -389,7 +390,7 @@
             sdpConstraints: connection.sdpConstraints,
             streams: getStreamInfoForAdmin(),
             extra: connection.extra,
-            password: false // typeof onnection.password !== 'undefined' && typeof onnection.password !== 'object' ? onnection.password : ''
+            password: typeof connection.password !== 'undefined' && typeof connection.password !== 'object' ? connection.password : ''
         }, function(isRoomJoined, error) {
             if (isRoomJoined === true) {
                 if (connection.enableLogs) {
@@ -402,7 +403,6 @@
                 }
 
                 mPeer.onNegotiationNeeded(connectionDescription);
-                cb(isRoomJoined, connection.sessionid, error);
             }
 
             if (isRoomJoined === false) {
@@ -410,11 +410,13 @@
                     console.warn('isRoomJoined: ', error, ' roomid: ', connection.sessionid);
                 }
 
-                // retry after 3 seconds
-                setTimeout(function() {
+                // [disabled] retry after 3 seconds
+                false && setTimeout(function() {
                     joinRoom(connectionDescription, cb);
                 }, 3000);
             }
+
+            cb(isRoomJoined, connection.sessionid, error);
         });
     }
 
@@ -434,7 +436,7 @@
             streams: getStreamInfoForAdmin(),
             extra: connection.extra,
             identifier: connection.publicRoomIdentifier,
-            password: false // typeof onnection.password !== 'undefined' && typeof onnection.password !== 'object' ? onnection.password : ''
+            password: typeof connection.password !== 'undefined' && typeof connection.password !== 'object' ? connection.password : ''
         }, function(isRoomOpened, error) {
             if (isRoomOpened === true) {
                 if (connection.enableLogs) {

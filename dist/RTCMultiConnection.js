@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2018-10-20 6:44:42 AM UTC
+// Last time updated: 2018-10-21 9:42:58 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.5.0
@@ -4120,6 +4120,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             callback = callback || function() {};
 
             if (preventDuplicateOnStreamEvents[stream.streamid]) {
+                callback();
                 return;
             }
             preventDuplicateOnStreamEvents[stream.streamid] = true;
@@ -4418,7 +4419,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             }
         };
 
-        connection.join = connection.connect = function(remoteUserId, options) {
+        connection.join = function(remoteUserId, options) {
             connection.sessionid = (remoteUserId ? remoteUserId.sessionid || remoteUserId.remoteUserId || remoteUserId : false) || connection.sessionid;
             connection.sessionid += '';
 
@@ -4497,7 +4498,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 sdpConstraints: connection.sdpConstraints,
                 streams: getStreamInfoForAdmin(),
                 extra: connection.extra,
-                password: false // typeof onnection.password !== 'undefined' && typeof onnection.password !== 'object' ? onnection.password : ''
+                password: typeof connection.password !== 'undefined' && typeof connection.password !== 'object' ? connection.password : ''
             }, function(isRoomJoined, error) {
                 if (isRoomJoined === true) {
                     if (connection.enableLogs) {
@@ -4510,7 +4511,6 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     }
 
                     mPeer.onNegotiationNeeded(connectionDescription);
-                    cb(isRoomJoined, connection.sessionid, error);
                 }
 
                 if (isRoomJoined === false) {
@@ -4518,11 +4518,13 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                         console.warn('isRoomJoined: ', error, ' roomid: ', connection.sessionid);
                     }
 
-                    // retry after 3 seconds
-                    setTimeout(function() {
+                    // [disabled] retry after 3 seconds
+                    false && setTimeout(function() {
                         joinRoom(connectionDescription, cb);
                     }, 3000);
                 }
+
+                cb(isRoomJoined, connection.sessionid, error);
             });
         }
 
@@ -4542,7 +4544,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 streams: getStreamInfoForAdmin(),
                 extra: connection.extra,
                 identifier: connection.publicRoomIdentifier,
-                password: false // typeof onnection.password !== 'undefined' && typeof onnection.password !== 'object' ? onnection.password : ''
+                password: typeof connection.password !== 'undefined' && typeof connection.password !== 'object' ? connection.password : ''
             }, function(isRoomOpened, error) {
                 if (isRoomOpened === true) {
                     if (connection.enableLogs) {
