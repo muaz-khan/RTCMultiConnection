@@ -213,6 +213,35 @@ table tbody + tbody {
     width: 25px;
 }
 
+input[type="color"],
+input[type="date"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="email"],
+input[type="month"],
+input[type="number"],
+input[type="password"],
+input[type="search"],
+input[type="tel"],
+input[type="text"],
+input[type="time"],
+input[type="url"],
+input[type="week"],
+select:focus,
+textarea {
+  font-size: 16px;
+}
+
+pre {
+    padding: 5px;
+    background: #500;
+    border-width: 1px;
+    border-style: dotted;
+    border-color: #400 #700 #700 #400;
+    border-radius: 5px;
+    display: none;
+}
+
 @media all and (max-width: 900px) {
     tr, td, .logo {
         display: block;

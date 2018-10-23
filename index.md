@@ -1,11 +1,12 @@
 ---
-title: RTCMultiConnection | WebRTC
+title: RTCMultiConnection.js
 description: WebRTC JavaScript library for peer-to-peer applications (screen sharing, audio/video conferencing, file sharing, media streaming etc.)
 ---
 
 {% capture html %}
 
   <section style="text-align: center;">
+    <p>Newbie? Please check built-in demos: <a href="https://rtcmulticonnection.herokuapp.com/demos/">List Of All Demos</a></p>
     <input type="search" id="txt-search" placeholder="Search API">
     <small id="results" style="margin-left: 11px;font-size: 15px;">Results: 0</small>
   </section>
@@ -286,6 +287,9 @@ description: WebRTC JavaScript library for peer-to-peer applications (screen sha
       <li>
         <a href="/docs/multiPeersHandler/">multiPeersHandler</a>
       </li>
+      <li>
+        <a href="/docs/mute/">mute</a>
+      </li>
     </ul>
   </section>
 
@@ -523,6 +527,9 @@ description: WebRTC JavaScript library for peer-to-peer applications (screen sha
       <li>
         <a href="/docs/updateExtraData/">updateExtraData</a>
       </li>
+      <li>
+        <a href="/docs/unmute/">unmute</a>
+      </li>
     </ul>
   </section>
 
@@ -565,6 +572,13 @@ description: WebRTC JavaScript library for peer-to-peer applications (screen sha
   </footer>
 
    <script>
+      window.onkeyup = function(e) {
+        var keyCode = e.which || e.keyCode || 0;
+        if(keyCode == 70) {
+          document.getElementById('txt-search').focus();
+        }
+      };
+
       function searchAPI(text) {
         if(!text) text = '';
         text = text.toString().toLowerCase().trim();

@@ -93,7 +93,7 @@ css:
   <section id="aspnet">
     <h2><a href="#aspnet">ASP.NET</a></h2>
     <p>
-        You can use <a href="https://github.com/muaz-khan/XHR-Signaling">xhr signaling</a>, <a href="https://github.com/muaz-khan/WebRTC-Experiment/blob/master/Signaling.md#how-to-use-websync-for-signaling">websync signaling</a> or <a href="https://github.com/muaz-khan/WebRTC-Experiment/blob/master/Signaling.md#how-to-use-signalr-for-signaling">signal-r signaling</a>.
+        You can use <a href="https://github.com/muaz-khan/XHR-Signaling">xhr signaling</a>, <a href="https://github.com/muaz-khan/WebSync-Signaling">websync signaling</a> or <a href="https://github.com/muaz-khan/RTCMultiConnection-SignalR">signal-r signaling</a>.
     </p>
 
     <p>

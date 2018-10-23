@@ -6,7 +6,7 @@ description: Learn how to use RTCMultiConnection
 {% capture html %}
 
   <section>
-    <p>It is recommended to <a href="https://www.youtube.com/watch?v=jqtC7mSTCgk" class="highlighted">watch this YouTube video</a> that explains how to test and use <a href="https://github.com/muaz-khan/RTCMultiConnection#v3-demos">built-in demos</a>.</p>
+    <p>It is recommended to <a href="https://www.youtube.com/watch?v=jqtC7mSTCgk" class="highlighted">watch this YouTube video</a> that explains how to test and use <a href="https://rtcmulticonnection.herokuapp.com/demos/">built-in demos</a>.</p>
     <p>Remember: Use <a href="https://github.com/muaz-khan/Chrome-Extensions/tree/master/getUserMedia-on-http">this chrome extension</a> for HTTP-websites. LocalHost is excluded, though.</p>
   </section>
 

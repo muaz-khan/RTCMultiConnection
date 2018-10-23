@@ -6,12 +6,9 @@ api_description: Password entered by current user is invalid
 {% capture html %}
 
 <section>
-    <h2>How to use</h2>
-    <pre>
-connection.onInvalidPassword = function(remoteUserId, oldPassword) {
-    console.warn(remoteUserId, 'is password protected. Please join with valid password. Your old password', oldPassword, 'is wrong.');
-};
-</pre>
+    <h2>This event is obsolete.</h2>
+    <p>Please check this API instead: <a href="/docs/password/">password</a></p>
+    <p>Please try this demo: <a href="https://rtcmulticonnection.herokuapp.com/demos/Password-Protected-Rooms.html">demos/Password-Protected-Rooms.html</a></p>
 </section>
 
 {% endcapture %}

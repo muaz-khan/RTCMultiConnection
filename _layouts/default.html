@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="description" content="{% if page.description %}{{ page.description }}{% else %} {{ page.api_description }}{% endif %}">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{% if page.title %}{{ page.title }} {% else %} RTCMultiConnection.{{ page.api_name }}{% endif %}</title>
+    <title>{% if page.title %}{{ page.title }} {% else %} RTCMultiConnection.{{ page.api_name }}{% endif %} | {% if page.description %}{{ page.description }}{% else %} {{ page.api_description }}{% endif %}</title>
     <meta name="google-site-verification" content="0ZfJnHomOzZDWKIkhkRYklDwdYnyEFEnZ7neD7gzHPU" />
     {% assign sub_dirs = page.path | split: '/' | size | minus: 1 %}
     {% capture relative_path_to_root %}{% for i in (1..sub_dirs) %}../{% endfor %}{% endcapture %}
@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="/css/stylesheet.css">
     {% if page.css %}{{ page.css }}{% endif %}
     <script src="/js/menu.js"></script>
+    <link rel="stylesheet" href="/css/default.min.css">
+    <script src="/js/highlight.min.js"></script>
   </head>
 
   <body>
@@ -50,7 +52,29 @@
     {{ content }}
 
     <footer><small id="send-message"></small></footer>
-    
+    <script type="text/javascript">
+        function querySelectorAll(selector, element) {
+            element = element || document;
+            return Array.prototype.slice.call(element.querySelectorAll(selector));
+        }
+
+       querySelectorAll('pre').forEach(function(pre) {
+          var code = pre.querySelector('code');
+          if(!code) {
+            var code = document.createElement('code');
+            code.className = 'javascript';
+            code.innerHTML = pre.innerHTML.toString().trim();
+            pre.innerHTML = '';
+            pre.appendChild(code);
+          }
+          else {
+            code.innerHTML = code.innerHTML.toString().trim();
+          }
+
+          hljs.highlightBlock(pre);
+          pre.style.display = 'block';
+        });
+    </script>
     <script src="https://cdn.webrtc-experiment.com/common.js"></script>
   </body>
 </html>
