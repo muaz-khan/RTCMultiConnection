@@ -1465,13 +1465,18 @@
     };
 
     connection.getSocket = function(callback) {
+        if(!callback) {
+            throw new Error('callback paramter is required.');
+        }
+        callback = callback || function() {};
+
         if (!connection.socket) {
-            connectSocket(callback);
+            connectSocket(function() {
+                callback(connection.socket);
+            });
         } else if (callback) {
             callback(connection.socket);
         }
-
-        return connection.socket;
     };
 
     connection.getRemoteStreams = mPeer.getRemoteStreams;
