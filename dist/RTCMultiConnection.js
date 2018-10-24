@@ -1,9 +1,9 @@
 'use strict';
 
-// Last time updated: 2018-10-21 9:42:58 AM UTC
+// Last time updated: 2018-10-24 7:26:08 AM UTC
 
 // _________________________
-// RTCMultiConnection v3.5.0
+// RTCMultiConnection v3.5.2
 
 // Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection
 
@@ -5573,13 +5573,21 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
 
         connection.getSocket = function(callback) {
+            if (!callback && connection.enableLogs) {
+                console.warn('getSocket.callback paramter is required.');
+            }
+
+            callback = callback || function() {};
+
             if (!connection.socket) {
-                connectSocket(callback);
-            } else if (callback) {
+                connectSocket(function() {
+                    callback(connection.socket);
+                });
+            } else {
                 callback(connection.socket);
             }
 
-            return connection.socket;
+            return connection.socket; // callback is preferred over return-statement
         };
 
         connection.getRemoteStreams = mPeer.getRemoteStreams;
@@ -5906,7 +5914,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
 
         connection.trickleIce = true;
-        connection.version = '3.5.0';
+        connection.version = '3.5.2';
 
         connection.onSettingLocalDescription = function(event) {
             if (connection.enableLogs) {
