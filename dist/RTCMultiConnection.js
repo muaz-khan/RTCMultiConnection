@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2018-10-24 7:26:08 AM UTC
+// Last time updated: 2018-10-25 7:06:51 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.5.2
@@ -273,18 +273,6 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             }
         });
 
-        connection.socket.on('join-with-password', function(remoteUserId) {
-            connection.onJoinWithPassword(remoteUserId);
-        });
-
-        connection.socket.on('invalid-password', function(remoteUserId, oldPassword) {
-            connection.onInvalidPassword(remoteUserId, oldPassword);
-        });
-
-        connection.socket.on('password-max-tries-over', function(remoteUserId) {
-            connection.onPasswordMaxTriesOver(remoteUserId);
-        });
-
         connection.socket.on('user-disconnected', function(remoteUserId) {
             if (remoteUserId === connection.userid) {
                 return;
@@ -336,11 +324,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             connection.onNumberOfBroadcastViewersUpdated(data);
         });
 
-        connection.socket.on('room-full', function(roomid) {
-            connection.onRoomFull(roomid);
-        });
-
-        connection.socket.on('become-next-modrator', function(sessionid) {
+        connection.socket.on('set-isInitiator-true', function(sessionid) {
             if (sessionid != connection.sessionid) return;
             connection.isInitiator = true;
         });
@@ -4106,7 +4090,10 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
     })();
 
-    (function(connection) {
+    // _____________________
+    // RTCMultiConnection.js
+
+    (function RTCMultiConnection(connection) {
         forceOptions = forceOptions || {
             useDefaultDevices: true
         };
@@ -4219,14 +4206,25 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
 
         mPeer.onNegotiationNeeded = function(message, remoteUserId, callback) {
+            callback = callback || function() {};
+
             remoteUserId = remoteUserId || message.remoteUserId;
             message = message || '';
+
+            // usually a message looks like this
+            var messageToDeliver = {
+                remoteUserId: remoteUserId,
+                message: message,
+                sender: connection.userid
+            };
+
+            if (message.remoteUserId && message.message && message.sender) {
+                // if a code is manually passing required data
+                messageToDeliver = message;
+            }
+
             connectSocket(function() {
-                connection.socket.emit(connection.socketMessageEvent, typeof message.password !== 'undefined' ? message : {
-                    remoteUserId: remoteUserId,
-                    message: message,
-                    sender: connection.userid
-                }, callback || function() {});
+                connection.socket.emit(connection.socketMessageEvent, messageToDeliver, callback);
             });
         };
 
@@ -4309,12 +4307,11 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                             localPeerSdpConstraints: localPeerSdpConstraints,
                             remotePeerSdpConstraints: remotePeerSdpConstraints
                         },
-                        sender: connection.userid,
-                        password: connection.password || false
+                        sender: connection.userid
                     };
 
                     beforeJoin(connectionDescription.message, function() {
-                        joinRoom(connectionDescription, function() {});
+                        joinRoom(connectionDescription, callback);
                     });
                     return;
                 }
@@ -4478,8 +4475,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                     localPeerSdpConstraints: localPeerSdpConstraints,
                     remotePeerSdpConstraints: remotePeerSdpConstraints
                 },
-                sender: connection.userid,
-                password: connection.password || false
+                sender: connection.userid
             };
 
             beforeJoin(connectionDescription.message, function() {
@@ -5521,18 +5517,6 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             connection.onUserStatusChanged(event, true);
         };
 
-        connection.onJoinWithPassword = function(remoteUserId) {
-            console.warn(remoteUserId, 'is password protected. Please join with password.');
-        };
-
-        connection.onInvalidPassword = function(remoteUserId, oldPassword) {
-            console.warn(remoteUserId, 'is password protected. Please join with valid password. Your old password', oldPassword, 'is wrong.');
-        };
-
-        connection.onPasswordMaxTriesOver = function(remoteUserId) {
-            console.warn(remoteUserId, 'is password protected. Your max password tries exceeded the limit.');
-        };
-
         connection.getAllParticipants = function(sender) {
             return connection.peers.getAllParticipants(sender);
         };
@@ -5760,6 +5744,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
                 });
                 return;
             }
+
             connection.socket.emit('check-presence', roomid + '', function(isRoomExist, _roomid, extra) {
                 if (connection.enableLogs) {
                     console.log('checkPresence.isRoomExist: ', isRoomExist, ' roomid: ', _roomid);
@@ -5907,12 +5892,6 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             connection.join(connection.sessionid);
         };
 
-        connection.onRoomFull = function(roomid) {
-            if (connection.enableLogs) {
-                console.warn(roomid, 'is full.');
-            }
-        };
-
         connection.trickleIce = true;
         connection.version = '3.5.2';
 
@@ -5938,8 +5917,32 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         // if disabled, "event.mediaElement" for "onstream" will be NULL
         connection.autoCreateMediaElement = true;
 
-        // open or join with a password
+        // set password
         connection.password = null;
+
+        // set password
+        connection.setPassword = function(password, callback) {
+            callback = callback || function() {};
+            if (connection.socket) {
+                connection.socket.emit('set-password', password, callback);
+            } else {
+                connection.password = password;
+                callback(true, connection.sessionid, null);
+            }
+        };
+
+        // error messages
+        connection.errors = {
+            ROOM_NOT_AVAILABLE: 'Room not available',
+            INVALID_PASSWORD: 'Invalid password',
+            USERID_NOT_AVAILABLE: 'User ID does not exist',
+            ROOM_PERMISSION_DENIED: 'Room permission denied',
+            ROOM_FULL: 'Room full',
+            DID_NOT_JOIN_ANY_ROOM: 'Did not join any room yet',
+            INVALID_SOCKET: 'Invalid socket',
+            PUBLIC_IDENTIFIER_MISSING: 'publicRoomIdentifier is required',
+            INVALID_ADMIN_CREDENTIAL: 'Invalid username or password attempted'
+        };
     })(this);
 
 };

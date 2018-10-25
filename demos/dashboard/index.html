@@ -1,4 +1,4 @@
-﻿<!-- Demo version: 2018.10.15 -->
+﻿<!-- Demo version: 2018.10.25 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -14,14 +14,8 @@
   <script src="/admin/js/jquery-3.3.1.slim.min.js"></script>
   <script src="/admin/js/popper.min.js"></script>
   <script src="/admin/js/bootstrap.min.js"></script>
-
-  <script src="/node_modules/webrtc-adapter/out/adapter.js"></script>
-  <script src="/dist/RTCMultiConnection.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
-  <script src="/node_modules/fbr/FileBufferReader.js"></script>
-
-  <script src="/node_modules/canvas-designer/dev/webrtc-handler.js"></script>
-  <script src="/node_modules/canvas-designer/canvas-designer-widget.js"></script>
+  <script src="/dist/RTCMultiConnection.min.js"></script>
 
 <style type="text/css">
 html, body, section, ul, li, nav, a, h1, h2 {
@@ -299,7 +293,7 @@ input[disabled], button[disabled] {
 
     <div style="float: right;margin-top: 15px;">
       <button class="btn btn-primary" data-toggle="modal" data-target="#startRoomModel">Create A New Room</button>
-      <span class="top-span clickable" data-toggle="modal" data-target="#joinRoomModel">Join A Hidden Room</span>
+      <button id="btn-show-join-hidden-room" class="top-span btn btn-secondary" data-toggle="modal" data-target="#joinRoomModel">Join A Room</button>
       <span class="top-span">Active rooms: <span id="active-rooms">0</span></span>
     </div>
   </header>
@@ -344,7 +338,7 @@ input[disabled], button[disabled] {
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="joinRoomModelLabel">Join A Hidden Room</h5>
+          <h5 class="modal-title" id="joinRoomModelLabel">Join A Room</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
@@ -430,109 +424,7 @@ input[disabled], button[disabled] {
     </table>
   </section>
 
-<style>
-.extra-controls {
-    position: absolute;
-    right: 21%;
-}
-
-#btn-comments {
-  color: red;
-  margin-top: 5px;
-  font-size: 24px;
-  text-shadow: 1px 1px white;
-}
-
-#other-videos {
-    margin-top: 5px;
-}
-
-#other-videos video {
-    width: 45%;
-    margin: 5px;
-    border: 1px solid black;
-    padding: 1px;
-    border-radius: 3px;
-}
-
-#txt-chat-message {
-    width: 100%;
-    resize: vertical;
-    margin: 5px;
-    margin-right: 0;
-    min-height: 30px;
-}
-
-#btn-chat-message {
-    margin: 5px;
-}
-
-#conversation-panel {
-    margin-bottom: 20px;
-    text-align: left;
-    max-height: 200px;
-    overflow: auto;
-    border-top: 1px solid #E5E5E5;
-    width: 106%;
-}
-
-#conversation-panel .message {
-    border-bottom: 1px solid #E5E5E5;
-    padding: 5px 10px;
-}
-
-#conversation-panel .message img, #conversation-panel .message video, #conversation-panel .message iframe {
-    max-width: 100%;
-}
-
-#main-video {
-    width: 100%;
-    margin-top: -9px;
-    border-bottom: 1px solid #121010;
-    display: none;
-    padding-bottom: 1px;
-}
-
-hr {
-    height: 1px;
-    border: 0;
-    background: #E5E5E5;
-}
-
-#btn-attach-file {
-    width: 25px;
-    vertical-align: middle;
-    cursor: pointer;
-    display: none;
-}
-
-.checkmark {
-    display:none;
-    width: 15px;
-    vertical-align: middle;
-}
-</style>
-
-<article style="display: none;">
-<div id="widget-container" style="position: fixed;bottom: 0;right: 0;left: 20%;height: 100%;border: 1px solid black; border-top:0; border-bottom: 0;"></div>
-
-<div style="width: 20%; height: 100%; position: absolute;left:0;">
-    <video id="main-video" controls playsinline autoplay></video>
-    <div id="other-videos"></div>
-    <hr>
-    <div style="padding: 5px 10px;">
-        <div id="onUserStatusChanged"></div>
-    </div>
-
-    <div style="margin-top: 20px;position: absolute;bottom: 0;background: white; padding-bottom: 20px; width: 94%">
-        <div id="conversation-panel"></div>
-        <textarea id="txt-chat-message" disabled></textarea>
-        <button class="btn btn-primary" id="btn-chat-message" disabled>Send</button>
-        <img id="btn-attach-file" src="https://webrtcweb.com/attach-file.png" title="Attach a File">
-    </div>
-</div>
-</article>
-<footer style="text-align: center;">Dashboard + Video Conferencing + Chat + File Sharing</footer>
+  <footer style="text-align: center;">Dashboard + Video Conferencing + Chat + File Sharing</footer>
 
 <script>
 // this object is used to get uniquie rooms based on this demo
@@ -549,14 +441,14 @@ connection.publicRoomIdentifier = publicRoomIdentifier;
 connection.socketMessageEvent = publicRoomIdentifier;
 
 // keep room opened even if owner leaves
-connection.autoCloseEntireSession = false;
+connection.autoCloseEntireSession = true;
 
 connection.connectSocket(function(socket) {
-  looper();
+    looper();
 
-  socket.on('disconnect', function() {
-      location.reload();
-  });
+    socket.on('disconnect', function() {
+        location.reload();
+    });
 });
 
 function looper() {
@@ -599,7 +491,15 @@ function updateListOfRooms(rooms) {
         });
         html += '</td>';
 
-        html += '<td><button class="btn join-room" data-roomid="' + room.sessionid + '">Join</button></td>';
+        // check if room is full
+        if(room.isRoomFull) {
+          // room.participants.length >= room.maxParticipantsAllowed
+          html += '<td><span style="border-bottom: 1px dotted red; color: red;">Room is full</span></td>';
+        }
+        else {
+          html += '<td><button class="btn join-room" data-roomid="' + room.sessionid + '">Join</button></td>';
+        }
+        
         $(tr).html(html);
         $('#rooms-list').append(tr);
 
@@ -607,14 +507,11 @@ function updateListOfRooms(rooms) {
             $(tr).find('.join-room').prop('disabled', true);
 
             var roomid = $(this).attr('data-roomid');
-            connection.join(roomid, function(isRoomJoined, roomid, error) {
-                if (error) {
-                    $(tr).find('.join-room').prop('disabled', false);
-                    alertBox(error, 'Error');
-                } else {
-                    showArticle();
-                }
-            });
+            $('#txt-roomid-hidden').val(roomid);
+
+            $('#btn-show-join-hidden-room').click();
+
+            $(tr).find('.join-room').prop('disabled', false);
         });
     });
 }
@@ -645,30 +542,18 @@ $('#btn-join-hidden-room').click(function() {
             return;
         }
 
-        connection.join(roomid, function(isRoomJoined, roomid, error) {
-            if (error) {
-                $('#btn-join-hidden-room').html(initialHTML).prop('disabled', false);
-                alertBox(error, 'Error');
-            } else {
-                $('#joinRoomModel').modal('hide');
-                showArticle();
-            }
-        });
+        connection.sessionid = roomid;
+        connection.isInitiator = false;
+        $('#joinRoomModel').modal('hide');
+        openCanvasDesigner();
+
+        $('#btn-join-hidden-room').html(initialHTML).prop('disabled', false);
     })
 });
 
-function showArticle() {
-    $('#rooms-list').parent().parent().remove();
-    $('header').remove();
-    $('article').show();
-
-    designer.appendTo(document.getElementById('widget-container'));
-
+function openCanvasDesigner() {
     $('#startRoomModel').modal('hide');
-
-    if (connection.isInitiator === true) {
-        setTimeout(afterOpenOrRoom, 3000);
-    }
+    window.open('canvas-designer.html?open=' + connection.isInitiator + '&sessionid=' + connection.sessionid + '&publicRoomIdentifier=' + connection.publicRoomIdentifier + '&userFullName=' + connection.extra.userFullName);
 }
 
 function alertBox(message, title, specialMessage, callback) {
@@ -753,313 +638,12 @@ $('#btn-create-room').click(function() {
             connection.publicRoomIdentifier = '';
         }
 
-        connection.open(roomid, function(isRoomOpened, roomid, error) {
-            $('#btn-create-room').html(initialHTML).prop('disabled', false);
-            if (error) {
-                alertBox(error, 'Error');
-            } else {
-                showArticle();
-            }
-        })
+        connection.sessionid = roomid;
+        connection.isInitiator = true;
+        openCanvasDesigner();
+        $('#btn-create-room').html(initialHTML).prop('disabled', false);
     });
 });
-
-// here goes canvas designer
-var designer = new CanvasDesigner();
-
-// you can place widget.html anywhere
-designer.widgetHtmlURL = '/node_modules/canvas-designer/widget.html';
-designer.widgetJsURL = '/node_modules/canvas-designer/widget.min.js'
-
-designer.addSyncListener(function(data) {
-    connection.send(data);
-});
-
-designer.setSelected('pencil');
-
-designer.setTools({
-    pencil: true,
-    text: true,
-    image: true,
-    pdf: true,
-    eraser: true,
-    line: true,
-    arrow: true,
-    dragSingle: true,
-    dragMultiple: true,
-    arc: true,
-    rectangle: true,
-    quadratic: false,
-    bezier: true,
-    marker: true,
-    zoom: false,
-    lineWidth: false,
-    colorsPicker: false,
-    extraOptions: false,
-    code: false,
-    undo: true
-});
-
-// here goes RTCMultiConnection
-
-connection.chunkSize = 16000;
-connection.enableFileSharing = true;
-
-connection.session = {
-    audio: true,
-    video: true,
-    data: true
-};
-connection.sdpConstraints.mandatory = {
-    OfferToReceiveAudio: true,
-    OfferToReceiveVideo: true
-};
-
-connection.onUserStatusChanged = function(event) {
-    var infoBar = document.getElementById('onUserStatusChanged');
-    var names = [];
-    connection.getAllParticipants().forEach(function(pid) {
-        names.push(getFullName(pid));
-    });
-
-    if (!names.length) {
-        names = ['Only You'];
-    } else {
-        names = [connection.extra.userFullName || 'You'].concat(names);
-    }
-
-    infoBar.innerHTML = '<b>Active users:</b> ' + names.join(', ');
-};
-
-connection.onopen = function(event) {
-    connection.onUserStatusChanged(event);
-
-    if (designer.pointsLength <= 0) {
-        // make sure that remote user gets all drawings synced.
-        setTimeout(function() {
-            connection.send('plz-sync-points');
-        }, 1000);
-    }
-
-    document.getElementById('btn-chat-message').disabled = false;
-    document.getElementById('txt-chat-message').disabled = false;
-    document.getElementById('btn-attach-file').style.display = 'inline-block';
-};
-
-connection.onclose = connection.onerror = connection.onleave = function(event) {
-    connection.onUserStatusChanged(event);
-};
-
-connection.onmessage = function(event) {
-    if (event.data.chatMessage) {
-        appendChatMessage(event);
-        return;
-    }
-
-    if (event.data.checkmark === 'received') {
-        var checkmarkElement = document.getElementById(event.data.checkmark_id);
-        if (checkmarkElement) {
-            checkmarkElement.style.display = 'inline';
-        }
-        return;
-    }
-
-    if (event.data === 'plz-sync-points') {
-        designer.sync();
-        return;
-    }
-
-    designer.syncData(event.data);
-};
-
-// extra code
-
-function afterOpenOrRoom() {
-    // capture canvas-2d stream
-    // and share in realtime using RTCPeerConnection.addStream
-    // requires: dev/webrtc-handler.js
-    designer.captureStream(function(stream) {
-        stream.isScreen = true;
-        stream.streamid = stream.id;
-        stream.type = 'local';
-
-        /*
-        var video = document.createElement('video');
-        video.muted = true;
-        video.srcObject = stream;
-        video.play();
-        */
-
-        connection.attachStreams.push(stream);
-        connection.onstream({
-            stream: stream,
-            type: 'local',
-            streamid: stream.id,
-            // mediaElement: video
-        });
-    });
-}
-
-connection.onstream = function(event) {
-    if (event.stream.isScreen) {
-        var video = document.getElementById('main-video');
-        video.setAttribute('data-streamid', event.streamid);
-        video.style.display = 'block';
-        video.srcObject = event.stream;
-    } else {
-        event.mediaElement.controls = false;
-
-        var otherVideos = document.querySelector('#other-videos');
-        otherVideos.appendChild(event.mediaElement);
-    }
-
-    connection.onUserStatusChanged(event);
-};
-
-connection.onstreamended = function(event) {
-    var video = document.querySelector('video[data-streamid="' + event.streamid + '"]');
-    if (!video) {
-        video = document.getElementById(event.streamid);
-        if (video) {
-            video.parentNode.removeChild(video);
-            return;
-        }
-    }
-    if (video) {
-        video.srcObject = null;
-        video.style.display = 'none';
-    }
-};
-
-var conversationPanel = document.getElementById('conversation-panel');
-
-function appendChatMessage(event, checkmark_id) {
-    var div = document.createElement('div');
-
-    div.className = 'message';
-
-    if (event.data) {
-        div.innerHTML = '<b>' + (event.extra.userFullName || event.userid) + ':</b><br>' + event.data.chatMessage;
-
-        if (event.data.checkmark_id) {
-            connection.send({
-                checkmark: 'received',
-                checkmark_id: event.data.checkmark_id
-            });
-        }
-    } else {
-        div.innerHTML = '<b>You:</b> <img class="checkmark" id="' + checkmark_id + '" title="Received" src="https://webrtcweb.com/checkmark.png"><br>' + event;
-        div.style.background = '#cbffcb';
-    }
-
-    conversationPanel.appendChild(div);
-
-    conversationPanel.scrollTop = conversationPanel.clientHeight;
-    conversationPanel.scrollTop = conversationPanel.scrollHeight - conversationPanel.scrollTop;
-}
-document.getElementById('btn-chat-message').onclick = function() {
-    var chatMessage = document.getElementById('txt-chat-message').value;
-    document.getElementById('txt-chat-message').value = '';
-
-    if (!chatMessage || !chatMessage.replace(/ /g, '').length) return;
-
-    var checkmark_id = connection.userid + connection.token();
-
-    appendChatMessage(chatMessage, checkmark_id);
-
-    connection.send({
-        chatMessage: chatMessage,
-        checkmark_id: checkmark_id
-    });
-};
-
-document.getElementById('txt-chat-message').onkeyup = function(e) {
-    var code = e.keyCode || e.which;
-    if (code == 13) {
-        document.getElementById('btn-chat-message').click(); // you can even call "onclick"
-    }
-};
-
-document.getElementById('btn-attach-file').onclick = function() {
-    var file = new FileSelector();
-    file.selectSingleFile(function(file) {
-        connection.send(file);
-    });
-};
-
-function getFileHTML(file) {
-    var url = file.url || URL.createObjectURL(file);
-    var attachment = '<a href="' + url + '" target="_blank" download="' + file.name + '">Download: <b>' + file.name + '</b></a>';
-    if (file.name.match(/\.jpg|\.png|\.jpeg|\.gif/gi)) {
-        attachment += '<br><img crossOrigin="anonymous" src="' + url + '">';
-    } else if (file.name.match(/\.wav|\.mp3/gi)) {
-        attachment += '<br><audio src="' + url + '" controls></audio>';
-    } else if (file.name.match(/\.pdf|\.js|\.txt|\.sh/gi)) {
-        attachment += '<iframe class="inline-iframe" src="' + url + '"></iframe></a>';
-    }
-    return attachment;
-}
-
-function getFullName(userid) {
-    var _userFullName = userid;
-    if (connection.peers[userid] && connection.peers[userid].extra.userFullName) {
-        _userFullName = connection.peers[userid].extra.userFullName;
-    }
-    return _userFullName;
-}
-
-connection.onFileEnd = function(file) {
-    var html = getFileHTML(file);
-    var div = progressHelper[file.uuid].div;
-
-    if (file.userid === connection.userid) {
-        div.innerHTML = '<b>You:</b><br>' + html;
-        div.style.background = '#cbffcb';
-    } else {
-        div.innerHTML = '<b>' + getFullName(file.userid) + ':</b><br>' + html;
-    }
-};
-
-// to make sure file-saver dialog is not invoked.
-connection.autoSaveToDisk = false;
-
-var progressHelper = {};
-
-connection.onFileProgress = function(chunk, uuid) {
-    var helper = progressHelper[chunk.uuid];
-    helper.progress.value = chunk.currentPosition || chunk.maxChunks || helper.progress.max;
-    updateLabel(helper.progress, helper.label);
-};
-
-connection.onFileStart = function(file) {
-    var div = document.createElement('div');
-    div.className = 'message';
-
-    if (file.userid === connection.userid) {
-        div.innerHTML = '<b>You:</b><br><label>0%</label> <progress></progress>';
-        div.style.background = '#cbffcb';
-    } else {
-        div.innerHTML = '<b>' + getFullName(file.userid) + ':</b><br><label>0%</label> <progress></progress>';
-    }
-
-    div.title = file.name;
-    conversationPanel.appendChild(div);
-    progressHelper[file.uuid] = {
-        div: div,
-        progress: div.querySelector('progress'),
-        label: div.querySelector('label')
-    };
-    progressHelper[file.uuid].progress.max = file.maxChunks;
-
-    conversationPanel.scrollTop = conversationPanel.clientHeight;
-    conversationPanel.scrollTop = conversationPanel.scrollHeight - conversationPanel.scrollTop;
-};
-
-function updateLabel(progress, label) {
-    if (progress.position == -1) return;
-    var position = +progress.position.toFixed(2).split('.')[1] || 100;
-    label.innerHTML = position + '%';
-}
 
 var txtRoomId = document.getElementById('txt-roomid');
 
@@ -1076,21 +660,11 @@ var userFullName = document.getElementById('txt-user-name');
 
 userFullName.onkeyup = userFullName.onblur = userFullName.oninput = userFullName.onpaste = function() {
     localStorage.setItem('canvas-designer-user-full-name', userFullName.value);
-
-    connection.extra.userFullName = userFullName.value;
-
-    if (connection.getAllParticipants().length) {
-        connection.updateExtraData();
-    }
 };
 
 if (localStorage.getItem('canvas-designer-user-full-name')) {
     userFullName.value = localStorage.getItem('canvas-designer-user-full-name');
     $('#txt-user-name-hidden').val(userFullName.value);
-}
-
-if (userFullName.value.length && userFullName.value.replace(/ /g, '').length) {
-    connection.extra.userFullName = userFullName.value;
 }
 </script>
 </body>

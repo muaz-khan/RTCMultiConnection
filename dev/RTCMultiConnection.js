@@ -1,4 +1,7 @@
-(function(connection) {
+// _____________________
+// RTCMultiConnection.js
+
+(function RTCMultiConnection(connection) {
     forceOptions = forceOptions || {
         useDefaultDevices: true
     };
@@ -111,14 +114,25 @@
     };
 
     mPeer.onNegotiationNeeded = function(message, remoteUserId, callback) {
+        callback = callback || function() {};
+
         remoteUserId = remoteUserId || message.remoteUserId;
         message = message || '';
+
+        // usually a message looks like this
+        var messageToDeliver = {
+            remoteUserId: remoteUserId,
+            message: message,
+            sender: connection.userid
+        };
+
+        if (message.remoteUserId && message.message && message.sender) {
+            // if a code is manually passing required data
+            messageToDeliver = message;
+        }
+
         connectSocket(function() {
-            connection.socket.emit(connection.socketMessageEvent, typeof message.password !== 'undefined' ? message : {
-                remoteUserId: remoteUserId,
-                message: message,
-                sender: connection.userid
-            }, callback || function() {});
+            connection.socket.emit(connection.socketMessageEvent, messageToDeliver, callback);
         });
     };
 
@@ -201,12 +215,11 @@
                         localPeerSdpConstraints: localPeerSdpConstraints,
                         remotePeerSdpConstraints: remotePeerSdpConstraints
                     },
-                    sender: connection.userid,
-                    password: connection.password || false
+                    sender: connection.userid
                 };
 
                 beforeJoin(connectionDescription.message, function() {
-                    joinRoom(connectionDescription, function() {});
+                    joinRoom(connectionDescription, callback);
                 });
                 return;
             }
@@ -370,8 +383,7 @@
                 localPeerSdpConstraints: localPeerSdpConstraints,
                 remotePeerSdpConstraints: remotePeerSdpConstraints
             },
-            sender: connection.userid,
-            password: connection.password || false
+            sender: connection.userid
         };
 
         beforeJoin(connectionDescription.message, function() {
@@ -1413,18 +1425,6 @@
         connection.onUserStatusChanged(event, true);
     };
 
-    connection.onJoinWithPassword = function(remoteUserId) {
-        console.warn(remoteUserId, 'is password protected. Please join with password.');
-    };
-
-    connection.onInvalidPassword = function(remoteUserId, oldPassword) {
-        console.warn(remoteUserId, 'is password protected. Please join with valid password. Your old password', oldPassword, 'is wrong.');
-    };
-
-    connection.onPasswordMaxTriesOver = function(remoteUserId) {
-        console.warn(remoteUserId, 'is password protected. Your max password tries exceeded the limit.');
-    };
-
     connection.getAllParticipants = function(sender) {
         return connection.peers.getAllParticipants(sender);
     };
@@ -1652,6 +1652,7 @@
             });
             return;
         }
+
         connection.socket.emit('check-presence', roomid + '', function(isRoomExist, _roomid, extra) {
             if (connection.enableLogs) {
                 console.log('checkPresence.isRoomExist: ', isRoomExist, ' roomid: ', _roomid);
@@ -1799,12 +1800,6 @@
         connection.join(connection.sessionid);
     };
 
-    connection.onRoomFull = function(roomid) {
-        if (connection.enableLogs) {
-            console.warn(roomid, 'is full.');
-        }
-    };
-
     connection.trickleIce = true;
     connection.version = '@@version';
 
@@ -1830,6 +1825,30 @@
     // if disabled, "event.mediaElement" for "onstream" will be NULL
     connection.autoCreateMediaElement = true;
 
-    // open or join with a password
+    // set password
     connection.password = null;
+
+    // set password
+    connection.setPassword = function(password, callback) {
+        callback = callback || function() {};
+        if (connection.socket) {
+            connection.socket.emit('set-password', password, callback);
+        } else {
+            connection.password = password;
+            callback(true, connection.sessionid, null);
+        }
+    };
+
+    // error messages
+    connection.errors = {
+        ROOM_NOT_AVAILABLE: 'Room not available',
+        INVALID_PASSWORD: 'Invalid password',
+        USERID_NOT_AVAILABLE: 'User ID does not exist',
+        ROOM_PERMISSION_DENIED: 'Room permission denied',
+        ROOM_FULL: 'Room full',
+        DID_NOT_JOIN_ANY_ROOM: 'Did not join any room yet',
+        INVALID_SOCKET: 'Invalid socket',
+        PUBLIC_IDENTIFIER_MISSING: 'publicRoomIdentifier is required',
+        INVALID_ADMIN_CREDENTIAL: 'Invalid username or password attempted'
+    };
 })(this);

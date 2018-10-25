@@ -257,18 +257,6 @@ function SocketConnection(connection, connectCallback) {
         }
     });
 
-    connection.socket.on('join-with-password', function(remoteUserId) {
-        connection.onJoinWithPassword(remoteUserId);
-    });
-
-    connection.socket.on('invalid-password', function(remoteUserId, oldPassword) {
-        connection.onInvalidPassword(remoteUserId, oldPassword);
-    });
-
-    connection.socket.on('password-max-tries-over', function(remoteUserId) {
-        connection.onPasswordMaxTriesOver(remoteUserId);
-    });
-
     connection.socket.on('user-disconnected', function(remoteUserId) {
         if (remoteUserId === connection.userid) {
             return;
@@ -320,11 +308,7 @@ function SocketConnection(connection, connectCallback) {
         connection.onNumberOfBroadcastViewersUpdated(data);
     });
 
-    connection.socket.on('room-full', function(roomid) {
-        connection.onRoomFull(roomid);
-    });
-
-    connection.socket.on('become-next-modrator', function(sessionid) {
+    connection.socket.on('set-isInitiator-true', function(sessionid) {
         if (sessionid != connection.sessionid) return;
         connection.isInitiator = true;
     });
