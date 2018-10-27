@@ -39,9 +39,9 @@ function SocketConnection(connection, connectCallback) {
 
     if (connection.enableLogs) {
         if (connection.socketURL == '/') {
-            console.info('socket.io is connected at: ', location.origin + '/');
+            console.info('socket.io url is: ', location.origin + '/');
         } else {
-            console.info('socket.io is connected at: ', connection.socketURL);
+            console.info('socket.io url is: ', connection.socketURL);
         }
     }
 
@@ -50,9 +50,6 @@ function SocketConnection(connection, connectCallback) {
     } catch (e) {
         connection.socket = io.connect(connection.socketURL + parameters, connection.socketOptions);
     }
-
-    // detect signaling medium
-    connection.socket.isIO = true;
 
     var mPeer = connection.multiPeersHandler;
 
@@ -244,11 +241,11 @@ function SocketConnection(connection, connectCallback) {
 
         setTimeout(function() {
             connection.socket.emit('extra-data-updated', connection.extra);
-
-            if (connectCallback) {
-                connectCallback(connection.socket);
-            }
         }, 1000);
+
+        if (connectCallback) {
+            connectCallback(connection.socket);
+        }
     });
 
     connection.socket.on('disconnect', function() {

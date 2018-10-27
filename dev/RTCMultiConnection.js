@@ -1,7 +1,7 @@
 // _____________________
 // RTCMultiConnection.js
 
-(function RTCMultiConnection(connection) {
+(function(connection) {
     forceOptions = forceOptions || {
         useDefaultDevices: true
     };

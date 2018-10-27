@@ -1,9 +1,9 @@
 'use strict';
 
-// Last time updated: 2018-10-25 7:06:51 AM UTC
+// Last time updated: 2018-10-27 5:25:43 AM UTC
 
 // _________________________
-// RTCMultiConnection v3.5.2
+// RTCMultiConnection v3.5.3
 
 // Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection
 
@@ -12,7 +12,115 @@
 // MIT License   - www.WebRTC-Experiment.com/licence
 // --------------------------------------------------
 
-window.RTCMultiConnection = function(roomid, forceOptions) {
+var RTCMultiConnection = function(roomid, forceOptions) {
+
+    var browserFakeUserAgent = 'Fake/5.0 (FakeOS) AppleWebKit/123 (KHTML, like Gecko) Fake/12.3.4567.89 Fake/123.45';
+
+    (function(that) {
+        if (!that) {
+            return;
+        }
+
+        if (typeof window !== 'undefined') {
+            return;
+        }
+
+        if (typeof global === 'undefined') {
+            return;
+        }
+
+        global.navigator = {
+            userAgent: browserFakeUserAgent,
+            getUserMedia: function() {}
+        };
+
+        if (!global.console) {
+            global.console = {};
+        }
+
+        if (typeof global.console.debug === 'undefined') {
+            global.console.debug = global.console.info = global.console.error = global.console.log = global.console.log || function() {
+                console.log(arguments);
+            };
+        }
+
+        if (typeof document === 'undefined') {
+            /*global document:true */
+            that.document = {};
+
+            document.createElement = document.captureStream = document.mozCaptureStream = function() {
+                var obj = {
+                    getContext: function() {
+                        return obj;
+                    },
+                    play: function() {},
+                    pause: function() {},
+                    drawImage: function() {},
+                    toDataURL: function() {
+                        return '';
+                    }
+                };
+                return obj;
+            };
+
+            document.addEventListener = document.removeEventListener = that.addEventListener = that.removeEventListener = function() {};
+
+            that.HTMLVideoElement = that.HTMLMediaElement = function() {};
+        }
+
+        if (typeof io === 'undefined') {
+            that.io = function() {
+                return {
+                    on: function(eventName, callback) {
+                        callback = callback || function() {};
+
+                        if (eventName === 'connect') {
+                            callback();
+                        }
+                    },
+                    emit: function(eventName, data, callback) {
+                        callback = callback || function() {};
+                        if (eventName === 'open-room' || eventName === 'join-room') {
+                            callback(true, data.sessionid, null);
+                        }
+                    }
+                };
+            };
+        }
+
+        if (typeof location === 'undefined') {
+            /*global location:true */
+            that.location = {
+                protocol: 'file:',
+                href: '',
+                hash: '',
+                origin: 'self'
+            };
+        }
+
+        if (typeof screen === 'undefined') {
+            /*global screen:true */
+            that.screen = {
+                width: 0,
+                height: 0
+            };
+        }
+
+        if (typeof URL === 'undefined') {
+            /*global screen:true */
+            that.URL = {
+                createObjectURL: function() {
+                    return '';
+                },
+                revokeObjectURL: function() {
+                    return '';
+                }
+            };
+        }
+
+        /*global window:true */
+        that.window = global;
+    })(typeof global !== 'undefined' ? global : null);
 
     function SocketConnection(connection, connectCallback) {
         var parameters = '';
@@ -55,9 +163,9 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
         if (connection.enableLogs) {
             if (connection.socketURL == '/') {
-                console.info('socket.io is connected at: ', location.origin + '/');
+                console.info('socket.io url is: ', location.origin + '/');
             } else {
-                console.info('socket.io is connected at: ', connection.socketURL);
+                console.info('socket.io url is: ', connection.socketURL);
             }
         }
 
@@ -66,9 +174,6 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         } catch (e) {
             connection.socket = io.connect(connection.socketURL + parameters, connection.socketOptions);
         }
-
-        // detect signaling medium
-        connection.socket.isIO = true;
 
         var mPeer = connection.multiPeersHandler;
 
@@ -260,11 +365,11 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
             setTimeout(function() {
                 connection.socket.emit('extra-data-updated', connection.extra);
-
-                if (connectCallback) {
-                    connectCallback(connection.socket);
-                }
             }, 1000);
+
+            if (connectCallback) {
+                connectCallback(connection.socket);
+            }
         });
 
         connection.socket.on('disconnect', function() {
@@ -795,10 +900,10 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
 
     'use strict';
 
-    // Last Updated On: 2018-05-05 12:25:07 PM UTC
+    // Last Updated On: 2018-10-26 9:36:48 AM UTC
 
     // ________________
-    // DetectRTC v1.3.6
+    // DetectRTC v1.3.7
 
     // Open-Sourced: https://github.com/muaz-khan/DetectRTC
 
@@ -890,6 +995,12 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             var fullVersion = '' + parseFloat(navigator.appVersion);
             var majorVersion = parseInt(navigator.appVersion, 10);
             var nameOffset, verOffset, ix;
+
+            // both and safri and chrome has same userAgent
+            if (isSafari && !isChrome && nAgt.indexOf('CriOS') !== -1) {
+                isSafari = false;
+                isChrome = true;
+            }
 
             // In Opera, the true version is after 'Opera' or after 'Version'
             if (isOpera) {
@@ -1305,17 +1416,27 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             }
         });
 
+        const regexIpv4Local = /^(192\.168\.|169\.254\.|10\.|172\.(1[6-9]|2\d|3[01]))/,
+            regexIpv4 = /([0-9]{1,3}(\.[0-9]{1,3}){3})/,
+            regexIpv6 = /[a-f0-9]{1,4}(:[a-f0-9]{1,4}){7}/;
+
         // via: https://github.com/diafygi/webrtc-ips
         function DetectLocalIPAddress(callback, stream) {
             if (!DetectRTC.isWebRTCSupported) {
                 return;
             }
 
+            var isPublic = true,
+                isIpv4 = true;
             getIPs(function(ip) {
-                if (ip.match(/^(192\.168\.|169\.254\.|10\.|172\.(1[6-9]|2\d|3[01]))/)) {
-                    callback('Local: ' + ip);
+                if (ip.match(regexIpv4Local)) {
+                    isPublic = false;
+                    callback('Local: ' + ip, isPublic, isIpv4);
+                } else if (ip.match(regexIpv6)) { //via https://ourcodeworld.com/articles/read/257/how-to-get-the-client-ip-address-with-javascript-only
+                    isIpv4 = false;
+                    callback('Public: ' + ip, isPublic, isIpv4);
                 } else {
-                    callback('Public: ' + ip);
+                    callback('Public: ' + ip, isPublic, isIpv4);
                 }
             }, stream);
         }
@@ -1370,15 +1491,16 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
             }
 
             function handleCandidate(candidate) {
-                var ipRegex = /([0-9]{1,3}(\.[0-9]{1,3}){3})/;
-                var match = ipRegex.exec(candidate);
+                var match = regexIpv4.exec(candidate);
                 if (!match) {
                     return;
                 }
                 var ipAddress = match[1];
+                const isPublic = (candidate.match(regexIpv4Local)),
+                    isIpv4 = true;
 
                 if (ipDuplicates[ipAddress] === undefined) {
-                    callback(ipAddress);
+                    callback(ipAddress, isPublic, isIpv4);
                 }
 
                 ipDuplicates[ipAddress] = true;
@@ -1877,7 +1999,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         DetectRTC.isPromisesSupported = !!('Promise' in window);
 
         // version is generated by "grunt"
-        DetectRTC.version = '1.3.6';
+        DetectRTC.version = '1.3.7';
 
         if (typeof DetectRTC === 'undefined') {
             window.DetectRTC = {};
@@ -4093,7 +4215,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
     // _____________________
     // RTCMultiConnection.js
 
-    (function RTCMultiConnection(connection) {
+    (function(connection) {
         forceOptions = forceOptions || {
             useDefaultDevices: true
         };
@@ -5893,7 +6015,7 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
         };
 
         connection.trickleIce = true;
-        connection.version = '3.5.2';
+        connection.version = '3.5.3';
 
         connection.onSettingLocalDescription = function(event) {
             if (connection.enableLogs) {
@@ -5946,3 +6068,13 @@ window.RTCMultiConnection = function(roomid, forceOptions) {
     })(this);
 
 };
+
+if (typeof module !== 'undefined' /* && !!module.exports*/ ) {
+    module.exports = exports = RTCMultiConnection;
+}
+
+if (typeof define === 'function' && define.amd) {
+    define('RTCMultiConnection', [], function() {
+        return RTCMultiConnection;
+    });
+}

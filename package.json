@@ -53,7 +53,8 @@
     "basic-auth": "latest",
     "tsscmp": "latest",
     "webrtc-adapter": "latest",
-    "canvas-designer": "latest"
+    "canvas-designer": "latest",
+    "multistreamsmixer": "latest"
   },
   "analyze": false,
   "license": "MIT",
@@ -63,6 +64,7 @@
     "email": "muazkh@gmail.com"
   },
   "homepage": "https://rtcmulticonnection.herokuapp.com/demos/",
+  "tonicExampleFilename": "npm-test.js",
   "_from": "rtcmulticonnection@",
   "devDependencies": {
     "grunt": "0.4.5",

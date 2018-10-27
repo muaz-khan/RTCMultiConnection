@@ -24,6 +24,9 @@ All files from `/dist` directory are available on CDN: `https://cdn.webrtc-exper
 
 <!-- another CDN -->
 <script src="https://unpkg.com/rtcmulticonnection@latest/dist/RTCMultiConnection.min.js"></script>
+
+<!-- bundle CDN -->
+<script src="https://bundle.run/rtcmulticonnection@latest"></script>
 ```
 
 If you're sharing files, you also need to link:
