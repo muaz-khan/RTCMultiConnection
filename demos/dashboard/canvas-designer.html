@@ -1,4 +1,4 @@
-﻿<!-- Demo version: 2018.10.26 -->
+﻿<!-- Demo version: 2018.10.29 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -9,7 +9,10 @@
   <meta name="description" content="WebRTC Dashboard including support for canvas drawing, canvas data syncing, video conferencing, screen sharing and video conferencing. Including chat and file sharing.">
 
   <link rel="shortcut icon" href="/demos/logo.png">
+  <link rel="stylesheet" type="text/css" href="/demos/css/emojionearea.min.css">
 
+  <script src="/demos/js/jquery.min.js"></script>
+  <link href="/demos/css/bootstrap.min.css" rel="stylesheet">
   <script src="/node_modules/webrtc-adapter/out/adapter.js"></script>
   <script src="/dist/RTCMultiConnection.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
@@ -17,6 +20,7 @@
 
   <script src="/node_modules/canvas-designer/dev/webrtc-handler.js"></script>
   <script src="/node_modules/canvas-designer/canvas-designer-widget.js"></script>
+  <script src="/demos/js/emojionearea.min.js"></script>
   <!-- <script src="/node_modules/multistreamsmixer/MultiStreamsMixer.js"></script> -->
 
 <style type="text/css">
@@ -34,6 +38,17 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     font-size: 17px;
     line-height: 1.5em;
+}
+
+input[disabled], button[disabled] {
+  background: transparent!important;
+  color: #dcd7d7!important;
+  border: 1px solid #dcd7d7!important;
+  cursor: not-allowed!important;
+  text-shadow: none!important;
+  box-shadow: none!important;
+  text-decoration: none!important;
+  outline: none!important;
 }
 </style>
 </head>
@@ -134,7 +149,7 @@ hr {
 
     <div style="margin-top: 20px;position: absolute;bottom: 0;background: white; padding-bottom: 20px; width: 94%">
         <div id="conversation-panel"></div>
-        <textarea id="txt-chat-message" disabled></textarea>
+        <textarea id="txt-chat-message"></textarea>
         <button class="btn btn-primary" id="btn-chat-message" disabled>Send</button>
         <img id="btn-attach-file" src="https://webrtcweb.com/attach-file.png" title="Attach a File">
     </div>
@@ -256,7 +271,6 @@ connection.onopen = function(event) {
     }
 
     document.getElementById('btn-chat-message').disabled = false;
-    document.getElementById('txt-chat-message').disabled = false;
     document.getElementById('btn-attach-file').style.display = 'inline-block';
 };
 
@@ -373,9 +387,26 @@ function appendChatMessage(event, checkmark_id) {
     conversationPanel.scrollTop = conversationPanel.clientHeight;
     conversationPanel.scrollTop = conversationPanel.scrollHeight - conversationPanel.scrollTop;
 }
+
+$('#txt-chat-message').emojioneArea({
+    pickerPosition: "top",
+    filtersPosition: "bottom",
+    tones: false,
+    autocomplete: true,
+    inline: true,
+    hidePickerOnBlur: true,
+    events: {
+        focus: function() {
+            $('.emojionearea-category').unbind('click').bind('click', function() {
+                $('.emojionearea-button-close').click();
+            });
+        }
+    }
+});
+
 document.getElementById('btn-chat-message').onclick = function() {
-    var chatMessage = document.getElementById('txt-chat-message').value;
-    document.getElementById('txt-chat-message').value = '';
+    var chatMessage = $('.emojionearea-editor').html();
+    $('.emojionearea-editor').html('');
 
     if (!chatMessage || !chatMessage.replace(/ /g, '').length) return;
 
