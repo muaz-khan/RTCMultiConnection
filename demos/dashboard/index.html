@@ -1,4 +1,4 @@
-﻿<!-- Demo version: 2018.10.29 -->
+﻿<!-- Demo version: 2018.11.01 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -557,7 +557,22 @@ $('#btn-join-hidden-room').click(function() {
 
 function openCanvasDesigner() {
     $('#startRoomModel').modal('hide');
-    window.open('canvas-designer.html?open=' + connection.isInitiator + '&sessionid=' + connection.sessionid + '&publicRoomIdentifier=' + connection.publicRoomIdentifier + '&userFullName=' + connection.extra.userFullName);
+    var href = location.href + 'canvas-designer.html?open=' + connection.isInitiator + '&sessionid=' + connection.sessionid + '&publicRoomIdentifier=' + connection.publicRoomIdentifier + '&userFullName=' + connection.extra.userFullName;
+
+    var newWin = window.open(href);
+    if (!newWin || newWin.closed || typeof newWin.closed == 'undefined') {
+        var html = '';
+        html += '<p>Please click following link:</p>';
+        html += '<p><a href="' + href + '" target="_blank">';
+        if(connection.isInitiator) {
+          html += 'Click To Open The Room';
+        }
+        else {
+          html += 'Click To Join The Room';
+        }
+        html += '</a></p>';
+        alertBox(html, 'Popups Are Blocked');
+    }
 }
 
 function alertBox(message, title, specialMessage, callback) {

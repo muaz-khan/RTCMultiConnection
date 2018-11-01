@@ -335,6 +335,10 @@ connection.onstream = function(event) {
         var video = document.getElementById('main-video');
         video.setAttribute('data-streamid', event.streamid);
         video.style.display = 'block';
+        if(event.type === 'local') {
+            video.muted = true;
+            video.volume = 0;
+        }
         video.srcObject = event.stream;
     } else {
         event.mediaElement.controls = false;
@@ -507,6 +511,28 @@ function updateLabel(progress, label) {
     var position = +progress.position.toFixed(2).split('.')[1] || 100;
     label.innerHTML = position + '%';
 }
+
+/*
+// to enable only camera
+function beforeOpenRoom(callback) {
+    navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function(stream) {
+        connection.dontCaptureUserMedia = true;
+        
+        stream.isScreen = true;
+        stream.streamid = stream.id;
+        stream.type = 'local';
+
+        connection.attachStreams.push(stream);
+        connection.onstream({
+            stream: stream,
+            type: 'local',
+            streamid: stream.id
+        });
+
+        callback();
+    });
+}
+*/
 
 designer.appendTo(document.getElementById('widget-container'), function() {
     if (params.open === true || params.open === 'true') {
