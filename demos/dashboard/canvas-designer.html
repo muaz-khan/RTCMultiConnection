@@ -429,26 +429,21 @@ $('#txt-chat-message').emojioneArea({
                 });
             }
 
-            var code = e.keyCode || e.which;
-            if (code == 13) {
-                $('#btn-chat-message').click();
-            }
-            else {
-                clearTimeout(keyPressTimer);
-                numberOfKeys++;
 
-                if(numberOfKeys % 3 === 0) {
-                    connection.send({
-                        typing: true
-                    });
-                }
+            clearTimeout(keyPressTimer);
+            numberOfKeys++;
 
-                keyPressTimer = setTimeout(function() {
-                    connection.send({
-                        typing: false
-                    });
-                }, 1200);
+            if (numberOfKeys % 3 === 0) {
+                connection.send({
+                    typing: true
+                });
             }
+
+            keyPressTimer = setTimeout(function() {
+                connection.send({
+                    typing: false
+                });
+            }, 1200);
         },
         blur: function() {
             // $('#btn-chat-message').click();
@@ -458,6 +453,13 @@ $('#txt-chat-message').emojioneArea({
         }
     }
 });
+
+window.onkeyup = function(e) {
+    var code = e.keyCode || e.which;
+    if (code == 13) {
+        $('#btn-chat-message').click();
+    }
+};
 
 document.getElementById('btn-chat-message').onclick = function() {
     var chatMessage = $('.emojionearea-editor').html();
