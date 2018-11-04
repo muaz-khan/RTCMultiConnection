@@ -1,4 +1,4 @@
-﻿<!-- Demo version: 2018.10.29 -->
+﻿<!-- Demo version: 2018.11.04 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -149,6 +149,10 @@ hr {
 
     <div style="margin-top: 20px;position: absolute;bottom: 0;background: white; padding-bottom: 20px; width: 94%">
         <div id="conversation-panel"></div>
+        <div id="key-press" style="text-align: right; display: none; font-size: 11px;">
+            <span style="vertical-align: middle;"></span>
+            <img src="https://webrtcweb.com/key-press.gif" style="height: 12px; vertical-align: middle;">
+        </div>
         <textarea id="txt-chat-message"></textarea>
         <button class="btn btn-primary" id="btn-chat-message" disabled>Send</button>
         <img id="btn-attach-file" src="https://webrtcweb.com/attach-file.png" title="Attach a File">
@@ -279,6 +283,16 @@ connection.onclose = connection.onerror = connection.onleave = function(event) {
 };
 
 connection.onmessage = function(event) {
+    if(event.data.typing === true) {
+        $('#key-press').show().find('span').html(event.extra.userFullName + ' is typing');
+        return;
+    }
+
+    if(event.data.typing === false) {
+        $('#key-press').hide().find('span').html('');
+        return;
+    }
+
     if (event.data.chatMessage) {
         appendChatMessage(event);
         return;
@@ -392,6 +406,8 @@ function appendChatMessage(event, checkmark_id) {
     conversationPanel.scrollTop = conversationPanel.scrollHeight - conversationPanel.scrollTop;
 }
 
+var keyPressTimer;
+var numberOfKeys = 0;
 $('#txt-chat-message').emojioneArea({
     pickerPosition: "top",
     filtersPosition: "bottom",
@@ -403,6 +419,41 @@ $('#txt-chat-message').emojioneArea({
         focus: function() {
             $('.emojionearea-category').unbind('click').bind('click', function() {
                 $('.emojionearea-button-close').click();
+            });
+        },
+        keyup: function(e) {
+            var chatMessage = $('.emojionearea-editor').html();
+            if (!chatMessage || !chatMessage.replace(/ /g, '').length) {
+                connection.send({
+                    typing: false
+                });
+            }
+
+            var code = e.keyCode || e.which;
+            if (code == 13) {
+                $('#btn-chat-message').click();
+            }
+            else {
+                clearTimeout(keyPressTimer);
+                numberOfKeys++;
+
+                if(numberOfKeys % 3 === 0) {
+                    connection.send({
+                        typing: true
+                    });
+                }
+
+                keyPressTimer = setTimeout(function() {
+                    connection.send({
+                        typing: false
+                    });
+                }, 1200);
+            }
+        },
+        blur: function() {
+            // $('#btn-chat-message').click();
+            connection.send({
+                typing: false
             });
         }
     }
@@ -422,13 +473,10 @@ document.getElementById('btn-chat-message').onclick = function() {
         chatMessage: chatMessage,
         checkmark_id: checkmark_id
     });
-};
 
-document.getElementById('txt-chat-message').onkeyup = function(e) {
-    var code = e.keyCode || e.which;
-    if (code == 13) {
-        document.getElementById('btn-chat-message').click(); // you can even call "onclick"
-    }
+    connection.send({
+        typing: false
+    });
 };
 
 document.getElementById('btn-attach-file').onclick = function() {
