@@ -1,4 +1,4 @@
-﻿<!-- Demo version: 2018.11.01 -->
+﻿<!-- Demo version: 2018.11.06 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -324,6 +324,11 @@ input[disabled], button[disabled] {
                 <input type="text" class="form-control" id="txt-user-name">
               </p>
 
+              <p style="display: none;">
+                <label for="txt-room-password" class="col-form-label">Enter Room Password:</label>
+                <input type="text" class="form-control" id="txt-room-password">
+              </p>
+
               <p>
                 <label class="col-form-label"><input type="checkbox" id="chk-hidden-room"> Hidden Room? (Hide from the list)</label>
               </p>
@@ -331,6 +336,10 @@ input[disabled], button[disabled] {
           </form>
         </div>
         <div class="modal-footer">
+          <p style="position: absolute;left: 20px;">
+            <label class="col-form-label"><input type="checkbox" id="chk-room-password"> Set Room Password?</label>
+          </p>
+
           <button type="button" class="btn" data-dismiss="modal">Close</button>
           <button type="button" class="btn btn-primary" id="btn-create-room">Create</button>
         </div>
@@ -358,6 +367,11 @@ input[disabled], button[disabled] {
               <p>
                 <label for="txt-user-name-hidden" class="col-form-label">Enter Your Name:</label>
                 <input type="text" class="form-control" id="txt-user-name-hidden">
+              </p>
+
+              <p style="display: none;">
+                <label for="txt-room-password-hidden" class="col-form-label">Enter Room Password:</label>
+                <input type="text" class="form-control" id="txt-room-password-hidden">
               </p>
             </div>
           </form>
@@ -477,7 +491,13 @@ function updateListOfRooms(rooms) {
     rooms.forEach(function(room, idx) {
         var tr = document.createElement('tr');
         var html = '';
-        html += '<td>' + (idx + 1) + '</td>';
+        if(!room.isPasswordProtected) {
+          html += '<td>' + (idx + 1) + '</td>';
+        }
+        else {
+          html += '<td>' + (idx + 1) + ' <img src="https://webrtcweb.com/password-protected.png" style="height: 15px; vertical-align: middle;" title="Password Protected Room"></td>';
+        }
+
         html += '<td><span class="max-width" title="' + room.sessionid + '">' + room.sessionid + '</span></td>';
         html += '<td><span class="max-width" title="' + room.owner + '">' + room.owner + '</span></td>';
 
@@ -501,7 +521,7 @@ function updateListOfRooms(rooms) {
           html += '<td><span style="border-bottom: 1px dotted red; color: red;">Room is full</span></td>';
         }
         else {
-          html += '<td><button class="btn join-room" data-roomid="' + room.sessionid + '">Join</button></td>';
+          html += '<td><button class="btn join-room" data-roomid="' + room.sessionid + '" data-password-protected="' + (room.isPasswordProtected === true ? 'true' : 'false') +'">Join</button></td>';
         }
         
         $(tr).html(html);
@@ -515,10 +535,23 @@ function updateListOfRooms(rooms) {
 
             $('#btn-show-join-hidden-room').click();
 
+            if($(this).attr('data-password-protected') === 'true') {
+              $('#txt-room-password-hidden').parent().show();
+            }
+            else {
+              $('#txt-room-password-hidden').parent().hide();
+            }
+
             $(tr).find('.join-room').prop('disabled', false);
         });
     });
 }
+
+$('#btn-show-join-hidden-room').click(function(e) {
+  e.preventDefault();
+  $('#txt-room-password-hidden').parent().hide();
+  $('#joinRoomModel').modal('show');
+});
 
 $('#btn-join-hidden-room').click(function() {
     var roomid = $('#txt-roomid-hidden').val().toString();
@@ -531,6 +564,15 @@ $('#btn-join-hidden-room').click(function() {
     if (!fullName || !fullName.replace(/ /g, '').length) {
         alertBox('Please enter your name.', 'Your Name Is Required');
         return;
+    }
+
+    if($('#txt-room-password-hidden').parent().css('display') !== 'none') {
+      var roomPassword = $('#txt-room-password-hidden').val().toString();
+      if (!roomPassword || !roomPassword.replace(/ /g, '').length) {
+          alertBox('Please enter room password.', 'Password Box Is Empty');
+          return;
+      }
+      connection.password = roomPassword;
     }
 
     connection.extra.userFullName = fullName;
@@ -558,6 +600,10 @@ $('#btn-join-hidden-room').click(function() {
 function openCanvasDesigner() {
     $('#startRoomModel').modal('hide');
     var href = location.href + 'canvas-designer.html?open=' + connection.isInitiator + '&sessionid=' + connection.sessionid + '&publicRoomIdentifier=' + connection.publicRoomIdentifier + '&userFullName=' + connection.extra.userFullName;
+    
+    if(!!connection.password) {
+      href += '&password=' + connection.password;
+    }
 
     var newWin = window.open(href);
     if (!newWin || newWin.closed || typeof newWin.closed == 'undefined') {
@@ -637,6 +683,16 @@ $('#btn-create-room').click(function() {
         return;
     }
 
+    if($('#chk-room-password').prop('checked') === true){
+      var roomPassword = $('#txt-room-password').val().toString();
+      if (!roomPassword || !roomPassword.replace(/ /g, '').length) {
+          alertBox('Please enter room password.', 'Password Box Is Empty');
+          return;
+      }
+
+      connection.password = roomPassword;
+    }
+
     connection.extra.userFullName = fullName;
 
     var initialHTML = $('#btn-create-room').html();
@@ -662,6 +718,11 @@ $('#btn-create-room').click(function() {
         openCanvasDesigner();
         $('#btn-create-room').html(initialHTML).prop('disabled', false);
     });
+});
+
+$('#chk-room-password').change(function() {
+  $('#txt-room-password').parent().css('display', this.checked === true ? 'block' : 'none');
+  $('#txt-room-password').focus();
 });
 
 var txtRoomId = document.getElementById('txt-roomid');

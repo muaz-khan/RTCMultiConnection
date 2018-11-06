@@ -194,9 +194,6 @@ connection.maxParticipantsAllowed = 1000;
 // set value 2 for one-to-one connection
 // connection.maxParticipantsAllowed = 2;
 
-// https://www.rtcmulticonnection.org/docs/password/
-// connection.password = 'something';
-
 // here goes canvas designer
 var designer = new CanvasDesigner();
 
@@ -481,10 +478,16 @@ document.getElementById('btn-chat-message').onclick = function() {
     });
 };
 
+var recentFile;
 document.getElementById('btn-attach-file').onclick = function() {
     var file = new FileSelector();
     file.selectSingleFile(function(file) {
-        connection.send(file);
+        recentFile = file;
+
+        if(connection.getAllParticipants().length > 1) {
+            recentFile.userIndex = 0;
+            connection.send(file, connection.getAllParticipants()[recentFile.userIndex]);
+        }
     });
 };
 
@@ -516,6 +519,20 @@ connection.onFileEnd = function(file) {
     if (file.userid === connection.userid) {
         div.innerHTML = '<b>You:</b><br>' + html;
         div.style.background = '#cbffcb';
+
+        if(recentFile) {
+            recentFile.userIndex++;
+            var nextUserId = connection.getAllParticipants()[recentFile.userIndex];
+            if(nextUserId) {
+                connection.send(recentFile, nextUserId);
+            }
+            else {
+                recentFile = null;
+            }
+        }
+        else {
+            recentFile = null;
+        }
     } else {
         div.innerHTML = '<b>' + getFullName(file.userid) + ':</b><br>' + html;
     }
@@ -537,7 +554,12 @@ connection.onFileStart = function(file) {
     div.className = 'message';
 
     if (file.userid === connection.userid) {
-        div.innerHTML = '<b>You:</b><br><label>0%</label> <progress></progress>';
+        var userFullName = file.remoteUserId;
+        if(connection.peersBackup[file.remoteUserId]) {
+            userFullName = connection.peersBackup[file.remoteUserId].extra.userFullName;
+        }
+
+        div.innerHTML = '<b>You (to: ' + userFullName + '):</b><br><label>0%</label> <progress></progress>';
         div.style.background = '#cbffcb';
     } else {
         div.innerHTML = '<b>' + getFullName(file.userid) + ':</b><br><label>0%</label> <progress></progress>';
@@ -585,6 +607,10 @@ function beforeOpenRoom(callback) {
 */
 
 designer.appendTo(document.getElementById('widget-container'), function() {
+    if(!!params.password) {
+        connection.password = params.password;
+    }
+
     if (params.open === true || params.open === 'true') {
         beforeOpenRoom(function() {
             connection.open(params.sessionid, function(isRoomOpened, roomid, error) {
@@ -610,6 +636,19 @@ designer.appendTo(document.getElementById('widget-container'), function() {
                 }
                 if (error === connection.errors.ROOM_FULL) {
                     alert('Room is full.');
+                    return;
+                }
+                if (error === connection.errors.INVALID_PASSWORD) {
+                    connection.password = prompt('Please enter room password.') || '';
+                    if(!connection.password.length) {
+                        alert('Invalid password.');
+                        return;
+                    }
+                    connection.join(params.sessionid, function(isRoomJoined, roomid, error) {
+                        if(error) {
+                            alert(error);
+                        }
+                    });
                     return;
                 }
                 alert(error);
