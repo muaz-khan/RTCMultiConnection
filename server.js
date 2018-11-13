@@ -9,7 +9,7 @@ var firstParameter = {
 };
 */
 
-require('rtcmulticonnection-server')(null, function(request, response, config, root, BASH_COLORS_HELPER, pushLogs, resolveURL) {
+require('rtcmulticonnection-server')(null, function(request, response, config, root, BASH_COLORS_HELPER, pushLogs, resolveURL, isAdminAuthorized, getJsonFile) {
     try {
         var uri, filename;
 
