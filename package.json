@@ -1,7 +1,7 @@
 {
   "name": "rtcmulticonnection",
   "preferGlobal": false,
-  "version": "3.5.6",
+  "version": "3.5.7",
   "author": {
     "name": "Muaz Khan",
     "email": "muazkh@gmail.com",
@@ -50,8 +50,6 @@
     "fbr": "latest",
     "webrtc-screen-capturing": "latest",
     "socket.io": "latest",
-    "basic-auth": "latest",
-    "tsscmp": "latest",
     "webrtc-adapter": "latest",
     "canvas-designer": "latest",
     "multistreamsmixer": "latest"
