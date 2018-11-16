@@ -1,4 +1,4 @@
-﻿<!-- Demo version: 2018.11.04 -->
+﻿<!-- Demo version: 2018.11.16 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -484,7 +484,7 @@ document.getElementById('btn-attach-file').onclick = function() {
     file.selectSingleFile(function(file) {
         recentFile = file;
 
-        if(connection.getAllParticipants().length > 1) {
+        if(connection.getAllParticipants().length >= 1) {
             recentFile.userIndex = 0;
             connection.send(file, connection.getAllParticipants()[recentFile.userIndex]);
         }

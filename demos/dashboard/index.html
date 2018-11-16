@@ -1,4 +1,4 @@
-﻿<!-- Demo version: 2018.11.06 -->
+﻿<!-- Demo version: 2018.11.16 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -566,6 +566,8 @@ $('#btn-join-hidden-room').click(function() {
         return;
     }
 
+    connection.extra.userFullName = fullName;
+
     if($('#txt-room-password-hidden').parent().css('display') !== 'none') {
       var roomPassword = $('#txt-room-password-hidden').val().toString();
       if (!roomPassword || !roomPassword.replace(/ /g, '').length) {
@@ -573,10 +575,22 @@ $('#btn-join-hidden-room').click(function() {
           return;
       }
       connection.password = roomPassword;
+
+      connection.socket.emit('is-valid-password', connection.password, roomid, function(isValidPassword, roomid, error) {
+        if(isValidPassword === true) {
+          joinAHiddenRoom(roomid);
+        }
+        else {
+          alertBox(error, 'Password Issue');
+        }
+      });
+      return;
     }
 
-    connection.extra.userFullName = fullName;
+    joinAHiddenRoom(roomid);
+});
 
+function joinAHiddenRoom(roomid) {
     var initialHTML = $('#btn-join-hidden-room').html();
 
     $('#btn-join-hidden-room').html('Please wait...').prop('disabled', true);
@@ -595,7 +609,7 @@ $('#btn-join-hidden-room').click(function() {
 
         $('#btn-join-hidden-room').html(initialHTML).prop('disabled', false);
     })
-});
+}
 
 function openCanvasDesigner() {
     $('#startRoomModel').modal('hide');
@@ -683,6 +697,8 @@ $('#btn-create-room').click(function() {
         return;
     }
 
+    connection.extra.userFullName = fullName;
+
     if($('#chk-room-password').prop('checked') === true){
       var roomPassword = $('#txt-room-password').val().toString();
       if (!roomPassword || !roomPassword.replace(/ /g, '').length) {
@@ -691,9 +707,7 @@ $('#btn-create-room').click(function() {
       }
 
       connection.password = roomPassword;
-    }
-
-    connection.extra.userFullName = fullName;
+    }    
 
     var initialHTML = $('#btn-create-room').html();
 
