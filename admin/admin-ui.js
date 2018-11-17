@@ -1,41 +1,90 @@
-var socket = io.connect('/?userid=admin');
-socket.on('admin', function(message) {
-    if (message.newUpdates === true) {
-        if (socket.auto_update === true) {
-            socket.emit('admin', {
-                all: true
+var socket;
+
+$('#adminPasswordModel').modal({
+    backdrop: 'static',
+    keyboard: false
+});
+
+$('.close-admin-credentials-box').click(function() {
+    location.reload();
+});
+
+$('#btn-validate-admin').click(function() {
+    var adminUserName = $('#txt-admin-username').val();
+    var adminPassword = $('#txt-admin-password').val();
+
+    if(!adminUserName || !adminPassword || !adminUserName.replace(/ /g, '').length || !adminPassword.replace(/ /g, '').length) {
+        alertBox('Admin username and password is required.', 'Invalid Credentials', null, function() {
+            location.reload();
+        });
+        return;
+    }
+
+    $('#btn-validate-admin').html('Please wait...').prop('disabled', 'disabled').addClass('disabled');
+
+    connectSocket(adminUserName, adminPassword);
+});
+
+setTimeout(function() {
+    $('#txt-admin-username').focus();
+}, 500);
+
+function connectSocket(username, password) {
+    socket = io.connect('/?userid=admin&adminUserName=' + username + '&adminPassword=' + password);
+    socket.on('admin', function(message) {
+        if(message.error) {
+            alertBox(message.error, 'Invalid Credentials', null, function() {
+                location.reload();
             });
             return;
         }
-        $('.new-updates-notifier').show();
-    } else {
-        updateListOfRooms(message.listOfRooms || []);
-        // updateListOfUsers(message.listOfUsers || []);
-    }
 
-    $('#active-users').html(message.listOfUsers || 0);
-    $('#scalable-users').html(message.scalableBroadcastUsers || 0);
-    // $('#all-sockts').html(message.allSockets || 0);
-});
-$('.new-updates-notifier a').click(function(e) {
-    e.preventDefault();
-    $('.new-updates-notifier').hide();
-    socket.emit('admin', {
-        all: true
+        if(message.connected === true) {
+            $('#adminPasswordModel').modal('hide');
+            return;
+        }
+
+        socket.isAdminConnected = true;
+
+        if (message.newUpdates === true) {
+            if (socket.auto_update === true) {
+                socket.emit('admin', {
+                    all: true
+                });
+                return;
+            }
+            $('.new-updates-notifier').show();
+        } else {
+            updateListOfRooms(message.listOfRooms || []);
+            // updateListOfUsers(message.listOfUsers || []);
+        }
+
+        $('#active-users').html(message.listOfUsers || 0);
+        $('#scalable-users').html(message.scalableBroadcastUsers || 0);
+        // $('#all-sockts').html(message.allSockets || 0);
     });
-});
-$('.new-updates-notifier input').click(function() {
-    socket.auto_update = true;
-    $('.new-updates-notifier a').click();
-});
-socket.on('connect', function() {
-    socket.emit('admin', {
-        all: true
+    $('.new-updates-notifier a').click(function(e) {
+        e.preventDefault();
+        $('.new-updates-notifier').hide();
+        socket.emit('admin', {
+            all: true
+        });
     });
-});
-socket.on('disconnect', function() {
-    location.reload();
-});
+    $('.new-updates-notifier input').click(function() {
+        socket.auto_update = true;
+        $('.new-updates-notifier a').click();
+    });
+    socket.on('connect', function() {
+        socket.emit('admin', {
+            all: true
+        });
+    });
+    socket.on('disconnect', function() {
+        if(socket.isAdminConnected === true) {
+            location.reload();
+        }
+    });
+}
 
 function updateListOfUsers(listOfUsers) {
     $('#active-users').html(listOfUsers.length);
@@ -182,6 +231,8 @@ function updateListOfRooms(rooms) {
 }
 
 function updateViewLogsButton() {
+    return;
+
     var req = new XMLHttpRequest();
     req.open('GET', 'logs.json');
     req.onload = function() {
@@ -195,9 +246,11 @@ function updateViewLogsButton() {
     };
     req.send();
 }
-updateViewLogsButton();
+// updateViewLogsButton();
 
 $('#view-logs').click(function() {
+    return alertBox('This feature is temporarily disabled.');
+
     $('#view-logs').html('Loading...');
     $('#logs-viewer').html('Loading...');
 

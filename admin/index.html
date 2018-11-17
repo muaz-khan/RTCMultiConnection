@@ -1,4 +1,4 @@
-<!-- Demo version: 2018.10.29 -->
+<!-- Demo version: 2018.11.17 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -417,6 +417,38 @@ input[disabled], button[disabled] {
                 </div>
             </div>
         </div>
+
+  <div class="modal fade" id="adminPasswordModel" tabindex="-1" role="dialog" aria-labelledby="adminPasswordModelLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="adminPasswordModelLabel">Admin Credentials</h5>
+          <button type="button" class="close close-admin-credentials-box" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="form-group">
+              <p>
+                <label for="txt-admin-username" class="col-form-label">Enter Admin UserName:</label>
+                <input type="text" class="form-control" id="txt-admin-username">
+              </p>
+
+              <p>
+                <label for="txt-admin-password" class="col-form-label">Enter Admin Password:</label>
+                <input type="password" class="form-control" id="txt-admin-password">
+              </p>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn close-admin-credentials-box" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="btn-validate-admin">Validate</button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <section style="min-height: 400px;">
     <table class="table">
