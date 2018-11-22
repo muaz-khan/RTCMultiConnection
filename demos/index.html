@@ -1,4 +1,4 @@
-<!-- Demo version: 2018.10.25 -->
+<!-- Demo version: 2018.11.22 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -11,7 +11,6 @@
   <link rel="shortcut icon" href="/demos/logo.png">
   <link rel="stylesheet" href="/demos/stylesheet.css">
   <script src="/demos/menu.js"></script>
-
   <style>
   .search-container {
     text-align: left;
@@ -116,6 +115,27 @@
       RTCMultiConnection is a WebRTC JavaScript library for peer-to-peer applications (screen sharing, audio/video conferencing, file sharing, media streaming etc.)
     </p>
   </h1>
+
+  <section class="table-style-container" style="float: right; margin-top: 50px; border:0;">
+    <table class="table-style">
+      <thead>
+        <tr>
+          <th class="td-style">TURN Server Name</th>
+          <th class="td-style">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="tr-style">
+          <td class="td-style">CoTURN</td>
+          <td id="coturn-status" class="td-style">Checking..</td>
+        </tr>
+        <tr class="tr-style">
+          <td class="td-style">Restund</td>
+          <td id="restund-status" class="td-style">Checking..</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
 
   <section id="demos" style="text-align:center;" class="no-mobile">
       <h2>
@@ -494,6 +514,7 @@
     <small id="send-message"></small>
   </footer>
 
+  <script async defer src="/demos/is-turn-server-still-running.js"></script>
   <script async defer src="https://buttons.github.io/buttons.js"></script>
   <script async defer src="https://cdn.webrtc-experiment.com/common.js"></script>
 </body>
