@@ -130,6 +130,9 @@ require('rtcmulticonnection-server')(null, function(request, response, config, r
                 } else if (filename.indexOf(resolveURL('/demos/dashboard/')) !== -1) {
                     filename = filename.replace(resolveURL('/demos/dashboard/'), '');
                     filename += resolveURL('/demos/dashboard/index.html');
+                } else if (filename.indexOf(resolveURL('/demos/video-conference/')) !== -1) {
+                    filename = filename.replace(resolveURL('/demos/video-conference/'), '');
+                    filename += resolveURL('/demos/video-conference/index.html');
                 } else if (filename.indexOf(resolveURL('/demos')) !== -1) {
                     filename = filename.replace(resolveURL('/demos/'), '');
                     filename = filename.replace(resolveURL('/demos'), '');

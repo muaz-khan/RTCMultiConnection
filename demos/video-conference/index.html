@@ -5,8 +5,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Dashboard + Video Conferencing + Chat + File Sharing | RTCMultiConnection</title>
-  <meta name="description" content="WebRTC Dashboard including support for canvas drawing, canvas data syncing, video conferencing, screen sharing and video conferencing. Including chat and file sharing.">
+  <title>Video Conference | RTCMultiConnection</title>
+  <meta name="description" content="WebRTC Video Conference.">
 
   <link rel="shortcut icon" href="/demos/logo.png">
 
@@ -293,7 +293,7 @@ input[disabled], button[disabled] {
 </head>
 <body>
   <header style="margin-bottom: 20px;">
-    <img class="logo" src="/demos/logo.png" alt="RTCMultiConnection" /> <span class="logo-text">Dashboard Example</span>
+    <img class="logo" src="/demos/logo.png" alt="RTCMultiConnection" /> <span class="logo-text">Video Conference</span>
 
     <div style="float: right;margin-top: 15px;">
       <button class="btn btn-primary" data-toggle="modal" data-target="#startRoomModel">Create A New Room</button>
@@ -314,15 +314,6 @@ input[disabled], button[disabled] {
         <div class="modal-body">
           <form>
             <div class="form-group">
-              <p>
-                <label for="demo-type" class="col-form-label">Set Demo Type:</label>
-                <select id="demo-type" class="form-control">
-                    <option value="normal">Canvas Tool + Chat</option>
-                    <option value="canvas-stream">Canvas Tool + Chat + Canvas Stream</option>
-                    <option value="screen-sharing" selected>Canvas Tool + Chat + Screen Sharing</option>
-                </select>
-              </p>
-
               <p>
                 <label for="txt-roomid" class="col-form-label">Enter Room ID:</label>
                 <input type="text" class="form-control" id="txt-roomid">
@@ -451,12 +442,12 @@ input[disabled], button[disabled] {
     </table>
   </section>
 
-  <footer style="text-align: center;">Dashboard + Video Conferencing + Chat + File Sharing</footer>
+  <footer style="text-align: center;">Video Conference using RTCMultiConnection</footer>
 
 <script>
 // this object is used to get uniquie rooms based on this demo
 // i.e. only those rooms that are created on this page
-var publicRoomIdentifier = 'dashboard';
+var publicRoomIdentifier = 'video-conference-dashboard';
 
 var connection = new RTCMultiConnection();
 
@@ -622,13 +613,11 @@ function joinAHiddenRoom(roomid) {
 
 function openCanvasDesigner() {
     $('#startRoomModel').modal('hide');
-    var href = location.href + 'canvas-designer.html?open=' + connection.isInitiator + '&sessionid=' + connection.sessionid + '&publicRoomIdentifier=' + connection.publicRoomIdentifier + '&userFullName=' + connection.extra.userFullName;
+    var href = location.href + 'video-conference.html?open=' + connection.isInitiator + '&sessionid=' + connection.sessionid + '&publicRoomIdentifier=' + connection.publicRoomIdentifier + '&userFullName=' + connection.extra.userFullName;
     
     if(!!connection.password) {
       href += '&password=' + connection.password;
     }
-
-    href += '&demoType=' + $('#demo-type').val();
 
     var newWin = window.open(href);
     if (!newWin || newWin.closed || typeof newWin.closed == 'undefined') {
