@@ -1,9 +1,9 @@
 'use strict';
 
-// Last time updated: 2018-11-17 4:02:02 PM UTC
+// Last time updated: 2018-12-02 2:13:21 PM UTC
 
 // _________________________
-// RTCMultiConnection v3.5.8
+// RTCMultiConnection v3.5.9
 
 // Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection
 
@@ -3419,8 +3419,14 @@ var RTCMultiConnection = function(roomid, forceOptions) {
             ];
 
             if (typeof window.InstallTrigger !== 'undefined') {
-                iceServers[0].urls = iceServers[0].urls.pop();
-                iceServers[1].urls = iceServers[1].urls.pop();
+                iceServers = [{
+                    'urls': [
+                        'turn:webrtcweb.com:7788',
+                        'stun:webrtcweb.com:7788',
+                    ],
+                    'username': 'muazkh',
+                    'credential': 'muazkh'
+                }];
             }
 
             return iceServers;
@@ -6015,7 +6021,7 @@ var RTCMultiConnection = function(roomid, forceOptions) {
         };
 
         connection.trickleIce = true;
-        connection.version = '3.5.8';
+        connection.version = '3.5.9';
 
         connection.onSettingLocalDescription = function(event) {
             if (connection.enableLogs) {

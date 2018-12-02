@@ -34,8 +34,14 @@ var IceServersHandler = (function() {
         ];
 
         if (typeof window.InstallTrigger !== 'undefined') {
-            iceServers[0].urls = iceServers[0].urls.pop();
-            iceServers[1].urls = iceServers[1].urls.pop();
+            iceServers = [{
+                'urls': [
+                    'turn:webrtcweb.com:7788',
+                    'stun:webrtcweb.com:7788',
+                ],
+                'username': 'muazkh',
+                'credential': 'muazkh'
+            }];
         }
 
         return iceServers;
