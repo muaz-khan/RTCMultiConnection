@@ -1,4 +1,4 @@
-﻿<!-- Demo version: 2018.12.01 -->
+﻿<!-- Demo version: 2018.12.11 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -311,18 +311,9 @@ input[disabled], button[disabled] {
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body" style="padding-bottom: 0;">
           <form>
             <div class="form-group">
-              <p>
-                <label for="demo-type" class="col-form-label">Set Demo Type:</label>
-                <select id="demo-type" class="form-control">
-                    <option value="normal">Canvas Tool + Chat</option>
-                    <option value="canvas-stream">Canvas Tool + Chat + Canvas Stream</option>
-                    <option value="screen-sharing" selected>Canvas Tool + Chat + Screen Sharing</option>
-                </select>
-              </p>
-
               <p>
                 <label for="txt-roomid" class="col-form-label">Enter Room ID:</label>
                 <input type="text" class="form-control" id="txt-roomid">
@@ -338,17 +329,19 @@ input[disabled], button[disabled] {
                 <input type="text" class="form-control" id="txt-room-password">
               </p>
 
-              <p>
+              <a href="" style="float: right; margin-bottom: 10px; font-size: 14px;" onclick="event.preventDefault();$('.more-options').show();$(this).hide();">Show More Options</a>
+
+              <p class="more-options" style="margin-bottom: 0; display: none;">
+                <label class="col-form-label"><input type="checkbox" id="chk-room-password"> Set Room Password?</label>
+              </p>
+
+              <p class="more-options" style="margin-top: 0; margin-bottom: 0; display: none;">
                 <label class="col-form-label"><input type="checkbox" id="chk-hidden-room"> Hidden Room? (Hide from the list)</label>
               </p>
             </div>
           </form>
         </div>
         <div class="modal-footer">
-          <p style="position: absolute;left: 20px;">
-            <label class="col-form-label"><input type="checkbox" id="chk-room-password"> Set Room Password?</label>
-          </p>
-
           <button type="button" class="btn" data-dismiss="modal">Close</button>
           <button type="button" class="btn btn-primary" id="btn-create-room">Create</button>
         </div>
@@ -627,8 +620,6 @@ function openCanvasDesigner() {
     if(!!connection.password) {
       href += '&password=' + connection.password;
     }
-
-    href += '&demoType=' + $('#demo-type').val();
 
     var newWin = window.open(href);
     if (!newWin || newWin.closed || typeof newWin.closed == 'undefined') {
