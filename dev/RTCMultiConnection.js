@@ -1792,12 +1792,18 @@
     }
 
     connection.onUserIdAlreadyTaken = function(useridAlreadyTaken, yourNewUserId) {
-        if (connection.enableLogs) {
-            console.warn('Userid already taken.', useridAlreadyTaken, 'Your new userid:', yourNewUserId);
-        }
+        // via #683
+        connection.close();
+        connection.closeSocket();
 
+        connection.isInitiator = false;
         connection.userid = connection.token();
+
         connection.join(connection.sessionid);
+
+        if (connection.enableLogs) {
+            console.warn('Userid already taken.', useridAlreadyTaken, 'Your new userid:', connection.userid);
+        }
     };
 
     connection.trickleIce = true;

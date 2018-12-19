@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2018-12-02 2:13:21 PM UTC
+// Last time updated: 2018-12-11 12:02:18 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.5.9
@@ -414,11 +414,8 @@ var RTCMultiConnection = function(roomid, forceOptions) {
         });
 
         connection.socket.on('userid-already-taken', function(useridAlreadyTaken, yourNewUserId) {
-            connection.isInitiator = false;
-            connection.userid = yourNewUserId;
-
             connection.onUserIdAlreadyTaken(useridAlreadyTaken, yourNewUserId);
-        })
+        });
 
         connection.socket.on('logs', function(log) {
             if (!connection.enableLogs) return;
@@ -6012,12 +6009,18 @@ var RTCMultiConnection = function(roomid, forceOptions) {
         }
 
         connection.onUserIdAlreadyTaken = function(useridAlreadyTaken, yourNewUserId) {
-            if (connection.enableLogs) {
-                console.warn('Userid already taken.', useridAlreadyTaken, 'Your new userid:', yourNewUserId);
-            }
+            // via #683
+            connection.close();
+            connection.closeSocket();
 
+            connection.isInitiator = false;
             connection.userid = connection.token();
+
             connection.join(connection.sessionid);
+
+            if (connection.enableLogs) {
+                console.warn('Userid already taken.', useridAlreadyTaken, 'Your new userid:', connection.userid);
+            }
         };
 
         connection.trickleIce = true;

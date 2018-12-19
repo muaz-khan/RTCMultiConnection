@@ -290,11 +290,8 @@ function SocketConnection(connection, connectCallback) {
     });
 
     connection.socket.on('userid-already-taken', function(useridAlreadyTaken, yourNewUserId) {
-        connection.isInitiator = false;
-        connection.userid = yourNewUserId;
-
         connection.onUserIdAlreadyTaken(useridAlreadyTaken, yourNewUserId);
-    })
+    });
 
     connection.socket.on('logs', function(log) {
         if (!connection.enableLogs) return;
