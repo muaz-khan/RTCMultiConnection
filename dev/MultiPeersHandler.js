@@ -41,8 +41,12 @@ function MultiPeers(connection) {
             if (!isNull(data.size) && !isNull(data.type)) {
                 if (connection.enableFileSharing) {
                     self.shareFile(data, remoteUserId);
+                    return;
                 }
-                return;
+                
+                if (typeof data !== 'string') {
+                    data = JSON.stringify(data);
+                }
             }
 
             if (data.type !== 'text' && !(data instanceof ArrayBuffer) && !(data instanceof DataView)) {
