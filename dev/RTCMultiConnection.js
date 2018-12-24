@@ -668,6 +668,11 @@
     };
 
     connection.processSdp = function(sdp) {
+        // ignore SDP modification if unified-pan is supported
+        if (isUnifiedPlanSupportedDefault()) {
+            return sdp;
+        }
+
         if (DetectRTC.browser.name === 'Safari') {
             return sdp;
         }
@@ -832,7 +837,10 @@
         }]
     };
 
-    connection.rtcpMuxPolicy = 'require'; // "require" or "negotiate"
+    connection.sdpSemantics = null; // "unified-plan" or "plan-b", ref: webrtc.org/web-apis/chrome/unified-plan/
+    connection.iceCandidatePoolSize = null; // 0
+    connection.bundlePolicy = null; // max-bundle
+    connection.rtcpMuxPolicy = null; // "require" or "negotiate"
     connection.iceTransportPolicy = null; // "relay" or "all"
     connection.optionalArgument = {
         optional: [{
@@ -990,7 +998,7 @@
     };
 
     connection.addStream = function(session, remoteUserId) {
-        if (!!session.getAudioTracks) {
+        if (!!session.getTracks) {
             if (connection.attachStreams.indexOf(session) === -1) {
                 if (!session.streamid) {
                     session.streamid = session.id;
@@ -1092,8 +1100,8 @@
                 }
 
                 if (!stream.isScreen) {
-                    stream.isVideo = stream.getVideoTracks().length;
-                    stream.isAudio = !stream.isVideo && stream.getAudioTracks().length;
+                    stream.isVideo = !!getTracks(stream, 'video').length;
+                    stream.isAudio = !stream.isVideo && getTracks(stream, 'audio').length;
                 }
 
                 mPeer.onGettingLocalMedia(stream, function() {
@@ -1121,13 +1129,13 @@
         }
 
         if (mediaConstraints.audio) {
-            stream.getAudioTracks().forEach(function(track) {
+            getTracks(stream, 'audio').forEach(function(track) {
                 track.applyConstraints(mediaConstraints.audio);
             });
         }
 
         if (mediaConstraints.video) {
-            stream.getVideoTracks().forEach(function(track) {
+            getTracks(stream, 'video').forEach(function(track) {
                 track.applyConstraints(mediaConstraints.video);
             });
         }
@@ -1178,12 +1186,12 @@
         }
 
         if (session instanceof MediaStream) {
-            if (session.getVideoTracks().length) {
-                replaceTrack(session.getVideoTracks()[0], remoteUserId, true);
+            if (getTracks(session, 'video').length) {
+                replaceTrack(getTracks(session, 'video')[0], remoteUserId, true);
             }
 
-            if (session.getAudioTracks().length) {
-                replaceTrack(session.getAudioTracks()[0], remoteUserId, false);
+            if (getTracks(session, 'audio').length) {
+                replaceTrack(getTracks(session, 'audio')[0], remoteUserId, false);
             }
             return;
         }
