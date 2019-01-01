@@ -1,9 +1,9 @@
 'use strict';
 
-// Last time updated: 2018-12-24 6:17:00 AM UTC
+// Last time updated: 2019-01-01 9:45:12 AM UTC
 
 // _________________________
-// RTCMultiConnection v3.6.2
+// RTCMultiConnection v3.6.4
 
 // Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection
 
@@ -123,6 +123,10 @@ var RTCMultiConnection = function(roomid, forceOptions) {
     })(typeof global !== 'undefined' ? global : null);
 
     function SocketConnection(connection, connectCallback) {
+        function isData(session) {
+            return !session.audio && !session.video && !session.screen && session.data;
+        }
+
         var parameters = '';
 
         parameters += '?userid=' + connection.userid;
@@ -3396,52 +3400,16 @@ var RTCMultiConnection = function(roomid, forceOptions) {
     })();
 
     // IceServersHandler.js
-
     var IceServersHandler = (function() {
         function getIceServers(connection) {
-            // resiprocate: 3344+4433
-            // pions: 7575
-            var iceServers = [{
-                    'urls': [
-                        'stun:webrtcweb.com:7788', // coTURN
-                        'stun:webrtcweb.com:7788?transport=udp', // coTURN
-                    ],
-                    'username': 'muazkh',
-                    'credential': 'muazkh'
-                },
-                {
-                    'urls': [
-                        'turn:webrtcweb.com:7788', // coTURN 7788+8877
-                        'turn:webrtcweb.com:4455?transport=udp', // restund udp
-
-                        'turn:webrtcweb.com:8877?transport=udp', // coTURN udp
-                        'turn:webrtcweb.com:8877?transport=tcp', // coTURN tcp
-                    ],
-                    'username': 'muazkh',
-                    'credential': 'muazkh'
-                },
-                {
-                    'urls': [
-                        'stun:stun.l.google.com:19302',
-                        'stun:stun1.l.google.com:19302',
-                        'stun:stun2.l.google.com:19302',
-                        'stun:stun.l.google.com:19302?transport=udp',
-                    ]
-                }
-            ];
-
-            if (typeof window.InstallTrigger !== 'undefined') {
-                iceServers = [{
-                    'urls': [
-                        'turn:webrtcweb.com:7788',
-                        'stun:webrtcweb.com:7788',
-                    ],
-                    'username': 'muazkh',
-                    'credential': 'muazkh'
-                }];
-            }
-
-            return iceServers;
+            return [{
+                'urls': [
+                    'stun:stun.l.google.com:19302',
+                    'stun:stun1.l.google.com:19302',
+                    'stun:stun2.l.google.com:19302',
+                    'stun:stun.l.google.com:19302?transport=udp',
+                ]
+            }];
         }
 
         return {
@@ -6047,7 +6015,7 @@ var RTCMultiConnection = function(roomid, forceOptions) {
         };
 
         connection.trickleIce = true;
-        connection.version = '3.6.2';
+        connection.version = '3.6.4';
 
         connection.onSettingLocalDescription = function(event) {
             if (connection.enableLogs) {
