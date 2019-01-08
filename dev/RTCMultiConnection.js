@@ -1789,9 +1789,23 @@
         }
     }
 
-    connection.getExtraData = function(remoteUserId) {
+    connection.getExtraData = function(remoteUserId, callback) {
         if (!remoteUserId) throw 'remoteUserId is required.';
-        if (!connection.peers[remoteUserId]) return {};
+
+        if (callback) {
+            connection.socket.emit('get-remote-user-extra-data', remoteUserId, function(extra, remoteUserId, error) {
+                callback(extra, remoteUserId, error);
+            });
+            return;
+        }
+
+        if (!connection.peers[remoteUserId]) {
+            if (connection.peersBackup[remoteUserId]) {
+                return connection.peersBackup[remoteUserId].extra;
+            }
+            return {};
+        }
+
         return connection.peers[remoteUserId].extra;
     };
 

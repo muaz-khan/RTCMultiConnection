@@ -1,9 +1,9 @@
 'use strict';
 
-// Last time updated: 2019-01-01 9:45:12 AM UTC
+// Last time updated: 2019-01-08 5:18:57 AM UTC
 
 // _________________________
-// RTCMultiConnection v3.6.4
+// RTCMultiConnection v3.6.5
 
 // Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection
 
@@ -3400,16 +3400,38 @@ var RTCMultiConnection = function(roomid, forceOptions) {
     })();
 
     // IceServersHandler.js
+
     var IceServersHandler = (function() {
         function getIceServers(connection) {
-            return [{
-                'urls': [
-                    'stun:stun.l.google.com:19302',
-                    'stun:stun1.l.google.com:19302',
-                    'stun:stun2.l.google.com:19302',
-                    'stun:stun.l.google.com:19302?transport=udp',
-                ]
-            }];
+            // resiprocate: 3344+4433
+            // pions: 7575
+            var iceServers = [{
+                    'urls': [
+                        'stun:webrtcweb.com:7788'
+                    ],
+                    'username': 'muazkh',
+                    'credential': 'muazkh'
+                },
+                {
+                    'urls': [
+                        'turn:webrtcweb.com:7788', // coTURN 7788+8877
+                        'turn:webrtcweb.com:8877',
+                        'turn:webrtcweb.com:4455', // restund udp
+                    ],
+                    'username': 'muazkh',
+                    'credential': 'muazkh'
+                },
+                {
+                    'urls': [
+                        'stun:stun.l.google.com:19302',
+                        'stun:stun1.l.google.com:19302',
+                        'stun:stun2.l.google.com:19302',
+                        'stun:stun.l.google.com:19302?transport=udp',
+                    ]
+                }
+            ];
+
+            return iceServers;
         }
 
         return {
@@ -5989,9 +6011,23 @@ var RTCMultiConnection = function(roomid, forceOptions) {
             }
         }
 
-        connection.getExtraData = function(remoteUserId) {
+        connection.getExtraData = function(remoteUserId, callback) {
             if (!remoteUserId) throw 'remoteUserId is required.';
-            if (!connection.peers[remoteUserId]) return {};
+
+            if (callback) {
+                connection.socket.emit('get-remote-user-extra-data', remoteUserId, function(extra, remoteUserId, error) {
+                    callback(extra, remoteUserId, error);
+                });
+                return;
+            }
+
+            if (!connection.peers[remoteUserId]) {
+                if (connection.peersBackup[remoteUserId]) {
+                    return connection.peersBackup[remoteUserId].extra;
+                }
+                return {};
+            }
+
             return connection.peers[remoteUserId].extra;
         };
 
@@ -6015,7 +6051,7 @@ var RTCMultiConnection = function(roomid, forceOptions) {
         };
 
         connection.trickleIce = true;
-        connection.version = '3.6.4';
+        connection.version = '3.6.5';
 
         connection.onSettingLocalDescription = function(event) {
             if (connection.enableLogs) {
