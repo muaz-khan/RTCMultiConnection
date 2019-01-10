@@ -1,7 +1,7 @@
 {
   "name": "rtcmulticonnection",
   "preferGlobal": false,
-  "version": "3.6.5",
+  "version": "3.6.6",
   "author": {
     "name": "Muaz Khan",
     "email": "muazkh@gmail.com",
@@ -43,16 +43,16 @@
     "muaz-khan"
   ],
   "dependencies": {
-    "rtcmulticonnection-server": "latest",
+    "canvas-designer": "latest",
     "detectrtc": "latest",
-    "recordrtc": "latest",
-    "getstats": "latest",
     "fbr": "latest",
-    "webrtc-screen-capturing": "latest",
+    "getstats": "latest",
+    "multistreamsmixer": "latest",
+    "recordrtc": "latest",
+    "rtcmulticonnection-server": "latest",
     "socket.io": "latest",
     "webrtc-adapter": "latest",
-    "canvas-designer": "latest",
-    "multistreamsmixer": "latest"
+    "webrtc-screen-capturing": "latest"
   },
   "analyze": false,
   "license": "MIT",
@@ -65,16 +65,16 @@
   "tonicExampleFilename": "npm-test.js",
   "_from": "rtcmulticonnection@",
   "devDependencies": {
-    "grunt": "0.4.5",
-    "grunt-bump": "0.7.0",
-    "grunt-cli": "0.1.13",
-    "grunt-contrib-clean": "0.6.0",
-    "grunt-contrib-concat": "0.5.1",
-    "grunt-contrib-copy": "0.8.2",
-    "grunt-contrib-uglify": "0.11.0",
-    "grunt-contrib-watch": "^1.1.0",
-    "grunt-jsbeautifier": "0.2.10",
-    "grunt-replace": "0.11.0",
-    "load-grunt-tasks": "3.4.0"
+    "grunt": "latest",
+    "grunt-bump": "latest",
+    "grunt-cli": "latest",
+    "grunt-contrib-clean": "latest",
+    "grunt-contrib-concat": "latest",
+    "grunt-contrib-copy": "latest",
+    "grunt-contrib-uglify": "latest",
+    "grunt-contrib-watch": "latest",
+    "grunt-jsbeautifier": "latest",
+    "grunt-replace": "latest",
+    "load-grunt-tasks": "latest"
   }
 }

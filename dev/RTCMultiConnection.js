@@ -1792,7 +1792,7 @@
     connection.getExtraData = function(remoteUserId, callback) {
         if (!remoteUserId) throw 'remoteUserId is required.';
 
-        if (callback) {
+        if (typeof callback === 'function') {
             connection.socket.emit('get-remote-user-extra-data', remoteUserId, function(extra, remoteUserId, error) {
                 callback(extra, remoteUserId, error);
             });
