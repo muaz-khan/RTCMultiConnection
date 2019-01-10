@@ -44,7 +44,7 @@
   ],
   "dependencies": {
     "canvas-designer": "latest",
-    "detectrtc": "latest",
+    "detectrtc": "^1.3.9",
     "fbr": "latest",
     "getstats": "latest",
     "multistreamsmixer": "latest",
