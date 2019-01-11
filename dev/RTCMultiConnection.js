@@ -1869,6 +1869,18 @@
         }
     };
 
+    connection.onSocketDisconnect = function(event) {
+        if (connection.enableLogs) {
+            console.warn('socket.io connection is closed');
+        }
+    };
+
+    connection.onSocketError = function(event) {
+        if (connection.enableLogs) {
+            console.warn('socket.io connection is failed');
+        }
+    };
+
     // error messages
     connection.errors = {
         ROOM_NOT_AVAILABLE: 'Room not available',

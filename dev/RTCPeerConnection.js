@@ -267,7 +267,7 @@ function PeerInitiator(config) {
         if (dontDuplicate[event.stream.id] && DetectRTC.browser.name !== 'Safari') {
             if (event.track) {
                 event.track.onended = function() { // event.track.onmute = 
-                    peer.onremovestream(event);
+                    peer && peer.onremovestream(event);
                 };
             }
             return;
@@ -300,12 +300,12 @@ function PeerInitiator(config) {
 
         event.stream.getTracks().forEach(function(track) {
             track.onended = function() { // track.onmute = 
-                peer.onremovestream(event);
+                peer && peer.onremovestream(event);
             };
         });
 
         event.stream.onremovetrack = function() {
-            peer.onremovestream(event);
+            peer && peer.onremovestream(event);
         };
     };
 

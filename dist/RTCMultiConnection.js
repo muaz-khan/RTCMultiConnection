@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2019-01-10 5:33:35 AM UTC
+// Last time updated: 2019-01-11 7:48:52 AM UTC
 
 // _________________________
 // RTCMultiConnection v3.6.6
@@ -376,10 +376,12 @@ var RTCMultiConnection = function(roomid, forceOptions) {
             }
         });
 
-        connection.socket.on('disconnect', function() {
-            if (connection.enableLogs) {
-                console.warn('socket.io connection is closed');
-            }
+        connection.socket.on('disconnect', function(event) {
+            connection.onSocketDisconnect(event);
+        });
+
+        connection.socket.on('error', function(event) {
+            connection.onSocketError(event);
         });
 
         connection.socket.on('user-disconnected', function(remoteUserId) {
@@ -2705,7 +2707,7 @@ var RTCMultiConnection = function(roomid, forceOptions) {
             if (dontDuplicate[event.stream.id] && DetectRTC.browser.name !== 'Safari') {
                 if (event.track) {
                     event.track.onended = function() { // event.track.onmute = 
-                        peer.onremovestream(event);
+                        peer && peer.onremovestream(event);
                     };
                 }
                 return;
@@ -2738,12 +2740,12 @@ var RTCMultiConnection = function(roomid, forceOptions) {
 
             event.stream.getTracks().forEach(function(track) {
                 track.onended = function() { // track.onmute = 
-                    peer.onremovestream(event);
+                    peer && peer.onremovestream(event);
                 };
             });
 
             event.stream.onremovetrack = function() {
-                peer.onremovestream(event);
+                peer && peer.onremovestream(event);
             };
         };
 
@@ -6097,6 +6099,18 @@ var RTCMultiConnection = function(roomid, forceOptions) {
             } else {
                 connection.password = password;
                 callback(true, connection.sessionid, null);
+            }
+        };
+
+        connection.onSocketDisconnect = function(event) {
+            if (connection.enableLogs) {
+                console.warn('socket.io connection is closed');
+            }
+        };
+
+        connection.onSocketError = function(event) {
+            if (connection.enableLogs) {
+                console.warn('socket.io connection is failed');
             }
         };
 
