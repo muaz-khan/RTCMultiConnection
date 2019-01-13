@@ -39,7 +39,7 @@ mkdir node_modules
 npm install --save-dev
 
 # install grunt for code style verifications
-npm install grunt-cli
+npm install grunt-cli@0.1.13 -g
 
 npm install grunt@0.4.5
 npm install grunt-bump@0.7.0
