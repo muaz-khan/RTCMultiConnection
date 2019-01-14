@@ -1,4 +1,4 @@
-<!-- Demo version: 2018.06.17 -->
+<!-- Demo version: 2019.01.14 -->
 
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -119,7 +119,7 @@ connection.sdpConstraints.mandatory = {
 
 Vue.component('todo-item', {
   props: ['todo'],
-  template: '<video controls autoplay playsinline :src="todo.src" :muted="todo.muted" :id="todo.id"></video>'
+  template: '<video controls autoplay playsinline :srcObject.prop="todo.srcObject" :muted="todo.muted" :id="todo.id"></video>'
 })
 
 var vueApp = new Vue({
@@ -129,12 +129,11 @@ var vueApp = new Vue({
   }
 })
 
+connection.autoCreateMediaElement = false;
 connection.onstream = function(event) {
-    event.mediaElement.src = event.mediaElement.srcObject = null;
-
     vueApp.videosList.push({
         id: event.streamid,
-        src: URL.createObjectURL(event.stream),
+        srcObject: event.stream,
         muted: event.type === 'local'
     });
 };
