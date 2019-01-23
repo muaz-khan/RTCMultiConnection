@@ -1,6 +1,8 @@
-<a href="https://www.rtcmulticonnection.org/"><img src="https://i.imgur.com/MFfRBSM.png" /></a>
+**Disclaimer:** [https://www.webrtc-experiment.com/disclaimer/](https://www.webrtc-experiment.com/disclaimer/)
 
-## RTCMultiConnection - WebRTC JavaScript Library
+![](https://i.imgur.com/MFfRBSM.png)
+
+# RTCMultiConnection - WebRTC JavaScript Library
 
 ### Demos: https://rtcmulticonnection.herokuapp.com/demos/
 
