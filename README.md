@@ -1,5 +1,3 @@
-**Disclaimer:** [https://www.webrtc-experiment.com/disclaimer/](https://www.webrtc-experiment.com/disclaimer/)
-
 ![](https://i.imgur.com/MFfRBSM.png)
 
 # RTCMultiConnection - WebRTC JavaScript Library
@@ -70,6 +68,12 @@ RTCMultiConnection is using `Grunt` to compile javascript into `dist` directory:
 ionic/cordova mobile apps has a separate repository:
 
 * https://github.com/muaz-khan/cordova-mobile-apps
+
+## Disclaimer
+
+There is no warranty, expressed or implied, associated with this product. Use at your own risk.
+
+* [https://www.webrtc-experiment.com/disclaimer/](https://www.webrtc-experiment.com/disclaimer/)
 
 ## License
 
