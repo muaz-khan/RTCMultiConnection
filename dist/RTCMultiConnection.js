@@ -1,6 +1,6 @@
 'use strict';
 
-// Last time updated: 2019-02-15 11:27:13 AM UTC
+// Last time updated: 2019-02-16 7:11:13 PM UTC
 
 // _________________________
 // RTCMultiConnection v3.6.8
@@ -2547,7 +2547,7 @@ var RTCMultiConnection = function(roomid, forceOptions) {
                     params.rtcpMuxPolicy = connection.rtcpMuxPolicy;
                 }
 
-                if (DetectRTC.browser.name === 'Chrome') {
+                if (!!connection.sdpSemantics) {
                     params.sdpSemantics = connection.sdpSemantics || 'unified-plan';
                 }
 
