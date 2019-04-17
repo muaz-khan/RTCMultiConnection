@@ -1,3 +1,54 @@
+# Please Try 3rd Party Codes Instead
+
+* https://github.com/webrtc/samples (one-to-one)
+* https://github.com/peers/peerjs (possibly many-to-many)
+
+----
+
+> Try RTCMultiConnection at your own risk!
+> 
+> It is not gonna be updated from now on.
+>
+> 4/17/2019
+
+----
+
+|
+
+|
+
+|
+
+|
+
+|
+
+|
+
+|
+
+|
+
+|
+
+|
+
+|
+
+|
+
+|
+
+|
+
+|
+
+|
+
+|
+
+|
+
 ![](https://i.imgur.com/MFfRBSM.png)
 
 # RTCMultiConnection - WebRTC JavaScript Library
@@ -62,12 +113,6 @@ RTCMultiConnection is using `Grunt` to compile javascript into `dist` directory:
 
 1. https://github.com/muaz-khan/RTCMultiConnection/wiki
 2. https://github.com/muaz-khan/RTCMultiConnection-Server/wiki
-
-## iOS+Android Mobile Apps
-
-ionic/cordova mobile apps has a separate repository:
-
-* https://github.com/muaz-khan/cordova-mobile-apps
 
 ## Disclaimer
 
