@@ -1,61 +1,16 @@
-# Please Try 3rd Party Codes Instead
-
-* https://github.com/webrtc/samples (one-to-one)
-* https://github.com/peers/peerjs (possibly many-to-many)
-
-----
-
-> Try RTCMultiConnection at your own risk!
-> 
-> It is not gonna be updated from now on.
->
-> 4/17/2019
-
-----
-
-|
-
-|
-
-|
-
-|
-
-|
-
-|
-
-|
-
-|
-
-|
-
-|
-
-|
-
-|
-
-|
-
-|
-
-|
-
-|
-
-|
-
-|
-
 ![](https://i.imgur.com/MFfRBSM.png)
 
 # RTCMultiConnection - WebRTC JavaScript Library
 
-### Demos: https://rtcmulticonnection.herokuapp.com/demos/
-
 [![npm](https://img.shields.io/npm/v/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![downloads](https://img.shields.io/npm/dm/rtcmulticonnection.svg)](https://npmjs.org/package/rtcmulticonnection) [![Build Status: Linux](https://travis-ci.org/muaz-khan/RTCMultiConnection.png?branch=master)](https://travis-ci.org/muaz-khan/RTCMultiConnection)
+
+> Demos may not work without a TURN-server. So please set your own TURN-servers using `connetion.iceServers` array.
+
+## Socket.io Signaling Server
+
+Signaling server has a separate repository:
+
+* https://github.com/muaz-khan/RTCMultiConnection-Server
 
 ## Getting Started Without Any Installation
 
@@ -84,12 +39,6 @@ npm install
 
 node server --port=9001
 ```
-
-## Socket.io Signaling Server
-
-Signaling server has a separate repository:
-
-* https://github.com/muaz-khan/RTCMultiConnection-Server
 
 ## Integrate Inside Any Nodejs Application
 
