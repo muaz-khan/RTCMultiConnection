@@ -115,6 +115,17 @@ connection.sdpConstraints.mandatory = {
     OfferToReceiveVideo: false
 };
 
+// https://www.rtcmulticonnection.org/docs/iceServers/
+// use your own TURN-server here!
+connection.iceServers = [{
+    'urls': [
+        'stun:stun.l.google.com:19302',
+        'stun:stun1.l.google.com:19302',
+        'stun:stun2.l.google.com:19302',
+        'stun:stun.l.google.com:19302?transport=udp',
+    ]
+}];
+
 connection.audiosContainer = document.getElementById('audios-container');
 connection.onstream = function(event) {
     var width = parseInt(connection.audiosContainer.clientWidth / 2) - 20;
