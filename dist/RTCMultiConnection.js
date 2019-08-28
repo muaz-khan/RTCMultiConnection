@@ -13,7 +13,7 @@
 // --------------------------------------------------
 
 var RTCMultiConnection = function(roomid, forceOptions) {
-
+    var isNegotiating = false;
     var browserFakeUserAgent = 'Fake/5.0 (FakeOS) AppleWebKit/123 (KHTML, like Gecko) Fake/12.3.4567.89 Fake/123.45';
 
     (function(that) {
@@ -2649,6 +2649,10 @@ var RTCMultiConnection = function(roomid, forceOptions) {
         });
 
         peer.oniceconnectionstatechange = peer.onsignalingstatechange = function() {
+            if(self.signalingState != "stable") {
+                console.log("Negotiation skipped in stable");
+                return;
+            }
             var extra = self.extra;
             if (connection.peers[self.userid]) {
                 extra = connection.peers[self.userid].extra || extra;
