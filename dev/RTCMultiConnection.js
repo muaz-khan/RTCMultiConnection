@@ -38,6 +38,9 @@
             if (typeof StreamsHandler !== 'undefined') {
                 StreamsHandler.setHandlers(stream, true, connection);
             }
+            var isAudioMuted = stream.getAudioTracks().filter(function(track) {
+                return track.enabled;
+            }).length === 0;
 
             connection.streamEvents[stream.streamid] = {
                 stream: stream,
@@ -46,7 +49,7 @@
                 userid: connection.userid,
                 extra: connection.extra,
                 streamid: stream.streamid,
-                isAudioMuted: true
+                isAudioMuted: isAudioMuted
             };
 
             try {
