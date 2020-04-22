@@ -9,7 +9,7 @@ api_description: Set container element for file progress-bars
     <pre class="sh_javascript">
 &lt;div class="files-container"&gt;&lt;/div&gt;
 &lt;script&gt;
-    connection.videosContainer = document.querySelector('.files-container');
+    connection.filesContainer = document.querySelector('.files-container');
 &lt;/script&gt;
 </pre>
 </section>
