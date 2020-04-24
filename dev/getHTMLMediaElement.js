@@ -197,7 +197,7 @@ function getHTMLMediaElement(mediaElement, config) {
 
         function exitFullScreen() {
             if (document.fullscreen) {
-                document.cancelFullScreen();
+                document.exitFullscreen();
             }
 
             if (document.mozFullScreen) {
@@ -205,7 +205,7 @@ function getHTMLMediaElement(mediaElement, config) {
             }
 
             if (document.webkitIsFullScreen) {
-                document.webkitCancelFullScreen();
+                document.webkitExitFullscreen();
             }
         }
 
