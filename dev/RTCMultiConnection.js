@@ -211,6 +211,7 @@
 
                 var connectionDescription = {
                     remoteUserId: connection.sessionid,
+                    senderextra: connection.extra,
                     message: {
                         newParticipationRequest: true,
                         isOneWay: isOneWay,
@@ -379,6 +380,7 @@
 
         var connectionDescription = {
             remoteUserId: connection.sessionid,
+            senderextra: connection.extra,
             message: {
                 newParticipationRequest: true,
                 isOneWay: isOneWay,

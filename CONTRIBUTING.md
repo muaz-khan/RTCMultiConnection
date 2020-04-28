@@ -10,7 +10,8 @@
 2. [Alexey Kucherenko](https://github.com/killmenot)
 3. [Yuri](https://github.com/Yuripetusko)
 4. [Dmitry](https://github.com/Reptoh)
-5. +Your Name
+5. [Pranav M S](https://github.com/pranavms13)
+6. +Your Name
 
 # Rules to Contribute
 
