@@ -49,14 +49,19 @@
   ],
   "dependencies": {
     "canvas-designer": "latest",
+    "date-utils": "^1.2.21",
     "detectrtc": "latest",
     "fbr": "latest",
     "getstats": "latest",
+    "iplocation": "^7.2.0",
     "multistreamsmixer": "latest",
     "recordrtc": "latest",
+    "request-ip": "^2.1.3",
     "rtcmulticonnection-server": "latest",
     "socket.io": "latest",
-    "webrtc-adapter": "latest"
+    "webrtc-adapter": "latest",
+    "winston": "^3.3.3",
+    "winston-daily-rotate-file": "^4.5.0"
   },
   "analyze": false,
   "license": "MIT",
