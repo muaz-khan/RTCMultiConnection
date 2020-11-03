@@ -48,7 +48,11 @@
     "muaz-khan"
   ],
   "dependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^8.1.0",
+    "babel-preset-es2015": "^6.24.1",
     "canvas-designer": "latest",
+    "css-loader": "^5.0.0",
     "detectrtc": "latest",
     "fbr": "latest",
     "getstats": "latest",
@@ -56,6 +60,7 @@
     "recordrtc": "latest",
     "rtcmulticonnection-server": "latest",
     "socket.io": "latest",
+    "style-loader": "^2.0.0",
     "webrtc-adapter": "latest"
   },
   "analyze": false,
@@ -79,6 +84,8 @@
     "grunt-contrib-watch": "1.1.0",
     "grunt-jsbeautifier": "0.2.10",
     "grunt-replace": "0.11.0",
-    "load-grunt-tasks": "3.4.0"
+    "load-grunt-tasks": "3.4.0",
+    "webpack": "^5.3.2",
+    "webpack-cli": "^4.1.0"
   }
 }
