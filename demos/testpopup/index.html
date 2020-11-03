@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="/demos/js/jquery.min.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <video id="test-video" controls playsinline autoplay></video>
+    <audio id="test-audio" controls playsinline autoplay></audio>
+</body>
+</html>
+<script>
+    let videosrc = localStorage.getItem("testVideoSrc");
+    let audiosrc = localStorage.getItem("testAudioSrc");
+    console.log(videosrc);
+    console.log(audiosrc)
+    let video = document.querySelector('#test-video');
+    let audio = document.querySelector('#test-audio');
+    video.srcObject = videosrc;
+    audio.srcObject = audiosrc;
+    $("#test-video").show();
+</script>

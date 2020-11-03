@@ -5899,6 +5899,11 @@ var RTCMultiConnection = function(roomid, forceOptions) {
             PUBLIC_IDENTIFIER_MISSING: 'publicRoomIdentifier is required',
             INVALID_ADMIN_CREDENTIAL: 'Invalid username or password attempted'
         };
+        // 추가한 코드
+        // 커넥션 상태
+        connection.status = {
+            MEMO_BTN_STATUS:false
+        }
     })(this);
 
 };
