@@ -4,27 +4,27 @@
 
 You can search docs/APIs here:
 
-* http://www.rtcmulticonnection.org/
-* http://www.rtcmulticonnection.org/docs/
+- http://www.rtcmulticonnection.org/
+- http://www.rtcmulticonnection.org/docs/
 
 ### `socketURL`
 
 1. You can run nodejs on a separate domain or separate port or on a separate server
 2. You can set `socketURL="ip-address"` to link nodejs server
-3. Now you can run RTCMultiConnection demos on any webpage; whether it is PHP page, ASP.net page, python or ruby page or whatever framework running top over HTML.
+3. Now you can run RTCMultiConnection rtc on any webpage; whether it is PHP page, ASP.net page, python or ruby page or whatever framework running top over HTML.
 
 ```javascript
-connection.socketURL = 'https://onlyChangingPort.com:8888/';
-connection.socketURL = 'https://separateDomain.com:443/';
-connection.socketURL = '/'; // same domain
+connection.socketURL = "https://onlyChangingPort.com:8888/";
+connection.socketURL = "https://separateDomain.com:443/";
+connection.socketURL = "/"; // same domain
 
 // or a free signaling server:
 
 // v3.4.7 or newer
-connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+connection.socketURL = "https://rtcmulticonnection.herokuapp.com:443/";
 
 // v3.4.6 or older
-connection.socketURL = 'https://webrtcweb.com:9001/';
+connection.socketURL = "https://webrtcweb.com:9001/";
 ```
 
 ### `socketCustomParameters`
@@ -35,21 +35,21 @@ You can pass your custom socket.io parameters as well:
 // starts with "&"
 // &fullName=Muaz
 // &meetingId=xyz
-connection.socketCustomParameters = '&fullName=Muaz&country=PK&meetingId=xyz';
+connection.socketCustomParameters = "&fullName=Muaz&country=PK&meetingId=xyz";
 ```
 
 Now you can open `server.js` and access above parameters here:
 
 ```javascript
 // you can find below line on "server.js" file
-require('./Signaling-Server.js')(app, function(socket) {
-    var params = socket.handshake.query;
+require("./Signaling-Server.js")(app, function (socket) {
+  var params = socket.handshake.query;
 
-    var meetingId = params.meetingId;
-    var fullName = params.fullName;
-    var country = params.country;
-    var userid = params.userid;
-    // etc.
+  var meetingId = params.meetingId;
+  var fullName = params.fullName;
+  var country = params.country;
+  var userid = params.userid;
+  // etc.
 });
 ```
 
@@ -59,12 +59,14 @@ This feature allows you reliably update-extra data on nodejs before socket.io co
 
 ```javascript
 connection.extra = {
-    fullName: 'Muaz Khan',
-    joinedAt: (new Date).toISOString()
-};s
-connection.socketCustomParameters = '&extra=' + JSON.stringify(connection.extra);
+  fullName: "Muaz Khan",
+  joinedAt: new Date().toISOString(),
+};
+s;
+connection.socketCustomParameters =
+  "&extra=" + JSON.stringify(connection.extra);
 
-connection.openOrJoin('room-id');
+connection.openOrJoin("room-id");
 ```
 
 ### `applyConstraints`
@@ -79,20 +81,20 @@ var supports = navigator.mediaDevices.getSupportedConstraints();
 
 var constraints = {};
 if (supports.width && supports.height) {
-    constraints = {
-        width: width,
-        height: height
-    };
+  constraints = {
+    width: width,
+    height: height,
+  };
 }
 
 connection.applyConstraints({
-    video: constraints
+  video: constraints,
 });
 ```
 
 `applyConstraints` access `mediaConstraints` object, defined here:
 
-* [http://www.rtcmulticonnection.org/docs/mediaConstraints/](http://www.rtcmulticonnection.org/docs/mediaConstraints/)
+- [http://www.rtcmulticonnection.org/docs/mediaConstraints/](http://www.rtcmulticonnection.org/docs/mediaConstraints/)
 
 ### `replaceTrack`
 
@@ -101,8 +103,8 @@ This method allows you replace your front-camera video with back-camera video or
 ```javascript
 // here is its simpler usage
 connection.replaceTrack({
-	screen: true,
-	oneway: true
+  screen: true,
+  oneway: true,
 });
 ```
 
@@ -122,7 +124,7 @@ connection.replaceTrack(yourVideoStream);
 You can even force to replace tracks only with a single user:
 
 ```javascript
-var remoteUserId = 'single-remote-userid';
+var remoteUserId = "single-remote-userid";
 
 var videoTrack = yourVideoStream.getVideoTracks()[0];
 connection.replaceTrack(videoTrack, remoteUserId);
@@ -143,10 +145,10 @@ It takes following arguments:
 
 ```javascript
 // with single user
-connection.resetTrack('specific-userid', true);
+connection.resetTrack("specific-userid", true);
 
 // with multiple users
-connection.resetTrack(['first-user', 'second-user'], true);
+connection.resetTrack(["first-user", "second-user"], true);
 
 // NULL means all users
 connection.resetTrack(null, true);
@@ -165,28 +167,31 @@ connection.resetTrack();
 This event allows you show online/offline statuses of the user:
 
 ```javascript
-connection.onUserStatusChanged = function(status) {
-	document.getElementById(event.userid).src = status === 'online' ? 'online.gif' : 'offline.gif';
+connection.onUserStatusChanged = function (status) {
+  document.getElementById(event.userid).src =
+    status === "online" ? "online.gif" : "offline.gif";
 };
 ```
 
 You can even manually call above method from `onopen`, `onstream` and similar events to get the most accurate result possible:
 
 ```javascript
-connection.onopen = connection.stream = function(event) {
-    connection.onUserStatusChanged({
-        userid: event.userid,
-        extra: event.extra,
-        status: 'online'
-    });
+connection.onopen = connection.stream = function (event) {
+  connection.onUserStatusChanged({
+    userid: event.userid,
+    extra: event.extra,
+    status: "online",
+  });
 };
 
-connection.onleave = connection.streamended = connection.onclose = function(event) {
-    connection.onUserStatusChanged({
-        userid: event.userid,
-        extra: event.extra,
-        status: 'offline'
-    });
+connection.onleave = connection.streamended = connection.onclose = function (
+  event
+) {
+  connection.onUserStatusChanged({
+    userid: event.userid,
+    extra: event.extra,
+    status: "offline",
+  });
 };
 ```
 
@@ -194,8 +199,8 @@ connection.onleave = connection.streamended = connection.onclose = function(even
 
 ```javascript
 connection.maxParticipantsAllowed = 1; // one-to-one
-connection.onRoomFull = function(roomid) {
-  alert('Room is full.');
+connection.onRoomFull = function (roomid) {
+  alert("Room is full.");
 };
 ```
 
@@ -205,9 +210,9 @@ This method allows you get the `socket` object used for signaling (handshake/pre
 
 ```javascript
 var socket = connection.getSocket();
-socket.emit('custom-event', 'hi there');
-socket.on('custom-event', function(message) {
-	alert(message);
+socket.emit("custom-event", "hi there");
+socket.on("custom-event", function (message) {
+  alert(message);
 });
 ```
 
@@ -217,24 +222,24 @@ If socket isn't connected yet, then above method will auto-connect it. It is usi
 
 It is same like old RTCMultiConnection `connect` method:
 
-* [http://www.rtcmulticonnection.org/docs/connect/](http://www.rtcmulticonnection.org/docs/connect/)
+- [http://www.rtcmulticonnection.org/docs/connect/](http://www.rtcmulticonnection.org/docs/connect/)
 
 `connectSocket` method simply initializes socket.io server so that you can send custom-messages before creating/joining rooms:
 
 ```javascript
-connection.connectSocket(function(socket) {
-	socket.on('custom-message', function(message) {
-		alert(message);
+connection.connectSocket(function (socket) {
+  socket.on("custom-message", function (message) {
+    alert(message);
 
-		// custom message
-		if(message.joinMyRoom) {
-			connection.join(message.roomid);
-		}
-	});
+    // custom message
+    if (message.joinMyRoom) {
+      connection.join(message.roomid);
+    }
+  });
 
-	socket.emit('custom-message', 'hi there');
+  socket.emit("custom-message", "hi there");
 
-	connection.open('room-id');
+  connection.open("room-id");
 });
 ```
 
@@ -243,13 +248,16 @@ connection.connectSocket(function(socket) {
 A `string` property, allows you set custom socket.io event listener:
 
 ```javascript
-connection.socketCustomEvent = 'abcdef';
-connection.openOrJoin('roomid', function() {
-    connection.socket.on(connection.socketCustomEvent, function(message) {
-        alert(message);
-    });
+connection.socketCustomEvent = "abcdef";
+connection.openOrJoin("roomid", function () {
+  connection.socket.on(connection.socketCustomEvent, function (message) {
+    alert(message);
+  });
 
-    connection.socket.emit(connection.socketCustomEvent, 'My userid is: ' + connection.userid);
+  connection.socket.emit(
+    connection.socketCustomEvent,
+    "My userid is: " + connection.userid
+  );
 });
 ```
 
@@ -258,12 +266,12 @@ connection.openOrJoin('roomid', function() {
 This method allows you set custom socket listeners anytime, during a live session:
 
 ```javascript
-connection.setCustomSocketEvent('abcdef');
-connection.socket.on('abcdef', function(message) {
-    alert(message);
+connection.setCustomSocketEvent("abcdef");
+connection.socket.on("abcdef", function (message) {
+  alert(message);
 });
 
-connection.socket.emit('abcdef', 'My userid is: ' + connection.userid);
+connection.socket.emit("abcdef", "My userid is: " + connection.userid);
 ```
 
 ### `getUserMediaHandler`
@@ -272,38 +280,37 @@ This object allows you capture audio/video stream yourself. RTCMultiConnection w
 
 ```javascript
 var options = {
-	localMediaConstraints: {
-		audio: true,
-		video: true
-	},
-	onGettingLocalMedia: function(stream) {},
-	onLocalMediaError: function(error) {}
+  localMediaConstraints: {
+    audio: true,
+    video: true,
+  },
+  onGettingLocalMedia: function (stream) {},
+  onLocalMediaError: function (error) {},
 };
 connection.getUserMediaHandler(options);
 ```
 
 Its defined here:
 
-* [getUserMedia.js#L20](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dev/getUserMedia.js#L20)
-
+- [getUserMedia.js#L20](https://github.com/muaz-khan/RTCMultiConnection/tree/master/dev/getUserMedia.js#L20)
 
 ## `setUserPreferences`
 
 You can force `dontAttachStream` and `dontGetRemoteStream` for any or each user in any situation:
 
 ```javascript
-connection.setUserPreferences = function(userPreferences) {
-    if (connection.dontAttachStream) {
-    	// current user's streams will NEVER be shared with any other user
-        userPreferences.dontAttachLocalStream = true;
-    }
+connection.setUserPreferences = function (userPreferences) {
+  if (connection.dontAttachStream) {
+    // current user's streams will NEVER be shared with any other user
+    userPreferences.dontAttachLocalStream = true;
+  }
 
-    if (connection.dontGetRemoteStream) {
-    	// current user will NEVER receive any stream from any other user
-        userPreferences.dontGetRemoteStream = true;
-    }
+  if (connection.dontGetRemoteStream) {
+    // current user will NEVER receive any stream from any other user
+    userPreferences.dontGetRemoteStream = true;
+  }
 
-    return userPreferences;
+  return userPreferences;
 };
 ```
 
@@ -338,13 +345,12 @@ i.e. `setUserPreferences` allows you enable camera on demand.
 This method allows you check presence of the moderators/rooms:
 
 ```javascript
-connection.checkPresence('roomid', function(isRoomEists, roomid) {
-	if(isRoomEists) {
-		connection.join(roomid);
-	}
-	else {
-		connection.open(roomid);
-	}
+connection.checkPresence("roomid", function (isRoomEists, roomid) {
+  if (isRoomEists) {
+    connection.join(roomid);
+  } else {
+    connection.open(roomid);
+  }
 });
 ```
 
@@ -353,16 +359,16 @@ connection.checkPresence('roomid', function(isRoomEists, roomid) {
 This event is fired as soon as callee says "I am ready for offer. I enabled camera. Please create offer and share.".
 
 ```javascript
-connection.onReadyForOffer = function(remoteUserId, userPreferences) {
-	// if OfferToReceiveAudio/OfferToReceiveVideo should be enabled for specific users
-	userPreferences.localPeerSdpConstraints.OfferToReceiveAudio = true;
-	userPreferences.localPeerSdpConstraints.OfferToReceiveVideo = true;
+connection.onReadyForOffer = function (remoteUserId, userPreferences) {
+  // if OfferToReceiveAudio/OfferToReceiveVideo should be enabled for specific users
+  userPreferences.localPeerSdpConstraints.OfferToReceiveAudio = true;
+  userPreferences.localPeerSdpConstraints.OfferToReceiveVideo = true;
 
-	userPreferences.dontAttachStream = false; // according to situation
-	userPreferences.dontGetRemoteStream = false;  // according to situation
+  userPreferences.dontAttachStream = false; // according to situation
+  userPreferences.dontGetRemoteStream = false; // according to situation
 
-	// below line must be included. Above all lines are optional.
-	connection.multiPeersHandler.createNewPeer(remoteUserId, userPreferences);
+  // below line must be included. Above all lines are optional.
+  connection.multiPeersHandler.createNewPeer(remoteUserId, userPreferences);
 };
 ```
 
@@ -371,17 +377,17 @@ connection.onReadyForOffer = function(remoteUserId, userPreferences) {
 This event is fired as soon as someone tries to join you. You can either reject his request or set preferences.
 
 ```javascript
-connection.onNewParticipant = function(participantId, userPreferences) {
-    // if OfferToReceiveAudio/OfferToReceiveVideo should be enabled for specific users
-	userPreferences.localPeerSdpConstraints.OfferToReceiveAudio = true;
-	userPreferences.localPeerSdpConstraints.OfferToReceiveVideo = true;
+connection.onNewParticipant = function (participantId, userPreferences) {
+  // if OfferToReceiveAudio/OfferToReceiveVideo should be enabled for specific users
+  userPreferences.localPeerSdpConstraints.OfferToReceiveAudio = true;
+  userPreferences.localPeerSdpConstraints.OfferToReceiveVideo = true;
 
-	userPreferences.dontAttachStream = false; // according to situation
-	userPreferences.dontGetRemoteStream = false;  // according to situation
+  userPreferences.dontAttachStream = false; // according to situation
+  userPreferences.dontGetRemoteStream = false; // according to situation
 
-	// below line must be included. Above all lines are optional.
-	// if below line is NOT included; "join-request" will be considered rejected.
-    connection.acceptParticipationRequest(participantId, userPreferences);
+  // below line must be included. Above all lines are optional.
+  // if below line is NOT included; "join-request" will be considered rejected.
+  connection.acceptParticipationRequest(participantId, userPreferences);
 };
 ```
 
@@ -389,16 +395,18 @@ Or:
 
 ```javascript
 var alreadyAllowed = {};
-connection.onNewParticipant = function(participantId, userPreferences) {
-	if(alreadyAllowed[participantId]) {
-		connection.addParticipationRequest(participantId, userPreferences);
-		return;
-	}
+connection.onNewParticipant = function (participantId, userPreferences) {
+  if (alreadyAllowed[participantId]) {
+    connection.addParticipationRequest(participantId, userPreferences);
+    return;
+  }
 
-	var message = participantId + ' is trying to join your room. Confirm to accept his request.';
-	if( window.confirm(messsage ) ) {
-		connection.addParticipationRequest(participantId, userPreferences);
-	}
+  var message =
+    participantId +
+    " is trying to join your room. Confirm to accept his request.";
+  if (window.confirm(messsage)) {
+    connection.addParticipationRequest(participantId, userPreferences);
+  }
 };
 ```
 
@@ -407,11 +415,11 @@ connection.onNewParticipant = function(participantId, userPreferences) {
 Disconnect with single or multiple users. This method allows you keep connected to `socket` however either leave entire room or remove single or multiple users:
 
 ```javascript
-connection.disconnectWith('remoteUserId');
+connection.disconnectWith("remoteUserId");
 
 // to leave entire room
-connection.getAllParticipants().forEach(function(participantId) {
-	connection.disconnectWith(participantId);
+connection.getAllParticipants().forEach(function (participantId) {
+  connection.disconnectWith(participantId);
 });
 ```
 
@@ -422,15 +430,16 @@ Get list of all participants that are connected with current user.
 ```javascript
 var numberOfUsersInTheRoom = connection.getAllParticipants().length;
 
-var remoteUserId = 'xyz';
-var isUserConnectedWithYou = connection.getAllParticipants().indexOf(remoteUserId) !== -1;
+var remoteUserId = "xyz";
+var isUserConnectedWithYou =
+  connection.getAllParticipants().indexOf(remoteUserId) !== -1;
 
-connection.getAllParticipants().forEach(function(remoteUserId) {
-	var user = connection.peers[remoteUserId];
-	console.log(user.extra);
+connection.getAllParticipants().forEach(function (remoteUserId) {
+  var user = connection.peers[remoteUserId];
+  console.log(user.extra);
 
-	user.peer.close();
-	alert(user.peer === webkitRTCPeerConnection);
+  user.peer.close();
+  alert(user.peer === webkitRTCPeerConnection);
 });
 ```
 
@@ -454,12 +463,12 @@ Here is Firebase example:
 <script src="/dev/globals.js"></script>
 <script src="/dev/FirebaseConnection.js"></script>
 <script>
-var connection = new RTCMultiConnection();
+  var connection = new RTCMultiConnection();
 
-connection.firebase = 'your-firebase-account';
+  connection.firebase = "your-firebase-account";
 
-// below line replaces FirebaseConnection
-connection.setCustomSocketHandler(FirebaseConnection);
+  // below line replaces FirebaseConnection
+  connection.setCustomSocketHandler(FirebaseConnection);
 </script>
 ```
 
@@ -469,10 +478,10 @@ Here is PubNub example:
 <script src="/dev/globals.js"></script>
 <script src="/dev/PubNubConnection.js"></script>
 <script>
-var connection = new RTCMultiConnection();
+  var connection = new RTCMultiConnection();
 
-// below line replaces PubNubConnection
-connection.setCustomSocketHandler(PubNubConnection);
+  // below line replaces PubNubConnection
+  connection.setCustomSocketHandler(PubNubConnection);
 </script>
 ```
 
@@ -500,8 +509,8 @@ Please check [`FirebaseConnection`](https://github.com/muaz-khan/RTCMultiConnect
 
 For more information:
 
-* https://rtcmulticonnection.herokuapp.com/demos/Audio+Video+TextChat+FileSharing.html#comment-2670178473
-* https://rtcmulticonnection.herokuapp.com/demos/Audio+Video+TextChat+FileSharing.html#comment-2670182313
+- https://rtcmulticonnection.herokuapp.com/rtc/Audio+Video+TextChat+FileSharing.html#comment-2670178473
+- https://rtcmulticonnection.herokuapp.com/rtc/Audio+Video+TextChat+FileSharing.html#comment-2670182313
 
 ## `enableLogs`
 
@@ -515,7 +524,7 @@ connection.enableLogs = false; // to disable logs
 
 ```javascript
 connection.extra = {
-    joinTime: new Date()
+  joinTime: new Date(),
 };
 connection.updateExtraData();
 ```
@@ -523,8 +532,8 @@ connection.updateExtraData();
 Here is how to get extra-data:
 
 ```javascript
-var extra = connection.peers['remote-userid'].extra;
-alert( extra.joinTime);
+var extra = connection.peers["remote-userid"].extra;
+alert(extra.joinTime);
 ```
 
 Recent commit supports this as well:
@@ -544,7 +553,7 @@ connection.onstream = function(event) {
 You can force all the extra-data to be synced among all connected users.
 
 ```javascript
-connection.extra.fullName = 'New Full Name';
+connection.extra.fullName = "New Full Name";
 connection.updateExtraData(); // now above value will be auto synced among all connected users
 ```
 
@@ -553,11 +562,11 @@ connection.updateExtraData(); // now above value will be auto synced among all c
 This event is fired as soon as extra-data from any user is updated:
 
 ```javascript
-connection.onExtraDataUpdated = function(event) {
-	console.log('extra data updated', event.userid, event.extra);
+connection.onExtraDataUpdated = function (event) {
+  console.log("extra data updated", event.userid, event.extra);
 
-	// make sure that <video> header is having latest fullName
-	document.getElementById('video-header').innerHTML = event.extra.fullName;
+  // make sure that <video> header is having latest fullName
+  document.getElementById("video-header").innerHTML = event.extra.fullName;
 };
 ```
 
@@ -565,7 +574,7 @@ connection.onExtraDataUpdated = function(event) {
 
 It is similar to this:
 
-* http://www.rtcmulticonnection.org/docs/streams/
+- http://www.rtcmulticonnection.org/docs/streams/
 
 ## `socketOptions`
 
@@ -573,30 +582,30 @@ Socket.io options:
 
 ```javascript
 connection.socketOptions = {
-	'force new connection': true, // For SocketIO version < 1.0
-	'forceNew': true, // For SocketIO version >= 1.0
-	'transport': 'polling' // fixing transport:unknown issues
+  "force new connection": true, // For SocketIO version < 1.0
+  forceNew: true, // For SocketIO version >= 1.0
+  transport: "polling", // fixing transport:unknown issues
 };
 ```
 
 Or:
 
 ```javascript
-connection.socketOptions.resource = 'custom';
-connection.socketOptions.transport = 'polling';
-connection.socketOptions['try multiple transports'] = false;
+connection.socketOptions.resource = "custom";
+connection.socketOptions.transport = "polling";
+connection.socketOptions["try multiple transports"] = false;
 connection.socketOptions.secure = true;
-connection.socketOptions.port = '9001';
-connection.socketOptions['max reconnection attempts'] = 100;
+connection.socketOptions.port = "9001";
+connection.socketOptions["max reconnection attempts"] = 100;
 // etc.
 ```
 
 ## `connection.socket`
 
 ```javascript
-connection.open('roomid', function() {
-    connection.socket.emit('whatever', 'hmm');
-    connection.socket.disconnect();
+connection.open("roomid", function () {
+  connection.socket.emit("whatever", "hmm");
+  connection.socket.disconnect();
 });
 ```
 
@@ -605,22 +614,26 @@ connection.open('roomid', function() {
 Wanna detect current browser?
 
 ```javascript
-if(connection.DetectRTC.browser.isChrome) {
-	// it is Chrome
+if (connection.DetectRTC.browser.isChrome) {
+  // it is Chrome
 }
 
 // you can even set backward compatibility hack
 connection.UA = connection.DetectRTC.browser;
-if(connection.UA.isChrome) { }
+if (connection.UA.isChrome) {
+}
 ```
 
 Wanna detect if user is having microphone or webcam?
 
 ```javascript
-connection.DetectRTC.detectMediaAvailability(function(media){
-	if(media.hasWebcam) { }
-	if(media.hasMicrophone) { }
-	if(media.hasSpeakers) { }
+connection.DetectRTC.detectMediaAvailability(function (media) {
+  if (media.hasWebcam) {
+  }
+  if (media.hasMicrophone) {
+  }
+  if (media.hasSpeakers) {
+  }
 });
 ```
 
@@ -629,11 +642,11 @@ connection.DetectRTC.detectMediaAvailability(function(media){
 Get files problematically instead of using `input[type=file]`:
 
 ```javascript
-connection.invokeSelectFileDialog(function(file) {
-	var file = this.files[0];
-	if(file){
-		connection.shareFile(file);
-	}
+connection.invokeSelectFileDialog(function (file) {
+  var file = this.files[0];
+  if (file) {
+    connection.shareFile(file);
+  }
 });
 ```
 
@@ -644,46 +657,50 @@ Force bandwidth, bitrates, etc.
 ```javascript
 var BandwidthHandler = connection.BandwidthHandler;
 connection.bandwidth = {
-	audio: 128,
-	video: 256,
-	screen: 300
+  audio: 128,
+  video: 256,
+  screen: 300,
 };
-connection.processSdp = function(sdp) {
-    sdp = BandwidthHandler.setApplicationSpecificBandwidth(sdp, connection.bandwidth, !!connection.session.screen);
-    sdp = BandwidthHandler.setVideoBitrates(sdp, {
-        min: connection.bandwidth.video,
-        max: connection.bandwidth.video
-    });
+connection.processSdp = function (sdp) {
+  sdp = BandwidthHandler.setApplicationSpecificBandwidth(
+    sdp,
+    connection.bandwidth,
+    !!connection.session.screen
+  );
+  sdp = BandwidthHandler.setVideoBitrates(sdp, {
+    min: connection.bandwidth.video,
+    max: connection.bandwidth.video,
+  });
 
-    sdp = BandwidthHandler.setOpusAttributes(sdp);
+  sdp = BandwidthHandler.setOpusAttributes(sdp);
 
-    sdp = BandwidthHandler.setOpusAttributes(sdp, {
-        'stereo': 1,
-        //'sprop-stereo': 1,
-        'maxaveragebitrate': connection.bandwidth.audio * 1000 * 8,
-        'maxplaybackrate': connection.bandwidth.audio * 1000 * 8,
-        //'cbr': 1,
-        //'useinbandfec': 1,
-        // 'usedtx': 1,
-        'maxptime': 3
-    });
+  sdp = BandwidthHandler.setOpusAttributes(sdp, {
+    stereo: 1,
+    //'sprop-stereo': 1,
+    maxaveragebitrate: connection.bandwidth.audio * 1000 * 8,
+    maxplaybackrate: connection.bandwidth.audio * 1000 * 8,
+    //'cbr': 1,
+    //'useinbandfec': 1,
+    // 'usedtx': 1,
+    maxptime: 3,
+  });
 
-    return sdp;
+  return sdp;
 };
 ```
 
-* http://www.rtcmulticonnection.org/docs/processSdp/
+- http://www.rtcmulticonnection.org/docs/processSdp/
 
 ## `autoCloseEntireSession`
 
-* http://www.rtcmulticonnection.org/docs/autoCloseEntireSession/
+- http://www.rtcmulticonnection.org/docs/autoCloseEntireSession/
 
 ## `filesContainer`
 
 A DOM-element to show progress-bars and preview files.
 
 ```javascript
-connection.filesContainer = document.getElementById('files-container');
+connection.filesContainer = document.getElementById("files-container");
 ```
 
 ## `videosContainer`
@@ -691,7 +708,7 @@ connection.filesContainer = document.getElementById('files-container');
 A DOM-element to append videos or audios or screens:
 
 ```javascript
-connection.videosContainer = document.getElementById('videos-container');
+connection.videosContainer = document.getElementById("videos-container");
 ```
 
 ## `onMediaError`
@@ -699,8 +716,8 @@ connection.videosContainer = document.getElementById('videos-container');
 If screen or video capturing fails:
 
 ```javascript
-connection.onMediaError = function(error) {
-	alert( 'onMediaError:\n' + JSON.stringify(error) );
+connection.onMediaError = function (error) {
+  alert("onMediaError:\n" + JSON.stringify(error));
 };
 ```
 
@@ -711,14 +728,14 @@ connection.onMediaError = function(error) {
 Recreate peers. Capture new video using `connection.captureUserMedia` and call `connection.renegotiate()` and that new video will be shared with all connected users.
 
 ```javascript
-connection.renegotiate('with-single-userid');
+connection.renegotiate("with-single-userid");
 
 connection.renegotiate(); // with all users
 ```
 
 ## `addStream`
 
-* http://www.rtcmulticonnection.org/docs/addStream/
+- http://www.rtcmulticonnection.org/docs/addStream/
 
 You can even pass `streamCallback` and check if user declined prompt to share
 screen:
@@ -745,57 +762,57 @@ connection.addStream({
 
 ## `removeStream`
 
-* http://www.rtcmulticonnection.org/docs/removeStream/
+- http://www.rtcmulticonnection.org/docs/removeStream/
 
 You can even pass `streamCallback`:
 
 ```javascript
-connection.removeStream('streamid');
+connection.removeStream("streamid");
 connection.renegotiate();
 ```
 
 ## `mediaConstraints`
 
-* http://www.rtcmulticonnection.org/docs/mediaConstraints/
+- http://www.rtcmulticonnection.org/docs/mediaConstraints/
 
 ## `sdpConstraints`
 
-* http://www.rtcmulticonnection.org/docs/sdpConstraints/
+- http://www.rtcmulticonnection.org/docs/sdpConstraints/
 
 ## `extra`
 
-* http://www.rtcmulticonnection.org/docs/extra/
+- http://www.rtcmulticonnection.org/docs/extra/
 
 ## `userid`
 
-* http://www.rtcmulticonnection.org/docs/userid/
+- http://www.rtcmulticonnection.org/docs/userid/
 
 You must set userid before opening or joining a room:
 
 ```javascript
-connection.userid = 'abcdef';
-connection.openOrJoin('roomid');
+connection.userid = "abcdef";
+connection.openOrJoin("roomid");
 ```
 
 ## `session`
 
-* http://www.rtcmulticonnection.org/docs/session/
+- http://www.rtcmulticonnection.org/docs/session/
 
 To enable two-way audio however one-way screen or video:
 
 ```javascript
 // video is oneway, however audio is two-way
 connection.session = {
-    audio: 'two-way',
-    video: true,
-    oneway: true
+  audio: "two-way",
+  video: true,
+  oneway: true,
 };
 
 // screen is oneway, however audio is two-way
 connection.session = {
-    audio: 'two-way',
-    screen: true,
-    oneway: true
+  audio: "two-way",
+  screen: true,
+  oneway: true,
 };
 ```
 
@@ -812,11 +829,11 @@ connection.enableFileSharing = true;
 Change userid and update userid among all connected peers:
 
 ```javascript
-connection.changeUserId('new-userid');
+connection.changeUserId("new-userid");
 
 // or callback to check if userid is successfully changed
-connection.changeUserId('new-userid', function() {
-    alert('Your userid is successfully changed to: ' + connection.userid);
+connection.changeUserId("new-userid", function () {
+  alert("Your userid is successfully changed to: " + connection.userid);
 });
 ```
 
@@ -826,8 +843,8 @@ It is `true` by default. If you are handling `window.onbeforeunload` yourself, t
 
 ```javascript
 connection.closeBeforeUnload = false;
-window.onbeforeunlaod = function() {
-	connection.close();
+window.onbeforeunlaod = function () {
+  connection.close();
 };
 ```
 
@@ -839,14 +856,14 @@ You can skip using `autoCloseEntireSession`. You can keep session/room opened wh
 connection.closeEntireSession();
 
 // or callback
-connection.closeEntireSession(function() {
-    alert('Entire session has been closed.');
+connection.closeEntireSession(function () {
+  alert("Entire session has been closed.");
 });
 
 // or before leaving a page
 connection.closeBeforeUnload = false;
-window.onbeforeunlaod = function() {
-    connection.closeEntireSession();
+window.onbeforeunlaod = function () {
+  connection.closeEntireSession();
 };
 ```
 
@@ -858,27 +875,32 @@ connection.closeSocket(); // close socket.io connections
 
 ## `close`
 
-* http://www.rtcmulticonnection.org/docs/close/
+- http://www.rtcmulticonnection.org/docs/close/
 
 ## `onUserIdAlreadyTaken`
 
 This event is fired if two users tries to open same room.
 
 ```javascript
-connection.onUserIdAlreadyTaken = function(useridAlreadyTaken, yourNewUserId) {
-    if (connection.enableLogs) {
-        console.warn('Userid already taken.', useridAlreadyTaken, 'Your new userid:', yourNewUserId);
-    }
+connection.onUserIdAlreadyTaken = function (useridAlreadyTaken, yourNewUserId) {
+  if (connection.enableLogs) {
+    console.warn(
+      "Userid already taken.",
+      useridAlreadyTaken,
+      "Your new userid:",
+      yourNewUserId
+    );
+  }
 
-    connection.join(useridAlreadyTaken);
+  connection.join(useridAlreadyTaken);
 };
 ```
 
 Above event gets fired out of this code:
 
 ```javascript
-moderator1.open('same-roomid');
-moderator2.open('same-roomid');
+moderator1.open("same-roomid");
+moderator2.open("same-roomid");
 ```
 
 ## `onEntireSessionClosed`
@@ -886,28 +908,28 @@ moderator2.open('same-roomid');
 You can tell users that room-moderator closed entire session:
 
 ```javascript
-connection.onEntireSessionClosed = function(event) {
-    console.info('Entire session is closed: ', event.sessionid, event.extra);
+connection.onEntireSessionClosed = function (event) {
+  console.info("Entire session is closed: ", event.sessionid, event.extra);
 };
 ```
 
 ## `captureUserMedia`
 
-* http://www.rtcmulticonnection.org/docs/captureUserMedia/
+- http://www.rtcmulticonnection.org/docs/captureUserMedia/
 
 ## `open`
 
 Open room:
 
 ```javascript
-connection.open('roomid', function(isRoomCreated, roomid, error) {
-	if(error) {
-        alert(error);
+connection.open("roomid", function (isRoomCreated, roomid, error) {
+  if (error) {
+    alert(error);
 
-        // if error says that room is already created
-        connection.join('room-id');
-        return;
-    }
+    // if error says that room is already created
+    connection.join("room-id");
+    return;
+  }
 });
 ```
 
@@ -916,44 +938,43 @@ connection.open('roomid', function(isRoomCreated, roomid, error) {
 Join room:
 
 ```javascript
-connection.join('roomid', function(isRoomJoined, roomid, error) {
-    if(error) {
-        // maybe room does not exist
-        // maybe room is full
-        // maybe password is invalid
-        alert(error);
-        return;
-    }
+connection.join("roomid", function (isRoomJoined, roomid, error) {
+  if (error) {
+    // maybe room does not exist
+    // maybe room is full
+    // maybe password is invalid
+    alert(error);
+    return;
+  }
 });
 
 // or pass "options"
-connection.join('roomid', {
-	localPeerSdpConstraints: {
-		OfferToReceiveAudio: true,
-		OfferToReceiveVideo: true
-	},
-	remotePeerSdpConstraints: {
-		OfferToReceiveAudio: true,
-		OfferToReceiveVideo: true
-	},
-	isOneWay: false,
-	isDataOnly: false
+connection.join("roomid", {
+  localPeerSdpConstraints: {
+    OfferToReceiveAudio: true,
+    OfferToReceiveVideo: true,
+  },
+  remotePeerSdpConstraints: {
+    OfferToReceiveAudio: true,
+    OfferToReceiveVideo: true,
+  },
+  isOneWay: false,
+  isDataOnly: false,
 });
 ```
 
 ## `openOrJoin`
 
 ```javascript
-connection.openOrJoin('roomid');
+connection.openOrJoin("roomid");
 
 // or
-connection.openOrJoin('roomid', function(isRoomOpened, roomid) {
-	if(isRoomOpened === true) {
-        alert('opened the room');
-    }
-	else {
-        alert('joined the room');
-    }
+connection.openOrJoin("roomid", function (isRoomOpened, roomid) {
+  if (isRoomOpened === true) {
+    alert("opened the room");
+  } else {
+    alert("joined the room");
+  }
 });
 ```
 
@@ -1027,15 +1048,15 @@ You can skip any stream or allow RTCMultiConnection to share a stream with remot
 `nativePeer.addStream` method will be called only if below event permits the `MediaStream` object:
 
 ```javascript
-connection.beforeAddingStream = function(stream, peer) {
-	if(stream.id == 'any-streamid') return; // skip
-	if(stream.isScreen) return; // skip
-	if(stream.inactive) return; // skip
-	
-	// var remoteUserId = peer.userid;
-	// var remoteUserExtra = connection.peers[remoteUserId].extra;
+connection.beforeAddingStream = function (stream, peer) {
+  if (stream.id == "any-streamid") return; // skip
+  if (stream.isScreen) return; // skip
+  if (stream.inactive) return; // skip
 
-	return stream; // otherwise allow RTCMultiConnection to share this stream with remote users
+  // var remoteUserId = peer.userid;
+  // var remoteUserExtra = connection.peers[remoteUserId].extra;
+
+  return stream; // otherwise allow RTCMultiConnection to share this stream with remote users
 };
 ```
 
@@ -1045,19 +1066,19 @@ This method allows you get full control over screen-parameters:
 
 ```javascript
 connection.__getScreenConstraints = connection.getScreenConstraints;
-connection.getScreenConstraints = function(callback) {
-    connection.__getScreenConstraints(function(error, screen_constraints) {
-        if (connection.DetectRTC.browser.name === 'Chrome') {
-            delete screen_constraints.mandatory.minAspectRatio;
-            delete screen_constraints.mandatory.googLeakyBucket;
-            delete screen_constraints.mandatory.googTemporalLayeredScreencast;
-            delete screen_constraints.mandatory.maxWidth;
-            delete screen_constraints.mandatory.maxHeight;
-            delete screen_constraints.mandatory.minFrameRate;
-            delete screen_constraints.mandatory.maxFrameRate;
-        }
-        callback(error, screen_constraints);
-    });
+connection.getScreenConstraints = function (callback) {
+  connection.__getScreenConstraints(function (error, screen_constraints) {
+    if (connection.DetectRTC.browser.name === "Chrome") {
+      delete screen_constraints.mandatory.minAspectRatio;
+      delete screen_constraints.mandatory.googLeakyBucket;
+      delete screen_constraints.mandatory.googTemporalLayeredScreencast;
+      delete screen_constraints.mandatory.maxWidth;
+      delete screen_constraints.mandatory.maxHeight;
+      delete screen_constraints.mandatory.minFrameRate;
+      delete screen_constraints.mandatory.maxFrameRate;
+    }
+    callback(error, screen_constraints);
+  });
 };
 ```
 
@@ -1065,16 +1086,16 @@ Or to more simplify it:
 
 ```javascript
 connection.__getScreenConstraints = connection.getScreenConstraints;
-connection.getScreenConstraints = function(callback) {
-    connection.__getScreenConstraints(function(error, screen_constraints) {
-        if (connection.DetectRTC.browser.name === 'Chrome') {
-            screen_constraints.mandatory = {
-                chromeMediaSource: screen_constraints.mandatory.chromeMediaSource,
-                chromeMediaSourceId: screen_constraints.mandatory.chromeMediaSourceId
-            };
-        }
-        callback(error, screen_constraints);
-    });
+connection.getScreenConstraints = function (callback) {
+  connection.__getScreenConstraints(function (error, screen_constraints) {
+    if (connection.DetectRTC.browser.name === "Chrome") {
+      screen_constraints.mandatory = {
+        chromeMediaSource: screen_constraints.mandatory.chromeMediaSource,
+        chromeMediaSourceId: screen_constraints.mandatory.chromeMediaSourceId,
+      };
+    }
+    callback(error, screen_constraints);
+  });
 };
 ```
 
@@ -1082,17 +1103,17 @@ You can even delete width/height for Firefox:
 
 ```javascript
 connection.__getScreenConstraints = connection.getScreenConstraints;
-connection.getScreenConstraints = function(callback) {
-    connection.__getScreenConstraints(function(error, screen_constraints) {
-        if (connection.DetectRTC.browser.name === 'Chrome') {
-            delete screen_constraints.mandatory.minAspectRatio;
-        }
-        if (connection.DetectRTC.browser.name === 'Firefox') {
-            delete screen_constraints.width;
-            delete screen_constraints.height;
-        }
-        callback(error, screen_constraints);
-    });
+connection.getScreenConstraints = function (callback) {
+  connection.__getScreenConstraints(function (error, screen_constraints) {
+    if (connection.DetectRTC.browser.name === "Chrome") {
+      delete screen_constraints.mandatory.minAspectRatio;
+    }
+    if (connection.DetectRTC.browser.name === "Firefox") {
+      delete screen_constraints.width;
+      delete screen_constraints.height;
+    }
+    callback(error, screen_constraints);
+  });
 };
 ```
 
@@ -1100,7 +1121,7 @@ connection.getScreenConstraints = function(callback) {
 
 First step, install this chrome extension:
 
-* https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk
+- https://chrome.google.com/webstore/detail/screen-capturing/ajhifddimkapgcifgcodmmfdlknahffk
 
 Now use below code in any RTCMultiConnection (screen) demo:
 
@@ -1111,20 +1132,22 @@ Now use below code in any RTCMultiConnection (screen) demo:
 <script src="https://cdn.webrtc-experiment.com:443/getScreenId.js"></script>
 
 <script>
-// Using getScreenId.js to capture screen from any domain
-// You do NOT need to deploy Chrome Extension YOUR-Self!!
-connection.getScreenConstraints = function(callback, audioPlusTab) {
+  // Using getScreenId.js to capture screen from any domain
+  // You do NOT need to deploy Chrome Extension YOUR-Self!!
+  connection.getScreenConstraints = function (callback, audioPlusTab) {
     if (isAudioPlusTab(connection, audioPlusTab)) {
-        audioPlusTab = true;
+      audioPlusTab = true;
     }
 
-    getScreenConstraints(function(error, screen_constraints) {
-        if (!error) {
-            screen_constraints = connection.modifyScreenConstraints(screen_constraints);
-            callback(error, screen_constraints);
-        }
+    getScreenConstraints(function (error, screen_constraints) {
+      if (!error) {
+        screen_constraints = connection.modifyScreenConstraints(
+          screen_constraints
+        );
+        callback(error, screen_constraints);
+      }
     }, audioPlusTab);
-};
+  };
 </script>
 ```
 
@@ -1135,16 +1158,18 @@ Don't want to link `/dev/globals.js` or want to simplify codes???
 <script src="https://cdn.webrtc-experiment.com:443/getScreenId.js"></script>
 
 <script>
-// Using getScreenId.js to capture screen from any domain
-// You do NOT need to deploy Chrome Extension YOUR-Self!!
-connection.getScreenConstraints = function(callback) {
-    getScreenConstraints(function(error, screen_constraints) {
-        if (!error) {
-            screen_constraints = connection.modifyScreenConstraints(screen_constraints);
-            callback(error, screen_constraints);
-        }
+  // Using getScreenId.js to capture screen from any domain
+  // You do NOT need to deploy Chrome Extension YOUR-Self!!
+  connection.getScreenConstraints = function (callback) {
+    getScreenConstraints(function (error, screen_constraints) {
+      if (!error) {
+        screen_constraints = connection.modifyScreenConstraints(
+          screen_constraints
+        );
+        callback(error, screen_constraints);
+      }
     });
-};
+  };
 </script>
 ```
 
@@ -1154,27 +1179,32 @@ RTCMultiConnection now supports WebRTC scalable broadcasting. Two new API are in
 
 ```javascript
 connection.enableScalableBroadcast = true; // by default, it is false.
-connection.singleBroadcastAttendees = 3;   // how many users are handled by each broadcaster
+connection.singleBroadcastAttendees = 3; // how many users are handled by each broadcaster
 ```
 
-Live Demos:
+Live rtc:
 
-| DemoTitle        | TestLive           | ViewSource |
-| ------------- |-------------|-------------|
-| Scalable Audio/Video Broadcast | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Scalable-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Scalable-Broadcast.html) |
-| Scalable Screen Broadcast | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Scalable-Screen-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Scalable-Screen-Broadcast.html) |
-| Scalable Video Broadcast | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Video-Scalable-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Video-Scalable-Broadcast.html) |
-| Scalable File Sharing | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Files-Scalable-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Files-Scalable-Broadcast.html) |
+| DemoTitle                      | TestLive                                                                            | ViewSource                                                                                               |
+| ------------------------------ | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Scalable Audio/Video Broadcast | [Demo](https://rtcmulticonnection.herokuapp.com/rtc/Scalable-Broadcast.html)        | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/rtc/Scalable-Broadcast.html)        |
+| Scalable Screen Broadcast      | [Demo](https://rtcmulticonnection.herokuapp.com/rtc/Scalable-Screen-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/rtc/Scalable-Screen-Broadcast.html) |
+| Scalable Video Broadcast       | [Demo](https://rtcmulticonnection.herokuapp.com/rtc/Video-Scalable-Broadcast.html)  | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/rtc/Video-Scalable-Broadcast.html)  |
+| Scalable File Sharing          | [Demo](https://rtcmulticonnection.herokuapp.com/rtc/Files-Scalable-Broadcast.html)  | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/rtc/Files-Scalable-Broadcast.html)  |
 
 ## `onNumberOfBroadcastViewersUpdated`
 
 This event is fired for scalable-broadcast-initiator.
 
 ```javascript
-connection.onNumberOfBroadcastViewersUpdated = function(event) {
-    // event.broadcastId
-    // event.numberOfBroadcastViewers
-    console.info('Number of broadcast (', event.broadcastId, ') viewers', event.numberOfBroadcastViewers);
+connection.onNumberOfBroadcastViewersUpdated = function (event) {
+  // event.broadcastId
+  // event.numberOfBroadcastViewers
+  console.info(
+    "Number of broadcast (",
+    event.broadcastId,
+    ") viewers",
+    event.numberOfBroadcastViewers
+  );
 };
 ```
 
@@ -1183,57 +1213,81 @@ connection.onNumberOfBroadcastViewersUpdated = function(event) {
 You can manually get number-of-broadcast viewers as well:
 
 ```javascript
-connection.getNumberOfBroadcastViewers('broadcast-unique-id', function(numberOfBroadcastViewers) {
-    alert(numberOfBroadcastViewers);
+connection.getNumberOfBroadcastViewers("broadcast-unique-id", function (
+  numberOfBroadcastViewers
+) {
+  alert(numberOfBroadcastViewers);
 });
 ```
 
 ## Fix Echo
 
 ```javascript
-connection.onstream = function(event) {
-	if(event.mediaElement) {
-		event.mediaElement.muted = true;
-		delete event.mediaElement;
-	}
+connection.onstream = function (event) {
+  if (event.mediaElement) {
+    event.mediaElement.muted = true;
+    delete event.mediaElement;
+  }
 
-	var video = document.createElement('video');
-	if(event.type === 'local') {
-		video.muted = true;
-	}
-	video.src = URL.createObjectURL(event.stream);
-	connection.videosContainer.appendChild(video);
-}
+  var video = document.createElement("video");
+  if (event.type === "local") {
+    video.muted = true;
+  }
+  video.src = URL.createObjectURL(event.stream);
+  connection.videosContainer.appendChild(video);
+};
 ```
 
 ## How to use getStats?
 
-* https://github.com/muaz-khan/getStats
+- https://github.com/muaz-khan/getStats
 
 ```javascript
-connection.multiPeersHandler.onPeerStateChanged = function(state) {
-    if (state.iceConnectionState.search(/disconnected|closed|failed/gi) === -1 && !connection.isConnected) {
-        connection.isConnected = true;
+connection.multiPeersHandler.onPeerStateChanged = function (state) {
+  if (
+    state.iceConnectionState.search(/disconnected|closed|failed/gi) === -1 &&
+    !connection.isConnected
+  ) {
+    connection.isConnected = true;
 
-        var peer = connection.peers[state.userid].peer;
-        getStats(peer, function(result) {
-            if (!result || !result.connectionType) return;
+    var peer = connection.peers[state.userid].peer;
+    getStats(
+      peer,
+      function (result) {
+        if (!result || !result.connectionType) return;
 
-            // "relay" means TURN server
-            // "srflx" or "prflx" means STUN server
-            // "host" means neither STUN, nor TURN
-            console.debug('Incoming stream is using:', result.connectionType.remote.candidateType);
-            console.debug('Outgoing stream is using:', result.connectionType.local.candidateType);
+        // "relay" means TURN server
+        // "srflx" or "prflx" means STUN server
+        // "host" means neither STUN, nor TURN
+        console.debug(
+          "Incoming stream is using:",
+          result.connectionType.remote.candidateType
+        );
+        console.debug(
+          "Outgoing stream is using:",
+          result.connectionType.local.candidateType
+        );
 
-            // user external ip-addresses
-            console.debug('Remote user ip-address:', result.connectionType.remote.ipAddress);
-            console.debug('Local user ip-address:', result.connectionType.local.ipAddress);
+        // user external ip-addresses
+        console.debug(
+          "Remote user ip-address:",
+          result.connectionType.remote.ipAddress
+        );
+        console.debug(
+          "Local user ip-address:",
+          result.connectionType.local.ipAddress
+        );
 
-            // UDP is a real media port; TCP is a fallback.
-            console.debug('Peers are connected on port:', result.connectionType.transport);
-        }, 5000);
-        return;
-    }
+        // UDP is a real media port; TCP is a fallback.
+        console.debug(
+          "Peers are connected on port:",
+          result.connectionType.transport
+        );
+      },
+      5000
+    );
+    return;
+  }
 };
 ```
 
@@ -1242,32 +1296,33 @@ connection.multiPeersHandler.onPeerStateChanged = function(state) {
 You can compare `muteType` for `onmute` event; and `unmuteType` for `onunmute` event.
 
 ```javascript
-connection.onmute = function(e) {
-    if (!e.mediaElement) {
-        return;
-    }
+connection.onmute = function (e) {
+  if (!e.mediaElement) {
+    return;
+  }
 
-    if (e.muteType === 'both' || e.muteType === 'video') {
-        e.mediaElement.src = null;
-        e.mediaElement.pause();
-        e.mediaElement.poster = e.snapshot || 'https://cdn.webrtc-experiment.com/images/muted.png';
-    } else if (e.muteType === 'audio') {
-        e.mediaElement.muted = true;
-    }
+  if (e.muteType === "both" || e.muteType === "video") {
+    e.mediaElement.src = null;
+    e.mediaElement.pause();
+    e.mediaElement.poster =
+      e.snapshot || "https://cdn.webrtc-experiment.com/images/muted.png";
+  } else if (e.muteType === "audio") {
+    e.mediaElement.muted = true;
+  }
 };
 
-connection.onunmute = function(e) {
-    if (!e.mediaElement) {
-        return;
-    }
+connection.onunmute = function (e) {
+  if (!e.mediaElement) {
+    return;
+  }
 
-    if (e.unmuteType === 'both' || e.unmuteType === 'video') {
-        e.mediaElement.poster = null;
-        e.mediaElement.src = URL.createObjectURL(e.stream);
-        e.mediaElement.play();
-    } else if (e.unmuteType === 'audio') {
-        e.mediaElement.muted = false;
-    }
+  if (e.unmuteType === "both" || e.unmuteType === "video") {
+    e.mediaElement.poster = null;
+    e.mediaElement.src = URL.createObjectURL(e.stream);
+    e.mediaElement.play();
+  } else if (e.unmuteType === "audio") {
+    e.mediaElement.muted = false;
+  }
 };
 ```
 
@@ -1275,20 +1330,20 @@ connection.onunmute = function(e) {
 
 ```javascript
 connection.bandwidth = {
-    audio: 128,
-    video: 1024,
-    screen: 1024
+  audio: 128,
+  video: 1024,
+  screen: 1024,
 };
 
 var videoConstraints = {
-    mandatory: {
-        maxWidth: 1920,
-        maxHeight: 1080,
-        minAspectRatio: 1.77,
-        minFrameRate: 3,
-        maxFrameRate: 64
-    },
-    optional: []
+  mandatory: {
+    maxWidth: 1920,
+    maxHeight: 1080,
+    minAspectRatio: 1.77,
+    minFrameRate: 3,
+    maxFrameRate: 64,
+  },
+  optional: [],
 };
 
 connection.mediaConstraints.video = videoConstraints;
@@ -1296,7 +1351,7 @@ connection.mediaConstraints.video = videoConstraints;
 
 For low-latency audio:
 
-* https://twitter.com/WebRTCWeb/status/499102787733450753
+- https://twitter.com/WebRTCWeb/status/499102787733450753
 
 ## Default devices?
 
@@ -1305,7 +1360,7 @@ By default, RTCMultiConnection tries to use last available microphone and camera
 ```javascript
 // pass second parameter to force options
 var connection = new RTCMultiConnection(roomId, {
-    useDefaultDevices: true
+  useDefaultDevices: true,
 });
 ```
 
@@ -1316,14 +1371,14 @@ By default, you always have to call `open` or `join` or `openOrJoin` methods man
 ```javascript
 // pass second parameter to force options
 var connection = new RTCMultiConnection(roomId, {
-    autoOpenOrJoin: true
+  autoOpenOrJoin: true,
 });
 ```
 
 ## Wanna use H264 for video?
 
 ```javascript
-connection.codecs.video = 'H264';
+connection.codecs.video = "H264";
 ```
 
 ## Disable Video NACK
@@ -1331,25 +1386,25 @@ connection.codecs.video = 'H264';
 ```html
 <script src="/dev/CodecsHandler.js"></script>
 <script>
-// in your HTML file
-connection.processSdp = function(sdp) {
+  // in your HTML file
+  connection.processSdp = function (sdp) {
     // Disable NACK to test IDR recovery
     sdp = CodecsHandler.disableNACK(sdp);
     return sdp;
-};
+  };
 </script>
 ```
 
 ## Wanna use VP8 for video?
 
 ```javascript
-connection.codecs.video = 'VP8';
+connection.codecs.video = "VP8";
 ```
 
 ## Wanna use G722 for audio?
 
 ```javascript
-connection.codecs.audio = 'G722';
+connection.codecs.audio = "G722";
 ```
 
 ## Prioritize Codecs
@@ -1357,14 +1412,14 @@ connection.codecs.audio = 'G722';
 ```html
 <script src="/dev/CodecsHandler.js"></script>
 <script>
-// in your HTML file
-if(connection.DetectRTC.browser.name === 'Firefox') {
-    connection.getAllParticipants().forEach(function(p) {
-        var peer = connection.peers[p].peer;
+  // in your HTML file
+  if (connection.DetectRTC.browser.name === "Firefox") {
+    connection.getAllParticipants().forEach(function (p) {
+      var peer = connection.peers[p].peer;
 
-        CodecsHandler.prioritize('audio/opus', peer);
+      CodecsHandler.prioritize("audio/opus", peer);
     });
-}
+  }
 </script>
 ```
 
@@ -1375,36 +1430,36 @@ if(connection.DetectRTC.browser.name === 'Firefox') {
 ```html
 <script src="/dev/StreamHasData.js"></script>
 <script>
-connection.videosContainer = document.getElementById('videos-container');
-connection.onstream = function(event) {
-    StreamHasData.check(event.mediaElement, function(hasData) {
-        if (!hasData) {
-            alert('Seems stream does NOT has any data.');
-        }
+  connection.videosContainer = document.getElementById("videos-container");
+  connection.onstream = function (event) {
+    StreamHasData.check(event.mediaElement, function (hasData) {
+      if (!hasData) {
+        alert("Seems stream does NOT has any data.");
+      }
 
-        // append video here
-        connection.videosContainer.appendChild(event.mediaElement);
+      // append video here
+      connection.videosContainer.appendChild(event.mediaElement);
+      event.mediaElement.play();
+      setTimeout(function () {
         event.mediaElement.play();
-        setTimeout(function() {
-            event.mediaElement.play();
-        }, 5000);
+      }, 5000);
     });
-};
+  };
 </script>
 ```
 
-Demo: https://rtcmulticonnection.herokuapp.com/demos/StreamHasData.html
+Demo: https://rtcmulticonnection.herokuapp.com/rtc/StreamHasData.html
 
 ## File Sharing
 
 You can share files using `connection.send(file)`. E.g.
 
 ```javascript
-fileInput.onchange = function() {
-    var file = this.files[0];
+fileInput.onchange = function () {
+  var file = this.files[0];
 
-    if(!file) return;
-    connection.send(file);
+  if (!file) return;
+  connection.send(file);
 };
 ```
 
@@ -1412,20 +1467,20 @@ If you mistakenly shared wrong file, you can stop further sharing:
 
 ```javascript
 var file;
-fileInput.onchange = function() {
-    file = this.files[0];
+fileInput.onchange = function () {
+  file = this.files[0];
 
-    if(!file) return;
+  if (!file) return;
 
-    // First step: Set UUID for your file object
-    file.uuid = connection.token();
+  // First step: Set UUID for your file object
+  file.uuid = connection.token();
 
-    connection.send(file);
+  connection.send(file);
 };
 
-if(connection.fbr) {
-    // Second Last step: remove/delete file chunks based on file UUID
-    delete connection.fbr.chunks[file.uuid];
+if (connection.fbr) {
+  // Second Last step: remove/delete file chunks based on file UUID
+  delete connection.fbr.chunks[file.uuid];
 }
 ```
 
@@ -1438,11 +1493,11 @@ connection.fbr = null;
 You can even try any of these (you don't need to care about file UUID):
 
 ```javascript
-if(connection.fbr) {
-    // clearing all file chunks
-    // removing all file receivers
-    connection.fbr.chunks = {};
-    connection.fbr.users = {};
+if (connection.fbr) {
+  // clearing all file chunks
+  // removing all file receivers
+  connection.fbr.chunks = {};
+  connection.fbr.users = {};
 }
 ```
 
@@ -1463,8 +1518,8 @@ You can set ports, logs, socket-URLs and other configuration using [`config.json
 Note: `config.json` is completely optional. You can set each property directly in your HTML files using `connection.property` e.g.
 
 ```javascript
-connection.socketURL = '/';
-connection.socketMessageEvent = 'RTCMultiConnection-Message';
+connection.socketURL = "/";
+connection.socketMessageEvent = "RTCMultiConnection-Message";
 
 // etc.
 ```
@@ -1487,7 +1542,7 @@ You can either remove `enableLogs` from the `config.json` to **disable logs**; o
 
 # Tips & Tricks
 
-* https://github.com/muaz-khan/RTCMultiConnection/blob/master/docs/tips-tricks.md
+- https://github.com/muaz-khan/RTCMultiConnection/blob/master/docs/tips-tricks.md
 
 # Other Documents
 
@@ -1501,7 +1556,7 @@ You can either remove `enableLogs` from the `config.json` to **disable logs**; o
 
 ## Twitter
 
-* https://twitter.com/WebRTCWeb i.e. @WebRTCWeb
+- https://twitter.com/WebRTCWeb i.e. @WebRTCWeb
 
 ## License
 

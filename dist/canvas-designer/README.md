@@ -2,13 +2,13 @@
 
 ## Demo: https://www.webrtc-experiment.com/Canvas-Designer/
 
-## Advance Demo: [demos/dashboard/](https://rtcmulticonnection.herokuapp.com/demos/dashboard/)
+## Advance Demo: [rtc/dashboard/](https://rtcmulticonnection.herokuapp.com/rtc/dashboard/)
 
 Multiple designers demo: https://www.webrtc-experiment.com/Canvas-Designer/multiple.html
 
 ### YouTube video:
 
-* https://www.youtube.com/watch?v=pvAj5l_v3cM
+- https://www.youtube.com/watch?v=pvAj5l_v3cM
 
 [![npm](https://img.shields.io/npm/v/canvas-designer.svg)](https://npmjs.org/package/canvas-designer) [![downloads](https://img.shields.io/npm/dm/canvas-designer.svg)](https://npmjs.org/package/canvas-designer) [![Build Status: Linux](https://travis-ci.org/muaz-khan/Canvas-Designer.png?branch=master)](https://travis-ci.org/muaz-khan/Canvas-Designer)
 
@@ -16,23 +16,23 @@ Multiple designers demo: https://www.webrtc-experiment.com/Canvas-Designer/multi
 
 **You can check all releases here:**
 
-* https://github.com/muaz-khan/Canvas-Designer/releases
+- https://github.com/muaz-khan/Canvas-Designer/releases
 
 The specialty of this drawing-tool is that, it generates Canvas2D code for you; so simply draw and get the code! That code can be used in any javascript Canvas2D application.
 
 **You can submit issues here:**
 
-* https://github.com/muaz-khan/Canvas-Designer/issues
+- https://github.com/muaz-khan/Canvas-Designer/issues
 
 Also, you can collaborate your drawing with up to 15 users; and everything is synced from all users. So, if you draw a line and your friend-A draws quadratic curve and friend-B draws rectangle then everything will be synced among all users!
 
 ### Youtube Videos
 
-* https://www.youtube.com/watch?v=oSSwMlBu8SY
+- https://www.youtube.com/watch?v=oSSwMlBu8SY
 
 Gif images:
 
-* https://cdn.webrtc-experiment.com/images/Canvas-Designer.gif
+- https://cdn.webrtc-experiment.com/images/Canvas-Designer.gif
 
 <img src="https://i.imgur.com/uDbfy1F.png" />
 
@@ -86,7 +86,7 @@ More importantly, you can use unlimited designers on a single page. Each will ha
 
 You can install following chrome extension for multi-language input tools:
 
-* https://chrome.google.com/webstore/detail/google-input-tools/mclkkofklkfljcocdinagocijmpgbhab?hl=en
+- https://chrome.google.com/webstore/detail/google-input-tools/mclkkofklkfljcocdinagocijmpgbhab?hl=en
 
 Now type your own language text in any `<input>` box or anywhere, and simply copy that text.
 
@@ -115,18 +115,20 @@ You can paste any text: English, Arabic, Chinese etc.
 
 <!-- 2nd step -->
 <script>
-var designer = new CanvasDesigner();
+  var designer = new CanvasDesigner();
 
-// both links are mandatory
-// widget.html will internally use widget.js
-designer.widgetHtmlURL = 'https://cdn.webrtc-experiment.com/Canvas-Designer/widget.html'; // you can place this file anywhere
-designer.widgetJsURL = 'https://cdn.webrtc-experiment.com/Canvas-Designer/widget.js';     // you can place this file anywhere
+  // both links are mandatory
+  // widget.html will internally use widget.js
+  designer.widgetHtmlURL =
+    "https://cdn.webrtc-experiment.com/Canvas-Designer/widget.html"; // you can place this file anywhere
+  designer.widgetJsURL =
+    "https://cdn.webrtc-experiment.com/Canvas-Designer/widget.js"; // you can place this file anywhere
 </script>
 
 <!-- 3rd i.e. last step -->
 <script>
-// <iframe> will be appended to "document.body"
-designer.appendTo(document.body || document.documentElement);
+  // <iframe> will be appended to "document.body"
+  designer.appendTo(document.body || document.documentElement);
 </script>
 ```
 
@@ -139,26 +141,26 @@ tar -zxvf canvas-designer.tar.gz
 ls -a
 ```
 
-* For windows, use 7Zip or WinRAR to extract this: [canvas-designer.tar.gz](http://dl.webrtc-experiment.com/canvas-designer.tar.gz)
+- For windows, use 7Zip or WinRAR to extract this: [canvas-designer.tar.gz](http://dl.webrtc-experiment.com/canvas-designer.tar.gz)
 
 # Complete Usage
 
 ```javascript
 var designer = new CanvasDesigner();
 
-websocket.onmessage = function(event) {
-    designer.syncData( JSON.parse(event.data) );
+websocket.onmessage = function (event) {
+  designer.syncData(JSON.parse(event.data));
 };
 
-designer.addSyncListener(function(data) {
-    websocket.send(JSON.stringify(data));
+designer.addSyncListener(function (data) {
+  websocket.send(JSON.stringify(data));
 });
 
-designer.setSelected('pencil');
+designer.setSelected("pencil");
 
 designer.setTools({
-    pencil: true,
-    text: true
+  pencil: true,
+  text: true,
 });
 
 designer.appendTo(document.documentElement);
@@ -169,24 +171,24 @@ It is having `designer.destroy()` method as well.
 # Use [WebRTC](http://www.rtcmulticonnection.org/docs/)!
 
 ```javascript
-webrtc.onmessage = function(event) {
-    designer.syncData( event.data );
+webrtc.onmessage = function (event) {
+  designer.syncData(event.data);
 };
 
-designer.addSyncListener(function(data) {
-    webrtc.send(data);
+designer.addSyncListener(function (data) {
+  webrtc.send(data);
 });
 ```
 
 # Use Socket.io
 
 ```javascript
-socket.on('message', function(data) {
-    designer.syncData( data );
+socket.on("message", function (data) {
+  designer.syncData(data);
 });
 
-designer.addSyncListener(function(data) {
-    socket.emit('message', data);
+designer.addSyncListener(function (data) {
+  socket.emit("message", data);
 });
 ```
 
@@ -197,14 +199,14 @@ designer.addSyncListener(function(data) {
 You can place `widget.html` file anywhere on your site.
 
 ```javascript
-designer.widgetHtmlURL = '/html-files/widget.html';
+designer.widgetHtmlURL = "/html-files/widget.html";
 ```
 
 By default `widget.html` is placed in the same directory of `index.html`.
 
 ```javascript
 // here is default value
-designer.widgetHtmlURL = 'widget.html';
+designer.widgetHtmlURL = "widget.html";
 ```
 
 Remember, `widget.html` is loaded using `<iframe>`.
@@ -216,14 +218,14 @@ Remember, `widget.html` is loaded using `<iframe>`.
 You can place `widget.html` file anywhere on your site.
 
 ```javascript
-designer.widgetJsURL = '/js-files/widget.min.js';
+designer.widgetJsURL = "/js-files/widget.min.js";
 ```
 
 By default `widget.min.js` is placed in the same directory of `index.html`.
 
 ```javascript
 // here is default value
-designer.widgetJsURL = 'widget.min.js';
+designer.widgetJsURL = "widget.min.js";
 ```
 
 Remember, `widget.js` is loaded using `<iframe>`.
@@ -257,8 +259,8 @@ designer.renderStream();
 This callback is invoked as soon as something new is drawn. An array-of-points is passed over this function. That array MUST be shared with remote users for collaboration.
 
 ```javascript
-designer.addSyncListener(function(data) {
-    designer.send(JSON.stringify(data));
+designer.addSyncListener(function (data) {
+  designer.send(JSON.stringify(data));
 });
 ```
 
@@ -266,40 +268,40 @@ designer.addSyncListener(function(data) {
 
 This method allows you select specific tools.
 
-* See list of [all tools](https://github.com/muaz-khan/Canvas-Designer#built-in-tools)
+- See list of [all tools](https://github.com/muaz-khan/Canvas-Designer#built-in-tools)
 
 ```javascript
-designer.setSelected('rectangle');
+designer.setSelected("rectangle");
 ```
 
 ## `setTools`
 
 This method allows you choose between tools that **should be displayed** in the tools-panel.
 
-* See list of [all tools](https://github.com/muaz-khan/Canvas-Designer#built-in-tools)
+- See list of [all tools](https://github.com/muaz-khan/Canvas-Designer#built-in-tools)
 
 ```javascript
 designer.setTools({
-    line: true,
-    arrow: true,
-    pencil: true,
-    marker: true,
-    dragSingle: true,
-    dragMultiple: true,
-    eraser: true,
-    rectangle: true,
-    arc: true,
-    bezier: true,
-    quadratic: true,
-    text: true,
-    image: true,
-    pdf: true,
-    zoom: true,
-    lineWidth: true,
-    colorsPicker: true,
-    extraOptions: true,
-    code: true,
-    undo: true
+  line: true,
+  arrow: true,
+  pencil: true,
+  marker: true,
+  dragSingle: true,
+  dragMultiple: true,
+  eraser: true,
+  rectangle: true,
+  arc: true,
+  bezier: true,
+  quadratic: true,
+  text: true,
+  image: true,
+  pdf: true,
+  zoom: true,
+  lineWidth: true,
+  colorsPicker: true,
+  extraOptions: true,
+  code: true,
+  undo: true,
 });
 ```
 
@@ -309,34 +311,34 @@ You can force/set your own tool-icons:
 
 ```javascript
 designer.icons = {
-    line: '/icons/line.png',
-    arrow: '/icons/arrow.png',
-    pencil: '/icons/pencil.png',
-    dragSingle: '/icons/dragSingle.png',
-    dragMultiple: '/icons/dragMultiple.png',
-    eraser: '/icons/eraser.png',
-    rectangle: '/icons/rectangle.png',
-    arc: '/icons/arc.png',
-    bezier: '/icons/bezier.png',
-    quadratic: '/icons/quadratic.png',
-    text: '/icons/text.png',
-    image: '/icons/image.png',
-    pdf: '/icons/pdf.png',
-    pdf_next: '/icons/pdf-next.png',
-    pdf_prev: '/icons/pdf-prev.png',
-    marker: '/icons/marker.png',
-    zoom: '/icons/zoom.png',
-    lineWidth: '/icons/lineWidth.png',
-    colorsPicker: '/icons/colorsPicker.png',
-    extraOptions: '/icons/extraOptions.png',
-    code: '/icons/code.png'
+  line: "/icons/line.png",
+  arrow: "/icons/arrow.png",
+  pencil: "/icons/pencil.png",
+  dragSingle: "/icons/dragSingle.png",
+  dragMultiple: "/icons/dragMultiple.png",
+  eraser: "/icons/eraser.png",
+  rectangle: "/icons/rectangle.png",
+  arc: "/icons/arc.png",
+  bezier: "/icons/bezier.png",
+  quadratic: "/icons/quadratic.png",
+  text: "/icons/text.png",
+  image: "/icons/image.png",
+  pdf: "/icons/pdf.png",
+  pdf_next: "/icons/pdf-next.png",
+  pdf_prev: "/icons/pdf-prev.png",
+  marker: "/icons/marker.png",
+  zoom: "/icons/zoom.png",
+  lineWidth: "/icons/lineWidth.png",
+  colorsPicker: "/icons/colorsPicker.png",
+  extraOptions: "/icons/extraOptions.png",
+  code: "/icons/code.png",
 };
 ```
 
 You can set like this as well:
 
 ```javascript
-designer.icons.line = '/icons/line.png';
+designer.icons.line = "/icons/line.png";
 ```
 
 Default values are `NULL` to force icons from `/dev/data-dris.js`.
@@ -349,8 +351,8 @@ CanvasDesigner is a widget; that widget should be appended to a DOM object. This
 designer.appendTo(document.body || document.documentElement);
 
 // or
-designer.appendTo(document.body || document.documentElement, function() {
-    alert('iframe load callback');
+designer.appendTo(document.body || document.documentElement, function () {
+  alert("iframe load callback");
 });
 ```
 
@@ -369,7 +371,7 @@ designer.destroy();
 You can access designer iframe as following:
 
 ```javascript
-designer.iframe.style.border = '5px solid red';
+designer.iframe.style.border = "5px solid red";
 
 window.open(designer.iframe.src);
 ```
@@ -377,10 +379,10 @@ window.open(designer.iframe.src);
 `designer.iframe` will be `null/undefined` until you call `appendTo`. So always use this code-block:
 
 ```javascript
-if(!designer.iframe) {
-    designer.appendTo(document.body);
+if (!designer.iframe) {
+  designer.appendTo(document.body);
 }
-designer.iframe.style.border = '5px solid red';
+designer.iframe.style.border = "5px solid red";
 ```
 
 ## `toDataURL`
@@ -388,8 +390,8 @@ designer.iframe.style.border = '5px solid red';
 Get data-URL of your drawings!
 
 ```javascript
-designer.toDataURL('image/png', function(dataURL) {
-    window.open(dataURL);
+designer.toDataURL("image/png", function (dataURL) {
+  window.open(dataURL);
 });
 ```
 
@@ -404,11 +406,11 @@ designer.sync();
 Here is a real usecase:
 
 ```javascript
-webrtcDataChannel.onopen = function() {
-    if(designer.pointsLength > 0) {
-        // you seems having data to be synced with new user!
-        designer.sync();
-    }
+webrtcDataChannel.onopen = function () {
+  if (designer.pointsLength > 0) {
+    // you seems having data to be synced with new user!
+    designer.sync();
+  }
 };
 ```
 
@@ -419,13 +421,13 @@ Get `MediaStream` object and share in realtime using `RTCPeerConnection.addStrea
 ```html
 <script src="dev/webrtc-handler.js"></script>
 <script>
-designer.captureStream(function(stream) {
+  designer.captureStream(function (stream) {
     var url = URL.createObjectURL(stream);
     videoPreview.src = url;
 
     rtcPeerConnection.addStream(stream);
     rtcPeerConnection.createOffer(success, failure, params);
-});
+  });
 </script>
 ```
 
@@ -435,19 +437,19 @@ Each shape is considered as a `point`. This value allows you check number of sha
 
 ```javascript
 (function looper() {
-    document.getElementById('number-of-shapes').inenrHTML = designer.pointsLength;
-    setTimeout(looper, 1000);
+  document.getElementById("number-of-shapes").inenrHTML = designer.pointsLength;
+  setTimeout(looper, 1000);
 })();
 ```
 
 Or a real usage:
 
 ```javascript
-websocket.onopen = function() {
-    if(designer.pointsLength > 0) {
-        // you seems having data to be synced with existing users!
-        designer.sync();
-    }
+websocket.onopen = function () {
+  if (designer.pointsLength > 0) {
+    // you seems having data to be synced with existing users!
+    designer.sync();
+  }
 };
 ```
 
@@ -456,19 +458,19 @@ websocket.onopen = function() {
 You can either undo drawings by pressing `ctrl+z` on windows and `command+z` on Mac; however you can undo using `designer.undo` method as well:
 
 ```javascript
-designer.undo();   // undo last shape
+designer.undo(); // undo last shape
 designer.undo(-1); // undo last shape
 
 // undo shape from specific index
 designer.undo(0);
 
 // undo all shapes
-designer.undo('all');
+designer.undo("all");
 
 // undo last 10 shapes
 designer.undo({
-    numberOfLastShapes: 10
-})
+  numberOfLastShapes: 10,
+});
 ```
 
 `designer.pointsLength` shows number of shapes; and `designer.undo` accepts shape-index as well.
@@ -480,8 +482,10 @@ designer.undo({
 Open [`widget.html`](https://github.com/muaz-khan/Canvas-Designer/blob/master/widget.html) and add your new tool-icon HTML.
 
 ```html
-<div id="tool-box" class="tool-box"> <!-- search for this div; and include your HTML inside this div -->
-    <canvas id="yourNewToolIcon" width="40" height="40"></canvas> <!-- here is your icon-HTML -->
+<div id="tool-box" class="tool-box">
+  <!-- search for this div; and include your HTML inside this div -->
+  <canvas id="yourNewToolIcon" width="40" height="40"></canvas>
+  <!-- here is your icon-HTML -->
 </div>
 ```
 
@@ -491,7 +495,7 @@ Open [`decorator.js`](https://github.com/muaz-khan/Canvas-Designer/blob/master/d
 
 ```javascript
 var tools = {
-    yourNewToolIcon: true // add this line to make sure index.html can use it
+  yourNewToolIcon: true, // add this line to make sure index.html can use it
 };
 ```
 
@@ -499,18 +503,18 @@ Search for `decorateLine` method, and append following snippet quickly after tha
 
 ```javascript
 function decorateYourNewToolIcon() {
-    var context = getContext('yourNewToolIcon');
+  var context = getContext("yourNewToolIcon");
 
-    context.fillStyle = 'Gray';
-    context.font = '9px Verdana';
-    context.fillText('New', 16, 12);
+  context.fillStyle = "Gray";
+  context.font = "9px Verdana";
+  context.fillText("New", 16, 12);
 
-    bindEvent(context, 'YourNewToolIconSelected');
+  bindEvent(context, "YourNewToolIconSelected");
 }
 
 if (tools.yourNewToolIcon === true) {
-    decorateYourNewToolIcon();
-} else document.getElementById('yourNewToolIcon').style.display = 'none';
+  decorateYourNewToolIcon();
+} else document.getElementById("yourNewToolIcon").style.display = "none";
 ```
 
 ## Third Step
@@ -519,16 +523,16 @@ Open [`common.js`](https://github.com/muaz-khan/Canvas-Designer/blob/master/dev/
 
 ```javascript
 var is = {
-    isYourNewToolIconSelected: false, // add this line
+  isYourNewToolIconSelected: false, // add this line
 
-    set: function (shape) {
-        var cache = this;
+  set: function (shape) {
+    var cache = this;
 
-        cache.isYourNewToolIconSelected = false; // add this line as well.
+    cache.isYourNewToolIconSelected = false; // add this line as well.
 
-        // ..... don't modify anything else
-        cache['is' + shape] = true;
-    }
+    // ..... don't modify anything else
+    cache["is" + shape] = true;
+  },
 };
 ```
 
@@ -639,8 +643,7 @@ Search for `p[0] === 'line'` and add similar code-blocks for your shape (new-too
 
 ### For more information
 
-* https://www.webrtc-experiment.com/Canvas-Designer/Help/#contribute
-
+- https://www.webrtc-experiment.com/Canvas-Designer/Help/#contribute
 
 # Shortcut Keys
 
@@ -672,7 +675,7 @@ node server --port=9002 --ssl --ssl_key=/home/ssl/ssl.key --ssl_cert=/home/ssl/s
 
 For more info:
 
-* https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/installation-guide.md
+- https://github.com/muaz-khan/RTCMultiConnection/tree/master/docs/installation-guide.md
 
 # Contributors
 

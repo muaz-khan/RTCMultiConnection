@@ -34,7 +34,7 @@
         "type": "git",
         "url": "https://github.com/muaz-khan/RTCMultiConnection.git"
     },
-    "homepage": "https://rtcmulticonnection.herokuapp.com/demos/",
+    "homepage": "https://rtcmulticonnection.herokuapp.com/rtc/",
     "ignore": [
         "**/.*",
         "node_modules",
