@@ -8,7 +8,7 @@
   <title>Dashboard + Video Conferencing + Chat + File Sharing | RTCMultiConnection</title>
   <meta name="description" content="WebRTC Dashboard including support for canvas drawing, canvas data syncing, video conferencing, screen sharing and video conferencing. Including chat and file sharing.">
 
-  <link rel="shortcut icon" href="/demos/logo.png">
+  <!-- <link rel="shortcut icon" href="/demos/logo.png"> -->
   <link rel="stylesheet" type="text/css" href="/demos/css/emojionearea.min.css">
 
   <script src="/demos/js/jquery.min.js"></script>
@@ -18,10 +18,17 @@
   <script src="/socket.io/socket.io.js"></script>
   <script src="/node_modules/fbr/FileBufferReader.js"></script>
 
-  <script src="/node_modules/canvas-designer/dev/webrtc-handler.js"></script>
-  <script src="/node_modules/canvas-designer/canvas-designer-widget.js"></script>
+
+ 
+  <!-- <script src="/node_modules/canvas-designer/dev/webrtc-handler.js"></script>
+  <script src="/node_modules/canvas-designer/canvas-designer-widget.js"></script> -->
+   <!--수정한 js코드 dist폴더로 뺌-->
+  <script src="/dist/canvas-designer/dev/webrtc-handler.js"></script>
+  <script src="/dist/canvas-designer/canvas-designer-widget.js"></script>
   <script src="/demos/js/emojionearea.min.js"></script>
   <!-- <script src="/node_modules/multistreamsmixer/MultiStreamsMixer.js"></script> -->
+  <!--Record streams audio 모듈 추가-->
+  <script src="/node_modules/recordrtc/RecordRTC.js"></script>
 
 <style type="text/css">
 html, body, section, ul, li, nav, a, h1, h2 {
@@ -41,127 +48,128 @@ body {
 }
 
 input[disabled], button[disabled] {
-  background: transparent!important;
-  color: #dcd7d7!important;
-  border: 1px solid #dcd7d7!important;
-  cursor: not-allowed!important;
-  text-shadow: none!important;
-  box-shadow: none!important;
-  text-decoration: none!important;
-  outline: none!important;
+    background: transparent!important;
+    color: #dcd7d7!important;
+    border: 1px solid #dcd7d7!important;
+    cursor: not-allowed!important;
+    text-shadow: none!important;
+    box-shadow: none!important;
+    text-decoration: none!important;
+    outline: none!important;
 }
 </style>
 </head>
 <body>
 <style>
-.extra-controls {
-    position: absolute;
-    right: 21%;
-}
-
-#btn-comments {
-  color: red;
-  margin-top: 5px;
-  font-size: 24px;
-  text-shadow: 1px 1px white;
-}
-
-#other-videos {
-    margin-top: 5px;
-}
-
-#other-videos video {
-    width: 45%;
-    margin: 5px;
-    border: 1px solid black;
-    padding: 1px;
-    border-radius: 3px;
-}
-
-#txt-chat-message {
-    width: 100%;
-    resize: vertical;
-    margin: 5px;
-    margin-right: 0;
-    min-height: 30px;
-}
-
-#btn-chat-message {
-    margin: 5px;
-}
-
-#conversation-panel {
-    margin-bottom: 20px;
-    text-align: left;
-    max-height: 200px;
-    overflow: auto;
-    border-top: 1px solid #E5E5E5;
-    width: 106%;
-}
-
-#conversation-panel .message {
-    border-bottom: 1px solid #E5E5E5;
-    padding: 5px 10px;
-}
-
-#conversation-panel .message img, #conversation-panel .message video, #conversation-panel .message iframe {
-    max-width: 100%;
-}
-
-#main-video {
-    width: 100%;
-    margin-top: -9px;
-    border-bottom: 1px solid #121010;
-    display: none;
-    padding-bottom: 1px;
-    display: none;
-}
-
-hr {
-    height: 1px;
-    border: 0;
-    background: #E5E5E5;
-}
-
-#btn-attach-file {
-    width: 25px;
-    vertical-align: middle;
-    cursor: pointer;
-    display: none;
-}
-
-#btn-share-screen {
-    width: 25px;
-    vertical-align: middle;
-    cursor: pointer;
-    display: none;
-}
-
-.checkmark {
-    display:none;
-    width: 15px;
-    vertical-align: middle;
-}
-
-#screen-viewer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 9999999999999;
-    display: none;
-}
-</style>
-
+    .extra-controls {
+        position: absolute;
+        right: 21%;
+    }
+    
+    #btn-comments {
+        color: red;
+        margin-top: 5px;
+        font-size: 24px;
+        text-shadow: 1px 1px white;
+    }
+    
+    #other-videos {
+        margin-top: 5px;
+    }
+    
+    #other-videos video {
+        width: 45%;
+        margin: 5px;
+        border: 1px solid black;
+        padding: 1px;
+        border-radius: 3px;
+    }
+    
+    #txt-chat-message {
+        width: 100%;
+        resize:none;
+        margin: 5px;
+        margin-right: 0;
+        min-height: 30px;
+    }
+    
+    #btn-chat-message {
+        margin: 5px;
+    }
+    
+    #conversation-panel {
+        margin-bottom: 20px;
+        text-align: left;
+        max-height: 200px;
+        overflow: auto;
+        border-top: 1px solid #E5E5E5;
+        width: 106%;
+    }
+    
+    #conversation-panel .message {
+        border-bottom: 1px solid #E5E5E5;
+        padding: 5px 10px;
+    }
+    
+    #conversation-panel .message img, #conversation-panel .message video, #conversation-panel .message iframe {
+        max-width: 100%;
+    }
+    
+    #main-video {
+        width: 100%;
+        margin-top: -9px;
+        border-bottom: 1px solid #121010;
+        display: none;
+        padding-bottom: 1px;
+        display: none;
+    }
+    
+    hr {
+        height: 1px;
+        border: 0;
+        background: #E5E5E5;
+    }
+    
+    #btn-attach-file {
+        width: 25px;
+        vertical-align: middle;
+        cursor: pointer;
+        display: none;
+    }
+    
+    
+    
+    .checkmark {
+        display:none;
+        width: 15px;
+        vertical-align: middle;
+    }
+    
+    #screen-viewer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999999999999;
+        display: none;
+    }
+    </style>
 <article>
-
-<div id="widget-container" style="position: fixed;bottom: 0;right: 0;left: 20%;height: 100%;border: 1px solid black; border-top:0; border-bottom: 0;"></div>
+<div id="isMemo">
+    <div id="other-videos" style="position: fixed;bottom: 80%;left: 20%; height: 20%; border-bottom: 1;"></div>
+    <div id="widget-container" style="position: fixed;bottom: 0;right: 0;left: 20%;height: 80%;border: 1px solid black; border-top:0; border-bottom: 0;"></div>
+</div>
+<div id="isNomal">
+    <div style="position: fixed;left: 20%">ajaskldjaskldjklj</div>
+</div>
 <video id="screen-viewer" controls playsinline autoplay></video>
-
 <div style="width: 20%; height: 100%; position: absolute;left:0;">
-    <video id="main-video" controls playsinline autoplay></video>
-    <div id="other-videos"></div>
+    <div class="video-container">
+        <video id="main-video" controls playsinline autoplay></video>
+        <!--test용-->
+        <div id="other-videos"></div>
+    </div>
     <hr>
     <div style="padding: 5px 10px;">
         <div id="onUserStatusChanged"></div>
@@ -175,8 +183,10 @@ hr {
         </div>
         <textarea id="txt-chat-message"></textarea>
         <button class="btn btn-primary" id="btn-chat-message" disabled>Send</button>
+        <button class="btn btn-primary" id="btn-memo-message">Memo</button>
+        <button class="btn btn-primary" id="btn-record-message">Record</button>
+        <button class="btn btn-primary" id="btn-test-message">RecordTEST</button>
         <img id="btn-attach-file" src="https://www.webrtc-experiment.com/images/attach-file.png" title="Attach a File">
-        <img id="btn-share-screen" src="https://www.webrtc-experiment.com/images/share-screen.png" title="Share Your Screen">
     </div>
 
     <canvas id="temp-stream-canvas" style="display: none;"></canvas>
@@ -184,7 +194,170 @@ hr {
 </article>
 
 <script>
-(function() {
+let cnt = 0;
+let videoID = [];
+let videoIDL = -1;
+
+let btn_memo_flag = false;
+let btn_record_flag = false;
+let memo_first_change = true;
+let init_btn_sync = false;
+
+let streamArr = [];
+let recordAudioFormData;
+let recordVideoFormData;
+
+let recorder;
+function mainVideoControlShow(id,callback){
+    var video = document.querySelector('video[id="' + id + '"]');
+    var video2 = document.getElementById('main-video');
+    video2.style.display = 'none';
+    video2.muted = true;
+    video2.volume = 0;
+    video2.srcObject = video.srcObject;
+    
+    $('#main-video').show(); // 선택된 비디오 메인비디오에 띄우기
+    callback(); // 캔버스에 메인비디오 이식
+}
+function changeMemoBtn(input){
+    if(input){ // 메모창
+        $("#btn-memo-message").html("Nomal")
+        $("#isMemo").css('display', '');
+        $("#isNomal").css('display', 'none');
+        
+    }else{ // nomal
+        $("#btn-memo-message").html("Memo")
+        $("#isMemo").css('display', 'none');
+        $("#isNomal").css('display', '');
+    }
+    // console.log(btn_memo_flag)
+}
+function changeRecordBtn(input){
+    btn_record_flag = input;
+    if(btn_record_flag){
+        $("#btn-record-message").html("Stop")
+    }else{
+        $("#btn-record-message").html("Start")
+    }
+}
+$('#btn-record-message').click(function(){
+    btn_record_flag = !btn_record_flag;
+    if(btn_record_flag){
+        connection.send("plz-record-to-true")
+        designer.postMessage({
+            recording: true,
+            content : true
+        });
+        audioRecord(startAudioRecord);
+    }else{
+        connection.send("plz-record-to-false")
+        designer.postMessage({
+            recording: true,
+            content : false
+        });
+        stopAudioRecord();
+    }
+    changeRecordBtn(btn_record_flag)
+});
+$('#btn-memo-message').click(function() {
+    btn_memo_flag = !btn_memo_flag
+    if(btn_memo_flag){
+        connection.send("plz-memo-to-true")
+    }else{
+        connection.send("plz-memo-to-false")
+    }
+    changeMemoBtn(btn_memo_flag)
+});
+$('#btn-test-message').click(function() {
+    //var video = document.getElementById('main-video');
+    //video.style.display = 'none';
+    //video.srcObject = null;
+    //video.src = null;
+    //video.srcObject = video.srcObject;
+    //$('#iframe').get(0).contentWindow.접근할변수명;
+    //$('#main-video').show(); // 선택된 비디오 메인비디오에 띄우기
+    console.log("test ",$('iframe').get(0).contentWindow.getRecordVideoFormData);
+
+
+    // 팝업창 test ver
+    //let url = "../testpopup/index.html";
+    //let name = "check!!";
+    //let specs =
+    //"width=640px,height=480px,top=200,left=100,toolbar=no,menubar=no,resizable=yes";
+    //w = window.open(url, name, specs);
+});
+function audioRecord(callback){
+    console.log("audioRecord 실행")
+    streamArr = [];
+    connection.streamEvents.selectAll().forEach(ele=>{
+        streamArr.push(ele.stream)
+    });
+    callback();
+}
+function startAudioRecord(){
+    console.log("callback 함수 실행")
+    recorder = RecordRTC(streamArr, {
+        type: 'audio'
+      });
+    connection.recorder = recorder;
+    console.log("RECORDER START! ",recorder);
+    recorder.startRecording();
+}
+
+function stopAudioRecord() {
+  var recorder = connection.recorder;
+  if(!recorder) return alert('No recorder found.');
+  recorder.stopRecording(function() {
+    var blob = recorder.getBlob();
+    var audioURL = URL.createObjectURL(blob); 
+    console.log("녹화된 결과값 : ",blob)
+    //window.open(audioURL);
+    //invokeSaveAsDialog(blob);
+    recordAudioFormData = new FormData().append("file", blob);
+    //test용
+    //console.log("LocalStroage : ", blob)
+    //localStorage.setItem('testAudioSrc', formData);
+    connection.recorder = null;
+  });
+};
+
+$('#other-videos').click(function(e){
+    var id = e.target.getAttribute('id');
+    if ( ( id != '') && (id != null)) {
+        //console.log("parent document : ",e.target)
+        mainVideoControlShow(id,designer.backgroundVideo);
+        console.log(e.target)
+        connection.send({
+            mainVideo: 'plz-find-main-video',
+            mainVideoId: id
+        });
+        //let clicked = document.getElementById("clicked-video");
+        //video.style = "position: fixed;bottom: 0;right: 0;left: 30%;height: 80%;border: 1px solid black; border-top:0; border-bottom: 0;"
+        //$("#main-canvas").appendTo(document.getElementById(id));
+        //clicked.style = "position: fixed;bottom: 0;right: 0;left: 30%;height: 80%;border: 1px solid black; border-top:0; border-bottom: 0;"
+        //var otherVideos = document.querySelector('#other-videos');
+        //clicked.srcObject(video.srcObject);
+        //console.log(otherVideos)
+        //HTMLMediaElement.srcObject = sourceObject;  
+    } 
+});
+$('#main-video').click(function(e){ // main-video 지우는로직 적을것
+    console.log("SRCSRCSRC",document.querySelector("#main-video").srcObject)
+    console.log("SRCSRCSRC",document.querySelector("#main-video").src)
+    if(!document.querySelector("#main-video").srcObject && !document.querySelector("#main-video").src) return;
+    mainVideoControlHide(designer.removeMainVideo);
+    connection.send({
+        mainVideo: 'plz-remove-main-video'
+    });
+});
+function mainVideoControlHide(callback){
+    $('#main-video').srcObject = null;
+    $('#main-video').hide();
+    callback();
+}
+
+// 아래로 기존코드들
+(function() {    
     var params = {},
         r = /([^&=]+)=?([^&]*)/g;
 
@@ -199,8 +372,9 @@ hr {
 
 var connection = new RTCMultiConnection();
 
-connection.socketURL = '/';
-// connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+//connection.socketURL = '/';
+//connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+connection.socketURL = 'http://localhost:9002/';
 
 connection.extra.userFullName = params.userFullName;
 
@@ -221,8 +395,11 @@ connection.maxParticipantsAllowed = 1000;
 var designer = new CanvasDesigner();
 
 // you can place widget.html anywhere
-designer.widgetHtmlURL = '/node_modules/canvas-designer/widget.html';
-designer.widgetJsURL = '/node_modules/canvas-designer/widget.min.js'
+
+// 추가된 코드
+designer.widgetHtmlURL = '/dist/canvas-designer/widget.html';
+designer.widgetJsURL = '/dist/canvas-designer/widget_mod.js'
+// 추가
 
 designer.addSyncListener(function(data) {
     connection.send(data);
@@ -234,7 +411,7 @@ designer.setTools({
     pencil: true,
     text: true,
     image: true,
-    pdf: true,
+    pdf: false,
     eraser: true,
     line: true,
     arrow: true,
@@ -296,7 +473,7 @@ connection.onopen = function(event) {
 
     document.getElementById('btn-chat-message').disabled = false;
     document.getElementById('btn-attach-file').style.display = 'inline-block';
-    document.getElementById('btn-share-screen').style.display = 'inline-block';
+    //document.getElementById('btn-share-screen').style.display = 'inline-block';
 };
 
 connection.onclose = connection.onerror = connection.onleave = function(event) {
@@ -304,8 +481,10 @@ connection.onclose = connection.onerror = connection.onleave = function(event) {
 };
 
 connection.onmessage = function(event) {
+    //console.log("메시지 받았다!!",event.data)
     if(event.data.showMainVideo) {
         // $('#main-video').show();
+        console.log("받았는데?")
         $('#screen-viewer').css({
             top: $('#widget-container').offset().top,
             left: $('#widget-container').offset().left,
@@ -315,7 +494,14 @@ connection.onmessage = function(event) {
         $('#screen-viewer').show();
         return;
     }
-
+    if(event.data.mainVideo === 'plz-find-main-video'){ // 비디오를 찾아서 메인비디오에 띄워라
+        mainVideoControlShow(event.data.mainVideoId,designer.backgroundVideo);
+        return;
+    }
+    if(event.data.mainVideo === 'plz-remove-main-video'){ // 메인비디오 지우기
+        mainVideoControlHide(designer.removeMainVideo);
+        return;
+    }
     if(event.data.hideMainVideo) {
         // $('#main-video').hide();
         $('#screen-viewer').hide();
@@ -345,13 +531,55 @@ connection.onmessage = function(event) {
         return;
     }
 
-    if (event.data === 'plz-sync-points') {
+    if (event.data === 'plz-sync-points') { // 최초 싱크맞출때
         designer.sync();
         return;
+    }
+    if(event.data === 'plz-memo-to-false'){
+        btn_memo_flag = false;
+        changeMemoBtn(btn_memo_flag);
+        return;
+    }
+    if(event.data === 'plz-memo-to-true'){
+        btn_memo_flag = true;
+        changeMemoBtn(btn_memo_flag);
+        return;
+    }
+    if(event.data.request === 'init-plz-memo-to-false' && event.data.target_id === connection.extra.userFullName){
+        console.log("방버튼정보 받았다!")
+        btn_memo_flag = false;
+        init_btn_sync = true;
+        changeMemoBtn(btn_memo_flag);
+        return;
+    }
+    if(event.data.request === 'init-plz-memo-to-true' && event.data.target_id === connection.extra.userFullName){
+        //console.log("초기화!")
+        console.log("방버튼정보 받았다!")
+        btn_memo_flag = true;
+        init_btn_sync = true;
+        changeMemoBtn(btn_memo_flag);
+        return;
+    }
+    if(event.data.request === 'plz-btn-sync' && (params.open === true || params.open === 'true')){
+        console.log("방버튼정보 줄께")
+        //console.log(event.data.join_id," 받아라 ",btn_memo_flag)
+        if(btn_memo_flag){
+            
+            connection.send({
+                request: 'init-plz-memo-to-true',
+                target_id: event.data.join_id
+            })
+        }else{
+            connection.send({
+                request: 'init-plz-memo-to-false',
+                target_id: event.data.join_id
+            })
+        }
     }
 
     designer.syncData(event.data);
 };
+
 
 // extra code
 
@@ -361,15 +589,19 @@ connection.onstream = function(event) {
         $('#screen-viewer').hide();
     }
     else if (event.extra.roomOwner === true) {
-        var video = document.getElementById('main-video');
-        video.setAttribute('data-streamid', event.streamid);
-        // video.style.display = 'none';
-        if(event.type === 'local') {
-            video.muted = true;
-            video.volume = 0;
-        }
-        video.srcObject = event.stream;
-        $('#main-video').show();
+        //var video = document.getElementById('main-video');
+        //video.setAttribute('data-streamid', event.streamid);
+        //// video.style.display = 'none';
+        //if(event.type === 'local') {
+        //    video.muted = true;
+        //    video.volume = 0;
+        //}
+        //video.srcObject = event.stream;
+        //$('#main-video').show();
+        event.mediaElement.controls = false;
+
+        var otherVideos = document.querySelector('#other-videos');
+        otherVideos.appendChild(event.mediaElement);
     } else {
         event.mediaElement.controls = false;
 
@@ -398,6 +630,7 @@ connection.onstreamended = function(event) {
 var conversationPanel = document.getElementById('conversation-panel');
 
 function appendChatMessage(event, checkmark_id) {
+    console.log("append chatmessage")
     var div = document.createElement('div');
 
     div.className = 'message';
@@ -424,51 +657,7 @@ function appendChatMessage(event, checkmark_id) {
 
 var keyPressTimer;
 var numberOfKeys = 0;
-$('#txt-chat-message').emojioneArea({
-    pickerPosition: "top",
-    filtersPosition: "bottom",
-    tones: false,
-    autocomplete: true,
-    inline: true,
-    hidePickerOnBlur: true,
-    events: {
-        focus: function() {
-            $('.emojionearea-category').unbind('click').bind('click', function() {
-                $('.emojionearea-button-close').click();
-            });
-        },
-        keyup: function(e) {
-            var chatMessage = $('.emojionearea-editor').html();
-            if (!chatMessage || !chatMessage.replace(/ /g, '').length) {
-                connection.send({
-                    typing: false
-                });
-            }
 
-
-            clearTimeout(keyPressTimer);
-            numberOfKeys++;
-
-            if (numberOfKeys % 3 === 0) {
-                connection.send({
-                    typing: true
-                });
-            }
-
-            keyPressTimer = setTimeout(function() {
-                connection.send({
-                    typing: false
-                });
-            }, 1200);
-        },
-        blur: function() {
-            // $('#btn-chat-message').click();
-            connection.send({
-                typing: false
-            });
-        }
-    }
-});
 
 window.onkeyup = function(e) {
     var code = e.keyCode || e.which;
@@ -478,9 +667,13 @@ window.onkeyup = function(e) {
 };
 
 document.getElementById('btn-chat-message').onclick = function() {
-    var chatMessage = $('.emojionearea-editor').html();
+    console.log("CLICK!!!")
+    //var chatMessage = $('.emojionearea-editor').html();
+    var chatMessage = $('#txt-chat-message').val();
+    $('#txt-chat-message').val("")
+    console.log(chatMessage)
     $('.emojionearea-editor').html('');
-
+    
     if (!chatMessage || !chatMessage.replace(/ /g, '').length) return;
 
     var checkmark_id = connection.userid + connection.token();
@@ -606,32 +799,34 @@ function updateLabel(progress, label) {
 if(!!params.password) {
     connection.password = params.password;
 }
-
 designer.appendTo(document.getElementById('widget-container'), function() {
     if (params.open === true || params.open === 'true') {
-            var tempStreamCanvas = document.getElementById('temp-stream-canvas');
-            var tempStream = tempStreamCanvas.captureStream();
-            tempStream.isScreen = true;
-            tempStream.streamid = tempStream.id;
-            tempStream.type = 'local';
-            connection.attachStreams.push(tempStream);
-            window.tempStream = tempStream;
-
-            connection.extra.roomOwner = true;
-            connection.open(params.sessionid, function(isRoomOpened, roomid, error) {
-                if (error) {
-                    if (error === connection.errors.ROOM_NOT_AVAILABLE) {
-                        alert('Someone already created this room. Please either join or create a separate room.');
-                        return;
-                    }
-                    alert(error);
+        //console.log("개설자");
+        init_btn_sync = true
+        // tempSTreamCanvas 왜 필요한거?? 캡처용인가???
+        //var tempStreamCanvas = document.getElementById('temp-stream-canvas');
+        //var tempStream = tempStreamCanvas.captureStream();
+        //tempStream.isScreen = true;
+        //tempStream.streamid = tempStream.id;
+        //tempStream.type = 'local';
+        //connection.attachStreams.push(tempStream);
+        //window.tempStream = tempStream;
+        //connection.extra.roomOwner = true;
+        connection.open(params.sessionid, function(isRoomOpened, roomid, error) {
+            if (error) {
+                if (error === connection.errors.ROOM_NOT_AVAILABLE) {
+                    alert('Someone already created this room. Please either join or create a separate room.');
+                    return;
                 }
+                alert(error);
+            }
 
-                connection.socket.on('disconnect', function() {
-                    location.reload();
-                });
+            connection.socket.on('disconnect', function() {
+                location.reload();
             });
+        });
     } else {
+        //console.log("참가자");
         connection.join(params.sessionid, function(isRoomJoined, roomid, error) {
             if (error) {
                 if (error === connection.errors.ROOM_NOT_AVAILABLE) {
@@ -657,14 +852,27 @@ designer.appendTo(document.getElementById('widget-container'), function() {
                 }
                 alert(error);
             }
-
+            initBtnClock();
             connection.socket.on('disconnect', function() {
                 location.reload();
             });
         });
     }
-});
 
+
+    document.getElementById('isMemo').style.display = 'none';
+    console.log("none")
+});
+function initBtnClock(){
+    if(!init_btn_sync){
+        connection.send({
+            request: 'plz-btn-sync',
+            join_id: connection.extra.userFullName
+        });// 내아이디 첨부해서 보냄
+        console.log("버튼정보점...")
+        let timerId = setTimeout(initBtnClock, 2000);
+    }
+}
 function addStreamStopListener(stream, callback) {
     stream.addEventListener('ended', function() {
         callback();
@@ -739,7 +947,7 @@ function replaceScreenTrack(stream) {
 
         // $('#main-video').hide();
         $('#screen-viewer').hide();
-        $('#btn-share-screen').show();
+        //$('#btn-share-screen').show();
         replaceTrack(tempStream.getTracks()[0], screenTrackId);
     });
 
@@ -763,32 +971,6 @@ function replaceScreenTrack(stream) {
     $('#screen-viewer').show();
 }
 
-$('#btn-share-screen').click(function() {
-    if(!window.tempStream) {
-        alert('Screen sharing is not enabled.');
-        return;
-    }
-
-    $('#btn-share-screen').hide();
-
-    if(navigator.mediaDevices.getDisplayMedia) {
-        navigator.mediaDevices.getDisplayMedia(screen_constraints).then(stream => {
-            replaceScreenTrack(stream);
-        }, error => {
-            alert('Please make sure to use Edge 17 or higher.');
-        });
-    }
-    else if(navigator.getDisplayMedia) {
-        navigator.getDisplayMedia(screen_constraints).then(stream => {
-            replaceScreenTrack(stream);
-        }, error => {
-            alert('Please make sure to use Edge 17 or higher.');
-        });
-    }
-    else {
-        alert('getDisplayMedia API is not available in this browser.');
-    }
-});
 </script>
 </body>
 </html>
