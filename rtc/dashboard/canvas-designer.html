@@ -8,7 +8,7 @@
   <title>Dashboard + Video Conferencing + Chat + File Sharing | RTCMultiConnection</title>
   <meta name="description" content="WebRTC Dashboard including support for canvas drawing, canvas data syncing, video conferencing, screen sharing and video conferencing. Including chat and file sharing.">
 
-  <!-- <link rel="shortcut icon" href="/rtc/logo.png"> -->
+  <!-- <link rel="shortcut icon" href="/demos/logo.png"> -->
   <link rel="stylesheet" type="text/css" href="/rtc/css/emojionearea.min.css">
 
   <script src="/rtc/js/jquery.min.js"></script>
@@ -121,9 +121,14 @@ input[disabled], button[disabled] {
         border-bottom: 1px solid #121010;
         display: none;
         padding-bottom: 1px;
-        display: none;
     }
-    
+    #main-audio{
+        width: 100%;
+        margin-top: -9px;
+        border-bottom: 1px solid #121010;
+        /*display: none;*/
+        padding-bottom: 1px;
+    }
     hr {
         height: 1px;
         border: 0;
@@ -166,7 +171,8 @@ input[disabled], button[disabled] {
 <video id="screen-viewer" controls playsinline autoplay></video>
 <div style="width: 20%; height: 100%; position: absolute;left:0;">
     <div class="video-container">
-        <video id="main-video" controls playsinline autoplay></video>
+        <video id="main-video" playsinline autoplay></video>
+        <audio id="main-audio" controls playsinline autoplay></audio>
         <!--test용-->
         <div id="other-videos"></div>
     </div>
@@ -186,6 +192,7 @@ input[disabled], button[disabled] {
         <button class="btn btn-primary" id="btn-memo-message">Memo</button>
         <button class="btn btn-primary" id="btn-record-message">Record</button>
         <button class="btn btn-primary" id="btn-test-message">RecordTEST</button>
+        <button class="btn btn-primary" id="btn-clear-message">clear</button>
         <img id="btn-attach-file" src="https://www.webrtc-experiment.com/images/attach-file.png" title="Attach a File">
     </div>
 
@@ -194,20 +201,47 @@ input[disabled], button[disabled] {
 </article>
 
 <script>
-let cnt = 0;
-let videoID = [];
-let videoIDL = -1;
+let init_btn_sync = false; // 방버튼정보를 최초 동기화 하였는가??
+let btn_memo_flag = false; // 회의화면 or canvas화면 btn
 
-let btn_memo_flag = false;
-let btn_record_flag = false;
-let memo_first_change = true;
-let init_btn_sync = false;
+let btn_record_flag = false; // record 시작/ 끝
 
-let streamArr = [];
-let recordAudioFormData;
-let recordVideoFormData;
+let streamArr = []; // 모든 참여자 음성 stream arr
+let recordAudioFormData; // 저장된 audioData
+let recordVideoFormData; // 저장된 videoData
 
-let recorder;
+let recorder; // RTC recorder
+
+
+// test 용 -> 나중에는 canvas 영상 재생할때만 canvas하단에 배치할것
+var audio = document.getElementById('main-audio');
+var video = document.getElementById('main-video');
+//audio.style.display = '';
+audio.addEventListener('play', audioHandler, false);
+audio.addEventListener('pause', audioHandler, false);
+audio.addEventListener('seeked', audioHandler, false);
+
+// audio 제어 핸들러
+function audioHandler(e) {
+    console.log("EEEEEEE ", e)
+    if (e.type == 'play') {
+      // play your audio
+        console.log("audio play ")
+        video.play()
+    } else if (e.type == 'pause') {
+      // pause your audio
+        console.log("audio pause ")
+        video.pause()
+    }else if(e.type == 'seeked'){
+        console.log("audio seeked ",audio.currentTime)
+        video.currentTime = audio.currentTime;
+    }else if(e.type == 'timeupdate'){
+        console.log("audio timeupdate")
+    }
+  }
+
+
+
 function mainVideoControlShow(id,callback){
     var video = document.querySelector('video[id="' + id + '"]');
     var video2 = document.getElementById('main-video');
@@ -268,17 +302,95 @@ $('#btn-memo-message').click(function() {
     }
     changeMemoBtn(btn_memo_flag)
 });
+$('#btn-clear-message').click(function() {
+    clearCanvas();
+});
+function clearCanvas(){
+    let clearFlag = false;
+    if(document.querySelector("#main-video").style.display !== "none"){
+        clearFlag = true; // 캔버스 배경영상이 있을때
+    }
+    designer.postMessage({
+        undo: true,
+        index : "all",
+        clearFlag : clearFlag
+    });
+    connection.send("plz-clear-canvas")
+}
+async function testURLData(url){
+    let blob = await fetch(url).then(r => r.blob()); // url에서 blob로 바꾸기
+    console.log("test ! ",blob)
+    // media url file객체로 만들기
+    let file = await fetch(url).then(r => r.blob()).then(blobFile => console.log(new File([blobFile], "fileNameGoesHere", { type: "audio/webm" })))
+}
+function syncSharedMedia(recordAudioFormData,recordVideoFormData){
+    var audio = document.getElementById('main-audio');
+    var video = document.getElementById('main-video');
+    audio.srcObject = null;
+    audio.src = null;
+    audio.onended = function(e) {    //audio.srcObject = null;
+        //audio.src = null;
+        // audio.style.display = 'none';
+    };
+    audio.src = recordAudioFormData;
+    //audio.currentTime = 3;
+    //$('#main-audio').show();
+
+    video.srcObject = null;
+    video.src = null;
+    video.style.display = 'none';
+    video.onended = function(e) {
+        //video.srcObject = null;
+        //video.src = null;
+        //video.style.display = 'none';
+        //designer.postMessage({
+        //    removeMainVideo: true
+        //});
+    };
+    video.src = recordVideoFormData;
+    $('#main-video').show();
+}
 $('#btn-test-message').click(function() {
-    //var video = document.getElementById('main-video');
-    //video.style.display = 'none';
-    //video.srcObject = null;
-    //video.src = null;
-    //video.srcObject = video.srcObject;
     //$('#iframe').get(0).contentWindow.접근할변수명;
     //$('#main-video').show(); // 선택된 비디오 메인비디오에 띄우기
-    console.log("test ",$('iframe').get(0).contentWindow.getRecordVideoFormData);
+    
+    clearCanvas(); // 적던것 지우고 시작
+    let getVideo = $('iframe').get(0).contentWindow.getRecordVideoFormData;
+    var audio = document.getElementById('main-audio');
+    var video = document.getElementById('main-video');
+    console.log("보낸 영상데이터", getVideo())
+    console.log("보낸 음성데이터", recordAudioFormData)
+    connection.send({
+        sharedVideo: 'plz-get-shared-video',
+        sharedRecordVideo: URL.createObjectURL(getVideo()),
+        sharedRecordAudio: URL.createObjectURL(recordAudioFormData)
+    });
+    recordVideoFormData = getVideo()
+    console.log("audio!!!!",audio)
+    audio.srcObject = null;
+    audio.src = null;
+    audio.onended = function(e) {
+        //audio.srcObject = null;
+        //audio.src = null;
+        // audio.style.display = 'none';
+    };
+    audio.src = URL.createObjectURL(recordAudioFormData);
+    //audio.currentTime = 3;
+    //$('#main-audio').show();
 
-
+    video.srcObject = null;
+    video.src = null;
+    video.style.display = 'none';
+    video.onended = function(e) {
+        //video.srcObject = null;
+        //video.src = null;
+        //video.style.display = 'none';
+        //designer.postMessage({
+        //    removeMainVideo: true
+        //});
+    };
+    video.src = URL.createObjectURL(recordVideoFormData);
+    $('#main-video').show();
     // 팝업창 test ver
     //let url = "../testpopup/index.html";
     //let name = "check!!";
@@ -313,7 +425,8 @@ function stopAudioRecord() {
     console.log("녹화된 결과값 : ",blob)
     //window.open(audioURL);
     //invokeSaveAsDialog(blob);
-    recordAudioFormData = new FormData().append("file", blob);
+    //recordAudioFormData = new FormData().append("file", blob);
+    recordAudioFormData = blob;
     //test용
     //console.log("LocalStroage : ", blob)
     //localStorage.setItem('testAudioSrc', formData);
@@ -372,10 +485,9 @@ function mainVideoControlHide(callback){
 
 var connection = new RTCMultiConnection();
 
-//connection.socketURL = '/';
+connection.socketURL = '/';
 //connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
-// connection.socketURL = 'http://localhost:9002/';
-connection.socketURL = 'https://k3d106.p.ssafy.io/rtc-server/';
+//connection.socketURL = 'http://localhost:9002/';
 
 connection.extra.userFullName = params.userFullName;
 
@@ -495,6 +607,14 @@ connection.onmessage = function(event) {
         $('#screen-viewer').show();
         return;
     }
+    if(event.data.sharedVideo ==='plz-get-shared-video'){
+        console.log("!!",event.data.sharedVideo)
+        console.log("동영상공유 받음!",event.data.sharedRecordAudio)
+        console.log("오비오공유 받음!",event.data.sharedRecordVideo)
+        if(event.data.sharedRecordAudio && event.data.sharedRecordVideo){
+            syncSharedMedia(event.data.sharedRecordAudio,event.data.sharedRecordVideo)
+        }
+    }
     if(event.data.mainVideo === 'plz-find-main-video'){ // 비디오를 찾아서 메인비디오에 띄워라
         mainVideoControlShow(event.data.mainVideoId,designer.backgroundVideo);
         return;
@@ -535,6 +655,15 @@ connection.onmessage = function(event) {
     if (event.data === 'plz-sync-points') { // 최초 싱크맞출때
         designer.sync();
         return;
+    }
+    if(event.data === 'plz-clear-canvas'){
+        let clearFlag = false;
+        if(document.querySelector("#main-video").style.display !== "none"){
+            clearFlag = true; // 캔버스 배경영상이 있을때
+        }
+        designer.postMessage({
+            clearFlag : clearFlag
+        });
     }
     if(event.data === 'plz-memo-to-false'){
         btn_memo_flag = false;
@@ -585,6 +714,7 @@ connection.onmessage = function(event) {
 // extra code
 
 connection.onstream = function(event) {
+    console.log("event !!! ", event)
     if (event.stream.isScreen && !event.stream.canvasStream) {
         $('#screen-viewer').get(0).srcObject = event.stream;
         $('#screen-viewer').hide();
@@ -610,7 +740,7 @@ connection.onstream = function(event) {
         otherVideos.appendChild(event.mediaElement);
     }
 
-    connection.onUserStatusChanged(event);
+    connection.onUserStatusChanged(event); // 유저 이름 업데이트
 };
 
 connection.onstreamended = function(event) {
@@ -693,6 +823,7 @@ document.getElementById('btn-chat-message').onclick = function() {
 
 var recentFile;
 document.getElementById('btn-attach-file').onclick = function() {
+    console.log("!_!_!_!_!_!")
     var file = new FileSelector();
     file.selectSingleFile(function(file) {
         recentFile = file;
