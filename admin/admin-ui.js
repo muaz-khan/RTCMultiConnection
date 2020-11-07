@@ -30,7 +30,7 @@ setTimeout(function() {
 }, 500);
 
 function connectSocket(username, password) {
-    socket = io.connect('/?userid=admin&adminUserName=' + username + '&adminPassword=' + password);
+    socket = io.connect('/', {query:"userid=admin&adminUserName=" + username + "&adminPassword=" + password});
     socket.on('admin', function(message) {
         if(message.error) {
             alertBox(message.error, 'Invalid Credentials', null, function() {
