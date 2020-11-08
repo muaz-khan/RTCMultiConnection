@@ -12,6 +12,7 @@ function getRecordVideoFormData() {
   var chunks = [];
   let clearFlag = false;
   mediaRecorder.ondataavailable = function (e) {
+    console.log("무슨타입이야? ",e)
     chunks.push(e.data);
   };
   mediaRecorder.onstop = function (e) {
