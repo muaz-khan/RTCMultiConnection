@@ -193,6 +193,7 @@ input[disabled], button[disabled] {
         <button class="btn btn-primary" id="btn-record-message">Record</button>
         <button class="btn btn-primary" id="btn-test-message">RecordTEST</button>
         <button class="btn btn-primary" id="btn-clear-message">clear</button>
+        <button class="btn btn-primary" id="btn-share-screen">sharScreen</button>
         <img id="btn-attach-file" src="https://www.webrtc-experiment.com/images/attach-file.png" title="Attach a File">
     </div>
 
@@ -210,7 +211,144 @@ let streamArr = []; // 모든 참여자 음성 stream arr
 let recordAudioFormData; // 저장된 audioData
 let recordVideoFormData; // 저장된 videoData
 
+let tempVideoSrc = ""; // 보내기전 데이터
+let tempAudioSrc = ""; // 
+
+let tempAudioTag = null;
+let tempVideoTag = null;
+
+
 let recorder; // RTC recorder
+
+// 화면 제어 test
+var RMCMediaTrack = {
+    cameraStream: null,
+    cameraTrack: null,
+    screen: null
+};
+document.getElementById('btn-share-screen').onclick = function() {
+    this.disabled = true;
+    connection.session.screen = true;
+    getScreenStream(function(screen) {
+        var isLiveSession = connection.getAllParticipants().length > 0;
+        if (isLiveSession) {
+            replaceTrack(RMCMediaTrack.screen);
+        }
+
+        // now remove old video track from "attachStreams" array
+        // so that newcomers can see screen as well
+        connection.attachStreams.forEach(function(stream) {
+            getTracks(stream, 'video').forEach(function(track) {
+                stream.removeTrack(track);
+            });
+
+            // now add screen track into that stream object
+            stream.addTrack(RMCMediaTrack.screen);
+        });
+    });
+
+}
+function screenHelper(callback) {
+    if(navigator.mediaDevices.getDisplayMedia) {
+          navigator.mediaDevices.getDisplayMedia(screen_constraints).then(stream => {
+              callback(stream);
+          }, error => {
+              alert('Please make sure to use Edge 17 or higher.');
+          });
+      }
+      else if(navigator.getDisplayMedia) {
+          navigator.getDisplayMedia(screen_constraints).then(stream => {
+              callback(stream);
+          }, error => {
+              alert('Please make sure to use Edge 17 or higher.');
+          });
+      }
+      else {
+          alert('getDisplayMedia API is not available in this browser.');
+      }
+  }
+  
+  function getScreenStream(callback) {
+        screenHelper(function(screen) {
+              RMCMediaTrack.screen = getTracks(screen, 'video')[0];
+  
+              RMCMediaTrack.selfVideo.srcObject = screen;
+  
+              // in case if onedned event does not fire
+              (function looper() {
+                  // readyState can be "live" or "ended"
+                  if (RMCMediaTrack.screen.readyState === 'ended') {
+                      RMCMediaTrack.screen.onended();
+                      return;
+                  }
+                  setTimeout(looper, 1000);
+              })();
+  
+              var firedOnce = false;
+              RMCMediaTrack.screen.onended = RMCMediaTrack.screen.onmute = RMCMediaTrack.screen.oninactive = function() {
+                  if (firedOnce) return;
+                  firedOnce = true;
+  
+                  if (getTracks(RMCMediaTrack.cameraStream, 'video')[0].readyState) {
+                      getTracks(RMCMediaTrack.cameraStream, 'video').forEach(function(track) {
+                          RMCMediaTrack.cameraStream.removeTrack(track);
+                      });
+                      RMCMediaTrack.cameraStream.addTrack(RMCMediaTrack.cameraTrack);
+                  }
+  
+                  RMCMediaTrack.selfVideo.srcObject = RMCMediaTrack.cameraStream;
+  
+                  connection.socket && connection.socket.emit(connection.socketCustomEvent, {
+                      justStoppedMyScreen: true,
+                      userid: connection.userid
+                  });
+  
+                  // share camera again
+                  replaceTrack(RMCMediaTrack.cameraTrack);
+  
+                  // now remove old screen from "attachStreams" array
+                  connection.attachStreams = [RMCMediaTrack.cameraStream];
+  
+                  // so that user can share again
+                  btnShareScreen.disabled = false;
+              };
+  
+              connection.socket && connection.socket.emit(connection.socketCustomEvent, {
+                  justSharedMyScreen: true,
+                  userid: connection.userid
+              });
+  
+              callback(screen);
+          });
+  }
+  
+  function replaceTrack(videoTrack) {
+      if (!videoTrack) return;
+      if (videoTrack.readyState === 'ended') {
+          alert('Can not replace an "ended" track. track.readyState: ' + videoTrack.readyState);
+          return;
+      }
+      connection.getAllParticipants().forEach(function(pid) {
+          var peer = connection.peers[pid].peer;
+          if (!peer.getSenders) return;
+  
+          var trackToReplace = videoTrack;
+  
+          peer.getSenders().forEach(function(sender) {
+              if (!sender || !sender.track) return;
+  
+              if (sender.track.kind === 'video' && trackToReplace) {
+                  sender.replaceTrack(trackToReplace);
+                  trackToReplace = null;
+              }
+          });
+      });
+  }
+// 화면 제어 end
+
+
+
+
 
 
 // test 용 -> 나중에는 canvas 영상 재생할때만 canvas하단에 배치할것
@@ -350,38 +488,74 @@ function syncSharedMedia(recordAudioFormData,recordVideoFormData){
     video.src = recordVideoFormData;
     $('#main-video').show();
 }
-$('#btn-test-message').click(function() {
-    //$('#iframe').get(0).contentWindow.접근할변수명;
-    //$('#main-video').show(); // 선택된 비디오 메인비디오에 띄우기
-    
-    clearCanvas(); // 적던것 지우고 시작
+function makeShareMediaSrc(){
     let getVideo = $('iframe').get(0).contentWindow.getRecordVideoFormData;
-    var audio = document.getElementById('main-audio');
-    var video = document.getElementById('main-video');
-    console.log("보낸 영상데이터", getVideo())
-    console.log("보낸 음성데이터", recordAudioFormData)
+    var videoReader = new FileReader();
+    var audioReader = new FileReader();
+
+    audioReader.onloadend = function() {
+        console.log("끝났다1 !!!!!!!!!!!!!!!!!")
+        tempAudioSrc = audioReader.result;            
+        //audio.src = tempAudioSrc;
+    }
+    videoReader.onloadend = function() {
+        console.log("끝났다2 !!!!!!!!!!!!!!!!!")
+        tempVideoSrc = videoReader.result;    
+        //console.log(tempVideoSrc);             
+        //video.src = tempVideoSrc;
+    }
+    audioReader.readAsDataURL(recordAudioFormData);
+    videoReader.readAsDataURL(recordVideoFormData=getVideo());
+    sendMediaClock(initIntaval);
+}
+function initIntaval(){
+    console.log("인터벌 초기화!") // 문제 될수있을듯
+    connection.chunkInterval = 0;
+}
+function sendMediaClock(callback){
+    if(!tempAudioSrc || !tempVideoSrc){
+        let timerId = setTimeout(sendMediaClock, 500);
+    }else{
+        console.log("마무리")
+        sendMediaSrc(tempAudioSrc,tempVideoSrc);
+        tempAudioSrc = "";
+        tempVideoSrc = "";
+        callback();
+    }
+}
+function sendMediaSrc(sharedRecordAudio,sharedRecordVideo){
+    //console.log("보내기전 확인!",sharedRecordAudio)
+    //console.log("보내기전 확인!",sharedRecordVideo)
+    //console.log("보내기전 확인!",formData.get("audio"))
+    //console.log("보내기전 확인!",formData.get("video"))
+    //console.log("보내기전 FORMDATA",formData)
+    let obj = {}
+    connection.chunkInterval = 0.00000000001;
     connection.send({
+        type:"sendMedia",
         sharedVideo: 'plz-get-shared-video',
-        sharedRecordVideo: URL.createObjectURL(getVideo()),
-        sharedRecordAudio: URL.createObjectURL(recordAudioFormData)
+        sharedRecordAudio: sharedRecordAudio,
+        sharedRecordVideo:sharedRecordVideo
     });
-    recordVideoFormData = getVideo()
-    console.log("audio!!!!",audio)
-    audio.srcObject = null;
-    audio.src = null;
-    audio.onended = function(e) {
+    tempAudioTag.src = sharedRecordAudio
+    tempVideoTag.src = sharedRecordVideo
+}
+$('#btn-test-message').click(function() {
+    clearCanvas(); // 적던것 지우고 시작
+    tempAudioTag = document.getElementById('main-audio');
+    tempVideoTag = document.getElementById('main-video');
+
+    tempAudioTag.srcObject = null;
+    tempAudioTag.src = null;
+    tempAudioTag.onended = function(e) {
         //audio.srcObject = null;
         //audio.src = null;
         // audio.style.display = 'none';
     };
-    audio.src = URL.createObjectURL(recordAudioFormData);
-    //audio.currentTime = 3;
-    //$('#main-audio').show();
-
-    video.srcObject = null;
-    video.src = null;
-    video.style.display = 'none';
-    video.onended = function(e) {
+    tempVideoTag.srcObject = null;
+    tempVideoTag.src = null;
+    tempVideoTag.style.display = 'none';
+    tempVideoTag.onended = function(e) {
         //video.srcObject = null;
         //video.src = null;
         //video.style.display = 'none';
@@ -389,15 +563,45 @@ $('#btn-test-message').click(function() {
         //    removeMainVideo: true
         //});
     };
-    video.src = URL.createObjectURL(recordVideoFormData);
-    $('#main-video').show();
-    // 팝업창 test ver
-    //let url = "../testpopup/index.html";
-    //let name = "check!!";
-    //let specs =
-    //"width=640px,height=480px,top=200,left=100,toolbar=no,menubar=no,resizable=yes";
-    //w = window.open(url, name, specs);
+    //video.src = URL.createObjectURL(recordVideoFormData);
+    
+    
+    test()
+    //makeShareMediaSrc();
+
+    //$('#main-video').show();
+    
 });
+function test(){
+    navigator.mediaDevices.getUserMedia({
+    video: true
+}).then(function(screen) {
+    var video = document.querySelector('video');
+    video.muted = true;
+    video.srcObject = screen;
+
+    navigator.mediaDevices.getUserMedia({
+        audio: true
+    }).then(function(mic) {
+        var finalStream = new MediaStream();
+        screen.getVideoTracks().concat(mic.getAudioTracks()).forEach(function(track) {
+            finalStream.addTrack(track);
+        });
+        finalStream.isScreen = true;
+        connection.attachStreams.push(finalStream);
+
+        // video.srcObject = finalStream;
+
+        var event = {
+            type: 'local',
+            stream: finalStream,
+            mediaElement: video
+        };
+        connection.onstream(event);
+    });
+});
+
+}
 function audioRecord(callback){
     console.log("audioRecord 실행")
     streamArr = [];
@@ -551,7 +755,7 @@ connection.enableFileSharing = true;
 connection.session = {
     audio: true,
     video: true,
-    data: true
+    data: true,
 };
 connection.sdpConstraints.mandatory = {
     OfferToReceiveAudio: true,
@@ -609,8 +813,6 @@ connection.onmessage = function(event) {
     }
     if(event.data.sharedVideo ==='plz-get-shared-video'){
         console.log("!!",event.data.sharedVideo)
-        console.log("동영상공유 받음!",event.data.sharedRecordAudio)
-        console.log("오비오공유 받음!",event.data.sharedRecordVideo)
         if(event.data.sharedRecordAudio && event.data.sharedRecordVideo){
             syncSharedMedia(event.data.sharedRecordAudio,event.data.sharedRecordVideo)
         }
@@ -715,6 +917,13 @@ connection.onmessage = function(event) {
 
 connection.onstream = function(event) {
     console.log("event !!! ", event)
+    if(event.type === 'test'){
+        event.mediaElement.controls = false;
+
+        var otherVideos = document.querySelector('#other-videos');
+        otherVideos.appendChild(event.mediaElement);
+        return;
+    }
     if (event.stream.isScreen && !event.stream.canvasStream) {
         $('#screen-viewer').get(0).srcObject = event.stream;
         $('#screen-viewer').hide();
