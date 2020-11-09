@@ -354,7 +354,6 @@ function getRecordVideoFormData() {
   }
 
   function syncPoints(isSyncAll) {
-    console.log("싱크를 맞춰용!");
     if ((isSyncAll && (lastPointIndex = 0), lastPointIndex != points.length)) {
       for (var pointsToShare = [], i = lastPointIndex; i < points.length; i++)
         pointsToShare[i - lastPointIndex] = points[i];
