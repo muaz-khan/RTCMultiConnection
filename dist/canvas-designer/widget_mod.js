@@ -3739,10 +3739,7 @@ function getRecordVideoFormData() {
           console.log("widget.html에서 받았다...");
           test.findParentDocument(event.data.id);
           let video = window.parent.document.getElementById("main-video");
-          console.log(
-            "부모객체는 찾을수있냐? ",
-            window.parent.document.getElementById(video)
-          );
+
           test.drawVideoToCanvas(video, context, 872, 670);
         }
         if (event.data.removeMainVideo) {
