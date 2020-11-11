@@ -11,7 +11,10 @@
   <!-- <link rel="shortcut icon" href="/demos/logo.png"> -->
   <link rel="stylesheet" type="text/css" href="/rtc/css/emojionearea.min.css">
 
-  <script src="/rtc/js/jquery.min.js"></script>
+  <!-- <script src="/rtc/js/jquery.min.js"></script> -->
+  <script src="/rtc/js/jquery-3.5.1.min.js"></script>
+  <script src="/rtc/js/bootstrap.min.js"></script>
+
   <link href="/rtc/css/bootstrap.min.css" rel="stylesheet">
   <script src="/node_modules/webrtc-adapter/out/adapter.js"></script>
   <script src="/dist/RTCMultiConnection.min.js"></script>
@@ -156,15 +159,55 @@ input[disabled], button[disabled] {
         <div id="onoff-reg" class="onoff-5 circle-btn">
             <button class="btn btn-primary" id="btn-clear-message">clear</button>
         </div>
+        <div id="onoff-list" class="onoff-5 circle-btn">
+            <button class="btn btn-primary"id="btn-searchall-my-record-media">getRecordList</button>
+        </div>
+        <div id="onoff-list-one" class="onoff-5 circle-btn">
+            <button class="btn btn-primary"id="btn-search-my-record-media">getRecordDetail</button>
+        </div>
       </div>
     </div>
   </div>
+  
+        <!-- <button class="btn btn-primary" id="btn-searchall-my-record-media">getRecordList</button> -->
+        <!-- <button class="btn btn-primary" id="btn-search-my-record-media">getRecordDetail</button> -->
+
+    
+    <div class="modal fade" id="mediaFormToSave" tabindex="-1" role="dialog" aria-labelledby="mediaFormToSaveLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="mediaFormToSaveLabel">녹화 영상 저장</h5>
+              <button type="button" class="close modal-close-btn" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form>
+                <div class="form-group">
+                  <p>
+                    <label for="txt-media-title" class="col-form-label">영상 제목:</label>
+                    <input type="text" class="form-control" id="txt-media-title">
+                  </p>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn modal-close-btn">취소</button>
+              <button type="button" class="btn btn-primary" id="btn-save-record-media-modal">저장</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <canvas id="temp-stream-canvas" style="display: none;"></canvas>
 </div>
 
 
 
 <script>
 let init_btn_sync = false; // 방버튼정보를 최초 동기화 하였는가??
+let init_share_media = false; // share정보 최초 동기화 하였는가??
+
 let btn_memo_flag = false; // 회의화면 or canvas화면 btn
 
 let btn_record_flag = false; // record 시작/ 끝
@@ -173,8 +216,20 @@ let streamArr = []; // 모든 참여자 음성 stream arr
 let recordAudioFormData; // 저장된 audioData
 let recordVideoFormData; // 저장된 videoData
 
+let recordAudioFormData2; // 저장된 audioData
+let recordVideoFormData2; // 저장된 videoData
+
+
+
+let tempVideoSrc = ""; // 보내기전 데이터
+let tempAudioSrc = ""; // 
+
 let recorder; // RTC recorder
 
+let isMediaSharing = false; // 미디어 공유중인지?
+let isShareMyMedia = false; // 자기 미디어 공유중인지? - 제어권 가짐 -> 아직 개발단계
+
+let finishShareMidia = false; // 공유가 끝났는지?
 
 // test 용 -> 나중에는 canvas 영상 재생할때만 canvas하단에 배치할것
 var audio = document.getElementById('main-audio');
@@ -184,25 +239,67 @@ audio.addEventListener('play', audioHandler, false);
 audio.addEventListener('pause', audioHandler, false);
 audio.addEventListener('seeked', audioHandler, false);
 
+$('#btn-save-recorded-data').click(function(e) {
+    //e.preventDefault();
+    $('#mediaFormToSave').modal('show');
+  });
+
 // audio 제어 핸들러
 function audioHandler(e) {
-    console.log("EEEEEEE ", e)
+    if(isMediaSharing && !finishShareMidia){
+        alert("타사용자 에게 미디어를 공유하는 중입니다.")
+        video.pause();
+        audio.pause();
+        return;
+    }
     if (e.type == 'play') {
       // play your audio
         console.log("audio play ")
         video.play()
+        syncMediaControls('play',-1)
+
     } else if (e.type == 'pause') {
       // pause your audio
         console.log("audio pause ")
         video.pause()
+        syncMediaControls('pause',-1)
+
     }else if(e.type == 'seeked'){
         console.log("audio seeked ",audio.currentTime)
         video.currentTime = audio.currentTime;
+        syncMediaControls('seeked',audio.currentTime)
+        
     }else if(e.type == 'timeupdate'){
         console.log("audio timeupdate")
+        syncMediaControls('timeupdate',-1)
     }
   }
 
+function syncMediaControls(string, param){
+    if ('play'=== string) {
+        connection.send({
+            type:"syncMediaControls",
+            sharedVideo: 'plz-media-play',
+        });
+    }else if ('pause' === string) {
+        connection.send({
+            type:"syncMediaControls",
+            sharedVideo: 'plz-media-pause',
+        });
+    }else if('seeked' === string){
+        connection.send({
+            type:"syncMediaControls",
+            sharedVideo: 'plz-media-seeked',
+            currentTime: param,
+        });
+    }else if('timeupdate' === string){
+        connection.send({ // 추가 구현
+            type:"syncMediaControls",
+            sharedVideo: 'plz-media-timeupdate',
+            timeupdate: param,
+        });
+      }
+}
 
 
 function mainVideoControlShow(id,callback){
@@ -240,22 +337,111 @@ function changeRecordBtn(input){
 $('#btn-record-message').click(function(){
     btn_record_flag = !btn_record_flag;
     if(btn_record_flag){
-        connection.send("plz-record-to-true")
         designer.postMessage({
             recording: true,
             content : true
         });
         audioRecord(startAudioRecord);
     }else{
-        connection.send("plz-record-to-false")
         designer.postMessage({
             recording: true,
             content : false
         });
         stopAudioRecord();
+        recordClock(); // 녹화한 미디어와 추가 입력 받아서 서버로 보내는 함수
     }
     changeRecordBtn(btn_record_flag)
 });
+function recordClock(){
+    let getVideo = $('iframe').get(0).contentWindow.getRecordVideoFormData;
+    if(!recordAudioFormData || !(recordVideoFormData = getVideo() )){
+        let timerId = setTimeout(recordClock, 500);
+        
+    }else{
+        if(!confirm("녹화한 미디어를 저장하시겠습니까?")){
+            recordVideoFormData = null;
+            recordAudioFormData = null;
+            alert("취소 하였습니다!")
+            return;
+        }else{
+            $('#mediaFormToSave').modal('show');
+        }
+    }
+}
+let myRecordedData = [];
+$('#btn-save-record-media-modal').click(function(){
+    if(!$('#txt-media-title').val().toString()){
+        alert("저장할 이름을 입력해주세요.")
+        return;
+    }
+    $('#btn-save-record-media-modal').attr('disabled', true);
+    $('.modal-close-btn').attr('disabled', true);
+
+    var fd = new FormData();
+    fd.append('media_title', $('#txt-media-title').val().toString());
+    fd.append('recordVideoFormData', recordVideoFormData);
+    fd.append('recordAudioFormData', recordAudioFormData);
+    $.ajax({
+        url: 'https://k3d106.p.ssafy.io/api/v2/media/'+params.userFullName,
+        type: 'POST',
+        data: fd,
+        processData: false,
+        contentType: false,
+        dataType: "json",
+        enctype: "multipart/form-data",
+        success: function (html) {
+            recordVideoFormData = null;
+            recordAudioFormData = null;
+            console.log("success");
+          },
+          error: function (error) {
+            $('#btn-save-record-media-modal').attr('disabled', false);
+            $('.modal-close-btn').attr('disabled', false);
+            //recordVideoFormData = null;
+            //recordAudioFormData = null;
+            $('#mediaFormToSave').modal('hide');
+          },
+    }).done(function(data) {
+        console.log(data)
+        $('#btn-save-record-media-modal').attr('disabled', false);
+        $('.modal-close-btn').attr('disabled', false);
+        //recordVideoFromData2 = b64toBlob(data.video,"video/mp4",512);
+        //recordAudioFormData2 = b64toBlob(data.audio,"audio/webm;codecs=opus",512);
+        //console.log("받은 비디오 ? ", b64toBlob(data.video,"video/mp4",512))
+        //console.log("받은 오디오 ? ", b64toBlob(data.audio,"audio/webm;codecs=opus",512))
+        //console.log("가지고있던 비디오 ? ",recordVideoFormData )
+        //console.log("가지고있던 오디오 ? ",recordAudioFormData )
+        //shareMyMedia(b64toBlob(data.video,"video/mp4",512),b64toBlob(data.audio,"audio/webm;codecs=opus",512));
+        if(data.message == 'success')
+            alert("저장되었습니다!!!")
+        $('#mediaFormToSave').modal('hide');
+    });
+});
+function b64toBlob(b64Data, contentType='', sliceSize=512) {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+  
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+  
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+  
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+  
+    const blob = new Blob(byteArrays, {type: contentType});
+    return blob;
+  }
+$('.modal-close-btn').click(function(){
+    alert("취소 하였습니다!")
+    recordVideoFormData = null;
+    recordAudioFormData = null;
+    $('#mediaFormToSave').modal('hide');
+})
 $('#btn-memo-message').click(function() {
     btn_memo_flag = !btn_memo_flag
     if(btn_memo_flag){
@@ -280,56 +466,63 @@ function clearCanvas(){
     });
     connection.send("plz-clear-canvas")
 }
-async function testURLData(url){
-    let blob = await fetch(url).then(r => r.blob()); // url에서 blob로 바꾸기
-    console.log("test ! ",blob)
-    // media url file객체로 만들기
-    let file = await fetch(url).then(r => r.blob()).then(blobFile => console.log(new File([blobFile], "fileNameGoesHere", { type: "audio/webm" })))
-}
-function syncSharedMedia(recordAudioFormData,recordVideoFormData){
-    var audio = document.getElementById('main-audio');
-    var video = document.getElementById('main-video');
-    audio.srcObject = null;
-    audio.src = null;
-    audio.onended = function(e) {    //audio.srcObject = null;
-        //audio.src = null;
-        // audio.style.display = 'none';
-    };
-    audio.src = recordAudioFormData;
-    //audio.currentTime = 3;
-    //$('#main-audio').show();
 
-    video.srcObject = null;
-    video.src = null;
-    video.style.display = 'none';
-    video.onended = function(e) {
-        //video.srcObject = null;
-        //video.src = null;
-        //video.style.display = 'none';
-        //designer.postMessage({
-        //    removeMainVideo: true
-        //});
-    };
+function syncSharedMedia(recordAudioFormData,recordVideoFormData){
+    audio.src = recordAudioFormData;
     video.src = recordVideoFormData;
+    audio.pause();
+    video.pause();
     $('#main-video').show();
+
 }
-$('#btn-test-message').click(function() {
-    //$('#iframe').get(0).contentWindow.접근할변수명;
-    //$('#main-video').show(); // 선택된 비디오 메인비디오에 띄우기
-    
-    clearCanvas(); // 적던것 지우고 시작
+function makeShareMediaSrc(recordVideoFormData2,recordAudioFormData2){
     let getVideo = $('iframe').get(0).contentWindow.getRecordVideoFormData;
-    var audio = document.getElementById('main-audio');
-    var video = document.getElementById('main-video');
-    console.log("보낸 영상데이터", getVideo())
-    console.log("보낸 음성데이터", recordAudioFormData)
+    var videoReader = new FileReader();
+    var audioReader = new FileReader();
+
+    audioReader.onloadend = function() {
+        tempAudioSrc = audioReader.result;   
+        //console.log("tempAudioSrc",tempAudioSrc)     
+    }
+    videoReader.onloadend = function() {
+        tempVideoSrc = videoReader.result;    
+        //console.log("tempVideoSrc",tempVideoSrc)     
+    }
+    audioReader.readAsDataURL(recordAudioFormData2);
+    videoReader.readAsDataURL(recordVideoFormData2);
+    sendMediaClock();
+}
+function initIntaval(){
+    console.log("인터벌 초기화!") // 문제 될수있을듯
+    connection.chunkInterval = 0;
+}
+function sendMediaClock(){
+    if(!tempAudioSrc || !tempVideoSrc){
+        let timerId = setTimeout(sendMediaClock, 500);
+    }else{
+        console.log("마무리")
+        sendMediaSrc(tempAudioSrc,tempVideoSrc);
+        tempAudioSrc = "";
+        tempVideoSrc = "";
+    }
+}
+function sendMediaSrc(sharedRecordAudio,sharedRecordVideo){
+    connection.chunkInterval = 0.00000000001;
     connection.send({
+        type:"sendMedia",
         sharedVideo: 'plz-get-shared-video',
-        sharedRecordVideo: URL.createObjectURL(getVideo()),
-        sharedRecordAudio: URL.createObjectURL(recordAudioFormData)
+        sharedRecordAudio : sharedRecordAudio,
+        sharedRecordVideo : sharedRecordVideo,
+        checkmark_id : connection.userid,
     });
-    recordVideoFormData = getVideo()
-    console.log("audio!!!!",audio)
+    audio.src = sharedRecordAudio
+    video.src = sharedRecordVideo
+    $('#main-video').show();
+    video.pause();
+    audio.pause();
+}
+function clearMedia(){
+    
     audio.srcObject = null;
     audio.src = null;
     audio.onended = function(e) {
@@ -337,10 +530,6 @@ $('#btn-test-message').click(function() {
         //audio.src = null;
         // audio.style.display = 'none';
     };
-    audio.src = URL.createObjectURL(recordAudioFormData);
-    //audio.currentTime = 3;
-    //$('#main-audio').show();
-
     video.srcObject = null;
     video.src = null;
     video.style.display = 'none';
@@ -352,15 +541,53 @@ $('#btn-test-message').click(function() {
         //    removeMainVideo: true
         //});
     };
-    video.src = URL.createObjectURL(recordVideoFormData);
-    $('#main-video').show();
-    // 팝업창 test ver
-    //let url = "../testpopup/index.html";
-    //let name = "check!!";
-    //let specs =
-    //"width=640px,height=480px,top=200,left=100,toolbar=no,menubar=no,resizable=yes";
-    //w = window.open(url, name, specs);
+}
+$('#btn-searchall-my-record-media').click(function() {
+    $.ajax({
+        type: "GET",
+        url: 'https://k3d106.p.ssafy.io/api/v2/media/'+params.userFullName,
+        success: function (html) {},
+        error: function (error) {},
+    }).done(function(data) {
+        console.log(data)
+        // 여기서 테이블 만들기
+    });
 });
+$('#btn-search-my-record-media').click(function() {
+    getMidiasFromDB('test')
+});
+function getMidiasFromDB(title){
+    $.ajax({
+        type: "GET",
+        url: 'https://k3d106.p.ssafy.io/api/v2/media/'+params.userFullName+"/"+title,
+        success: function (html) {
+
+        },
+        error: function (error) {
+
+        },
+    }).done(function(data) {
+        console.log(data)
+        
+    });
+}
+function shareMyMedia(recordVideoFromData2,recordAudioFormData2){ // 저장된 정보로 share하는 함수
+    if(isMediaSharing){
+        let sharFlag = confirm("현재 미디어 공유중입니다. 공유중인 미디어를 제거하고 공유할까요?");
+        if(!sharFlag){
+            return;
+        }else{
+            isShareMyMedia = true;
+        }
+    }else {
+        isShareMyMedia = true;
+        isMediaSharing = true;
+    }
+    finishShareMidia = false;
+    clearCanvas(); // 적던것 지우고 시작
+    clearMedia();
+    makeShareMediaSrc(recordVideoFromData2,recordAudioFormData2);
+}
 function audioRecord(callback){
     console.log("audioRecord 실행")
     streamArr = [];
@@ -386,13 +613,7 @@ function stopAudioRecord() {
     var blob = recorder.getBlob();
     var audioURL = URL.createObjectURL(blob); 
     console.log("녹화된 결과값 : ",blob)
-    //window.open(audioURL);
-    //invokeSaveAsDialog(blob);
-    //recordAudioFormData = new FormData().append("file", blob);
     recordAudioFormData = blob;
-    //test용
-    //console.log("LocalStroage : ", blob)
-    //localStorage.setItem('testAudioSrc', formData);
     connection.recorder = null;
   });
 };
@@ -407,14 +628,12 @@ $('#other-videos').click(function(e){
             mainVideo: 'plz-find-main-video',
             mainVideoId: id
         });
-        //let clicked = document.getElementById("clicked-video");
-        //video.style = "position: fixed;bottom: 0;right: 0;left: 30%;height: 80%;border: 1px solid black; border-top:0; border-bottom: 0;"
-        //$("#main-canvas").appendTo(document.getElementById(id));
-        //clicked.style = "position: fixed;bottom: 0;right: 0;left: 30%;height: 80%;border: 1px solid black; border-top:0; border-bottom: 0;"
-        //var otherVideos = document.querySelector('#other-videos');
-        //clicked.srcObject(video.srcObject);
-        //console.log(otherVideos)
-        //HTMLMediaElement.srcObject = sourceObject;  
+        isMediaSharing = false; // 미디어 공유중인지?
+        isShareMyMedia = false; // 자기 미디어 공유중인지? - 제어권 가짐 -> 아직 개발단계
+        finishShareMidia = false; // 공유가 끝났는지?
+        audio.pause();
+        video.controls = false;
+        audio.controls = false;
     } 
 });
 $('#main-video').click(function(e){ // main-video 지우는로직 적을것
@@ -485,36 +704,36 @@ designer.setSelected('pencil');
 
 designer.setTools({
     pencil: true,
-    text: true,
+    text: false,
     image: true,
     pdf: false,
     eraser: true,
-    line: true,
-    arrow: true,
-    dragSingle: true,
+    line: false,
+    arrow: false,
+    dragSingle: false,
     dragMultiple: true,
     arc: true,
     rectangle: true,
     quadratic: false,
-    bezier: true,
+    bezier: false,
     marker: true,
     zoom: false,
     lineWidth: false,
     colorsPicker: false,
     extraOptions: false,
     code: false,
-    undo: true
+    undo: false
 });
 
 // here goes RTCMultiConnection
 
-connection.chunkSize = 16000;
+connection.chunkSize = 60000; // 16000 -> 160000 / 80000
 connection.enableFileSharing = true;
 
 connection.session = {
     audio: true,
     video: true,
-    data: true
+    data: true,
 };
 connection.sdpConstraints.mandatory = {
     OfferToReceiveAudio: true,
@@ -556,8 +775,47 @@ connection.onclose = connection.onerror = connection.onleave = function(event) {
     connection.onUserStatusChanged(event);
 };
 
+function syncMediaControls(string, param){
+    if ('play'=== string) {
+        connection.send({
+            type:"syncMediaControls",
+            mediaControls: 'plz-media-play',
+        });
+    }else if ('pause' === string) {
+        connection.send({
+            type:"syncMediaControls",
+            mediaControls: 'plz-media-pause',
+        });
+    }else if('seeked' === string){
+        connection.send({
+            type:"syncMediaControls",
+            mediaControls: 'plz-media-seeked',
+            currentTime: param,
+        });
+    }else if('timeupdate' === string){
+        connection.send({ // 추가 구현
+            type:"syncMediaControls",
+            mediaControls: 'plz-media-timeupdate',
+            timeupdate: param,
+        });
+      }
+}
+
+
 connection.onmessage = function(event) {
     //console.log("메시지 받았다!!",event.data)
+    if("syncMediaControls" === event.data.type){
+        if(isShareMyMedia) return;
+        if('plz-media-play'===event.data.mediaControls){
+            audio.play();
+        }else if('plz-media-pause'===event.data.mediaControls){
+            audio.pause();
+        }else if('plz-media-seeked'===event.data.mediaControls){
+            audio.currentTime = event.data.currentTime;
+        }else if('plz-media-timeupdate'===event.data.mediaControls){
+            console.log("time update ???? ")
+        }
+    }
     if(event.data.showMainVideo) {
         // $('#main-video').show();
         console.log("받았는데?")
@@ -570,16 +828,45 @@ connection.onmessage = function(event) {
         $('#screen-viewer').show();
         return;
     }
+    if(event.data.receive_success){
+        if(event.data.target_id === connection.userid){
+            alert("미디어 공유가 완료되었습니다.")
+            finishShareMidia = true;
+            if(isShareMyMedia){
+                video.controls = false;
+                audio.controls = true; 
+            }
+        }
+    }
     if(event.data.sharedVideo ==='plz-get-shared-video'){
         console.log("!!",event.data.sharedVideo)
-        console.log("동영상공유 받음!",event.data.sharedRecordAudio)
-        console.log("오비오공유 받음!",event.data.sharedRecordVideo)
         if(event.data.sharedRecordAudio && event.data.sharedRecordVideo){
+            if(event.data.checkmark_id){
+                console.log("보낸 사람 아이디 받았다!",event.data.checkmark_id)
+                connection.send({
+                    receive_success : true,
+                    target_id : event.data.checkmark_id,
+                })
+                finishShareMidia = true;
+            }
+            video.controls = false;
+            audio.controls = false; 
+
+
+            isMediaSharing = true; // 미디어 공유중인지?
+            isShareMyMedia = false; // 자기 미디어 공유중인지? - 제어권 가짐
+            clearMedia();
             syncSharedMedia(event.data.sharedRecordAudio,event.data.sharedRecordVideo)
         }
     }
     if(event.data.mainVideo === 'plz-find-main-video'){ // 비디오를 찾아서 메인비디오에 띄워라
         mainVideoControlShow(event.data.mainVideoId,designer.backgroundVideo);
+        isMediaSharing = false; // 미디어 공유중인지?
+        isShareMyMedia = false; // 자기 미디어 공유중인지? - 제어권 가짐 -> 아직 개발단계
+        finishShareMidia = false; // 공유가 끝났는지?
+        audio.pause();
+        video.controls = false;
+        audio.controls = false;
         return;
     }
     if(event.data.mainVideo === 'plz-remove-main-video'){ // 메인비디오 지우기
@@ -638,6 +925,18 @@ connection.onmessage = function(event) {
         changeMemoBtn(btn_memo_flag);
         return;
     }
+    if(event.data.type === 'initRoom' && event.data.target_id === connection.extra.userFullName){
+        isMediaSharing = event.data.isMediaSharing;
+        init_share_media = true;
+        if(event.data.isMediaSharing){
+            connection.send({
+                type: 'init-plz-media-src',
+            })
+        }
+    }
+    if(event.data.type === 'init-plz-media-src'){
+        // 이부분은.... 보수공사 끝나고 하자....
+    }
     if(event.data.request === 'init-plz-memo-to-false' && event.data.target_id === connection.extra.userFullName){
         console.log("방버튼정보 받았다!")
         btn_memo_flag = false;
@@ -657,7 +956,6 @@ connection.onmessage = function(event) {
         console.log("방버튼정보 줄께")
         //console.log(event.data.join_id," 받아라 ",btn_memo_flag)
         if(btn_memo_flag){
-            
             connection.send({
                 request: 'init-plz-memo-to-true',
                 target_id: event.data.join_id
@@ -668,6 +966,7 @@ connection.onmessage = function(event) {
                 target_id: event.data.join_id
             })
         }
+        
     }
 
     designer.syncData(event.data);
@@ -678,11 +977,12 @@ connection.onmessage = function(event) {
 
 connection.onstream = function(event) {
     console.log("event !!! ", event)
+    // 파람의 유저풀네임 === 엑스트라 유저풀네임
     if (event.stream.isScreen && !event.stream.canvasStream) {
         $('#screen-viewer').get(0).srcObject = event.stream;
         $('#screen-viewer').hide();
     }
-    else if (event.extra.roomOwner === true) {
+    else if (event.extra.roomOwner === true) { // 지금은 params.open으로 구분... 되게되있음 사용안하는 if문
         //var video = document.getElementById('main-video');
         //video.setAttribute('data-streamid', event.streamid);
         //// video.style.display = 'none';
@@ -692,6 +992,7 @@ connection.onstream = function(event) {
         //}
         //video.srcObject = event.stream;
         //$('#main-video').show();
+        console.log("check event !!! ", event.mediaElement)
         event.mediaElement.controls = false;
 
         var otherVideos = document.querySelector('#other-videos');
@@ -897,16 +1198,8 @@ if(!!params.password) {
 designer.appendTo(document.getElementById('widget-container'), function() {
     if (params.open === true || params.open === 'true') {
         //console.log("개설자");
-        init_btn_sync = true
-        // tempSTreamCanvas 왜 필요한거?? 캡처용인가???
-        //var tempStreamCanvas = document.getElementById('temp-stream-canvas');
-        //var tempStream = tempStreamCanvas.captureStream();
-        //tempStream.isScreen = true;
-        //tempStream.streamid = tempStream.id;
-        //tempStream.type = 'local';
-        //connection.attachStreams.push(tempStream);
-        //window.tempStream = tempStream;
-        //connection.extra.roomOwner = true;
+        init_btn_sync = true;
+        init_share_media = true;
         connection.open(params.sessionid, function(isRoomOpened, roomid, error) {
             if (error) {
                 if (error === connection.errors.ROOM_NOT_AVAILABLE) {
@@ -959,12 +1252,12 @@ designer.appendTo(document.getElementById('widget-container'), function() {
     console.log("none")
 });
 function initBtnClock(){
-    if(!init_btn_sync){
+    if(!init_btn_sync || init_share_media){
         connection.send({
             request: 'plz-btn-sync',
             join_id: connection.extra.userFullName
         });// 내아이디 첨부해서 보냄
-        console.log("버튼정보점...")
+        console.log("방 초기 정보점...")
         let timerId = setTimeout(initBtnClock, 2000);
     }
 }

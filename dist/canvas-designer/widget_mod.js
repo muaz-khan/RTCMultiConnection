@@ -12,6 +12,7 @@ function getRecordVideoFormData() {
   var chunks = [];
   let clearFlag = false;
   mediaRecorder.ondataavailable = function (e) {
+    console.log("무슨타입이야? ",e)
     chunks.push(e.data);
   };
   mediaRecorder.onstop = function (e) {
@@ -353,7 +354,6 @@ function getRecordVideoFormData() {
   }
 
   function syncPoints(isSyncAll) {
-    console.log("싱크를 맞춰용!");
     if ((isSyncAll && (lastPointIndex = 0), lastPointIndex != points.length)) {
       for (var pointsToShare = [], i = lastPointIndex; i < points.length; i++)
         pointsToShare[i - lastPointIndex] = points[i];
@@ -3708,6 +3708,7 @@ function getRecordVideoFormData() {
       console.log("제발되라.. ", id);
     },
     drawVideoToCanvas: function (video, context, width, height) {
+        console.log("TEST CONTEXT", context.canvas.width)
       test.loadVideo(video, context, width, height);
     },
     loadVideo: function (video, context, width, height) {
@@ -3739,11 +3740,8 @@ function getRecordVideoFormData() {
           console.log("widget.html에서 받았다...");
           test.findParentDocument(event.data.id);
           let video = window.parent.document.getElementById("main-video");
-          console.log(
-            "부모객체는 찾을수있냐? ",
-            window.parent.document.getElementById(video)
-          );
-          test.drawVideoToCanvas(video, context, 872, 670);
+
+          test.drawVideoToCanvas(video, context, context.canvas.width, context.canvas.height);
         }
         if (event.data.removeMainVideo) {
           if (!isVideoBackGround) return;
