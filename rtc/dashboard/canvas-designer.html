@@ -11,7 +11,10 @@
   <!-- <link rel="shortcut icon" href="/demos/logo.png"> -->
   <link rel="stylesheet" type="text/css" href="/rtc/css/emojionearea.min.css">
 
-  <script src="/rtc/js/jquery.min.js"></script>
+  <!-- <script src="/rtc/js/jquery.min.js"></script> -->
+  <script src="/rtc/js/jquery-3.5.1.min.js"></script>
+  <script src="/rtc/js/bootstrap.min.js"></script>
+
   <link href="/rtc/css/bootstrap.min.css" rel="stylesheet">
   <script src="/node_modules/webrtc-adapter/out/adapter.js"></script>
   <script src="/dist/RTCMultiConnection.min.js"></script>
@@ -191,11 +194,37 @@ input[disabled], button[disabled] {
         <button class="btn btn-primary" id="btn-chat-message" disabled>Send</button>
         <button class="btn btn-primary" id="btn-memo-message">Memo</button>
         <button class="btn btn-primary" id="btn-record-message">Record</button>
-        <button class="btn btn-primary" id="btn-test-message">RecordTEST</button>
+        <button class="btn btn-primary" id="btn-searchall-my-record-media">getRecordList</button>
+        <button class="btn btn-primary" id="btn-search-my-record-media">getRecordDetail</button>
         <button class="btn btn-primary" id="btn-clear-message">clear</button>
         <img id="btn-attach-file" src="https://www.webrtc-experiment.com/images/attach-file.png" title="Attach a File">
     </div>
-
+    <div class="modal fade" id="mediaFormToSave" tabindex="-1" role="dialog" aria-labelledby="mediaFormToSaveLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="mediaFormToSaveLabel">녹화 영상 저장</h5>
+              <button type="button" class="close modal-close-btn" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form>
+                <div class="form-group">
+                  <p>
+                    <label for="txt-media-title" class="col-form-label">영상 제목:</label>
+                    <input type="text" class="form-control" id="txt-media-title">
+                  </p>
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn modal-close-btn">취소</button>
+              <button type="button" class="btn btn-primary" id="btn-save-record-media-modal">저장</button>
+            </div>
+          </div>
+        </div>
+      </div>
     <canvas id="temp-stream-canvas" style="display: none;"></canvas>
 </div>
 </article>
@@ -211,6 +240,11 @@ let btn_record_flag = false; // record 시작/ 끝
 let streamArr = []; // 모든 참여자 음성 stream arr
 let recordAudioFormData; // 저장된 audioData
 let recordVideoFormData; // 저장된 videoData
+
+let recordAudioFormData2; // 저장된 audioData
+let recordVideoFormData2; // 저장된 videoData
+
+
 
 let tempVideoSrc = ""; // 보내기전 데이터
 let tempAudioSrc = ""; // 
@@ -230,7 +264,10 @@ audio.addEventListener('play', audioHandler, false);
 audio.addEventListener('pause', audioHandler, false);
 audio.addEventListener('seeked', audioHandler, false);
 
-
+$('#btn-save-recorded-data').click(function(e) {
+    //e.preventDefault();
+    $('#mediaFormToSave').modal('show');
+  });
 
 // audio 제어 핸들러
 function audioHandler(e) {
@@ -325,22 +362,111 @@ function changeRecordBtn(input){
 $('#btn-record-message').click(function(){
     btn_record_flag = !btn_record_flag;
     if(btn_record_flag){
-        connection.send("plz-record-to-true")
         designer.postMessage({
             recording: true,
             content : true
         });
         audioRecord(startAudioRecord);
     }else{
-        connection.send("plz-record-to-false")
         designer.postMessage({
             recording: true,
             content : false
         });
         stopAudioRecord();
+        recordClock(); // 녹화한 미디어와 추가 입력 받아서 서버로 보내는 함수
     }
     changeRecordBtn(btn_record_flag)
 });
+function recordClock(){
+    let getVideo = $('iframe').get(0).contentWindow.getRecordVideoFormData;
+    if(!recordAudioFormData || !(recordVideoFormData = getVideo() )){
+        let timerId = setTimeout(recordClock, 500);
+        
+    }else{
+        if(!confirm("녹화한 미디어를 저장하시겠습니까?")){
+            recordVideoFormData = null;
+            recordAudioFormData = null;
+            alert("취소 하였습니다!")
+            return;
+        }else{
+            $('#mediaFormToSave').modal('show');
+        }
+    }
+}
+let myRecordedData = [];
+$('#btn-save-record-media-modal').click(function(){
+    if(!$('#txt-media-title').val().toString()){
+        alert("저장할 이름을 입력해주세요.")
+        return;
+    }
+    $('#btn-save-record-media-modal').attr('disabled', true);
+    $('.modal-close-btn').attr('disabled', true);
+
+    var fd = new FormData();
+    fd.append('media_title', $('#txt-media-title').val().toString());
+    fd.append('recordVideoFormData', recordVideoFormData);
+    fd.append('recordAudioFormData', recordAudioFormData);
+    $.ajax({
+        url: 'https://k3d106.p.ssafy.io/api/v2/media/'+params.userFullName,
+        type: 'POST',
+        data: fd,
+        processData: false,
+        contentType: false,
+        dataType: "json",
+        enctype: "multipart/form-data",
+        success: function (html) {
+            recordVideoFormData = null;
+            recordAudioFormData = null;
+            console.log("success");
+          },
+          error: function (error) {
+            $('#btn-save-record-media-modal').attr('disabled', false);
+            $('.modal-close-btn').attr('disabled', false);
+            //recordVideoFormData = null;
+            //recordAudioFormData = null;
+            $('#mediaFormToSave').modal('hide');
+          },
+    }).done(function(data) {
+        console.log(data)
+        $('#btn-save-record-media-modal').attr('disabled', false);
+        $('.modal-close-btn').attr('disabled', false);
+        //recordVideoFromData2 = b64toBlob(data.video,"video/mp4",512);
+        //recordAudioFormData2 = b64toBlob(data.audio,"audio/webm;codecs=opus",512);
+        //console.log("받은 비디오 ? ", b64toBlob(data.video,"video/mp4",512))
+        //console.log("받은 오디오 ? ", b64toBlob(data.audio,"audio/webm;codecs=opus",512))
+        //console.log("가지고있던 비디오 ? ",recordVideoFormData )
+        //console.log("가지고있던 오디오 ? ",recordAudioFormData )
+        //shareMyMedia(b64toBlob(data.video,"video/mp4",512),b64toBlob(data.audio,"audio/webm;codecs=opus",512));
+        if(data.message == 'success')
+            alert("저장되었습니다!!!")
+        $('#mediaFormToSave').modal('hide');
+    });
+});
+function b64toBlob(b64Data, contentType='', sliceSize=512) {
+    const byteCharacters = atob(b64Data);
+    const byteArrays = [];
+  
+    for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      const slice = byteCharacters.slice(offset, offset + sliceSize);
+  
+      const byteNumbers = new Array(slice.length);
+      for (let i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+  
+      const byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+  
+    const blob = new Blob(byteArrays, {type: contentType});
+    return blob;
+  }
+$('.modal-close-btn').click(function(){
+    alert("취소 하였습니다!")
+    recordVideoFormData = null;
+    recordAudioFormData = null;
+    $('#mediaFormToSave').modal('hide');
+})
 $('#btn-memo-message').click(function() {
     btn_memo_flag = !btn_memo_flag
     if(btn_memo_flag){
@@ -374,34 +500,35 @@ function syncSharedMedia(recordAudioFormData,recordVideoFormData){
     $('#main-video').show();
 
 }
-function makeShareMediaSrc(){
+function makeShareMediaSrc(recordVideoFormData2,recordAudioFormData2){
     let getVideo = $('iframe').get(0).contentWindow.getRecordVideoFormData;
     var videoReader = new FileReader();
     var audioReader = new FileReader();
 
     audioReader.onloadend = function() {
-        tempAudioSrc = audioReader.result;        
+        tempAudioSrc = audioReader.result;   
+        //console.log("tempAudioSrc",tempAudioSrc)     
     }
     videoReader.onloadend = function() {
         tempVideoSrc = videoReader.result;    
+        //console.log("tempVideoSrc",tempVideoSrc)     
     }
-    audioReader.readAsDataURL(recordAudioFormData);
-    videoReader.readAsDataURL(recordVideoFormData=getVideo());
-    sendMediaClock(initIntaval);
+    audioReader.readAsDataURL(recordAudioFormData2);
+    videoReader.readAsDataURL(recordVideoFormData2);
+    sendMediaClock();
 }
 function initIntaval(){
     console.log("인터벌 초기화!") // 문제 될수있을듯
     connection.chunkInterval = 0;
 }
-function sendMediaClock(callback){
+function sendMediaClock(){
     if(!tempAudioSrc || !tempVideoSrc){
-        let timerId = setTimeout(sendMediaClock,callback, 500);
+        let timerId = setTimeout(sendMediaClock, 500);
     }else{
         console.log("마무리")
         sendMediaSrc(tempAudioSrc,tempVideoSrc);
         tempAudioSrc = "";
         tempVideoSrc = "";
-        callback();
     }
 }
 function sendMediaSrc(sharedRecordAudio,sharedRecordVideo){
@@ -440,7 +567,36 @@ function clearMedia(){
         //});
     };
 }
-$('#btn-test-message').click(function() {
+$('#btn-searchall-my-record-media').click(function() {
+    $.ajax({
+        type: "GET",
+        url: 'https://k3d106.p.ssafy.io/api/v2/media/'+params.userFullName,
+        success: function (html) {},
+        error: function (error) {},
+    }).done(function(data) {
+        console.log(data)
+        // 여기서 테이블 만들기
+    });
+});
+$('#btn-search-my-record-media').click(function() {
+    getMidiasFromDB('test')
+});
+function getMidiasFromDB(title){
+    $.ajax({
+        type: "GET",
+        url: 'https://k3d106.p.ssafy.io/api/v2/media/'+params.userFullName+"/"+title,
+        success: function (html) {
+
+        },
+        error: function (error) {
+
+        },
+    }).done(function(data) {
+        console.log(data)
+        
+    });
+}
+function shareMyMedia(recordVideoFromData2,recordAudioFormData2){ // 저장된 정보로 share하는 함수
     if(isMediaSharing){
         let sharFlag = confirm("현재 미디어 공유중입니다. 공유중인 미디어를 제거하고 공유할까요?");
         if(!sharFlag){
@@ -455,37 +611,7 @@ $('#btn-test-message').click(function() {
     finishShareMidia = false;
     clearCanvas(); // 적던것 지우고 시작
     clearMedia();
-    makeShareMediaSrc();
-});
-function test(){
-    navigator.mediaDevices.getUserMedia({
-    video: true
-}).then(function(screen) {
-    var video = document.querySelector('video');
-    video.muted = true;
-    video.srcObject = screen;
-
-    navigator.mediaDevices.getUserMedia({
-        audio: true
-    }).then(function(mic) {
-        var finalStream = new MediaStream();
-        screen.getVideoTracks().concat(mic.getAudioTracks()).forEach(function(track) {
-            finalStream.addTrack(track);
-        });
-        finalStream.isScreen = true;
-        connection.attachStreams.push(finalStream);
-
-        // video.srcObject = finalStream;
-
-        var event = {
-            type: 'local',
-            stream: finalStream,
-            mediaElement: video
-        };
-        connection.onstream(event);
-    });
-});
-
+    makeShareMediaSrc(recordVideoFromData2,recordAudioFormData2);
 }
 function audioRecord(callback){
     console.log("audioRecord 실행")
@@ -512,13 +638,7 @@ function stopAudioRecord() {
     var blob = recorder.getBlob();
     var audioURL = URL.createObjectURL(blob); 
     console.log("녹화된 결과값 : ",blob)
-    //window.open(audioURL);
-    //invokeSaveAsDialog(blob);
-    //recordAudioFormData = new FormData().append("file", blob);
     recordAudioFormData = blob;
-    //test용
-    //console.log("LocalStroage : ", blob)
-    //localStorage.setItem('testAudioSrc', formData);
     connection.recorder = null;
   });
 };
@@ -871,11 +991,7 @@ connection.onmessage = function(event) {
                 target_id: event.data.join_id
             })
         }
-        connection.send({
-            type:'initRoom',
-            target_id: event.data.join_id,
-            isMediaSharing: isMediaSharing
-        })
+        
     }
 
     designer.syncData(event.data);
@@ -886,18 +1002,12 @@ connection.onmessage = function(event) {
 
 connection.onstream = function(event) {
     console.log("event !!! ", event)
-    if(event.type === 'test'){
-        event.mediaElement.controls = false;
-
-        var otherVideos = document.querySelector('#other-videos');
-        otherVideos.appendChild(event.mediaElement);
-        return;
-    }
+    // 파람의 유저풀네임 === 엑스트라 유저풀네임
     if (event.stream.isScreen && !event.stream.canvasStream) {
         $('#screen-viewer').get(0).srcObject = event.stream;
         $('#screen-viewer').hide();
     }
-    else if (event.extra.roomOwner === true) {
+    else if (event.extra.roomOwner === true) { // 지금은 params.open으로 구분... 되게되있음 사용안하는 if문
         //var video = document.getElementById('main-video');
         //video.setAttribute('data-streamid', event.streamid);
         //// video.style.display = 'none';
@@ -907,6 +1017,7 @@ connection.onstream = function(event) {
         //}
         //video.srcObject = event.stream;
         //$('#main-video').show();
+        console.log("check event !!! ", event.mediaElement)
         event.mediaElement.controls = false;
 
         var otherVideos = document.querySelector('#other-videos');
@@ -1114,15 +1225,6 @@ designer.appendTo(document.getElementById('widget-container'), function() {
         //console.log("개설자");
         init_btn_sync = true;
         init_share_media = true;
-        // tempSTreamCanvas 왜 필요한거?? 캡처용인가???
-        //var tempStreamCanvas = document.getElementById('temp-stream-canvas');
-        //var tempStream = tempStreamCanvas.captureStream();
-        //tempStream.isScreen = true;
-        //tempStream.streamid = tempStream.id;
-        //tempStream.type = 'local';
-        //connection.attachStreams.push(tempStream);
-        //window.tempStream = tempStream;
-        //connection.extra.roomOwner = true;
         connection.open(params.sessionid, function(isRoomOpened, roomid, error) {
             if (error) {
                 if (error === connection.errors.ROOM_NOT_AVAILABLE) {
