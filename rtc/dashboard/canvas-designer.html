@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>Dashboard + Video Conferencing + Chat + File Sharing | RTCMultiConnection</title>
+  <title>VORACAY</title>
   <meta name="description" content="WebRTC Dashboard including support for canvas drawing, canvas data syncing, video conferencing, screen sharing and video conferencing. Including chat and file sharing.">
 
   <!-- <link rel="shortcut icon" href="/demos/logo.png"> -->
@@ -31,7 +31,7 @@
   <script src="/node_modules/recordrtc/RecordRTC.js"></script>
 
 <style type="text/css">
-html, body, section, ul, li, nav, a, h1, h2 {
+/* html, body, section, ul, li, nav, a, h1, h2 {
     padding: 0;
     margin: 0;
     outline: none;
@@ -56,149 +56,112 @@ input[disabled], button[disabled] {
     box-shadow: none!important;
     text-decoration: none!important;
     outline: none!important;
-}
+} */
 </style>
 </head>
 <body>
-<style>
-    .extra-controls {
-        position: absolute;
-        right: 21%;
-    }
-    
-    #btn-comments {
-        color: red;
-        margin-top: 5px;
-        font-size: 24px;
-        text-shadow: 1px 1px white;
-    }
-    
-    #other-videos {
-        margin-top: 5px;
-    }
-    
-    #other-videos video {
-        width: 45%;
-        margin: 5px;
-        border: 1px solid black;
-        padding: 1px;
-        border-radius: 3px;
-    }
-    
-    #txt-chat-message {
-        width: 100%;
-        resize:none;
-        margin: 5px;
-        margin-right: 0;
-        min-height: 30px;
-    }
-    
-    #btn-chat-message {
-        margin: 5px;
-    }
-    
-    #conversation-panel {
-        margin-bottom: 20px;
-        text-align: left;
-        max-height: 200px;
-        overflow: auto;
-        border-top: 1px solid #E5E5E5;
-        width: 106%;
-    }
-    
-    #conversation-panel .message {
-        border-bottom: 1px solid #E5E5E5;
-        padding: 5px 10px;
-    }
-    
-    #conversation-panel .message img, #conversation-panel .message video, #conversation-panel .message iframe {
-        max-width: 100%;
-    }
-    
-    #main-video {
-        width: 100%;
-        margin-top: -9px;
-        border-bottom: 1px solid #121010;
-        display: none;
-        padding-bottom: 1px;
-    }
-    #main-audio{
-        width: 100%;
-        margin-top: -9px;
-        border-bottom: 1px solid #121010;
-        /*display: none;*/
-        padding-bottom: 1px;
-    }
-    hr {
-        height: 1px;
-        border: 0;
-        background: #E5E5E5;
-    }
-    
-    #btn-attach-file {
-        width: 25px;
-        vertical-align: middle;
-        cursor: pointer;
-        display: none;
-    }
-    
-    
-    
-    .checkmark {
-        display:none;
-        width: 15px;
-        vertical-align: middle;
-    }
-    
-    #screen-viewer {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        z-index: 9999999999999;
-        display: none;
-    }
-    </style>
-<article>
-<div id="isMemo">
-    <div id="other-videos" style="position: fixed;bottom: 80%;left: 20%; height: 20%; border-bottom: 1;"></div>
-    <div id="widget-container" style="position: fixed;bottom: 0;right: 0;left: 20%;height: 80%;border: 1px solid black; border-top:0; border-bottom: 0;"></div>
-</div>
-<div id="isNomal">
-    <div style="position: fixed;left: 20%">ajaskldjaskldjklj</div>
-</div>
-<video id="screen-viewer" controls playsinline autoplay></video>
-<div style="width: 20%; height: 100%; position: absolute;left:0;">
-    <div class="video-container">
-        <video id="main-video" playsinline autoplay></video>
+
+
+<div class="voracay">
+    <div class="meetingroom">
+      <div id="sidebar" class="sidebar">
+        <video id="main-video"  playsinline autoplay></video>
         <audio id="main-audio" controls playsinline autoplay></audio>
-        <!--test용-->
-        <div id="other-videos"></div>
-    </div>
-    <hr>
-    <div style="padding: 5px 10px;">
-        <div id="onUserStatusChanged"></div>
-    </div>
-
-    <div style="margin-top: 20px;position: absolute;bottom: 0;background: white; padding-bottom: 20px; width: 94%">
-        <div id="conversation-panel"></div>
-        <div id="key-press" style="text-align: right; display: none; font-size: 11px;">
-            <span style="vertical-align: middle;"></span>
-            <img src="https://www.webrtc-experiment.com/images/key-press.gif" style="height: 12px; vertical-align: middle;">
+        <div id="participant">
+          <div id="onUserStatusChanged"></div>
         </div>
-        <textarea id="txt-chat-message"></textarea>
-        <button class="btn btn-primary" id="btn-chat-message" disabled>Send</button>
-        <button class="btn btn-primary" id="btn-memo-message">Memo</button>
-        <button class="btn btn-primary" id="btn-record-message">Record</button>
-        <button class="btn btn-primary" id="btn-test-message">RecordTEST</button>
-        <button class="btn btn-primary" id="btn-clear-message">clear</button>
-        <img id="btn-attach-file" src="https://www.webrtc-experiment.com/images/attach-file.png" title="Attach a File">
+        <div class="btn-zip">
+          <input type="radio" id="chat-btn" name="button" checked="checked" />
+          <label for="chat-btn" id="chat-label" class="btn-item chat-btn"
+            >채팅  <img  src="../img/chat.png" alt="채팅" width="30" height="30" /></label
+          >
+          <input type="radio" id="save-btn" name="button" />
+          <label for="save-btn" id="save-label" class="btn-item save-btn"
+            >보관함  <img  src="../img/list1.png" alt="보관함" width="30" height="30" /></label
+          >
+        </div>
+        <div class="chosed-box">
+          <div id="chat-boxid" >
+            <div id="chatboxact">
+                <div id="chat-send">
+                    <textarea id="txt-chat-message"></textarea>
+                    <div id="chat-btn">
+                        <button class="btn btn-primary" id="btn-chat-message" disabled>
+                            전송
+                        </button>
+                        <img id="btn-attach-file" src="../img/clip.png"title="파일첨부" alt="파일첨부" width="30" height="30" />
+                     </div>
+                </div>
+                <div id="chat-container">
+                    <div id="conversation-panel"></div>
+                    <!-- <div
+                        id="key-press"
+                        style="text-align: right; display: none; font-size: 11px"
+                    >
+                        <span style="vertical-align: middle"></span>
+                        <img
+                        src="https://www.webrtc-experiment.com/images/key-press.gif"
+                        style="height: 12px; vertical-align: middle"
+                        />
+                    </div> -->
+                </div>
+                
+            </div>
+           
+          </div><!--chat-boxid -->
+          <!-- 보관함 -->
+          <div id="save-boxid">
+            <div id="saveboxact" class="save-box active">
+           
+              
+            </div>
+          </div>
+        </div>
+      </div> 
+
+      <!-- containerA -->
+     
+      <div id="containerA" >
+        <div id="captiondiv" class="captionBox">
+        </div>
+            <div id="other-videos" ></div>
+            <div id="isMemo">
+            <div id="widget-container" style="position: fixed;bottom: 0;right: 0;left: 20%;height: 80%;border: 1px solid black; border-top:0; border-bottom: 0;"></div>
+            </div> 
+      </div>
     </div>
 
-    <canvas id="temp-stream-canvas" style="display: none;"></canvas>
+    <div class="plus-box"></div>
+    <div class="meeting-bottom">
+      <div class="bottom-btn-box">
+        <div id="onoff-cam" class="onoff-cam circle-btn">
+          <i class="active"><img  src="../img/cam2.png" alt="캠" width="60" height="60" /></i>
+          <p class="arrow_box">카메라</p>
+        </div>
+
+        <div id="onoff-mic" class="onoff-mike circle-btn">
+          <i class=" fa-2x active"></i>
+          <p class="arrow_box">마이크</p>
+        </div>
+
+    
+        <button class="btn btn-primary" id="btn-memo-message">Memo</button>
+        
+        <div id="onoff-caption" class="onoff-caption circle-btn">
+            <button class="btn btn-primary" id="btn-record-message">Record</button>
+        </div>
+        <div id="onoff-data" id="navbartest" class="onoff-sign circle-btn">
+            <button class="btn btn-primary" id="btn-test-message">RecordTEST</button>
+        </div>
+        <div id="onoff-reg" class="onoff-5 circle-btn">
+            <button class="btn btn-primary" id="btn-clear-message">clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-</article>
+
+
 
 <script>
 let init_btn_sync = false; // 방버튼정보를 최초 동기화 하였는가??
@@ -257,12 +220,12 @@ function changeMemoBtn(input){
     if(input){ // 메모창
         $("#btn-memo-message").html("Nomal")
         $("#isMemo").css('display', '');
-        $("#isNomal").css('display', 'none');
+        // $("#isNomal").css('display', 'none');
         
     }else{ // nomal
         $("#btn-memo-message").html("Memo")
         $("#isMemo").css('display', 'none');
-        $("#isNomal").css('display', '');
+        // $("#isNomal").css('display', '');
     }
     // console.log(btn_memo_flag)
 }
@@ -776,14 +739,14 @@ function appendChatMessage(event, checkmark_id) {
             });
         }
     } else {
-        div.innerHTML = '<b>You:</b> <img class="checkmark" id="' + checkmark_id + '" title="Received" src="https://www.webrtc-experiment.com/images/checkmark.png"><br>' + event;
+        div.innerHTML = '<b>ME:</b> <img class="checkmark" id="' + checkmark_id + '" title="Received" src="https://www.webrtc-experiment.com/images/checkmark.png"><br>' + event;
         div.style.background = '#cbffcb';
     }
 
-    conversationPanel.appendChild(div);
+    conversationPanel.prepend(div);
 
-    conversationPanel.scrollTop = conversationPanel.clientHeight;
-    conversationPanel.scrollTop = conversationPanel.scrollHeight - conversationPanel.scrollTop;
+    // conversationPanel.scrollTop = conversationPanel.clientHeight;
+    // conversationPanel.scrollTop = conversationPanel.scrollHeight - conversationPanel.scrollTop;
 }
 
 var keyPressTimer;
@@ -1103,6 +1066,610 @@ function replaceScreenTrack(stream) {
     $('#screen-viewer').show();
 }
 
+//    button func
+// 캠 끄기
+$("#onoff-cam i").click(function (e) {
+    camactiveis = $("#onoff-cam i").hasClass("active");
+
+    var streamByUserId = connection.streamEvents.selectFirst({
+        userid: connection.userid,
+    }).stream;
+    if (camactiveis) {
+        streamByUserId.mute("video");
+        $(this).removeClass("active");
+    } else {
+        streamByUserId.unmute("video");
+        $(this).addClass("active");
+    }
+});
+// 마이크 끄기
+$("#onoff-mic i").click(function () {
+    micactiveis = $("#onoff-mic i").hasClass("active");
+    var streamByUserId = connection.streamEvents.selectFirst({
+        userid: connection.userid,
+    }).stream;
+    if (micactiveis) {
+        streamByUserId.mute("audio");
+        recognition.stop();
+        $(this).removeClass("active");
+    } else {
+        streamByUserId.unmute("audio");
+        recognition.start();
+        $(this).addClass("active");
+    }
+    // $(this).toggleClass("active");
+    // alert("onoff-mic");
+});
+$("#onoff-caption i").click(function () {
+    $(this).toggleClass("active");
+
+    captionactiveis = $("#captiondiv").hasClass("activecaption");
+
+    if (captionactiveis) {
+        $("#captiondiv").removeClass("activecaption");
+    }
+    if (!captionactiveis) {
+        $("#captiondiv").addClass("activecaption");
+    }
+    });
+    $("#onoff-data i").click(function () {
+    menuactiveis = $("#onoff-data i").hasClass("active");
+    if (!menuactiveis) {
+        onsignvideo();
+    }
+    if (menuactiveis) {
+        offsignvideo();
+    }
+
+    alert("onoff-data");
+    });
+    $("#onoff-reg i").click(function () {
+    $(this).toggleClass("active");
+    if ($(this).hasClass("active")) {
+        let url = "../../hand/dist/index.html";
+        let name = "check!!";
+        let specs =
+        "width=640px,height=480px,top=200,left=100,toolbar=no,menubar=no,resizable=yes";
+        w = window.open(url, name, specs);
+        w.onbeforeunload = function () {
+        localStorage.removeItem("handjesture-message");
+        $("#onoff-reg i").toggleClass("active");
+        };
+    }
+    // alert("onoff-reg");
+});
+
+// 채팅 sidebar 클릭시
+$("#chat-label").click(function () {
+    console.log("chat!!!!");
+    // offsaveboxmenu();
+    chatactiveis = $("#chatboxact").hasClass("active");
+    saveactiveis = $("#saveboxact").hasClass("active");
+    if (chatactiveis) {
+        $("#chatboxact").removeClass("active");
+    }
+    if (!saveactiveis) {
+        $("#saveboxact").addClass("active");
+    }
+});
+// 보관함 sidebar 클릭시
+$("#save-label").click(function () {
+    // onsaveboxmenu();
+    chatactiveis = $("#chatboxact").hasClass("active");
+    saveactiveis = $("#saveboxact").hasClass("active");
+    if (!chatactiveis) {
+        $("#chatboxact").addClass("active");
+    }
+    if (saveactiveis) {
+        $("#saveboxact").removeClass("active");
+    }
+});
 </script>
 </body>
+<style type="text/css">
+    /* containerA */
+    #containerA{
+        background: rgb(3, 215, 253);
+        width: 80%;
+        height: calc(100% - 120px);
+        position: absolute; 
+        left: 0;
+    }
+    /* caption */
+
+    #containerA div.activecaption {
+      display: none;
+    }
+
+    /* chat */
+    .onUserStatusChanged {
+      padding: 5px 10px;
+      height: 100px;
+      background: #252424;
+    }
+
+    #btn-chat-message {
+      margin: 5px;
+      margin-left: 0px;
+      margin-right: 0px;
+      width: 97%;
+      background-color: rgb(169, 178, 230);
+    }
+    .btn-primary {
+      background-color: #42025d66;
+      border-color: #42025d66;
+    }
+    .btn-primary:disabled {
+      background-color: #42025d66;
+      border-color: #42025d66;
+    }
+    /* side menu */
+
+    #chat-boxid {
+        height: calc(100%);
+        /* padding: 0 15px; */
+    }
+    #chatboxact {
+      
+      /* position: absolute; */
+      /* bottom: 0; */
+      /* flex-direction: column; */
+      
+      margin-left: 2px;
+      background: #2701fc;
+      width: 100%;
+      left: 20px;
+      height: 100%;
+      overflow: hidden;
+    }
+    #chat-send{
+        margin: 5px;
+        display:flex;
+    }
+    #chat-boxid div.active {
+      display: none;
+    }
+
+    #save-boxid div.active {
+      display: none;
+    }
+    #recode-boxid div.active {
+      display: none;
+    }
+    /* button */
+    .circle-btn i.active {
+      background: rgb(176, 70, 180);
+    }
+    #sidebar-btn i {
+      background: none;
+    }
+    #sidebar-btn i.active,
+    #sidebar-btn i.active:before {
+      background: rgb(176, 70, 180);
+    }
+
+    #sidebar-btn i.active {
+      color: #a887ff;
+      background: white;
+    }
+
+    .changeWidth {
+      margin-right: 300px;
+      width: calc(100vw - 300px);
+    }
+
+
+    
+    .voracay {
+      font-family: "Jua", sans-serif;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      position: relative;
+      background: rgb(253, 3, 3);
+    }
+    .meetingroom {
+      background: rgb(253, 195, 3);
+      height: calc(100% - 80px);
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      color: rgb(255, 255, 255);
+      font-size: 20px;
+      /* 넘어가면 보이지 않게 */
+      overflow: hidden;
+    }
+    .videoBox {
+      padding: 50px;
+      height: calc(100%-80px);
+      position: relative;
+      top: 0%;
+    }
+
+    .video {
+      display: grid;
+      grid-gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(30%, auto));
+      grid-template-rows: repeat(auto-fit, minmax(50%, auto));
+      justify-content: center;
+      line-height: 100%;
+      /* place-items: center; */
+      white-space: nowrap;
+      /* min-height: 100vh; */
+    }
+    .video div {
+      box-sizing: border-box;
+    }
+    .video-one {
+      padding-bottom: 56.26%;
+      background-color: white;
+    }
+    .captionBox {
+      /* margin-bottom: 100px; */
+      position: relative;
+      top: 0%;
+      left: 50%;
+      margin: 0 auto;
+      transform: translate(-50%, 0%);
+      /* background: rgba(107, 83, 136, 0.87); */
+      width: 100%;
+      height: 30px;
+      padding: 5px 20px;
+      /* 가운데 정렬 */
+      margin: 0 auto 50px auto;
+    }
+    .captionBox p {
+      background: rgba(107, 83, 136, 0.87);
+      color: white;
+      word-wrap: break-word;
+      word-break: break-all;
+      white-space: pre-line;
+      padding: 10px 20px;
+      /* width: 50%; */
+      /* padding: 5px 20px;  */
+      text-align: center;
+      font-size: 120%;
+      line-height: 30px;
+    }
+
+    .sidebar {
+      font-family: "Jua", sans-serif;
+      height: calc(100% - 80px);
+      width: 300px;
+      position: fixed;
+      z-index: 3;
+      top: 0;
+      right: 0;
+      background: rgb(72, 255, 0);
+      /* opacity: 0.9; */
+      overflow: hidden;
+    }
+
+
+    .sidemargin {
+      width: (100vw - 300px);
+    }
+    .sign-box {
+      width: 300px;
+      height: 200px;
+      background: rgb(255, 218, 246);
+      z-index: 4;
+      position: absolute;
+      right: 0;
+      bottom: 80px;
+      display: none;
+    }
+
+    .signVideoWidth {
+      display: block;
+    }
+
+    .btn-zip {
+      font-family: "Jua", sans-serif;
+      display: grid;
+      grid-template-columns: 1fr 1fr ;
+      text-align: center;
+      justify-content: center;
+    }
+
+    .btn-zip > input[type="radio"] {
+      opacity: 0;
+      position: fixed;
+      width: 0;
+    }
+
+    .btn-zip label {
+      display: inline-block;
+      background-color: rgb(169, 178, 230);;
+      padding: 10px;
+      font-family: "Jua", sans-serif;
+      font-family: "Noto Sans KR", sans-serif;
+      font-size: 16px;
+      /* border: 2px solid #444; */
+      border-radius: 10px 10px 0 0;
+    }
+    .btn-zip input[type="radio"]:checked + label {
+      background-image: linear-gradient(
+        to right top,
+        #082257,
+        #0d1a41,
+        #111742,
+        #100b41,
+        #261355,
+        #220f47,
+        #2e135a,
+        #1a0d47,
+        #1c1257,
+        #191350,
+        #1b1246,
+        #160e57
+      );
+    }
+
+    .btn-zip label:hover {
+      cursor: pointer;
+      background-color: rgb(100, 115, 197);
+    }
+
+    .btn-item {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .chat-btn {
+      animation: move 1s;
+      margin-bottom: 0;
+      text-align: center;
+    }
+    .save-btn {
+      animation: move 1s;
+      margin-bottom: 0;
+    }
+    .record-btn {
+      animation: move 1s;
+      margin-bottom: 0;
+    }
+
+    .chosed-box {
+      width: 100%;
+      height: 100%;
+      background: #ff0101;
+    }
+    .plus-box {
+      width: 100%;
+      height: 80px;
+      background-image: linear-gradient(
+        to right top,
+        rgb(179, 184, 255),
+        rgb(158, 151, 250),
+        rgb(152, 162, 253),
+        #a2b0ff,
+        #9aa9ff,
+        rgb(147, 167, 253),
+        #94a4ff
+      );
+      z-index: 2;
+      position:absolute;
+      margin-bottom: 80px;
+      left: 0;
+    }
+
+    .meeting-bottom {
+      width: 100%;
+      height: 120px;
+      /* padding:20px; */
+
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      z-index: 4;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+    }
+
+    .bottom-btn-box {
+      padding-top: 45px;
+      width: 50%;
+      height: 100%;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+
+    .circle-btn {
+      position: relative;
+      /* display: block; */
+      align-items: center;
+      width: 100%;
+      /* height: 100%; */
+      margin: 15px;
+    }
+    .arrow_box {
+      z-index: 5;
+      text-align: center;
+      display: none;
+      position: absolute;
+      width: 120px;
+      padding: 8px;
+      top: -80%;
+      left: -25%;
+      -webkit-border-radius: 8px;
+      -moz-border-radius: 8px;
+      border-radius: 8px;
+      background: rgba(33, 16, 131, 0.925);
+      color: #fff;
+      font-size: 14px;
+      opacity: 0.8;
+    }
+
+    .arrow_box:after {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      margin-left: -10px;
+      border: solid transparent;
+      border-color: rgba(51, 51, 51, 0);
+      border-top-color: rgba(40, 18, 119, 0.685);
+      border-width: 10px;
+      pointer-events: none;
+      content: " ";
+    }
+
+    /* .circle-btn:hover > p.arrow_box {
+      display: block;
+    } */
+    .circle-btn:hover > p.arrow_box {
+      display: block;
+    }
+    .circle-btn:hover {
+      cursor: pointer;
+    }
+
+    .circle-btn i {
+      display: block;
+      color: white;
+      padding: 20px;
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.562);
+      justify-content: center;
+      align-items: center;
+      display: flex;
+    }
+
+    .hello {
+      display: grid;
+      grid-template-columns: auto auto auto;
+    }
+
+
+
+
+    /* 기존 CSS */
+    .extra-controls {
+        position: absolute;
+        right: 21%;
+    }
+    
+    #btn-comments {
+        color: red;
+        margin-top: 5px;
+        font-size: 24px;
+        text-shadow: 1px 1px white;
+    }
+    
+    #other-videos {
+        margin-top: 5px;
+    }
+  /*    6명일때
+
+        /* width: 31%;
+        margin: 5px;
+        border: 1px solid black;
+        padding: 1px;
+        border-radius: 3px; */
+        #other-videos video {
+        width: 45%;
+        height: 250px;
+        margin: 10px;
+        /* border: 1px solid black; */
+        padding: 1px;
+        border-radius: 3px;
+      }
+    
+    #txt-chat-message {
+        width: 95%;
+        /* resize:none;
+        margin: 5px;
+        margin-right: 0; */
+        min-height: 20px;
+        border-radius: 10px;
+    }
+    
+    #btn-chat-message {
+        margin:0px;
+        margin-left: 2px;
+        background-color: rgb(0, 0, 0);
+        color: white;
+    }
+    #chat-container{
+        height: 450px;
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+    #conversation-panel {
+        /* margin-bottom: 20px; */
+        text-align: left;
+        /* max-height: 180px; */
+        max-height: 80%;
+        background-color: wheat;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        border-top: 1px solid #e5e5e5;
+        /* width:106%; */
+        /* 위에로 설정: scroll조금만 보임, 110%로하면 아예안보임 */
+        width: 110%;
+        font-size: 15px
+    }
+    
+    #conversation-panel .message {
+        border-bottom: 1px solid #9c0808;
+        padding: 5px 10px;
+        word-wrap:break-word;
+    }
+    
+    #conversation-panel .message img, #conversation-panel .message video, #conversation-panel .message iframe {
+        max-width: 100%;
+    }
+    
+    #main-video {
+        width: 100%;
+        margin-top: -9px;
+        border-bottom: 1px solid #121010;
+        display: none;
+        padding-bottom: 1px;
+    }
+    #main-audio{
+        width: 100%;
+        margin-top: -9px;
+        border-bottom: 1px solid #121010;
+        /*display: none;*/
+        padding-bottom: 1px;
+    }
+    hr {
+        height: 1px;
+        border: 0;
+        background: #E5E5E5;
+    }
+    
+    #btn-attach-file {
+        width: 25px;
+        vertical-align: middle;
+        cursor: pointer;
+        display: none;
+    }
+    
+    
+    
+    .checkmark {
+        display:none;
+        width: 15px;
+        vertical-align: middle;
+    }
+    
+    #screen-viewer {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 9999999999999;
+        display: none;
+    }
+  </style>
 </html>
