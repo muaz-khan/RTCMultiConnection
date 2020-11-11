@@ -3708,6 +3708,7 @@ function getRecordVideoFormData() {
       console.log("제발되라.. ", id);
     },
     drawVideoToCanvas: function (video, context, width, height) {
+        console.log("TEST CONTEXT", context.canvas.width)
       test.loadVideo(video, context, width, height);
     },
     loadVideo: function (video, context, width, height) {
@@ -3740,7 +3741,7 @@ function getRecordVideoFormData() {
           test.findParentDocument(event.data.id);
           let video = window.parent.document.getElementById("main-video");
 
-          test.drawVideoToCanvas(video, context, 872, 670);
+          test.drawVideoToCanvas(video, context, context.canvas.width, context.canvas.height);
         }
         if (event.data.removeMainVideo) {
           if (!isVideoBackGround) return;
