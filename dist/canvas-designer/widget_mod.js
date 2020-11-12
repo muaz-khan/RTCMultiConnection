@@ -12,7 +12,6 @@ function getRecordVideoFormData() {
   var chunks = [];
   let clearFlag = false;
   mediaRecorder.ondataavailable = function (e) {
-    console.log("무슨타입이야? ",e)
     chunks.push(e.data);
   };
   mediaRecorder.onstop = function (e) {
@@ -401,6 +400,7 @@ function getRecordVideoFormData() {
     points = [],
     // video="", // 추가
     isVideoBackGround = false, // 추가
+    isWhiteBoard = false, // 추가
     textarea = find("code-text"),
     lineWidth = 2,
     strokeStyle = "#6c96c8",
@@ -953,11 +953,19 @@ function getRecordVideoFormData() {
     drawHelper = {
       redraw: function () {
         // 추가 삭제...
-        if (!isVideoBackGround) {
+        if (!isVideoBackGround) { // 비디오 아닐때일때
           // 여기 내생각에 없어도 될꺼같은데 왜 없으면 안되는건지 생각해보자..
-          tempContext.clearRect(0, 0, innerWidth, innerHeight),
-            context.clearRect(0, 0, innerWidth, innerHeight);
-        } else if (clearFlag) {
+          if(isWhiteBoard){
+            tempContext.fillStyle = "white" 
+            context.fillStyle = "white"
+              tempContext.fillRect(0, 0, innerWidth, innerHeight),
+              context.fillRect(0, 0, innerWidth, innerHeight);
+              isWhiteBoard = false;
+          }else{
+            tempContext.clearRect(0, 0, innerWidth, innerHeight),
+              context.clearRect(0, 0, innerWidth, innerHeight);
+          }
+        } else if (clearFlag) { // 그냥 지우는애 (비디오때는 clearRect가 실행되면 안됨)
           clearFlag = false;
           tempContext.clearRect(0, 0, innerWidth, innerHeight),
             context.clearRect(0, 0, innerWidth, innerHeight);
@@ -3705,10 +3713,12 @@ function getRecordVideoFormData() {
   //추가
   var test = {
     findParentDocument: function (id) {
-      console.log("제발되라.. ", id);
+      //console.log("제발되라.. ", id);
     },
     drawVideoToCanvas: function (video, context, width, height) {
-        console.log("TEST CONTEXT", context.canvas.width)
+      // fillRect되있는 색 지우고 시작하자
+      tempContext.clearRect(0, 0, innerWidth, innerHeight); 
+      context.clearRect(0, 0, innerWidth, innerHeight);
       test.loadVideo(video, context, width, height);
     },
     loadVideo: function (video, context, width, height) {
@@ -3735,13 +3745,23 @@ function getRecordVideoFormData() {
             (sdp.uid = uid), window.parent.postMessage(sdp, "*");
           });
         // 추가
+        if(event.data.backgroundWhite){
+          isVideoBackGround = false;
+          isWhiteBoard = true;
+          // 적어람뫄
+          drawHelper.redraw();
+        }
         if (event.data.backgroundVideo) {
           isVideoBackGround = true;
-          console.log("widget.html에서 받았다...");
-          test.findParentDocument(event.data.id);
-          let video = window.parent.document.getElementById("main-video");
+          console.log("widget video stream id ", event.data.streamId)
+          if(!event.data.srcObj){
+            test.findParentDocument(event.data.id);
+            let video = window.parent.document.getElementById("main-video");
+            console.log("video 가져올수있나?",video)
+            test.drawVideoToCanvas(video, context, context.canvas.width, context.canvas.height);
+          }else{
 
-          test.drawVideoToCanvas(video, context, context.canvas.width, context.canvas.height);
+          }
         }
         if (event.data.removeMainVideo) {
           if (!isVideoBackGround) return;
@@ -3756,7 +3776,6 @@ function getRecordVideoFormData() {
           }
         }
         if (event.data.clearFlag) {
-          console.log("넘어왔잔아");
           clearFlag = true;
           points = [];
           drawHelper.redraw();
