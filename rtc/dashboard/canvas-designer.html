@@ -70,53 +70,51 @@ input[disabled], button[disabled] {
       <div id="sidebar" class="sidebar">
         <video id="main-video"  playsinline autoplay></video>
         <audio id="main-audio" controls playsinline autoplay></audio>
-        <div id="participant">
-          <div id="onUserStatusChanged"></div>
-        </div>
+        <!-- loadImage('./img/NAMU.png') -->
         <div class="btn-zip">
-          <input type="radio" id="chat-btn" name="button" checked="checked" />
+          <input type="radio" id="participant-btn" name="button"checked="checked" />
+          <label for="participant-btn" id="participant-label" class="btn-item participant-btn"
+            >참가자  <img  src="../img/participant.png" alt="참가자" width="25" height="25" /></label
+          >
+
+          <input type="radio" id="chat-btn" name="button"  />
           <label for="chat-btn" id="chat-label" class="btn-item chat-btn"
             >채팅  <img  src="../img/chat.png" alt="채팅" width="30" height="30" /></label
           >
+
           <input type="radio" id="save-btn" name="button" />
           <label for="save-btn" id="save-label" class="btn-item save-btn"
-            >보관함  <img  src="../img/list1.png" alt="보관함" width="30" height="30" /></label
+            >보관함  <img  src="../img/list1.png" alt="보관함" width="25" height="25" /></label
           >
+          
         </div>
         <div class="chosed-box">
+           <div id="participant-boxid" >
+                <div id="participantboxact" class="participant-box ">
+                  <div id="onUserStatusChanged"></div> 
+                </div>
+          </div>
           <div id="chat-boxid" >
-            <div id="chatboxact">
-                <div id="chat-send">
+            <div id="chatboxact" class="chat-box active">
+                <div id="chat-send" >
                     <textarea id="txt-chat-message"></textarea>
-                    <div id="chat-btn">
-                        <button class="btn btn-primary" id="btn-chat-message" disabled>
-                            전송
-                        </button>
+                    <!-- <div id="chat-btn"> -->
+                        <!-- <button class="btn btn-primary" id="btn-chat-message" disabled> class="btn btn-primary" -->
+                            <img  id="btn-chat-message" src="../img/send.png"title="전송" alt="전송" width="30" height="30" disabled />
+                        <!-- </button> -->
                         <img id="btn-attach-file" src="../img/clip.png"title="파일첨부" alt="파일첨부" width="30" height="30" />
-                     </div>
+                     <!-- </div> -->
                 </div>
                 <div id="chat-container">
                     <div id="conversation-panel"></div>
-                    <!-- <div
-                        id="key-press"
-                        style="text-align: right; display: none; font-size: 11px"
-                    >
-                        <span style="vertical-align: middle"></span>
-                        <img
-                        src="https://www.webrtc-experiment.com/images/key-press.gif"
-                        style="height: 12px; vertical-align: middle"
-                        />
-                    </div> -->
                 </div>
-                
             </div>
            
           </div><!--chat-boxid -->
           <!-- 보관함 -->
           <div id="save-boxid">
             <div id="saveboxact" class="save-box active">
-           
-              
+
             </div>
           </div>
         </div>
@@ -138,17 +136,30 @@ input[disabled], button[disabled] {
     <div class="meeting-bottom">
       <div class="bottom-btn-box">
         <div id="onoff-cam" class="onoff-cam circle-btn">
-          <i class="active"><img  src="../img/cam2.png" alt="캠" width="60" height="60" /></i>
+          <i class="active">
+              <img class="oncam" src="../img/cam2.png" alt="캠" width="40" height="40" />
+              <img class="offcam" src="../img/cam1.png" alt="캠" width="40" height="40" /></i>
           <p class="arrow_box">카메라</p>
         </div>
 
-        <div id="onoff-mic" class="onoff-mike circle-btn">
-          <i class=" fa-2x active"></i>
+        <div id="onoff-mic" class="onoff-mic circle-btn">
+          <i class="active">
+            <img class="onmic" src="../img/micon.png" alt="마이크" width="40" height="40" />
+            <img class="offmic" src="../img/micoff.png" alt="마이크" width="40" height="40" /></i>
+
+          </i>
           <p class="arrow_box">마이크</p>
         </div>
 
+        <div id="invitelink" class="circle-btn">
+            <i>
+              <img src="../img/invite.png" alt="초대" width="40" height="40" />
+            </i>
+            <p class="arrow_box">초대 링크</p>
+        </div>
+
     
-        <button class="btn btn-primary" id="btn-memo-message">Memo</button>
+        <!-- <button class="btn btn-primary" id="btn-memo-message">Memo</button>
         
         <div id="onoff-caption" class="onoff-caption circle-btn">
             <button class="btn btn-primary" id="btn-record-message">Record</button>
@@ -164,7 +175,7 @@ input[disabled], button[disabled] {
         </div>
         <div id="onoff-list-one" class="onoff-5 circle-btn">
             <button class="btn btn-primary"id="btn-search-my-record-media">getRecordDetail</button>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -205,6 +216,9 @@ input[disabled], button[disabled] {
 
 
 <script>
+const recognition = new webkitSpeechRecognition();//마이크
+
+
 let init_btn_sync = false; // 방버튼정보를 최초 동기화 하였는가??
 let init_share_media = false; // share정보 최초 동기화 하였는가??
 
@@ -748,12 +762,12 @@ connection.onUserStatusChanged = function(event) {
     });
 
     if (!names.length) {
-        names = ['Only You'];
+        names = ['다른멤버가 참여할 때까지 기다려주세요'];
     } else {
         names = [connection.extra.userFullName || 'You'].concat(names);
     }
 
-    infoBar.innerHTML = '<b>Active users:</b> ' + names.join(', ');
+    infoBar.innerHTML = '<b>미팅 멤버:</b> ' + names.join(', ');
 };
 
 connection.onopen = function(event) {
@@ -1031,7 +1045,7 @@ function appendChatMessage(event, checkmark_id) {
     div.className = 'message';
 
     if (event.data) {
-        div.innerHTML = '<b>' + (event.extra.userFullName || event.userid) + ':</b><br>' + event.data.chatMessage;
+        div.innerHTML = '<img src="../img/you1.png" class="sendmark"> <b>[' + (event.extra.userFullName || event.userid) + ']: </b>' + event.data.chatMessage;
 
         if (event.data.checkmark_id) {
             connection.send({
@@ -1040,8 +1054,8 @@ function appendChatMessage(event, checkmark_id) {
             });
         }
     } else {
-        div.innerHTML = '<b>ME:</b> <img class="checkmark" id="' + checkmark_id + '" title="Received" src="https://www.webrtc-experiment.com/images/checkmark.png"><br>' + event;
-        div.style.background = '#cbffcb';
+        div.innerHTML = '<img class="checkmark" id="' + checkmark_id + '" title="Received" src="../img/me1.png"><b>ME: </b>' + event;
+        div.style.background = 'rgb(16 23 66)';
     }
 
     conversationPanel.prepend(div);
@@ -1101,7 +1115,7 @@ document.getElementById('btn-attach-file').onclick = function() {
 
 function getFileHTML(file) {
     var url = file.url || URL.createObjectURL(file);
-    var attachment = '<a href="' + url + '" target="_blank" download="' + file.name + '">Download: <b>' + file.name + '</b></a>';
+    var attachment = '<a href="' + url + '" target="_blank" download="' + file.name + '">다운로드: <b>' + file.name + '</b></a>';
     if (file.name.match(/\.jpg|\.png|\.jpeg|\.gif/gi)) {
         attachment += '<br><img crossOrigin="anonymous" src="' + url + '">';
     } else if (file.name.match(/\.wav|\.mp3/gi)) {
@@ -1125,8 +1139,8 @@ connection.onFileEnd = function(file) {
     var div = progressHelper[file.uuid].div;
 
     if (file.userid === connection.userid) {
-        div.innerHTML = '<b>You:</b><br>' + html;
-        div.style.background = '#cbffcb';
+        div.innerHTML =  '<img src="../img/me1.png" class="sendmark"><b>ME: </b><br>' + html;
+        div.style.background = '#101742';
 
         if(recentFile) {
             recentFile.userIndex++;
@@ -1142,7 +1156,7 @@ connection.onFileEnd = function(file) {
             recentFile = null;
         }
     } else {
-        div.innerHTML = '<b>' + getFullName(file.userid) + ':</b><br>' + html;
+        div.innerHTML = '<img src="../img/you1.png" class="sendmark"> <b>[' + getFullName(file.userid) + ']:</b><br>' + html;
     }
 };
 
@@ -1168,13 +1182,13 @@ connection.onFileStart = function(file) {
         }
 
         div.innerHTML = '<b>You (to: ' + userFullName + '):</b><br><label>0%</label> <progress></progress>';
-        div.style.background = '#cbffcb';
+        div.style.background = 'rgb(16 23 66)';
     } else {
         div.innerHTML = '<b>' + getFullName(file.userid) + ':</b><br><label>0%</label> <progress></progress>';
     }
 
     div.title = file.name;
-    conversationPanel.appendChild(div);
+    conversationPanel.prepend(div);
     progressHelper[file.uuid] = {
         div: div,
         progress: div.querySelector('progress'),
@@ -1182,8 +1196,8 @@ connection.onFileStart = function(file) {
     };
     progressHelper[file.uuid].progress.max = file.maxChunks;
 
-    conversationPanel.scrollTop = conversationPanel.clientHeight;
-    conversationPanel.scrollTop = conversationPanel.scrollHeight - conversationPanel.scrollTop;
+    // conversationPanel.scrollTop = conversationPanel.clientHeight;
+    // conversationPanel.scrollTop = conversationPanel.scrollHeight - conversationPanel.scrollTop;
 };
 
 function updateLabel(progress, label) {
@@ -1363,7 +1377,7 @@ function replaceScreenTrack(stream) {
 // 캠 끄기
 $("#onoff-cam i").click(function (e) {
     camactiveis = $("#onoff-cam i").hasClass("active");
-
+    //active: 동작중
     var streamByUserId = connection.streamEvents.selectFirst({
         userid: connection.userid,
     }).stream;
@@ -1431,13 +1445,32 @@ $("#onoff-caption i").click(function () {
     }
     // alert("onoff-reg");
 });
-
+//참여자 sidebar 클릭시
+$("#participant-label").click(function () {
+    // onsaveboxmenu();
+    participantactiveis = $("#participantboxact").hasClass("active");
+    chatactiveis = $("#chatboxact").hasClass("active");
+    saveactiveis = $("#saveboxact").hasClass("active");
+    if (participantactiveis) {
+        $("#participantboxact").removeClass("active");
+    }
+    if (!chatactiveis) {
+        $("#chatboxact").addClass("active");
+    }
+    if (!saveactiveis) {
+        $("#saveboxact").addClass("active");
+    }
+});
 // 채팅 sidebar 클릭시
 $("#chat-label").click(function () {
     console.log("chat!!!!");
     // offsaveboxmenu();
+    participantactiveis = $("#participantboxact").hasClass("active");
     chatactiveis = $("#chatboxact").hasClass("active");
     saveactiveis = $("#saveboxact").hasClass("active");
+    if (!participantactiveis) {
+        $("#participantboxact").addClass("active");
+    }
     if (chatactiveis) {
         $("#chatboxact").removeClass("active");
     }
@@ -1448,8 +1481,12 @@ $("#chat-label").click(function () {
 // 보관함 sidebar 클릭시
 $("#save-label").click(function () {
     // onsaveboxmenu();
+    participantactiveis = $("#participantboxact").hasClass("active");
     chatactiveis = $("#chatboxact").hasClass("active");
     saveactiveis = $("#saveboxact").hasClass("active");
+    if (!participantactiveis) {
+        $("#participantboxact").addClass("active");
+    }
     if (!chatactiveis) {
         $("#chatboxact").addClass("active");
     }
@@ -1457,6 +1494,7 @@ $("#save-label").click(function () {
         $("#saveboxact").removeClass("active");
     }
 });
+
 </script>
 </body>
 <style type="text/css">
@@ -1482,11 +1520,7 @@ $("#save-label").click(function () {
     }
 
     #btn-chat-message {
-      margin: 5px;
-      margin-left: 0px;
-      margin-right: 0px;
-      width: 97%;
-      background-color: rgb(169, 178, 230);
+        padding-left: 3px;
     }
     .btn-primary {
       background-color: #42025d66;
@@ -1509,7 +1543,7 @@ $("#save-label").click(function () {
       /* flex-direction: column; */
       
       margin-left: 2px;
-      background: #2701fc;
+      background: #101742;
       width: 100%;
       left: 20px;
       height: 100%;
@@ -1522,27 +1556,46 @@ $("#save-label").click(function () {
     #chat-boxid div.active {
       display: none;
     }
-
     #save-boxid div.active {
       display: none;
     }
-    #recode-boxid div.active {
+    #participant-boxid div.active {
       display: none;
     }
     /* button */
     .circle-btn i.active {
-      background: rgb(176, 70, 180);
+      background: rgb(41 58 151);
     }
+    .circle-btn i.active .offcam {
+      display: none;
+    }
+    .circle-btn i .oncam {
+      display: none;
+    }
+    .circle-btn i.active .oncam {
+      display: inline;
+    }
+    .circle-btn i.active .offmic {
+      display: none;
+    }
+    .circle-btn i .onmic {
+      display: none;
+    }
+    .circle-btn i.active .onmic {
+      display: inline;
+    }
+    
+ 
     #sidebar-btn i {
       background: none;
     }
     #sidebar-btn i.active,
     #sidebar-btn i.active:before {
-      background: rgb(176, 70, 180);
+      background: rgb(251, 255, 3);
     }
 
     #sidebar-btn i.active {
-      color: #a887ff;
+      color: #05681b;
       background: white;
     }
 
@@ -1661,7 +1714,7 @@ $("#save-label").click(function () {
     .btn-zip {
       font-family: "Jua", sans-serif;
       display: grid;
-      grid-template-columns: 1fr 1fr ;
+      grid-template-columns: 1fr 1fr 1fr ;
       text-align: center;
       justify-content: center;
     }
@@ -1713,13 +1766,13 @@ $("#save-label").click(function () {
     .chat-btn {
       animation: move 1s;
       margin-bottom: 0;
-      text-align: center;
+      display:flex;
     }
     .save-btn {
       animation: move 1s;
       margin-bottom: 0;
     }
-    .record-btn {
+    .participant-btn {
       animation: move 1s;
       margin-bottom: 0;
     }
@@ -1727,7 +1780,7 @@ $("#save-label").click(function () {
     .chosed-box {
       width: 100%;
       height: 100%;
-      background: #ff0101;
+      background: #101742;
     }
     .plus-box {
       width: 100%;
@@ -1828,7 +1881,7 @@ $("#save-label").click(function () {
       padding: 20px;
       width: 62px;
       height: 62px;
-      border-radius: 50%;
+      border-radius: 40%;
       border: 2px solid rgba(255, 255, 255, 0.562);
       justify-content: center;
       align-items: center;
@@ -1876,34 +1929,39 @@ $("#save-label").click(function () {
       }
     
     #txt-chat-message {
-        width: 95%;
+        width: 90%;
         /* resize:none;
         margin: 5px;
         margin-right: 0; */
-        min-height: 20px;
+        overflow-y: scroll;
+        height: 35px;
         border-radius: 10px;
     }
     
     #btn-chat-message {
-        margin:0px;
+        
         margin-left: 2px;
-        background-color: rgb(0, 0, 0);
-        color: white;
+        height: 35px;
+        width: 30px;
+        padding: 2px;
+        padding-left: 0px;
+        padding-right: 0px;
     }
     #chat-container{
         height: 450px;
         overflow-y: hidden;
         overflow-x: hidden;
+        margin-right: 20px;
+        margin-left: 10px;
     }
     #conversation-panel {
         /* margin-bottom: 20px; */
         text-align: left;
         /* max-height: 180px; */
         max-height: 80%;
-        background-color: wheat;
         overflow-x: hidden;
         overflow-y: scroll;
-        border-top: 1px solid #e5e5e5;
+        border-top: 2px solid #a9b2e6;
         /* width:106%; */
         /* 위에로 설정: scroll조금만 보임, 110%로하면 아예안보임 */
         width: 110%;
@@ -1911,7 +1969,7 @@ $("#save-label").click(function () {
     }
     
     #conversation-panel .message {
-        border-bottom: 1px solid #9c0808;
+        border-bottom: 2px solid #a9b2e6;;
         padding: 5px 10px;
         word-wrap:break-word;
     }
@@ -1941,18 +1999,26 @@ $("#save-label").click(function () {
     }
     
     #btn-attach-file {
-        width: 25px;
+
         vertical-align: middle;
         cursor: pointer;
         display: none;
+        display: inline-block;
+        padding-left: 3px;
+        padding-top: 3px;
+        padding-right: 3px;
     }
     
     
     
     .checkmark {
         display:none;
-        width: 15px;
+        width: 40px;
         vertical-align: middle;
+    }
+    .sendmark {
+        width: 40px;
+        height: 40px;
     }
     
     #screen-viewer {
