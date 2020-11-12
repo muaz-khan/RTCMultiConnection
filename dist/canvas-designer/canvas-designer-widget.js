@@ -63,8 +63,8 @@ function CanvasDesigner() {
     var selectedIcon = 'pencil';
 
     function syncData(data) {
-        console.log("designer에서 받음 ",data)
-        console.log("designer return되는가 ",!designer.iframe)
+        //console.log("designer에서 받음 ",data)
+        //console.log("designer return되는가 ",!designer.iframe)
         if (!designer.iframe) return;
 
         designer.postMessage({
@@ -93,7 +93,7 @@ function CanvasDesigner() {
 
         if (!!event.data.canvasDesignerSyncData) {
             designer.pointsLength = event.data.canvasDesignerSyncData.points.length;
-            console.log("그림그릴때 ",event.data.canvasDesignerSyncData);
+           // console.log("그림그릴때 ",event.data.canvasDesignerSyncData);
             syncDataListener(event.data.canvasDesignerSyncData);
             return;
         }
@@ -195,10 +195,10 @@ function CanvasDesigner() {
 
     designer.postMessage = function(message) {
         if (!designer.iframe) return;
-        console.log("desinger.postmessage ",message)
+        //console.log("desinger.postmessage ",message)
         message.uid = designer.uid;
         designer.iframe.contentWindow.postMessage(message, '*');
-        console.log("message.uid designer.uid  ",message.uid)
+        //console.log("message.uid designer.uid  ",message.uid)
     };
 
     designer.captureStream = function(callback) {
@@ -226,12 +226,20 @@ function CanvasDesigner() {
         });
     };
     // 추가한 코드
-    designer.backgroundVideo = function(idData){
+    designer.backgroundVideo = function(srcObj){
+        console.log("srcObj : ", srcObj)
         if (!designer.iframe) return;
-        console.log("canvas-designer-widget param!! : ",idData)
+        //console.log("canvas-designer-widget param!! : ",idData)
         // console.log("canvas-widget.js첨부된 비디오",video);
         designer.postMessage({
-            backgroundVideo: true
+            backgroundVideo: true,
+            srcObj : srcObj,
+        });
+    }
+    designer.backgroundWhite = function(){
+        if(!designer.iframe) return;
+        designer.postMessage({
+            backgroundWhite: true
         });
     }
     designer.removeMainVideo = function(){
