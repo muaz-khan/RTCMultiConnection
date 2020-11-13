@@ -4,7 +4,8 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, initial-scale=0.66, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>VORACAY</title>
   <meta name="description" content="WebRTC Dashboard including support for canvas drawing, canvas data syncing, video conferencing, screen sharing and video conferencing. Including chat and file sharing.">
 
@@ -60,6 +61,7 @@ input[disabled], button[disabled] {
     text-decoration: none!important;
     outline: none!important;
 } */
+
 </style>
 </head>
 <body>
@@ -129,13 +131,7 @@ input[disabled], button[disabled] {
       <div id="containerA" >
         <div id="captiondiv" class="captionBox">
         </div>
-            <div class="paging-button">
-                <div id="paging-prev"></div>
-            </div>
             <div id="other-videos" ></div>
-            <div class="paging-button">
-                <div id="paging-next"></div>
-            </div>
             <div id="isMemo">
                 <div id="widget-container" >
                     <audio id="main-audio" controls playsinline autoplay></audio>
@@ -246,7 +242,7 @@ input[disabled], button[disabled] {
           </div>
         </div>
       </div>
-    <canvas id="temp-stream-canvas" style="display: none;"></canvas>
+    <canvas id="temp-stream-canvas" style="display: none; touch-action: manipulation;"></canvas>
 </div>
 
 
@@ -1304,305 +1300,50 @@ connection.onmessage = function(event) {
 
 // extra code
 
-// 페이징 변수
-var totalPeople = 0;
-var tempCount = 4;
-var meetingList = [];
-var tempPageCount = 0;
-var newHtml = '<div class=\"other-videos'+tempPageCount+'\"> </div>';
-var currentPage = 1;
-var dataPerPage = 4;    // 한 페이지에 나타낼 데이터 수
-var pageCount = 1;        // 한 화면에 나타낼 페이지 수
-
-// 모바일 화면 변수 설정
-if($(window).width() <768) {
-    tempCount = 2;
-    dataPerPage = 2;
-}
 connection.onstream = function(event) {
-    totalPeople++;  //누가 들어올 때 ++
-    // 화면 크기 따른 함수 호출
-    if($(window).width() >768) {
-        inWeb(event);
-    }else{
-        inMobile(event);
+    console.log("stream 은?!",connection.streamEvents)
+    console.log("event !!! ", event)
+    // 파람의 유저풀네임 === 엑스트라 유저풀네임
+    if(params.userFullName == event.extra.userFullName){
+        console.log("내 streamID = ", event.streamid)
+        myStreamID = event.streamid;
     }
-};
-
-function inWeb(event) {
-
-if(tempCount==0){   //4명이 채워질 때
-    tempCount=4;    //tempCount 원상복구
-    tempPageCount++;    // 총 페이지 수 ++
-    newHtml += '<div class=\"other-videos'+tempPageCount+'\"> </div>';
-    // 숫자를 붙인 div 태그 추가해주기
-}else {
-    tempCount--; 
-}
-console.log("event !!! ", event)
-// 파람의 유저풀네임 === 엑스트라 유저풀네임
-if (event.stream.isScreen && !event.stream.canvasStream) {
-    $('#screen-viewer').get(0).srcObject = event.stream;
-    $('#screen-viewer').hide();
-}
-else if (event.extra.roomOwner === true) { // 지금은 params.open으로 구분... 되게되있음 사용안하는 if문
-    console.log("check event !!! ", event.mediaElement)
-    event.mediaElement.controls = false;
-    meetingList.push(event);
-    // var otherVideos = document.querySelector('#other-videos');
-    // otherVideos.appendChild(event.mediaElement);
-} else {
-    if(event.mediaElement){
+    if (event.stream.isScreen && !event.stream.canvasStream) {
+        $('#screen-viewer').get(0).srcObject = event.stream;
+        $('#screen-viewer').hide();
+    }
+    else if (event.extra.roomOwner === true) { // 지금은 params.open으로 구분... 되게되있음 사용안하는 if문
+        //var video = document.getElementById('main-video');
+        //video.setAttribute('data-streamid', event.streamid);
+        //// video.style.display = 'none';
+        //if(event.type === 'local') {
+        //    video.muted = true;
+        //    video.volume = 0;
+        //}
+        //video.srcObject = event.stream;
+        //$('#main-video').show();
         event.mediaElement.controls = false;
-        meetingList.push(event);
-    }
-}
-// videoTotal 태그 html 변경
-$("#other-videos").html(newHtml);
 
-    // 추가된 div태그에 video 태그 4개씩 넣기
-    var j=3;
-    var newPageCount = 0;
-    for(var i=0; i<meetingList.length; i++){
-        var newClassName = '.other-videos'+''+newPageCount+'';
-            if(j==0){
-                j=3;
-                newPageCount++;
-            }
-        var otherVideos = document.querySelector(newClassName);
-
-        // 이름표
-        let div = document.createElement('div');
-        let p = document.createElement('p');
-        div.className = 'media-div'
-        p.className = 'user-info-label'
-        let temp = "["+event.extra.userInfo.user_dept+"] "+event.extra.userInfo.user_name +" "+event.extra.userInfo.user_grade;
-        p.innerHTML = `${temp}`
-        div.appendChild(meetingList[i].mediaElement);
-        div.appendChild(p);
-        otherVideos.appendChild(div);
-        j--;
+        var otherVideos = document.querySelector('#other-videos');
+        otherVideos.appendChild(event.mediaElement);
+    } else {
+        if(event.mediaElement){
+            event.mediaElement.controls = false;
+            let div = document.createElement('div');
+            let p = document.createElement('p');
+            div.className = 'media-div'
+            p.className = 'user-info-label'
+            let temp = "["+event.extra.userInfo.user_dept+"] "+event.extra.userInfo.user_name +" "+event.extra.userInfo.user_grade;
+            p.innerHTML = `${temp}`
+            div.appendChild(event.mediaElement);
+            div.appendChild(p);
+            var otherVideos = document.querySelector('#other-videos');
+            otherVideos.appendChild(div);
+        }
     }
-    inWebPaging(totalPeople, dataPerPage, pageCount, currentPage);
 
     connection.onUserStatusChanged(event); // 유저 이름 업데이트
-}
-
-function inMobile(event) {
-if(tempCount==0){   //4명이 채워질 때
-    tempCount=2;    //tempCount 원상복구
-    tempPageCount++;    // 총 페이지 수 ++
-    newHtml += '<div class=\"other-videos'+tempPageCount+'\"> </div>';
-    // 숫자를 붙인 div 태그 추가해주기
-}else {
-    tempCount--;
-}
-console.log("event !!! ", event)
-// 파람의 유저풀네임 === 엑스트라 유저풀네임
-if (event.stream.isScreen && !event.stream.canvasStream) {
-    $('#screen-viewer').get(0).srcObject = event.stream;
-    $('#screen-viewer').hide();
-}
-else if (event.extra.roomOwner === true) { // 지금은 params.open으로 구분... 되게되있음 사용안하는 if문
-    console.log("check event !!! ", event.mediaElement)
-    event.mediaElement.controls = false;
-    meetingList.push(event);
-    // var otherVideos = document.querySelector('#other-videos');
-    // otherVideos.appendChild(event.mediaElement);
-} else {
-    if(event.mediaElement){
-        event.mediaElement.controls = false;
-        meetingList.push(event);
-    }
-}
-// videoTotal 태그 html 변경
-$("#other-videos").html(newHtml);
-
-    // 추가된 div태그에 video 태그 4개씩 넣기
-    var j=1;
-    var newPageCount = 0;
-    for(var i=0; i<meetingList.length; i++){
-        var newClassName = '.other-videos'+''+newPageCount+'';
-            if(j==0){
-                j=1;
-                newPageCount++;
-            }
-        var otherVideos = document.querySelector(newClassName);
-
-        // 이름표
-        let div = document.createElement('div');
-        let p = document.createElement('p');
-        div.className = 'media-div'
-        p.className = 'user-info-label'
-        let temp = "["+event.extra.userInfo.user_dept+"] "+event.extra.userInfo.user_name +" "+event.extra.userInfo.user_grade;
-        p.innerHTML = `${temp}`
-        div.appendChild(meetingList[i].mediaElement);
-        div.appendChild(p);
-        otherVideos.appendChild(div);
-        j--;
-    }
-inMobilePaging(totalPeople, dataPerPage, pageCount, currentPage);
-
-connection.onUserStatusChanged(event); // 유저 이름 업데이트
-}
-
-// 페이지 넘기든 버튼 클릭 시
-function clickPage(flag){
-    if(flag=='next'){
-    currentPage+=1;
-    }else{
-    currentPage-=1;
-}
-
-if($(window).width() >768) {
-    inWebPaging(totalPeople, dataPerPage, pageCount, currentPage);
-}else
-    inMobilePaging(totalPeople, dataPerPage, pageCount, currentPage);
-}
-
-
-
-// 페이징
-function inWebPaging(totalPeople, dataPerPage, pageCount, currentPage){
-    
-    var totalPage = Math.ceil(totalPeople/dataPerPage);    // 총 페이지 수
-    console.log("totalPage>>>>>>>>>>>>>",totalPage);
-    var pageGroup = Math.ceil(currentPage/pageCount);    // 페이지 그룹
-
-    var htmlNext = "";
-    var htmlPrev = "";
-    var next = currentPage+1;
-    var prev = currentPage-1;
-
-    var $pingingView = $("#paging");
-    
-    console.log("prev>>>>>>>>>>>>>>",prev);
-
-    if(prev > 0){
-      console.log("prev가 0보다 크다!!!")
-      htmlPrev += "<img id='prev' src='../img/prev.png' alt='이전' onclick='clickPage(\"prev\")'/>";
-    //   "<button onclick='clickPage(\"prev\")' id='"+prev+"'><</button>"
-    }else{
-        htmlPrev += "<img id='prev' src='../img/prev_gray.png' alt='이전'/>";
-    }
-    
-    // html += "<a href='#' id=" + currentPage + ">" + currentPage + "</a> ";
-
-    if(currentPage < totalPage){
-      console.log("현재 페이지가 토탈보다 작다 !!!");
-      htmlNext += "<img id='next' src='../img/next.png' alt='다음' onclick='clickPage(\"next\")'/>";
-    //   htmlNext += "<button onclick='clickPage(\"next\")' id='"+next+"'>></button>";
-    }else{
-    htmlNext += "<img id='next' src='../img/next_gray.png' alt='다음'>";
-    }
-        
-    $("#paging-prev").html(htmlPrev);    // 페이지 목록 생성
-    $("#paging-next").html(htmlNext);    // 페이지 목록 생성
-
-    $("#paging-prev").css("visibility", "visible");
-    $("#paging-next").css("visibility", "visible");
-
-    // $("#paging a").css("color", "black");
-    // $("#paging a#" + currentPage).css({"text-decoration":"none", 
-    //                                        "color":"red", 
-    //                                        "font-weight":"bold"});    // 현재 페이지 표시
-
-    for(var i=1; i<=(meetingList.length/4)+1; i++){
-      var className = '.other-videos'+''+(i-1)+'';
-      console.log('className???',className);
-      if(i == currentPage){
-        console.log(currentPage,"   추가하세용");
-        $(className).css("display","block");
-      }else{
-        console.log(currentPage,"   삭제하세용");
-        $(className).css("display","none");
-    }
-}
-
-$("#paging a").click(function(){
-            
-    var $item = $(this);
-    var $id = $item.attr("id");
-    var selectedPage = $item.text();
-            
-    if($id == "next")    selectedPage = next;
-    if($id == "prev")    selectedPage = prev;
-            
-    paging(totalPeople, dataPerPage, pageCount, selectedPage);
-});
-                                           
-}
-
-function inMobilePaging(totalPeople, dataPerPage, pageCount, currentPage){
-    
-    var totalPage = Math.ceil(totalPeople/dataPerPage);    // 총 페이지 수
-    console.log("totalPage>>>>>>>>>>>>>",totalPage);
-    var pageGroup = Math.ceil(currentPage/pageCount);    // 페이지 그룹
-
-    var htmlNext = "";
-    var htmlPrev = "";
-    var next = currentPage+1;
-    var prev = currentPage-1;
-
-    var $pingingView = $("#paging");
-    
-    console.log("prev>>>>>>>>>>>>>>",prev);
-
-    if(prev > 0){
-      console.log("prev가 0보다 크다!!!")
-      htmlPrev += "<img id='prev' src='../img/prev.png' alt='이전' onclick='clickPage(\"prev\")'/>";
-    //   "<button onclick='clickPage(\"prev\")' id='"+prev+"'><</button>"
-    }else{
-        htmlPrev += "<img id='prev' src='../img/prev_gray.png' alt='이전'/>";
-    }
-    
-    // html += "<a href='#' id=" + currentPage + ">" + currentPage + "</a> ";
-    
-    console.log("currentPage??>>>>",currentPage,"totalPage>>>>",totalPage, "totalPeople>>>>", totalPeople);
-    if(currentPage < totalPage){
-      console.log("현재 페이지가 토탈보다 작다 !!!");
-      htmlNext += "<img id='next' src='../img/next.png' alt='다음' onclick='clickPage(\"next\")'/>";
-    //   htmlNext += "<button onclick='clickPage(\"next\")' id='"+next+"'>></button>";
-    }else{
-    htmlNext += "<img id='next' src='../img/next_gray.png' alt='다음'>";
-    }
-        
-    $("#paging-prev").html(htmlPrev);    // 페이지 목록 생성
-    $("#paging-next").html(htmlNext);    // 페이지 목록 생성
-
-    $("#paging-prev").css("visibility", "visible");
-    $("#paging-next").css("visibility", "visible");
-
-    // $("#paging a").css("color", "black");
-    // $("#paging a#" + currentPage).css({"text-decoration":"none", 
-    //                                        "color":"red", 
-    //                                        "font-weight":"bold"});    // 현재 페이지 표시
-    console.log("meetingList.length>>>",meetingList.length)
-    for(var i=1; i<=(meetingList.length/2)+1; i++){
-      var className = '.other-videos'+''+(i-1)+'';
-      console.log('className???',className);
-      if(i == currentPage){
-        console.log(currentPage,"   추가하세용");
-        $(className).css("display","block");
-      }else{
-        console.log(currentPage,"   삭제하세용");
-        $(className).css("display","none");
-    }
-}
-
-$("#paging a").click(function(){
-            
-    var $item = $(this);
-    var $id = $item.attr("id");
-    var selectedPage = $item.text();
-            
-    if($id == "next")    selectedPage = next;
-    if($id == "prev")    selectedPage = prev;
-            
-    paging(totalPeople, dataPerPage, pageCount, selectedPage);
-});
-                                           
-}
+};
 
 connection.onstreamended = function(event) {
     var video = document.querySelector('video[data-streamid="' + event.streamid + '"]');
@@ -2081,51 +1822,33 @@ $("#save-label").click(function () {
 </script>
 </body>
 <style type="text/css">
-    #other-videos {
-        float:left;
-        width: 80%;
-        margin-top: 5px;
-    }
-  /*    6명일때
-        /* width: 31%;
-        margin: 5px;
-        border: 1px solid black;
-        padding: 1px;
-        border-radius: 3px; */
-
-    #other-videos > div {
-        width: 100%;
-        height: 100%;
-        margin-right:0;
-    }
-
     .media-div{
-        float: left;
-        width: 48%;
-        height: 245px;
-        margin-left: 2%;
-        margin-bottom: 5%;
+        display: inline-block;
+        width: 45%;
+        height: 250px;
+        margin: 10px;
         /* border: 1px solid black; */
         padding: 1px;
         border-radius: 3px;
     }
-    .media-div  video{
-        width: 100%;
-        height: 100%;
-        margin-left: 3%;
-        margin-bottom: 1%;
+    .media-div video {
+        width: 90%;
+        height: 90%;
         /* border: 1px solid black; */
-        /* padding: 1px; */
-        border-radius: 3px;
+        padding: 1px;
+        position: relative;
+        left:50%;
+        transform: translateX(-50%);
     }
     .media-div p {
-        margin-left: 8%;
         width: 90%;
         height: 7%;
         text-align: center;
         /* border: 1px solid black; */
+        padding: 1px;
+        position: relative;
         left:50%;
-        /* transform: translateX(-50%); */
+        transform: translateX(-50%);
     }
     #uploaded-container{
         height: 450px;
@@ -2281,14 +2004,47 @@ $("#save-label").click(function () {
       width: calc(100vw - 300px);
     }
 
+    /* html { */
+  /* overscroll-behavior-y: none; */
+/* } */
+/* .body */
+/* .voracay{ */
+  /* position: absolute; */
+  /* top: 0px; */
+/*  */
+  /* Give them all the available space */
+  /* width: 100%; */
+  /* height: 100%; */
+/*  */
+  /* Remove the margins if any */
+  /* margin: 0; */
+/*  */
+  /* Allow them to scroll down the document */
+  /* overflow-y: hidden; */
+/* } */
+/* .body{ */
+  /* z-index: 1; */
+  /* overscroll-behavior-y: none; */
+/* } */
+/* .voracay{ */
+  /* z-index: 2; */
+/* } */
+    html
+    body {
+      overscroll-behavior-y: contain;
+    }
 
-    
+    .temp-stream-canvas{ 
+      touch-action: none;
+    }
     .voracay {
       height: 100vh;
       width: 100vw;
       overflow: hidden;
+      overflow-y: hidden;
       position: relative;
       background: rgb(0, 0, 0);
+      touch-action: none;
     }
     .meetingroom {
       background: rgb(0, 0, 0);
@@ -2584,6 +2340,27 @@ $("#save-label").click(function () {
         text-shadow: 1px 1px white;
     }
     
+    #other-videos {
+        margin-top: 5px;
+    }
+  /*    6명일때
+
+        /* width: 31%;
+        margin: 5px;
+        border: 1px solid black;
+        padding: 1px;
+        border-radius: 3px; */
+        
+        
+        /*#other-videos video {
+        width: 45%;
+        height: 250px;
+        margin: 10px;
+        /* border: 1px solid black; */
+        /*padding: 1px;
+        border-radius: 3px;
+      }*/
+    
     #txt-chat-message {
         width: 90%;
         /* resize:none;
@@ -2697,77 +2474,6 @@ $("#save-label").click(function () {
         height: 100%;
         z-index: 9999999999999;
         display: none;
-    }
-
-    .paging-button{
-        float: left;
-        width: 10%;
-        height: 100%;
-        padding-top: 21%;
-    }
-
-    #paging-next{
-        width:90%;
-        height:100%;
-    }
-
-    #paging-prev{
-        width:90%;
-        height:100%;
-    }
-
-    #next{
-        float:left;
-        width: 35px;
-        height: 35px;
-        margin-right: 70%;
-    }
-
-    #prev{
-        width: 35px;
-        height: 35px;
-        margin-left: 45%;
-        margin-right: 25%;
-
-    }
-    @media screen and (max-width: 768px) {
-        .paging-button{
-            height:5%;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            float:none;
-        }
-
-        .media-div{
-            float: left;
-            width: 100%;
-            height: 220px;
-            margin-left: 2%;
-            margin-bottom: 5%;
-            /* border: 1px solid black; */
-            padding: 1px;
-            border-radius: 3px;
-        }
-        .media-div  video{
-            width: 100%;
-            height: 100%;
-            margin-left: 3%;
-            margin-bottom: 1%;
-            /* border: 1px solid black; */
-            /* padding: 1px; */
-            border-radius: 3px;
-        }
-        .media-div p {
-            margin-left: 8%;
-            width: 90%;
-            height: 7%;
-            text-align: center;
-            font-size : 1rem;
-            /* border: 1px solid black; */
-            left:50%;
-            /* transform: translateX(-50%); */
-        }
     }
   </style>
 </html>
