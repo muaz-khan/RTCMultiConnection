@@ -69,7 +69,7 @@ input[disabled], button[disabled] {
     <div class="meetingroom">
       <div id="sidebar" class="sidebar">
         <video id="main-video"  playsinline autoplay></video>
-        <audio id="main-audio" controls playsinline autoplay></audio>
+        
         <!-- loadImage('./img/NAMU.png') -->
         <div class="btn-zip">
           <input type="radio" id="participant-btn" name="button"checked="checked" />
@@ -131,7 +131,10 @@ input[disabled], button[disabled] {
         </div>
             <div id="other-videos" ></div>
             <div id="isMemo">
-            <div id="widget-container" ></div>
+                <div id="widget-container" >
+                    <audio id="main-audio" controls playsinline autoplay></audio>
+                </div>
+                
             </div> 
       </div>
     </div>
@@ -570,8 +573,8 @@ function sendMediaClock(){
         let timerId = setTimeout(sendMediaClock, 500);
     }else{
         sendMediaSrc(tempAudioSrc,tempVideoSrc);
-        //tempAudioSrc = "";
-        //tempVideoSrc = "";
+        tempAudioSrc = "";
+        tempVideoSrc = "";
     }
 }
 function sendMediaSrc(sharedRecordAudio,sharedRecordVideo,callback){
@@ -1888,10 +1891,12 @@ $("#save-label").click(function () {
     /*widget-container  */
     #widget-container {
         position: fixed;
-        bottom: 0;
-        right: 0;
-        left: 20%;
-        height: 80%;
+        bottom: 85px;
+        /* left: 150px; */
+        left: 10%;
+        right: calc(300px + 10%);
+        height: calc(60%);
+        /* width:  calc(60%); */
         border: 1px solid black;
         border-top:0;
         border-bottom: 0;
@@ -2377,11 +2382,25 @@ $("#save-label").click(function () {
         height: 0;
     }
     #main-audio{
-        width: 100%;
+         width: 100%;
+        position: fixed;
+        bottom: 85px;
+        left:calc( 10% + 1px);
+        width:  calc(58%);
+      
         margin-top: -9px;
-        border-bottom: 1px solid #121010;
-        /*display: none;*/
-        padding-bottom: 1px;
+      
+        z-index: 3; 
+
+        /* width: 100%;
+        position: fixed;
+        bottom: 85px;
+        left:calc( 10% + 1px);
+        width:  calc(100% -50px);
+        
+        margin-top: -9px;
+      
+        z-index: 3; */
     }
     hr {
         height: 1px;
