@@ -312,31 +312,6 @@ function audioHandler(e) {
     }
   }
 
-function syncMediaControls(string, param){
-    if ('play'=== string) {
-        connection.send({
-            type:"syncMediaControls",
-            sharedVideo: 'plz-media-play',
-        });
-    }else if ('pause' === string) {
-        connection.send({
-            type:"syncMediaControls",
-            sharedVideo: 'plz-media-pause',
-        });
-    }else if('seeked' === string){
-        connection.send({
-            type:"syncMediaControls",
-            sharedVideo: 'plz-media-seeked',
-            currentTime: param,
-        });
-    }else if('timeupdate' === string){
-        connection.send({ // 추가 구현
-            type:"syncMediaControls",
-            sharedVideo: 'plz-media-timeupdate',
-            timeupdate: param,
-        });
-      }
-}
 
 
 function mainVideoControlShow(id,callback){
@@ -598,8 +573,8 @@ function sendMediaClock(){
         let timerId = setTimeout(sendMediaClock, 500);
     }else{
         sendMediaSrc(tempAudioSrc,tempVideoSrc);
-        //tempAudioSrc = "";
-        //tempVideoSrc = "";
+        tempAudioSrc = "";
+        tempVideoSrc = "";
     }
 }
 function sendMediaSrc(sharedRecordAudio,sharedRecordVideo,callback){
@@ -739,6 +714,9 @@ function getMidiasFromDB(title){
     });
 }
 function shareMyMedia(recordVideoFromData2,recordAudioFormData2){ // 저장된 정보로 share하는 함수
+    toShareCnt = connection.getAllParticipants().length;
+    receiveCnt = 0;
+    console.log("toShareCnt ", toShareCnt)
     finishShareMidia = false;
     clearCanvas(); // 적던것 지우고 시작
     clearMedia();
@@ -913,6 +891,11 @@ function getUsersByID(id){
     $.ajax({
         type: "GET",
         url: 'https://k3d106.p.ssafy.io/api/v2/users/'+params.userFullName,
+        // token헤더에 넣는 방식으로 바꿀것. 토큰은 session이든 로컬스토리지를 통해 가져올것
+        //beforeSend: function (xhr) {
+        //    xhr.setRequestHeader("Content-type","application/json");
+        //    xhr.setRequestHeader("Authorization","JWT " + token);
+        //},
         success: function (html) {},
         error: function (error) {},
     }).done(function(data) {
@@ -1042,6 +1025,8 @@ connection.onclose = connection.onerror = connection.onleave = function(event) {
 };
 
 function syncMediaControls(string, param){
+    console.log("can control shared media? ", isShareMyMedia)
+    if(!isShareMyMedia) return;
     if ('play'=== string) {
         connection.send({
             type:"syncMediaControls",
@@ -1066,12 +1051,11 @@ function syncMediaControls(string, param){
         });
       }
 }
-
-
+let toShareCnt = -1;
+let receiveCnt = -1;
 connection.onmessage = function(event) {
     //console.log("메시지 받았다!!",event.data)
     if("syncMediaControls" === event.data.type){
-        if(isShareMyMedia) return;
         if('plz-media-play'===event.data.mediaControls){
             audio.play();
         }else if('plz-media-pause'===event.data.mediaControls){
@@ -1098,12 +1082,17 @@ connection.onmessage = function(event) {
     if(event.data.receive_success){
         if(event.data.target_id === connection.userid){
             if(!event.data.need_time_sync){
-                alert("미디어 공유가 완료되었습니다.")
-                finishShareMidia = true;
-                console.log("isShareMyMedia",isShareMyMedia)
-                initIntaval();
-                if(isShareMyMedia){
-                    loadDuration();
+                receiveCnt++;
+                if(receiveCnt == toShareCnt || toShareCnt != connection.getAllParticipants().length){
+                    toShareCnt = -1;
+                    receiveCnt = -1;
+                    alert("미디어 공유가 완료되었습니다.")
+                    finishShareMidia = true;
+                    console.log("isShareMyMedia",isShareMyMedia)
+                    initIntaval();
+                    if(isShareMyMedia){
+                        loadDuration();
+                    }
                 }
             }else{
                 initIntaval();
@@ -1336,10 +1325,19 @@ connection.onstream = function(event) {
         var otherVideos = document.querySelector('#other-videos');
         otherVideos.appendChild(event.mediaElement);
     } else {
-        event.mediaElement.controls = false;
-
-        var otherVideos = document.querySelector('#other-videos');
-        otherVideos.appendChild(event.mediaElement);
+        if(event.mediaElement){
+            event.mediaElement.controls = false;
+            let div = document.createElement('div');
+            let p = document.createElement('p');
+            div.className = 'media-div'
+            p.className = 'user-info-label'
+            let temp = "["+event.extra.userInfo.user_dept+"] "+event.extra.userInfo.user_name +" "+event.extra.userInfo.user_grade;
+            p.innerHTML = `${temp}`
+            div.appendChild(event.mediaElement);
+            div.appendChild(p);
+            var otherVideos = document.querySelector('#other-videos');
+            otherVideos.appendChild(div);
+        }
     }
 
     connection.onUserStatusChanged(event); // 유저 이름 업데이트
@@ -1822,6 +1820,58 @@ $("#save-label").click(function () {
 </script>
 </body>
 <style type="text/css">
+    .media-div{
+        display: inline-block;
+        width: 45%;
+        height: 250px;
+        margin: 10px;
+        /* border: 1px solid black; */
+        padding: 1px;
+        border-radius: 3px;
+    }
+    .media-div video {
+        width: 90%;
+        height: 90%;
+        /* border: 1px solid black; */
+        padding: 1px;
+        position: relative;
+        left:50%;
+        transform: translateX(-50%);
+    }
+    .media-div p {
+        width: 90%;
+        height: 7%;
+        text-align: center;
+        /* border: 1px solid black; */
+        padding: 1px;
+        position: relative;
+        left:50%;
+        transform: translateX(-50%);
+    }
+    #uploaded-container{
+        height: 450px;
+        overflow-y: hidden;
+        overflow-x: hidden;
+        margin-right: 20px;
+        margin-left: 10px;
+    }
+    #uploaded-list {
+        text-align: left;
+        max-height: 80%;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        border-top: 2px solid #a9b2e6;
+        width: 110%;
+        font-size: 15px
+    }
+    #saveboxact{
+      margin-left: 2px;
+      background: #cc24a2;
+      width: 100%;
+      left: 20px;
+      height: 100%;
+      overflow: hidden;
+    }
 
 
     /* containerA */
@@ -1850,31 +1900,6 @@ $("#save-label").click(function () {
         border: 1px solid black;
         border-top:0;
         border-bottom: 0;
-    }
-    /* 보관함 */
-    #uploaded-container{
-        height: 450px;
-        overflow-y: hidden;
-        overflow-x: hidden;
-        margin-right: 20px;
-        margin-left: 10px;
-    }
-    #uploaded-list {
-        text-align: left;
-        max-height: 80%;
-        overflow-x: hidden;
-        overflow-y: scroll;
-        border-top: 2px solid #a9b2e6;
-        width: 110%;
-        font-size: 15px
-    }
-    #saveboxact{
-      margin-left: 2px;
-      background: #cc24a2;
-      width: 100%;
-      left: 20px;
-      height: 100%;
-      overflow: hidden;
     }
     /* chat */
     .onUserStatusChanged {
@@ -2032,8 +2057,8 @@ $("#save-label").click(function () {
       transform: translate(-50%, 0%);
       /* background: rgba(107, 83, 136, 0.87); */
       width: 100%;
-      height: 30px;
-      padding: 5px 20px;
+      /*height: 30px;*/
+      /*padding: 5px 20px;*/
       /* 가운데 정렬 */
       margin: 0 auto 50px auto;
     }
@@ -2290,14 +2315,16 @@ $("#save-label").click(function () {
         border: 1px solid black;
         padding: 1px;
         border-radius: 3px; */
-        #other-videos video {
+        
+        
+        /*#other-videos video {
         width: 45%;
         height: 250px;
         margin: 10px;
         /* border: 1px solid black; */
-        padding: 1px;
+        /*padding: 1px;
         border-radius: 3px;
-      }
+      }*/
     
     #txt-chat-message {
         width: 90%;
