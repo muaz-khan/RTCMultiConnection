@@ -226,14 +226,14 @@ function CanvasDesigner() {
         });
     };
     // 추가한 코드
-    designer.backgroundVideo = function(srcObj){
-        console.log("srcObj : ", srcObj)
+    designer.backgroundVideo = function(id){
+        //console.log("id : ", id)
         if (!designer.iframe) return;
         //console.log("canvas-designer-widget param!! : ",idData)
         // console.log("canvas-widget.js첨부된 비디오",video);
         designer.postMessage({
             backgroundVideo: true,
-            srcObj : srcObj,
+            streamId : id,
         });
     }
     designer.backgroundWhite = function(){
