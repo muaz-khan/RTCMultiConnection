@@ -1802,12 +1802,12 @@ function gotDevices(deviceInfos){
     const deviceInfo = deviceInfos[i];
     const option = document.createElement('option');
     option.value = deviceInfo.deviceId;
-    // if (deviceInfo.kind === 'videoinput') {
+    if (deviceInfo.kind === 'videoinput') {
       option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
       videoSelect.appendChild(option);
-    // } else {
-    //   console.log('Some other kind of source/device: ', deviceInfo);
-    // }
+    } else {
+      console.log('Some other kind of source/device: ', deviceInfo);
+    }
   }
   selectors.forEach((select, selectorIndex) => {
     if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
@@ -1847,16 +1847,16 @@ function changeCamera() {
     console.error('Error happens:', err);
   });
 
-  if (window.stream) {
-    window.stream.getTracks().forEach(track => {
-      track.stop();
-    });
-  }
+//   if (window.stream) {
+//     window.stream.getTracks().forEach(track => {
+//       track.stop();
+//     });
+//   }
   
-  const constraints = {
-    video: {deviceId: videoSource ? {exact: videoSource} : undefined}
-  };
-  navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
+//   const constraints = {
+//     video: {deviceId: videoSource ? {exact: videoSource} : undefined}
+//   };
+//   navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
 }
 
 videoSelect.onchange = changeCamera;
