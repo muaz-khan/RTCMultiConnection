@@ -1825,14 +1825,34 @@ function gotStream(stream) {
 }
 
 function changeCamera() {
-  
+    const videoSource = videoSelect.value;
+    
+    navigator.mediaDevices
+  .getUserMedia({
+    video:{deviceId: videoSource ? {exact: videoSource} : undefined}
+  })
+  .then(function(stream) {
+    let PCs = connection.peers;
+    if (!PCs.getSenders) return;
+    let videoTrack = stream.getVideoTracks()[0];
+    PCs.forEach(function(pc) {
+      var sender = pc.getSenders().find(function(s) {
+        return s.track.kind == videoTrack.kind;
+      });
+      console.log('found sender:', sender);
+      sender.replaceTrack(videoTrack);
+    });
+  })
+  .catch(function(err) {
+    console.error('Error happens:', err);
+  });
 
   if (window.stream) {
     window.stream.getTracks().forEach(track => {
       track.stop();
     });
   }
-  const videoSource = videoSelect.value;
+  
   const constraints = {
     video: {deviceId: videoSource ? {exact: videoSource} : undefined}
   };
