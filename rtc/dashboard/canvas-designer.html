@@ -551,6 +551,18 @@ function syncSharedMedia(recordAudioFormData,recordVideoFormData){
     designer.backgroundVideo();
 
 }
+function makeShareMediaSrc2(recordVideoFormData2){
+    var videoReader = new FileReader();
+
+    videoReader.onloadend = function() {
+        video.src = videoReader.result;
+        video.controls = true;
+        $('#main-video').show()    
+        console.log("tempVideoSrc",tempVideoSrc)     
+    }
+    videoReader.readAsDataURL(recordVideoFormData2);
+    //sendMediaClock2();
+}
 function makeShareMediaSrc(recordVideoFormData2,recordAudioFormData2){
     var videoReader = new FileReader();
     var audioReader = new FileReader();
@@ -570,6 +582,14 @@ function makeShareMediaSrc(recordVideoFormData2,recordAudioFormData2){
 function initIntaval(){ // 문제 될수있을듯
     connection.chunkInterval = 0;
 }
+function sendMediaClock2(){
+    if(!tempVideoSrc){
+        let timerId = setTimeout(sendMediaClock2, 500);
+    }else{
+        sendMediaSrc2(tempVideoSrc);
+        tempVideoSrc = "";
+    }
+}
 function sendMediaClock(){
     if(!tempAudioSrc || !tempVideoSrc){
         let timerId = setTimeout(sendMediaClock, 500);
@@ -579,7 +599,38 @@ function sendMediaClock(){
         tempVideoSrc = "";
     }
 }
+function sendMediaSrc2(sharedRecordVideo,callback){
+    console.log("sendMediaSrc2 !!!!! ", sharedRecordVideo)
+    connection.chunkInterval = 0.00000000001;
+    video.src = sharedRecordVideo
+    video.pause();
+    if(connection.getAllParticipants().length >= 1){        
+        connection.send({
+            type:"sendMedia",
+            sharedVideo: 'plz-get-shared-video',
+            sharedRecordAudio : sharedRecordAudio,
+            sharedRecordVideo : sharedRecordVideo,
+            checkmark_id : connection.userid,
+            requestId : connection.extra.userFullName
+        });
+    }else{
+        alert("저장된 미디어를 불러오고있습니다.")
+        finishShareMidia = true;
+        initIntaval();
+        setTimeout(loadDuration2,500)
+        return;
+    }
+    //audio.src = sharedRecordAudio
+    //video.src = sharedRecordVideo
+    
+    //$('#main-video').show();
+    //audio.style.display = '';
+    //designer.backgroundVideo();
+    //video.pause();
+    //audio.pause();
+}
 function sendMediaSrc(sharedRecordAudio,sharedRecordVideo,callback){
+    console.log("sendMediaSrc!!!!" ,sharedRecordVideo)
     connection.chunkInterval = 0.00000000001;
     audio.src = sharedRecordAudio
     video.src = sharedRecordVideo
@@ -698,6 +749,7 @@ function getMidiasFromDB(title){
     $.ajax({
         type: "GET",
         url: 'https://k3d106.p.ssafy.io/api/v2/media/'+params.userFullName+"/"+title,
+        //url: 'https://k3d106.p.ssafy.io/api/v2/test/5/moblie',
         success: function (html) {
 
         },
@@ -708,12 +760,23 @@ function getMidiasFromDB(title){
         console.log(data)
         if("success" === data.message){
             shareMyMedia(b64toBlob(data.video,"video/mp4",512),b64toBlob(data.audio,"audio/webm;codecs=opus",512)) // 디코딩
+            //shareMyMedia2(b64toBlob(data.video,"video/mp4",512)) // 디코딩
             isShareMyVideo = false;
             isShareVideo = false;
             isMediaSharing = true;
             isShareMyMedia = true;
         }
     });
+}
+// 모바일
+function shareMyMedia2(recordVideoFromData2){ // 저장된 정보로 share하는 함수
+    toShareCnt = connection.getAllParticipants().length;
+    receiveCnt = 0;
+    console.log("toShareCnt ", toShareCnt)
+    finishShareMidia = false;
+    clearCanvas(); // 적던것 지우고 시작
+    clearMedia();
+    makeShareMediaSrc2(recordVideoFromData2);
 }
 function shareMyMedia(recordVideoFromData2,recordAudioFormData2){ // 저장된 정보로 share하는 함수
     toShareCnt = connection.getAllParticipants().length;
@@ -740,6 +803,11 @@ function startAudioRecord(){
     connection.recorder = recorder;
     console.log("RECORDER START! ",recorder);
     recorder.startRecording();
+}
+async function loadDuration2(){
+    video.controls = false;
+    designer.backgroundVideo();
+    video.play();
 }
 async function loadDuration(){
     while(audio.duration === Infinity) {
@@ -2413,8 +2481,8 @@ $("#save-label").click(function () {
     
     #main-video {
         display: block;
-        width:0;
-        height: 0;
+        width:0px;
+        height: 0px;
     }
     #main-audio{
          width: 100%;
