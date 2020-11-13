@@ -90,6 +90,9 @@ input[disabled], button[disabled] {
           >
           
         </div>
+        <div class="select">
+            <label for="videoSource">Video source: </label><select id="videoSource"></select>
+        </div>
         <div class="chosed-box">
            <div id="participant-boxid" >
                 <div id="participantboxact" class="participant-box ">
@@ -144,6 +147,13 @@ input[disabled], button[disabled] {
     <div class="plus-box"></div>
     <div class="meeting-bottom">
       <div class="bottom-btn-box">
+        <div id="camera-selector" class="btn btn-dark">
+            <i class="active">
+                <img class="oncam" src="../img/cam2.png" alt="전면" width="40" height="40" />
+                <img class="offcam" src="../img/cam1.png" alt="후면" width="40" height="40" />
+            </i>
+            <p class="arrow_box">카메라 선택</p>
+        </div>
         <div id="onoff-cam" class="onoff-cam circle-btn">
           <i class="active">
               <img class="oncam" src="../img/cam2.png" alt="캠" width="40" height="40" />
@@ -1769,6 +1779,71 @@ function replaceScreenTrack(stream) {
         });
     $('#screen-viewer').show();
 }
+
+// 카메라 목록 테스트
+
+const videoSelect = document.querySelector('select#videoSource');
+
+function handleError(error) {
+  console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
+}
+
+function gotDevices(deviceInfos){
+      // Handles being called several times to update labels. Preserve values.
+  const selectors = [videoSelect];
+  const values = selectors.map(select => select.value);
+  selectors.forEach(select => {
+    while (select.firstChild) {
+      select.removeChild(select.firstChild);
+    }
+  });
+  for (let i = 0; i !== deviceInfos.length; ++i) {
+    const cameras = $("#camera-selector");
+    const deviceInfo = deviceInfos[i];
+    const option = document.createElement('option');
+    option.value = deviceInfo.deviceId;
+    // if (deviceInfo.kind === 'videoinput') {
+      option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
+      videoSelect.appendChild(option);
+    // } else {
+    //   console.log('Some other kind of source/device: ', deviceInfo);
+    // }
+  }
+  selectors.forEach((select, selectorIndex) => {
+    if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
+      select.value = values[selectorIndex];
+    }
+  });
+}
+
+function gotStream(stream) {
+  const videoElement = document.querySelector('video');
+  window.stream = stream; // make stream available to console
+  videoElement.srcObject = stream;
+  // Refresh button list in case labels have become available
+  return navigator.mediaDevices.enumerateDevices();
+}
+
+function changeCamera() {
+  
+
+  if (window.stream) {
+    window.stream.getTracks().forEach(track => {
+      track.stop();
+    });
+  }
+  const videoSource = videoSelect.value;
+  const constraints = {
+    video: {deviceId: videoSource ? {exact: videoSource} : undefined}
+  };
+  navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
+}
+
+videoSelect.onchange = changeCamera;
+
+navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
+
+////////////////
 
 //    button func
 // 캠 끄기
