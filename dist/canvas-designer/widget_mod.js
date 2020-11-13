@@ -3753,14 +3753,13 @@ function getRecordVideoFormData() {
         }
         if (event.data.backgroundVideo) {
           isVideoBackGround = true;
-          console.log("widget video stream id ", event.data.streamId)
-          if(!event.data.srcObj){
+          if(!event.data.streamId){
             test.findParentDocument(event.data.id);
             let video = window.parent.document.getElementById("main-video");
-            console.log("video 가져올수있나?",video)
             test.drawVideoToCanvas(video, context, context.canvas.width, context.canvas.height);
           }else{
-
+            //console.log("widget video stream id ", window.parent.makeStreamByStreamID(event.data.streamId))
+            //test.drawVideoToCanvas(video, context, context.canvas.width, context.canvas.height);
           }
         }
         if (event.data.removeMainVideo) {
