@@ -94,7 +94,7 @@ input[disabled], button[disabled] {
                   <div id="onUserStatusChanged"></div> 
                 </div>
           </div>
-          <div id="chat-boxid" >
+          <div id="chat-boxid" class="active">
             <div id="chatboxact" class="chat-box active">
                 <div id="chat-send" >
                     <textarea id="txt-chat-message"></textarea>
@@ -112,9 +112,11 @@ input[disabled], button[disabled] {
            
           </div><!--chat-boxid -->
           <!-- 보관함 -->
-          <div id="save-boxid">
+          <div id="save-boxid"class="active">
             <div id="saveboxact" class="save-box active">
-
+                <div id="uploaded-container">
+                    <div id="uploaded-list"></div>
+                </div>
             </div>
           </div>
         </div>
@@ -127,7 +129,7 @@ input[disabled], button[disabled] {
         </div>
             <div id="other-videos" ></div>
             <div id="isMemo">
-            <div id="widget-container" style="position: fixed;bottom: 0;right: 0;left: 20%;height: 80%;border: 1px solid black; border-top:0; border-bottom: 0;"></div>
+            <div id="widget-container" ></div>
             </div> 
       </div>
     </div>
@@ -157,21 +159,48 @@ input[disabled], button[disabled] {
             </i>
             <p class="arrow_box">초대 링크</p>
         </div>
-
-    
-        <button class="btn btn-primary" id="btn-memo-message" disabled>Conference</button>
-        <div id="onoff-list1" class="onoff-5 circle-btn">
+        <div id="share-screen" class="circle-btn">
+            <i>
+                <img id="btn-share-my-camera" src="../img/Screensharing.png" alt="Screensharing" width="50" height="40" />
+            </i>
+            <p class="arrow_box">Screen Sharing</p>
+        </div>
+        <div id="share-board" class="circle-btn">
+            <i>
+                <img id="btn-white-board" src="../img/boardshare.png" alt="boardsharing" width="50" height="60" />
+            </i>
+            <p class="arrow_box">Board Sharing</p>
+        </div>
+        <!-- <div id="onoff-list1" class="circle-btn">
             <button class="btn btn-primary"id="btn-white-board">WhiteBoard</button>
+        </div> -->
+        
+        <div id="record" class="circle-btn">
+            <i>
+                <img id="btn-record-message" src="../img/recoff.png" alt="Record" width="40" height="40" />
+            </i>
+            <p class="arrow_box">Record</p>
+            
         </div>
-        <div id="onoff-list2" class="onoff-5 circle-btn">
-            <button class="btn btn-primary"id="btn-share-my-camera">ShareMyCamera</button>
+
+        <div id="conference" class="circle-btn">
+            <i class="active">
+                <img id="btn-memo-message" src="../img/conference.png" alt="공유정지" width="40" height="35" />
+            </i>
+            <p class="arrow_box">회의화면</p>
+            
         </div>
-        <div id="onoff-caption" class="onoff-caption circle-btn">
-            <button class="btn btn-primary" id="btn-record-message">Record</button>
+        <div id="clear" class="circle-btn">
+            <i>
+                <img id="btn-clear-message" src="../img/clean.png" alt="전체삭제" width="50" height="70" />
+            </i>
+            <p class="arrow_box">clear</p>
+            
         </div>
-        <div id="onoff-reg" class="onoff-5 circle-btn">
+
+        <!-- <div id="onoff-reg" class="circle-btn">
             <button class="btn btn-primary" id="btn-clear-message">clear</button>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -619,8 +648,8 @@ function selectAllMedia(){
             }
             tbody.innerHTML = temp;
             table.appendChild(tbody);
-            $("#saveboxact").empty();
-            document.getElementById("saveboxact").appendChild(table)
+            $("#uploaded-list").empty();
+            document.getElementById("uploaded-list").appendChild(table)
         }
         // 여기서 테이블 만들기
     });
@@ -752,9 +781,9 @@ function changeShareMyCamera(flag){
     }
 }
 $('#btn-share-my-camera').click(function(){
-    isShareMyVideo = !isShareMyVideo;
+    isShareMyVideo = !isShareMyVideo;//true false 확인?
     if(isShareMyVideo && !btn_memo_flag){
-        btn_memo_flag = true
+        btn_memo_flag = true //그림판
         changeMemoBtn(true)
         connection.send('plz-memo-to-true') 
     }
@@ -1592,12 +1621,15 @@ $("#participant-label").click(function () {
     saveactiveis = $("#saveboxact").hasClass("active");
     if (participantactiveis) {
         $("#participantboxact").removeClass("active");
+        $("#participant-boxid").removeClass("active");
     }
     if (!chatactiveis) {
         $("#chatboxact").addClass("active");
+        $("#chat-boxid").addClass("active");
     }
     if (!saveactiveis) {
         $("#saveboxact").addClass("active");
+        $("#save-boxid").addClass("active");
     }
 });
 // 채팅 sidebar 클릭시
@@ -1609,12 +1641,15 @@ $("#chat-label").click(function () {
     saveactiveis = $("#saveboxact").hasClass("active");
     if (!participantactiveis) {
         $("#participantboxact").addClass("active");
+        $("#participant-boxid").addClass("active");
     }
     if (chatactiveis) {
         $("#chatboxact").removeClass("active");
+        $("#chat-boxid").removeClass("active");
     }
     if (!saveactiveis) {
         $("#saveboxact").addClass("active");
+        $("#save-boxid").addClass("active");
     }
 });
 // 보관함 sidebar 클릭시
@@ -1625,12 +1660,15 @@ $("#save-label").click(function () {
     saveactiveis = $("#saveboxact").hasClass("active");
     if (!participantactiveis) {
         $("#participantboxact").addClass("active");
+        $("#participant-boxid").addClass("active");
     }
     if (!chatactiveis) {
         $("#chatboxact").addClass("active");
+        $("#chat-boxid").addClass("active");
     }
     if (saveactiveis) {
         $("#saveboxact").removeClass("active");
+        $("#save-boxid").removeClass("active");
     }
     selectAllMedia();
 });
@@ -1650,18 +1688,29 @@ $("#save-label").click(function () {
 
     /* containerA */
     #containerA{
-        background: rgb(3, 215, 253);
+        background: rgb(0, 0, 0);
         width: 80%;
         height: calc(100% - 120px);
         position: absolute; 
         left: 0;
     }
+    
     /* caption */
 
     #containerA div.activecaption {
       display: none;
     }
-
+    /*widget-container  */
+    #widget-container {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        left: 20%;
+        height: 80%;
+        border: 1px solid black;
+        border-top:0;
+        border-bottom: 0;
+    }
     /* chat */
     .onUserStatusChanged {
       padding: 5px 10px;
@@ -1683,7 +1732,7 @@ $("#save-label").click(function () {
     /* side menu */
 
     #chat-boxid {
-        height: auto;
+        height: calc(100%);
         /* padding: 0 15px; */
     }
     #save-boxid{
@@ -1700,7 +1749,7 @@ $("#save-label").click(function () {
       background: #101742;
       width: 100%;
       left: 20px;
-      height: 100%;
+      height: calc(100%);
       overflow: hidden;
     }
     #chat-send{
@@ -1716,6 +1765,11 @@ $("#save-label").click(function () {
     #participant-boxid div.active {
       display: none;
     }
+    /* savebox css */
+    .table{
+        height:100%
+    }
+    
     /* button */
     .circle-btn i.active {
       background: rgb(41 58 151);
@@ -1761,15 +1815,14 @@ $("#save-label").click(function () {
 
     
     .voracay {
-      font-family: "Jua", sans-serif;
       height: 100vh;
       width: 100vw;
       overflow: hidden;
       position: relative;
-      background: rgb(253, 3, 3);
+      background: rgb(0, 0, 0);
     }
     .meetingroom {
-      background: rgb(253, 195, 3);
+      background: rgb(0, 0, 0);
       height: calc(100% - 80px);
       top: 0;
       left: 0;
@@ -1820,7 +1873,7 @@ $("#save-label").click(function () {
       margin: 0 auto 50px auto;
     }
     .captionBox p {
-      background: rgba(107, 83, 136, 0.87);
+      background: rgba(41, 62, 248, 0.87);
       color: white;
       word-wrap: break-word;
       word-break: break-all;
@@ -1834,14 +1887,13 @@ $("#save-label").click(function () {
     }
 
     .sidebar {
-      font-family: "Jua", sans-serif;
       height: calc(100% - 80px);
       width: 300px;
       position: fixed;
-      z-index: 3;
+      z-index: 1;
       top: 0;
       right: 0;
-      background: rgb(72, 255, 0);
+      background: rgb(255, 0, 0);
       /* opacity: 0.9; */
       overflow: hidden;
     }
@@ -1866,7 +1918,6 @@ $("#save-label").click(function () {
     }
 
     .btn-zip {
-      font-family: "Jua", sans-serif;
       display: grid;
       grid-template-columns: 1fr 1fr 1fr ;
       text-align: center;
@@ -1883,8 +1934,6 @@ $("#save-label").click(function () {
       display: inline-block;
       background-color: rgb(169, 178, 230);;
       padding: 10px;
-      font-family: "Jua", sans-serif;
-      font-family: "Noto Sans KR", sans-serif;
       font-size: 16px;
       /* border: 2px solid #444; */
       border-radius: 10px 10px 0 0;
@@ -1933,8 +1982,11 @@ $("#save-label").click(function () {
 
     .chosed-box {
       width: 100%;
-      height: 100%;
-      background: #101742;
+      height: calc(100% - 50px);
+      background: rgb(41 58 151);
+    }
+    .chosed-box div.active {
+      display: none;
     }
     .plus-box {
       width: 100%;
@@ -2102,7 +2154,7 @@ $("#save-label").click(function () {
         padding-right: 0px;
     }
     #chat-container{
-        height: 450px;
+        height:  calc(100%);
         overflow-y: hidden;
         overflow-x: hidden;
         margin-right: 20px;
@@ -2112,7 +2164,7 @@ $("#save-label").click(function () {
         /* margin-bottom: 20px; */
         text-align: left;
         /* max-height: 180px; */
-        max-height: 80%;
+        height:  calc(80%);
         overflow-x: hidden;
         overflow-y: scroll;
         border-top: 2px solid #a9b2e6;
