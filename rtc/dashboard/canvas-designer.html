@@ -1476,14 +1476,6 @@ connection.onstream = function(event) {
 let otherStreamID;
 function inWeb(event) {
 
-    // if(tempCount==0){   //4명이 채워질 때
-    //     tempCount=4;    //tempCount 원상복구
-    //     tempPageCount++;    // 총 페이지 수 ++
-    //     newHtml += '<div class=\"other-videos'+tempPageCount+'\"> </div>';
-    //     // 숫자를 붙인 div 태그 추가해주기
-    // }else {
-    //     tempCount--; 
-    // }
     console.log("event !!! ", event)
     // 파람의 유저풀네임 === 엑스트라 유저풀네임
     if(params.userFullName == event.extra.userFullName){
@@ -1594,7 +1586,7 @@ function inMobileChange(){
     newHtml = '<div class=\"other-videos'+0+'\"> </div>';
     for(var i=0; i<meetingList.length; i++){
         if(tempCount==0){   //4명이 채워질 때
-            tempCount=2;    //tempCount 원상복구
+            tempCount=1;    //tempCount 원상복구
             tempPageCount++;    // 총 페이지 수 ++
             newPageCount++;
             newHtml += '<div class=\"other-videos'+newPageCount+'\"> </div>';
@@ -1608,18 +1600,16 @@ function inMobileChange(){
     $("#other-videos").html(newHtml);
 
     // 추가된 div태그에 video 태그 4개씩 넣기
-    var j=1;
+    var j=2;
     var newPageCount = 0;
     for(var i=0; i<meetingList.length; i++){
-        var newClassName = '.other-videos'+''+newPageCount+'';
         if(j==0){
-            j=1;
+            j=2;
             newPageCount++;
-        }else{
-            j--;
         }
+        var newClassName = '.other-videos'+''+newPageCount+'';
         var otherVideos = document.querySelector(newClassName);
-
+        console.log("j>>>",j,"newClassName>>>",newClassName);
          // 이름표
         let div = document.createElement('div');
         let p = document.createElement('p');
@@ -1630,6 +1620,7 @@ function inMobileChange(){
         div.appendChild(meetingList[i].mediaElement);
         div.appendChild(p);
         otherVideos.appendChild(div);
+        j--;
     }
     inMobilePaging(totalPeople, dataPerPage, pageCount, currentPage);
 }
