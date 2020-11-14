@@ -1713,10 +1713,12 @@ function replaceTrack(videoTrack, screenTrackId) {
         return;
     }
     connection.getAllParticipants().forEach(function(pid) {
+        console.log("PID ", pid)
         var peer = connection.peers[pid].peer;
         if (!peer.getSenders) return;
         var trackToReplace = videoTrack;
         peer.getSenders().forEach(function(sender) {
+            console.log("sender ! ", sender)
             if (!sender || !sender.track) return;
             if(screenTrackId) {
                 if(trackToReplace && sender.track.id === screenTrackId) {
@@ -1822,7 +1824,6 @@ function gotStream(stream) {
   // Refresh button list in case labels have become available
   return navigator.mediaDevices.enumerateDevices();
 }
-
 function changeCamera() {
     const videoSource = videoSelect.value;
     navigator.mediaDevices
@@ -1830,9 +1831,16 @@ function changeCamera() {
     video:{deviceId: videoSource ? {exact: videoSource} : undefined}
   })
   .then(function(stream) {
-      console.log(stream);
       let videoTrack = stream.getVideoTracks()[0];
+      console.log(stream);
       console.log(videoTrack)
+      let myVideo = document.querySelector(`#${myStreamID}`);
+      let myVideoStream = myVideo.srcObject;
+      //myVideo.srcObject.addTrack(videoTrack);
+      myVideoStream.removeTrack(myVideo.srcObject.getVideoTracks()[0])
+      myVideoStream.addTrack(videoTrack)
+      myVideo.srcObject = null;
+      myVideo.srcObject = myVideoStream;
       replaceTrack(videoTrack, false);
     // let PCs = connection.peers;
     // if (!PCs.getSenders) return;
