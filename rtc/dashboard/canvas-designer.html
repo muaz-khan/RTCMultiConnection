@@ -208,7 +208,12 @@ input[disabled], button[disabled] {
                 <img id="btn-clear-message" src="../img/clean.png" alt="전체삭제" width="50" height="70" />
             </i>
             <p class="arrow_box">clear</p>
-            
+        </div>
+        <div id="test" class="circle-btn">
+            <i>
+                <img id="btn-clear-message" src="../img/clean.png" alt="전체삭제" width="50" height="70" />
+            </i>
+            <p class="arrow_box">test</p>
         </div>
 
         <!-- <div id="onoff-reg" class="circle-btn">
@@ -232,14 +237,14 @@ input[disabled], button[disabled] {
               </button>
             </div>
             <div class="modal-body">
-              <form>
+              <div>
                 <div class="form-group">
                   <p>
                     <label for="txt-media-title" class="col-form-label">영상 제목:</label>
                     <input type="text" class="form-control" id="txt-media-title">
                   </p>
                 </div>
-              </form>
+            </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn modal-close-btn">취소</button>
@@ -256,6 +261,14 @@ input[disabled], button[disabled] {
 <script>
 const recognition = new webkitSpeechRecognition();//마이크
 
+
+$('#test').click(function(){
+    console.log("TEST! my", connection.streamEvents[myStreamID].stream.getVideoTracks()[0]);
+    console.log("TEST! other", connection.streamEvents[otherStreamID]);
+    console.log("myStreamID ",myStreamID)
+    console.log("otherStreamID" , otherStreamID)
+    connection.streamEvents[otherStreamID].stream = null;
+})
 
 let init_btn_sync = false; // 방버튼정보를 최초 동기화 하였는가??
 let init_share_media = false; // share정보 최초 동기화 하였는가??
@@ -650,7 +663,6 @@ function sendMediaSrc2(sharedRecordVideo,callback){
     //audio.pause();
 }
 function sendMediaSrc(sharedRecordAudio,sharedRecordVideo,callback){
-    console.log("sendMediaSrc!!!!" ,sharedRecordVideo)
     connection.chunkInterval = 0.00000000001;
     audio.src = sharedRecordAudio
     video.src = sharedRecordVideo
@@ -1404,6 +1416,7 @@ if($(window).width() <768) {
     dataPerPage = 2;
 }
 connection.onstream = function(event) {
+    console.log("DETECT! ", DetectRTC)
     console.log("stream 은?!",connection.streamEvents)
     totalPeople++;  //누가 들어올 때 ++
     // 화면 크기 따른 함수 호출
@@ -1414,49 +1427,52 @@ connection.onstream = function(event) {
     }
 };
 
+let otherStreamID;
 function inWeb(event) {
 
-if(tempCount==0){   //4명이 채워질 때
-    tempCount=4;    //tempCount 원상복구
-    tempPageCount++;    // 총 페이지 수 ++
-    newHtml += '<div class=\"other-videos'+tempPageCount+'\"> </div>';
-    // 숫자를 붙인 div 태그 추가해주기
-}else {
-    tempCount--; 
-}
-console.log("event !!! ", event)
-// 파람의 유저풀네임 === 엑스트라 유저풀네임
-if(params.userFullName == event.extra.userFullName){
+    if(tempCount==0){   //4명이 채워질 때
+        tempCount=4;    //tempCount 원상복구
+        tempPageCount++;    // 총 페이지 수 ++
+        newHtml += '<div class=\"other-videos'+tempPageCount+'\"> </div>';
+        // 숫자를 붙인 div 태그 추가해주기
+    }else {
+        tempCount--; 
+    }
+    console.log("event !!! ", event)
+    // 파람의 유저풀네임 === 엑스트라 유저풀네임
+    if(params.userFullName == event.extra.userFullName){
         console.log("내 streamID = ", event.streamid)
         myStreamID = event.streamid;
+    }else{ // <<<<<<<<<<<<<<<<<<
+        otherStreamID = event.streamid;
     }
-if (event.stream.isScreen && !event.stream.canvasStream) {
-    $('#screen-viewer').get(0).srcObject = event.stream;
-    $('#screen-viewer').hide();
-}
-else if (event.extra.roomOwner === true) { // 지금은 params.open으로 구분... 되게되있음 사용안하는 if문
-    console.log("check event !!! ", event.mediaElement)
-     //var video = document.getElementById('main-video');
-        //video.setAttribute('data-streamid', event.streamid);
-        //// video.style.display = 'none';
-        //if(event.type === 'local') {
-        //    video.muted = true;
-        //    video.volume = 0;
-        //}
-        //video.srcObject = event.stream;
-        //$('#main-video').show();
-    event.mediaElement.controls = false;
-    meetingList.push(event);
-    // var otherVideos = document.querySelector('#other-videos');
-    // otherVideos.appendChild(event.mediaElement);
-} else {
-    if(event.mediaElement){
+    if (event.stream.isScreen && !event.stream.canvasStream) {
+        $('#screen-viewer').get(0).srcObject = event.stream;
+        $('#screen-viewer').hide();
+    }
+    else if (event.extra.roomOwner === true) { // 지금은 params.open으로 구분... 되게되있음 사용안하는 if문
+        console.log("check event !!! ", event.mediaElement)
+        //var video = document.getElementById('main-video');
+            //video.setAttribute('data-streamid', event.streamid);
+            //// video.style.display = 'none';
+            //if(event.type === 'local') {
+            //    video.muted = true;
+            //    video.volume = 0;
+            //}
+            //video.srcObject = event.stream;
+            //$('#main-video').show();
         event.mediaElement.controls = false;
         meetingList.push(event);
+        // var otherVideos = document.querySelector('#other-videos');
+        // otherVideos.appendChild(event.mediaElement);
+    } else {
+        if(event.mediaElement){
+            event.mediaElement.controls = false;
+            meetingList.push(event);
+        }
     }
-}
-// videoTotal 태그 html 변경
-$("#other-videos").html(newHtml);
+    // videoTotal 태그 html 변경
+    $("#other-videos").html(newHtml);
 
     // 추가된 div태그에 video 태그 4개씩 넣기
     var j=3;
