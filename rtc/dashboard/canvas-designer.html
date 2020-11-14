@@ -799,7 +799,11 @@ function selectAllMedia(){
             tbody.id = 'uploadDatas';
             let temp = '';
             for(let i=data.media.length-1;i>=0;i--){
-                temp += '<tr class="media-element"><td>'+data.media[i].media_title+'</td><td>'+uploadDate(data.media[i].video_upload_time)+'</td></tr>';
+                if(data.media[i].is_video){
+                    temp += '<tr class="media-element"><td><img class="rec_class" src="../img/video.png"></td><td>'+data.media[i].media_title+'</td><td>'+uploadDate(data.media[i].video_upload_time)+'</td></tr>';
+                }else{
+                    temp += '<tr class="media-element"><td><img class="rec_class" src="../img/image.png"></td><td>'+data.media[i].media_title+'</td><td>'+uploadDate(data.media[i].video_upload_time)+'</td></tr>';
+                }
             }
             tbody.innerHTML = temp;
             table.appendChild(tbody);
@@ -2426,6 +2430,10 @@ $("#save-label").click(function () {
 <style type="text/css">
     #mobile-device-box{
         display: none;
+    }
+    .rec_class{
+        width : 25px;
+        height: 25px;
     }
     /* @font-face {
         font-family: "123rf";
