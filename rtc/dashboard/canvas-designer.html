@@ -1423,7 +1423,7 @@ var totalPeople = 0;
 var tempCount = 4;
 var meetingList = [];
 var tempPageCount = 0;
-var newHtml = '<div class=\"other-videos'+tempPageCount+'\"> </div>';
+var newHtml;
 var currentPage = 1;
 var dataPerPage = 4;    // 한 페이지에 나타낼 데이터 수
 var pageCount = 1;        // 한 화면에 나타낼 페이지 수
@@ -1446,14 +1446,14 @@ connection.onstream = function(event) {
 
 function inWeb(event) {
 
-if(tempCount==0){   //4명이 채워질 때
-    tempCount=4;    //tempCount 원상복구
-    tempPageCount++;    // 총 페이지 수 ++
-    newHtml += '<div class=\"other-videos'+tempPageCount+'\"> </div>';
-    // 숫자를 붙인 div 태그 추가해주기
-}else {
-    tempCount--; 
-}
+    // if(tempCount==0){   //4명이 채워질 때
+    //     tempCount=4;    //tempCount 원상복구
+    //     tempPageCount++;    // 총 페이지 수 ++
+    //     newHtml += '<div class=\"other-videos'+tempPageCount+'\"> </div>';
+    //     // 숫자를 붙인 div 태그 추가해주기
+    // }else {
+    //     tempCount--; 
+    // }
     console.log("event !!! ", event)
     // 파람의 유저풀네임 === 엑스트라 유저풀네임
     if(params.userFullName == event.extra.userFullName){
@@ -1486,21 +1486,37 @@ if(tempCount==0){   //4명이 채워질 때
         }
     }
     // videoTotal 태그 html 변경
+    // var otherVideos = document.querySelector('#other-videos');
+    // otherVideos.appendChild(event.mediaElement);
+    inWebChange();
+    connection.onUserStatusChanged(event); // 유저 이름 업데이트
+}
+
+function inWebChange(){
+    tempCount = 4;
+    var newPageCount = 0;
+    newHtml = '<div class=\"other-videos'+0+'\"> </div>';
+    for(var i=0; i<meetingList.length; i++){
+        if(tempCount==0){
+            tempCount=4;
+            tempPageCount++;
+            newPageCount++;
+            newHtml += '<div class=\"other-videos'+newPageCount+'\"> </div>';
+        }else tempCount--; 
+    }
+    console.log("html은????>>>>>>>>>>>>>>>>",newHtml);
     $("#other-videos").html(newHtml);
-        var otherVideos = document.querySelector('#other-videos');
-        otherVideos.appendChild(event.mediaElement);
-        
-    // 추가된 div태그에 video 태그 4개씩 넣기
+    
     var j=3;
     var newPageCount = 0;
     for(var i=0; i<meetingList.length; i++){
         var newClassName = '.other-videos'+''+newPageCount+'';
-            if(j==0){
-                j=3;
-                newPageCount++;
-            }
+        if(j==0){
+            j=3;
+            newPageCount++;
+        }
         var otherVideos = document.querySelector(newClassName);
-
+        
         // 이름표
         let div = document.createElement('div');
         let p = document.createElement('p');
@@ -1514,53 +1530,66 @@ if(tempCount==0){   //4명이 채워질 때
         j--;
     }
     inWebPaging(totalPeople, dataPerPage, pageCount, currentPage);
-
-    connection.onUserStatusChanged(event); // 유저 이름 업데이트
 }
 
 function inMobile(event) {
-if(tempCount==0){   //4명이 채워질 때
-    tempCount=2;    //tempCount 원상복구
-    tempPageCount++;    // 총 페이지 수 ++
-    newHtml += '<div class=\"other-videos'+tempPageCount+'\"> </div>';
-    // 숫자를 붙인 div 태그 추가해주기
-}else {
-    tempCount--;
-}
-console.log("event !!! ", event)
-// 파람의 유저풀네임 === 엑스트라 유저풀네임
-if (event.stream.isScreen && !event.stream.canvasStream) {
-    $('#screen-viewer').get(0).srcObject = event.stream;
-    $('#screen-viewer').hide();
-}
-else if (event.extra.roomOwner === true) { // 지금은 params.open으로 구분... 되게되있음 사용안하는 if문
-    console.log("check event !!! ", event.mediaElement)
-    event.mediaElement.controls = false;
-    meetingList.push(event);
-    // var otherVideos = document.querySelector('#other-videos');
-    // otherVideos.appendChild(event.mediaElement);
-    } else {
-        if(event.mediaElement){
-            event.mediaElement.controls = false;
-            meetingList.push(event);
+    console.log("event !!! ", event)
+    // 파람의 유저풀네임 === 엑스트라 유저풀네임
+    if (event.stream.isScreen && !event.stream.canvasStream) {
+        $('#screen-viewer').get(0).srcObject = event.stream;
+        $('#screen-viewer').hide();
     }
+    else if (event.extra.roomOwner === true) { // 지금은 params.open으로 구분... 되게되있음 사용안하는 if문
+        console.log("check event !!! ", event.mediaElement)
+        event.mediaElement.controls = false;
+        meetingList.push(event);
+        // var otherVideos = document.querySelector('#other-videos');
+        // otherVideos.appendChild(event.mediaElement);
+        } else {
+            if(event.mediaElement){
+                event.mediaElement.controls = false;
+                meetingList.push(event);
+        }
+    }
+    inMobileChange();
+    connection.onUserStatusChanged(event); // 유저 이름 업데이트
 }
-// videoTotal 태그 html 변경
-$("#other-videos").html(newHtml);
+
+function inMobileChange(){
+    console.log("meetingList.length>>>>>>>>>>?",meetingList.length);
+    tempCount=2;
+    var newPageCount = 0;
+    newHtml = '<div class=\"other-videos'+0+'\"> </div>';
+    for(var i=0; i<meetingList.length; i++){
+        if(tempCount==0){   //4명이 채워질 때
+            tempCount=2;    //tempCount 원상복구
+            tempPageCount++;    // 총 페이지 수 ++
+            newPageCount++;
+            newHtml += '<div class=\"other-videos'+newPageCount+'\"> </div>';
+            // 숫자를 붙인 div 태그 추가해주기
+        }else {
+            tempCount--;
+        }
+    }
+
+    // videoTotal 태그 html 변경
+    $("#other-videos").html(newHtml);
 
     // 추가된 div태그에 video 태그 4개씩 넣기
     var j=1;
     var newPageCount = 0;
     for(var i=0; i<meetingList.length; i++){
         var newClassName = '.other-videos'+''+newPageCount+'';
-            if(j==0){
-                j=1;
-                newPageCount++;
-            }
+        if(j==0){
+            j=1;
+            newPageCount++;
+        }else{
+            j--;
+        }
         var otherVideos = document.querySelector(newClassName);
 
          // 이름표
-         let div = document.createElement('div');
+        let div = document.createElement('div');
         let p = document.createElement('p');
         div.className = 'media-div'
         p.className = 'user-info-label'
@@ -1569,11 +1598,8 @@ $("#other-videos").html(newHtml);
         div.appendChild(meetingList[i].mediaElement);
         div.appendChild(p);
         otherVideos.appendChild(div);
-        j--;
     }
-inMobilePaging(totalPeople, dataPerPage, pageCount, currentPage);
-
-connection.onUserStatusChanged(event); // 유저 이름 업데이트
+    inMobilePaging(totalPeople, dataPerPage, pageCount, currentPage);
 }
 
 // 페이지 넘기든 버튼 클릭 시
@@ -1735,60 +1761,16 @@ $("#paging a").click(function(){
 }
 
 connection.onstreamended = function(event) {
-    // for(var i=0; i<=meetingList.length; i++){
-    //     if(event == meetingList[i]){
-    //         meetingList.splice(i,1);
-    //         totalPeople --;
-    //     }
-    // }
-
-    // if(tempCount==0){   //4명이 채워질 때
-    //     tempCount=4;    //tempCount 원상복구
-    //     tempPageCount++;    // 총 페이지 수 ++
-    //     newHtml += '<div class=\"other-videos'+tempPageCount+'\"> </div>';
-    //     // 숫자를 붙인 div 태그 추가해주기
-    // }else {
-    //     tempCount--; 
-    // }
-    // if($(window).width() >768) {
-    //     var j=3;
-    //     var newPageCount = 0;
-    //     for(var i=0; i<meetingList.length; i++){
-    //         var newClassName = '.other-videos'+''+newPageCount+'';
-    //             if(j==0){
-    //                 j=3;
-    //                 newPageCount++;
-    //             }
-    //         var otherVideos = document.querySelector(newClassName);
-
-    //         // 이름표
-    //         let div = document.createElement('div');
-    //         let p = document.createElement('p');
-    //         div.className = 'media-div'
-    //         p.className = 'user-info-label'
-    //         let temp = "["+meetingList[i].extra.userInfo.user_dept+"] "+meetingList[i].extra.userInfo.user_name +" "+meetingList[i].extra.userInfo.user_grade;
-    //         p.innerHTML = `${temp}`
-    //         div.appendChild(meetingList[i].mediaElement);
-    //         div.appendChild(p);
-    //         otherVideos.appendChild(div);
-    //         j--;
-    //     }
-    //     inWebPaging(totalPeople, dataPerPage, pageCount, currentPage);
-    // }else
-    //     inMobilePaging(totalPeople, dataPerPage, pageCount, currentPage);
-
-    
-    var video = document.querySelector('video[data-streamid="' + event.streamid + '"]');
-    if (!video) {
-        video = document.getElementById(event.streamid);
-        if (video) {
-            video.parentNode.removeChild(video);
-            return;
+    for(var i=0; i<=meetingList.length; i++){
+        if(event == meetingList[i]){
+            meetingList.splice(i,1);
+            totalPeople --;
         }
-    }
-    if (video) {
-        video.srcObject = null;
-        video.style.display = 'none';
+    } 
+    if($(window).width() >768) {
+        inWebChange();
+    }else{
+        inMobileChange();
     }
 };
 
