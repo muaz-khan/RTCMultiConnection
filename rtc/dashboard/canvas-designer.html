@@ -2039,7 +2039,7 @@ designer.appendTo(document.getElementById('widget-container'), function() {
     if(DetectRTC.isMobileDevice){
         //alert("모바일!")
         document.querySelector('#mobile-device-box').style.display = 'block';
-        videoSelect.onclick = changeCamera;
+        videoSelect.onchange = changeCamera;
     }else{
         //alert("DESK TOP!")
     }
