@@ -90,6 +90,9 @@ input[disabled], button[disabled] {
           >
           
         </div>
+        <div class="select" id="mobile-device-box">
+            <label for="videoSource">Video source: </label><select id="videoSource"></select>
+        </div>
         <div class="chosed-box">
            <div id="participant-boxid" >
                 <div id="participantboxact" class="participant-box ">
@@ -162,6 +165,13 @@ input[disabled], button[disabled] {
     <div class="plus-box"></div>
     <div class="meeting-bottom">
       <div class="bottom-btn-box">
+        <div id="camera-selector" class="btn btn-dark">
+            <i class="active">
+                <img class="oncam" src="../img/cam2.png" alt="전면" width="40" height="40" />
+                <img class="offcam" src="../img/cam1.png" alt="후면" width="40" height="40" />
+            </i>
+            <p class="arrow_box">카메라 선택</p>
+        </div>
         <div id="onoff-cam" class="onoff-cam circle-btn">
           <i class="active">
               <img class="oncam" src="../img/cam2.png" alt="캠" width="40" height="40" />
@@ -290,7 +300,7 @@ input[disabled], button[disabled] {
 
 <script>
 const recognition = new webkitSpeechRecognition();//마이크
-
+navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
 
 //$('#test').click(function(){
 //    console.log("TEST! my", connection.streamEvents[myStreamID].stream.getVideoTracks()[0]);
@@ -1967,6 +1977,15 @@ if(!!params.password) {
     connection.password = params.password;
 }
 designer.appendTo(document.getElementById('widget-container'), function() {
+    if(DetectRTC.isMobileDevice){
+        //alert("모바일!")
+        document.querySelector('#mobile-device-box').style.display = 'block';
+        videoSelect.onclick = changeCamera;
+    }else{
+        //alert("DESK TOP!")
+    }
+
+
     if (params.open === true || params.open === 'true') {
         //console.log("개설자");
         init_btn_sync = true;
@@ -2062,10 +2081,12 @@ function replaceTrack(videoTrack, screenTrackId) {
         return;
     }
     connection.getAllParticipants().forEach(function(pid) {
+        console.log("PID ", pid)
         var peer = connection.peers[pid].peer;
         if (!peer.getSenders) return;
         var trackToReplace = videoTrack;
         peer.getSenders().forEach(function(sender) {
+            console.log("sender ! ", sender)
             if (!sender || !sender.track) return;
             if(screenTrackId) {
                 if(trackToReplace && sender.track.id === screenTrackId) {
@@ -2074,10 +2095,9 @@ function replaceTrack(videoTrack, screenTrackId) {
                 }
                 return;
             }
-
-            if(sender.track.id !== tempStream.getTracks()[0].id) return;
             if (sender.track.kind === 'video' && trackToReplace) {
                 sender.replaceTrack(trackToReplace);
+                console.log("peer replaceTrack excute!!! ")
                 trackToReplace = null;
             }
         });
@@ -2128,6 +2148,102 @@ function replaceScreenTrack(stream) {
         });
     $('#screen-viewer').show();
 }
+
+// 카메라 목록 테스트
+
+const videoSelect = document.querySelector('select#videoSource');
+
+function handleError(error) {
+  console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
+}
+
+function gotDevices(deviceInfos){
+      // Handles being called several times to update labels. Preserve values.
+  const selectors = [videoSelect];
+  const values = selectors.map(select => select.value);
+  selectors.forEach(select => {
+    while (select.firstChild) {
+      select.removeChild(select.firstChild);
+    }
+  });
+  for (let i = 0; i !== deviceInfos.length; ++i) {
+    const cameras = $("#camera-selector");
+    const deviceInfo = deviceInfos[i];
+    const option = document.createElement('option');
+    option.value = deviceInfo.deviceId;
+     if (deviceInfo.kind === 'videoinput') {
+      option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
+      videoSelect.appendChild(option);
+     } else {
+       console.log('Some other kind of source/device: ', deviceInfo);
+     }
+  }
+  selectors.forEach((select, selectorIndex) => {
+    if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
+      select.value = values[selectorIndex];
+    }
+  });
+}
+
+function gotStream(stream) {
+  const videoElement = document.querySelector('video');
+  window.stream = stream; // make stream available to console
+  videoElement.srcObject = stream;
+  // Refresh button list in case labels have become available
+  return navigator.mediaDevices.enumerateDevices();
+}
+function changeCamera() {
+    const videoSource = videoSelect.value;
+    navigator.mediaDevices
+  .getUserMedia({
+    video:{deviceId: videoSource ? {exact: videoSource} : undefined}
+  })
+  .then(function(stream) {
+      let videoTrack = stream.getVideoTracks()[0];
+      let myVideo = document.getElementById(myStreamID);
+      for(let i=0;i<meetingList.length;i++){
+          if(meetingList[i].streamid == myStreamID){
+            myVideo.srcObject = null;
+            let newStream = meetingList[i].stream;
+            newStream.removeTrack(newStream.getVideoTracks()[0]);
+            newStream.addTrack(stream.getVideoTracks()[0]);
+            meetingList[i].stream = null;
+            meetingList[i].stream = newStream;
+            myVideo.srcObject = newStream;
+            console.log("myVideo Track2", myVideo.srcObject.getVideoTracks()[0])
+            
+            //myVideo.srcObject = null;
+            //myVideo.srcObject = newStream;
+            break;
+          }
+      }
+      //let myVideo = document.getElementById(myStreamID);
+      //let myVideoStream = myVideo.srcObject;
+      //myVideo.srcObject.addTrack(videoTrack);
+      //myVideoStream.removeTrack(myVideo.srcObject.getVideoTracks()[0])
+      //myVideoStream.addTrack(videoTrack)
+      //myVideo.srcObject = null;
+      //myVideo.srcObject = myVideoStream;
+      replaceTrack(videoTrack, false);
+  })
+  .catch(function(err) {
+    console.error('Error happens:', err);
+  });
+
+//   if (window.stream) {
+//     window.stream.getTracks().forEach(track => {
+//       track.stop();
+//     });
+//   }
+  
+//   const constraints = {
+//     video: {deviceId: videoSource ? {exact: videoSource} : undefined}
+//   };
+//   navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
+}
+
+
+////////////////
 
 //    button func
 // 캠 끄기
@@ -2249,6 +2365,9 @@ $("#save-label").click(function () {
 </script>
 </body>
 <style type="text/css">
+    #mobile-device-box{
+        display: none;
+    }
     /* @font-face {
         font-family: "123rf";
         src: url("../font/123RF.otf");
