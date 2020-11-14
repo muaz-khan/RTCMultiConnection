@@ -348,11 +348,25 @@ function changeMemoBtn(input){
     if(input){ // 메모창
         $('#btn-memo-message').attr('disabled', false);
         $("#isMemo").css('display', '');
+
+        // 사용자 화면 위치 변경
+        $("#captiondiv").css("display","none");
+        $(".media-div").addClass("on");
+        $(".user-info-label").addClass("on");
+        $("#other-videos").addClass("on");
+        $(".paging-button").addClass("on");
         // $("#isNomal").css('display', 'none');
         
     }else{ // nomal
         $('#btn-memo-message').attr('disabled', true);
         $("#isMemo").css('display', 'none');
+
+        // 사용자 화면 위치 되돌리기
+        $("#captiondiv").css("display","block");
+        $(".media-div").removeClass("on");
+        $(".user-info-label").removeClass("on");
+        $("#other-videos").removeClass("on");
+        $(".paging-button").removeClass("on");
         // $("#isNomal").css('display', '');
     }
     // console.log(btn_memo_flag)
@@ -1376,7 +1390,7 @@ $("#other-videos").html(newHtml);
         let p = document.createElement('p');
         div.className = 'media-div'
         p.className = 'user-info-label'
-        let temp = "["+event.extra.userInfo.user_dept+"] "+event.extra.userInfo.user_name +" "+event.extra.userInfo.user_grade;
+        let temp = "["+meetingList[i].extra.userInfo.user_dept+"] "+meetingList[i].extra.userInfo.user_name +" "+meetingList[i].extra.userInfo.user_grade;
         p.innerHTML = `${temp}`
         div.appendChild(meetingList[i].mediaElement);
         div.appendChild(p);
@@ -2098,7 +2112,6 @@ $("#save-label").click(function () {
         height: 100%;
         margin-right:0;
     }
-
     .media-div{
         float: left;
         width: 48%;
@@ -2126,6 +2139,28 @@ $("#save-label").click(function () {
         /* border: 1px solid black; */
         left:50%;
         /* transform: translateX(-50%); */
+    }
+
+    /* 화면 공유시 */
+    #other-videos.on{
+        margin-top: 2%;
+        margin-left: 2%;
+        padding-left: 6%;
+    }
+    .media-div.on{
+        margin-left: 1%;
+        margin-right: 1%;
+        margin-bottom: 0;
+        width: 20%;
+        height: 140px;
+    }
+    .user-info-label.on{
+        font-size: 0.8rem;
+        margin-bottom: 0;
+    }
+    .paging-button.on{
+        padding-top: 6%;
+        width: 9%;
     }
     #uploaded-container{
         height: 450px;
