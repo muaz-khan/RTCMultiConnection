@@ -2199,28 +2199,31 @@ function changeCamera() {
     video:{deviceId: videoSource ? {exact: videoSource} : undefined}
   })
   .then(function(stream) {
-      console.log("여기를 보시오 ",meetingList)
       let videoTrack = stream.getVideoTracks()[0];
-      console.log(stream);
-      console.log(videoTrack)
-     
+      let myVideo = document.getElementById(myStreamID);
       for(let i=0;i<meetingList.length;i++){
           if(meetingList[i].streamid == myStreamID){
+            myVideo.srcObject = null;
             let newStream = meetingList[i].stream;
             newStream.removeTrack(newStream.getVideoTracks()[0]);
             newStream.addTrack(stream.getVideoTracks()[0]);
             meetingList[i].stream = null;
             meetingList[i].stream = newStream;
+            myVideo.srcObject = newStream;
+            console.log("myVideo Track2", myVideo.srcObject.getVideoTracks()[0])
+            
+            //myVideo.srcObject = null;
+            //myVideo.srcObject = newStream;
             break;
           }
       }
-      let myVideo = document.getElementById(myStreamID);
-      let myVideoStream = myVideo.srcObject;
+      //let myVideo = document.getElementById(myStreamID);
+      //let myVideoStream = myVideo.srcObject;
       //myVideo.srcObject.addTrack(videoTrack);
-      myVideoStream.removeTrack(myVideo.srcObject.getVideoTracks()[0])
-      myVideoStream.addTrack(videoTrack)
-      myVideo.srcObject = null;
-      myVideo.srcObject = myVideoStream;
+      //myVideoStream.removeTrack(myVideo.srcObject.getVideoTracks()[0])
+      //myVideoStream.addTrack(videoTrack)
+      //myVideo.srcObject = null;
+      //myVideo.srcObject = myVideoStream;
       replaceTrack(videoTrack, false);
   })
   .catch(function(err) {
