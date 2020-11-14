@@ -1552,10 +1552,10 @@ function clickPage(flag){
     currentPage-=1;
 }
 
-if($(window).width() >768) {
-    inWebPaging(totalPeople, dataPerPage, pageCount, currentPage);
-}else
-    inMobilePaging(totalPeople, dataPerPage, pageCount, currentPage);
+    if($(window).width() >768) {
+        inWebPaging(totalPeople, dataPerPage, pageCount, currentPage);
+    }else
+        inMobilePaging(totalPeople, dataPerPage, pageCount, currentPage);
 }
 
 
@@ -1703,6 +1703,49 @@ $("#paging a").click(function(){
 }
 
 connection.onstreamended = function(event) {
+    // for(var i=0; i<=meetingList.length; i++){
+    //     if(event == meetingList[i]){
+    //         meetingList.splice(i,1);
+    //         totalPeople --;
+    //     }
+    // }
+
+    // if(tempCount==0){   //4명이 채워질 때
+    //     tempCount=4;    //tempCount 원상복구
+    //     tempPageCount++;    // 총 페이지 수 ++
+    //     newHtml += '<div class=\"other-videos'+tempPageCount+'\"> </div>';
+    //     // 숫자를 붙인 div 태그 추가해주기
+    // }else {
+    //     tempCount--; 
+    // }
+    // if($(window).width() >768) {
+    //     var j=3;
+    //     var newPageCount = 0;
+    //     for(var i=0; i<meetingList.length; i++){
+    //         var newClassName = '.other-videos'+''+newPageCount+'';
+    //             if(j==0){
+    //                 j=3;
+    //                 newPageCount++;
+    //             }
+    //         var otherVideos = document.querySelector(newClassName);
+
+    //         // 이름표
+    //         let div = document.createElement('div');
+    //         let p = document.createElement('p');
+    //         div.className = 'media-div'
+    //         p.className = 'user-info-label'
+    //         let temp = "["+meetingList[i].extra.userInfo.user_dept+"] "+meetingList[i].extra.userInfo.user_name +" "+meetingList[i].extra.userInfo.user_grade;
+    //         p.innerHTML = `${temp}`
+    //         div.appendChild(meetingList[i].mediaElement);
+    //         div.appendChild(p);
+    //         otherVideos.appendChild(div);
+    //         j--;
+    //     }
+    //     inWebPaging(totalPeople, dataPerPage, pageCount, currentPage);
+    // }else
+    //     inMobilePaging(totalPeople, dataPerPage, pageCount, currentPage);
+
+    
     var video = document.querySelector('video[data-streamid="' + event.streamid + '"]');
     if (!video) {
         video = document.getElementById(event.streamid);
@@ -2885,20 +2928,30 @@ html
 
     }
     @media screen and (max-width: 768px) {
-        .paging-button{
-            height:5%;
+
+        #containerA{
             width: 100%;
+        }
+
+        #other-videos{
+            width: 80%;
+            margin-top: 0;
+        }
+        .paging-button{
+            height: 100%;
+            width: 10%;
             margin: 0;
             padding: 0;
-            float:none;
+            padding-top: 68%;
+            float:left;
         }
 
         .media-div{
             float: left;
             width: 100%;
-            height: 220px;
-            margin-left: 2%;
-            margin-bottom: 5%;
+            height: 360px;
+            margin-left: 0%;
+            margin-top: 9%;
             /* border: 1px solid black; */
             padding: 1px;
             border-radius: 3px;
@@ -2906,21 +2959,48 @@ html
         .media-div  video{
             width: 100%;
             height: 100%;
-            margin-left: 3%;
-            margin-bottom: 1%;
+            margin-left: 0;
+            margin-bottom: 3%;
+            margin-top: 1%;
             /* border: 1px solid black; */
             /* padding: 1px; */
             border-radius: 3px;
         }
         .media-div p {
-            margin-left: 8%;
+            margin-left: 5%;
+            margin-bottom: 4%;
             width: 90%;
             height: 7%;
             text-align: center;
-            font-size : 1rem;
+            font-size : 1.5rem;
             /* border: 1px solid black; */
             left:50%;
             /* transform: translateX(-50%); */
+        }
+        #prev{
+            width: 100%;
+            height: calc(100% - 500px);
+            margin-left: 20%;
+        }
+        #next{
+            width: 100%;
+            height: calc(100% - 500px);
+            margin-right: 0;
+        }
+
+        #sidebar{
+            display: none;
+        }
+
+        .meetingroom{
+            height: calc(100% - 120px);
+        }
+
+        .plus-box{
+            height: 100%;
+        }
+        .bottom-btn-box{
+            padding-top: 0;
         }
     }
   </style>
