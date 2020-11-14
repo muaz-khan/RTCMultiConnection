@@ -15,14 +15,14 @@
   <!-- <script src="/rtc/js/jquery.min.js"></script> -->
   <script src="/rtc/js/jquery-3.5.1.min.js"></script>
   <script src="/rtc/js/bootstrap.min.js"></script>
-
+  
+  <script src="/rtc/js/ExpandSelect_1.00.js"></script>
+  
   <link href="/rtc/css/bootstrap.min.css" rel="stylesheet">
   <script src="/node_modules/webrtc-adapter/out/adapter.js"></script>
   <script src="/dist/RTCMultiConnection.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/node_modules/fbr/FileBufferReader.js"></script>
-
-
  
   <!-- <script src="/node_modules/canvas-designer/dev/webrtc-handler.js"></script>
   <script src="/node_modules/canvas-designer/canvas-designer-widget.js"></script> -->
@@ -91,7 +91,9 @@ input[disabled], button[disabled] {
           
         </div>
         <div class="select" id="mobile-device-box">
-            <label for="videoSource">Video source: </label><select id="videoSource"></select>
+            <label for="videoSource">Video source: </label>
+            <select id="videoSource"></select>
+            <input type="hidden" name="select_flag" id="select_flag" value="0">
         </div>
         <div class="chosed-box">
            <div id="participant-boxid" >
@@ -343,6 +345,10 @@ audio.addEventListener('play', audioHandler, false);
 audio.addEventListener('pause', audioHandler, false);
 audio.addEventListener('seeked', audioHandler, false);
 clearMedia();
+//videoSource
+$('#camera-selector').click(function(){
+    ExpandSelect('videoSource');
+});
 $('#btn-save-recorded-data').click(function(e) {
     //e.preventDefault();
     $('#mediaFormToSave').modal('show');
