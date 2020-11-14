@@ -121,6 +121,12 @@ input[disabled], button[disabled] {
           <!-- 보관함 -->
           <div id="save-boxid"class="active">
             <div id="saveboxact" class="save-box active">
+                <div id="uploaded-container-header">
+                    <div id="savebox-header">
+                        기록 영상명 </div>
+                    <div id="savebox-header-day">
+                            기록일 </div>
+                </div>
                 <div id="uploaded-container">
                     <div id="uploaded-list"></div>
                 </div>
@@ -132,9 +138,21 @@ input[disabled], button[disabled] {
       <!-- containerA -->
      
       <div id="containerA" >
+        <div class="logo">
+            <a class="logo-a" href="https://k3d106.p.ssafy.io/"><img src="../img/NAMU.png" alt="voda 로고" width="50" height="50" />VORACAY</a>
+        </div>
+        <!-- <div id="logo">
+            <img  id="btn-chat-message" src="../img/send.png"title="전송" alt="전송" width="30" height="30" disabled />
+        </div> -->
         <div id="captiondiv" class="captionBox">
         </div>
+        <div class="paging-button">
+            <div id="paging-prev"></div>
+        </div>
             <div id="other-videos" ></div>
+        <div class="paging-button">
+            <div id="paging-next"></div>
+        </div>
             <div id="isMemo">
                 <div id="widget-container" >
                     <audio id="main-audio" controls playsinline autoplay></audio>
@@ -212,7 +230,30 @@ input[disabled], button[disabled] {
                 <img id="btn-clear-message" src="../img/clean.png" alt="전체삭제" width="50" height="70" />
             </i>
             <p class="arrow_box">clear</p>
-            
+        </div>
+
+        <div id="more" class="circle-btn">
+            <i>
+                <img id="btn-more" src="../img/more.png" alt="더 보기" width="70" height="60" />
+            </i> 
+        </div>
+
+        <div id="close" class="circle-btn">
+            <i >
+                <img id="btn-close" src="../img/close.png" alt="종료" width="40" height="40" />
+            </i>  
+        </div>
+
+        <div id="more" class="circle-btn">
+            <i>
+                <img id="btn-more" src="../img/more.png" alt="더 보기" width="70" height="60" />
+            </i> 
+        </div>
+
+        <div id="close" class="circle-btn">
+            <i >
+                <img id="btn-close" src="../img/close.png" alt="종료" width="40" height="40" />
+            </i>  
         </div>
 
         <!-- <div id="onoff-reg" class="circle-btn">
@@ -236,14 +277,14 @@ input[disabled], button[disabled] {
               </button>
             </div>
             <div class="modal-body">
-              <form>
+              <div>
                 <div class="form-group">
                   <p>
                     <label for="txt-media-title" class="col-form-label">영상 제목:</label>
                     <input type="text" class="form-control" id="txt-media-title">
                   </p>
                 </div>
-              </form>
+            </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn modal-close-btn">취소</button>
@@ -252,7 +293,7 @@ input[disabled], button[disabled] {
           </div>
         </div>
       </div>
-    <canvas id="temp-stream-canvas" style="display: none; touch-action: manipulation;"></canvas>
+      <canvas id="temp-stream-canvas" style="display: none; touch-action: manipulation;"></canvas>
 </div>
 
 
@@ -260,6 +301,14 @@ input[disabled], button[disabled] {
 <script>
 const recognition = new webkitSpeechRecognition();//마이크
 navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
+
+//$('#test').click(function(){
+//    console.log("TEST! my", connection.streamEvents[myStreamID].stream.getVideoTracks()[0]);
+//    console.log("TEST! other", connection.streamEvents[otherStreamID]);
+//    console.log("myStreamID ",myStreamID)
+//    console.log("otherStreamID" , otherStreamID)
+//    connection.streamEvents[otherStreamID].stream = null;
+//})
 
 let init_btn_sync = false; // 방버튼정보를 최초 동기화 하였는가??
 let init_share_media = false; // share정보 최초 동기화 하였는가??
@@ -354,11 +403,25 @@ function changeMemoBtn(input){
     if(input){ // 메모창
         $('#btn-memo-message').attr('disabled', false);
         $("#isMemo").css('display', '');
+
+              // 사용자 화면 위치 변경
+              $("#captiondiv").css("display","none");
+        $(".media-div").addClass("on");
+        $(".user-info-label").addClass("on");
+        $("#other-videos").addClass("on");
+        $(".paging-button").addClass("on");
         // $("#isNomal").css('display', 'none');
         
     }else{ // nomal
         $('#btn-memo-message').attr('disabled', true);
         $("#isMemo").css('display', 'none');
+        
+        // 사용자 화면 위치 되돌리기
+        $("#captiondiv").css("display","block");
+        $(".media-div").removeClass("on");
+        $(".user-info-label").removeClass("on");
+        $("#other-videos").removeClass("on");
+        $(".paging-button").removeClass("on");
         // $("#isNomal").css('display', '');
     }
     // console.log(btn_memo_flag)
@@ -559,7 +622,7 @@ function syncSharedMedia(recordAudioFormData,recordVideoFormData){
     video.pause();
     //$('#main-video').show();
     designer.backgroundVideo();
-
+    
 }
 function makeShareMediaSrc2(recordVideoFormData2){
     var videoReader = new FileReader();
@@ -609,6 +672,7 @@ function sendMediaClock(){
         tempVideoSrc = "";
     }
 }
+
 function sendMediaSrc2(sharedRecordVideo,callback){
     console.log("sendMediaSrc2 !!!!! ", sharedRecordVideo)
     connection.chunkInterval = 0.00000000001;
@@ -640,7 +704,6 @@ function sendMediaSrc2(sharedRecordVideo,callback){
     //audio.pause();
 }
 function sendMediaSrc(sharedRecordAudio,sharedRecordVideo,callback){
-    console.log("sendMediaSrc!!!!" ,sharedRecordVideo)
     connection.chunkInterval = 0.00000000001;
     audio.src = sharedRecordAudio
     video.src = sharedRecordVideo
@@ -709,7 +772,7 @@ function selectAllMedia(){
             let tbody = document.createElement('tbody')
             table.id = 'uploaded-table'
             table.className = 'table';
-            table.innerHTML = `<thead><tr><th>제목</th><th>업로드 날짜</th></tr></thead>`;
+            // table.innerHTML = `<thead><tr><th>제목</th><th>업로드 날짜</th></tr></thead>`;
             tbody.id = 'uploadDatas';
             let temp = '';
             for(let i=data.media.length-1;i>=0;i--){
@@ -719,6 +782,11 @@ function selectAllMedia(){
             table.appendChild(tbody);
             $("#uploaded-list").empty();
             document.getElementById("uploaded-list").appendChild(table)
+        }else{
+            let div = document.createElement('div');
+            div.innerHTML = '기록 영상이 없습니다';
+            $("#uploaded-list").empty();
+            document.getElementById("uploaded-list").appendChild(div)
         }
         // 여기서 테이블 만들기
     });
@@ -759,7 +827,7 @@ function getMidiasFromDB(title){
     $.ajax({
         type: "GET",
         url: 'https://k3d106.p.ssafy.io/api/v2/media/'+params.userFullName+"/"+title,
-        //url: 'https://k3d106.p.ssafy.io/api/v2/test/5/moblie',
+       //url: 'https://k3d106.p.ssafy.io/api/v2/test/5/moblie',
         success: function (html) {
 
         },
@@ -770,7 +838,7 @@ function getMidiasFromDB(title){
         console.log(data)
         if("success" === data.message){
             shareMyMedia(b64toBlob(data.video,"video/mp4",512),b64toBlob(data.audio,"audio/webm;codecs=opus",512)) // 디코딩
-            //shareMyMedia2(b64toBlob(data.video,"video/mp4",512)) // 디코딩
+               //shareMyMedia2(b64toBlob(data.video,"video/mp4",512)) // 디코딩
             isShareMyVideo = false;
             isShareVideo = false;
             isMediaSharing = true;
@@ -1378,19 +1446,58 @@ connection.onmessage = function(event) {
 
 // extra code
 
+// 페이징 변수
+var totalPeople = 0;
+var tempCount = 4;
+var meetingList = [];
+var tempPageCount = 0;
+var newHtml;
+var currentPage = 1;
+var dataPerPage = 4;    // 한 페이지에 나타낼 데이터 수
+var pageCount = 1;        // 한 화면에 나타낼 페이지 수
+
+// 모바일 화면 변수 설정
+if($(window).width() <768) {
+    tempCount = 2;
+    dataPerPage = 2;
+}
 connection.onstream = function(event) {
+    console.log("DETECT! ", DetectRTC)
     console.log("stream 은?!",connection.streamEvents)
+    totalPeople++;  //누가 들어올 때 ++
+    // 화면 크기 따른 함수 호출
+    if($(window).width() >768) {
+        inWeb(event);
+    }else{
+        inMobile(event);
+    }
+};
+
+let otherStreamID;
+function inWeb(event) {
+
+    // if(tempCount==0){   //4명이 채워질 때
+    //     tempCount=4;    //tempCount 원상복구
+    //     tempPageCount++;    // 총 페이지 수 ++
+    //     newHtml += '<div class=\"other-videos'+tempPageCount+'\"> </div>';
+    //     // 숫자를 붙인 div 태그 추가해주기
+    // }else {
+    //     tempCount--; 
+    // }
     console.log("event !!! ", event)
     // 파람의 유저풀네임 === 엑스트라 유저풀네임
     if(params.userFullName == event.extra.userFullName){
         console.log("내 streamID = ", event.streamid)
         myStreamID = event.streamid;
+    }else{ // <<<<<<<<<<<<<<<<<<
+        otherStreamID = event.streamid;
     }
     if (event.stream.isScreen && !event.stream.canvasStream) {
         $('#screen-viewer').get(0).srcObject = event.stream;
         $('#screen-viewer').hide();
     }
     else if (event.extra.roomOwner === true) { // 지금은 params.open으로 구분... 되게되있음 사용안하는 if문
+        console.log("check event !!! ", event.mediaElement)
         //var video = document.getElementById('main-video');
         //video.setAttribute('data-streamid', event.streamid);
         //// video.style.display = 'none';
@@ -1401,40 +1508,301 @@ connection.onstream = function(event) {
         //video.srcObject = event.stream;
         //$('#main-video').show();
         event.mediaElement.controls = false;
-
-        var otherVideos = document.querySelector('#other-videos');
-        otherVideos.appendChild(event.mediaElement);
+        meetingList.push(event);
+    // var otherVideos = document.querySelector('#other-videos');
+    // otherVideos.appendChild(event.mediaElement);
     } else {
         if(event.mediaElement){
             event.mediaElement.controls = false;
-            let div = document.createElement('div');
-            let p = document.createElement('p');
-            div.className = 'media-div'
-            p.className = 'user-info-label'
-            let temp = "["+event.extra.userInfo.user_dept+"] "+event.extra.userInfo.user_name +" "+event.extra.userInfo.user_grade;
-            p.innerHTML = `${temp}`
-            div.appendChild(event.mediaElement);
-            div.appendChild(p);
-            var otherVideos = document.querySelector('#other-videos');
-            otherVideos.appendChild(div);
+            meetingList.push(event);
+        }
+    }
+    // videoTotal 태그 html 변경
+    // var otherVideos = document.querySelector('#other-videos');
+    // otherVideos.appendChild(event.mediaElement);
+    inWebChange();
+    connection.onUserStatusChanged(event); // 유저 이름 업데이트
+}
+
+function inWebChange(){
+    tempCount = 4;
+    var newPageCount = 0;
+    newHtml = '<div class=\"other-videos'+0+'\"> </div>';
+    for(var i=0; i<meetingList.length; i++){
+        if(tempCount==0){
+            tempCount=4;
+            tempPageCount++;
+            newPageCount++;
+            newHtml += '<div class=\"other-videos'+newPageCount+'\"> </div>';
+        }else tempCount--; 
+    }
+    console.log("html은????>>>>>>>>>>>>>>>>",newHtml);
+    $("#other-videos").html(newHtml);
+    
+    var j=3;
+    var newPageCount = 0;
+    for(var i=0; i<meetingList.length; i++){
+        var newClassName = '.other-videos'+''+newPageCount+'';
+        if(j==0){
+            j=3;
+            newPageCount++;
+        }
+        var otherVideos = document.querySelector(newClassName);
+        
+        // 이름표
+        let div = document.createElement('div');
+        let p = document.createElement('p');
+        div.className = 'media-div'
+        p.className = 'user-info-label'
+        let temp = "["+meetingList[i].extra.userInfo.user_dept+"] "+meetingList[i].extra.userInfo.user_name +" "+meetingList[i].extra.userInfo.user_grade;
+        p.innerHTML = `${temp}`
+        div.appendChild(meetingList[i].mediaElement);
+        div.appendChild(p);
+        otherVideos.appendChild(div);
+        j--;
+    }
+    inWebPaging(totalPeople, dataPerPage, pageCount, currentPage);
+}
+
+function inMobile(event) {
+    console.log("event !!! ", event)
+    // 파람의 유저풀네임 === 엑스트라 유저풀네임
+    if (event.stream.isScreen && !event.stream.canvasStream) {
+        $('#screen-viewer').get(0).srcObject = event.stream;
+        $('#screen-viewer').hide();
+    }
+    else if (event.extra.roomOwner === true) { // 지금은 params.open으로 구분... 되게되있음 사용안하는 if문
+        console.log("check event !!! ", event.mediaElement)
+        event.mediaElement.controls = false;
+        meetingList.push(event);
+        // var otherVideos = document.querySelector('#other-videos');
+        // otherVideos.appendChild(event.mediaElement);
+        } else {
+            if(event.mediaElement){
+                event.mediaElement.controls = false;
+                meetingList.push(event);
+        }
+    }
+    inMobileChange();
+    connection.onUserStatusChanged(event); // 유저 이름 업데이트
+}
+
+function inMobileChange(){
+    console.log("meetingList.length>>>>>>>>>>?",meetingList.length);
+    tempCount=2;
+    var newPageCount = 0;
+    newHtml = '<div class=\"other-videos'+0+'\"> </div>';
+    for(var i=0; i<meetingList.length; i++){
+        if(tempCount==0){   //4명이 채워질 때
+            tempCount=2;    //tempCount 원상복구
+            tempPageCount++;    // 총 페이지 수 ++
+            newPageCount++;
+            newHtml += '<div class=\"other-videos'+newPageCount+'\"> </div>';
+            // 숫자를 붙인 div 태그 추가해주기
+        }else {
+            tempCount--;
         }
     }
 
-    connection.onUserStatusChanged(event); // 유저 이름 업데이트
-};
+    // videoTotal 태그 html 변경
+    $("#other-videos").html(newHtml);
+
+    // 추가된 div태그에 video 태그 4개씩 넣기
+    var j=1;
+    var newPageCount = 0;
+    for(var i=0; i<meetingList.length; i++){
+        var newClassName = '.other-videos'+''+newPageCount+'';
+        if(j==0){
+            j=1;
+            newPageCount++;
+        }else{
+            j--;
+        }
+        var otherVideos = document.querySelector(newClassName);
+
+         // 이름표
+        let div = document.createElement('div');
+        let p = document.createElement('p');
+        div.className = 'media-div'
+        p.className = 'user-info-label'
+        let temp = "["+meetingList[i].extra.userInfo.user_dept+"] "+meetingList[i].extra.userInfo.user_name +" "+meetingList[i].extra.userInfo.user_grade;
+        p.innerHTML = `${temp}`
+        div.appendChild(meetingList[i].mediaElement);
+        div.appendChild(p);
+        otherVideos.appendChild(div);
+    }
+    inMobilePaging(totalPeople, dataPerPage, pageCount, currentPage);
+}
+
+// 페이지 넘기든 버튼 클릭 시
+function clickPage(flag){
+    if(flag=='next'){
+    currentPage+=1;
+    }else{
+    currentPage-=1;
+}
+
+    if($(window).width() >768) {
+        inWebPaging(totalPeople, dataPerPage, pageCount, currentPage);
+    }else
+        inMobilePaging(totalPeople, dataPerPage, pageCount, currentPage);
+}
+
+
+
+// 페이징
+function inWebPaging(totalPeople, dataPerPage, pageCount, currentPage){
+    
+    var totalPage = Math.ceil(totalPeople/dataPerPage);    // 총 페이지 수
+    console.log("totalPage>>>>>>>>>>>>>",totalPage);
+    var pageGroup = Math.ceil(currentPage/pageCount);    // 페이지 그룹
+
+    var htmlNext = "";
+    var htmlPrev = "";
+    var next = currentPage+1;
+    var prev = currentPage-1;
+
+    var $pingingView = $("#paging");
+    
+    console.log("prev>>>>>>>>>>>>>>",prev);
+
+    if(prev > 0){
+      console.log("prev가 0보다 크다!!!")
+      htmlPrev += "<img id='prev' src='../img/prev.png' alt='이전' onclick='clickPage(\"prev\")'/>";
+    //   "<button onclick='clickPage(\"prev\")' id='"+prev+"'><</button>"
+    }else{
+        htmlPrev += "<img id='prev' src='../img/prev_gray.png' alt='이전'/>";
+    }
+    
+    // html += "<a href='#' id=" + currentPage + ">" + currentPage + "</a> ";
+
+    if(currentPage < totalPage){
+      console.log("현재 페이지가 토탈보다 작다 !!!");
+      htmlNext += "<img id='next' src='../img/next.png' alt='다음' onclick='clickPage(\"next\")'/>";
+    //   htmlNext += "<button onclick='clickPage(\"next\")' id='"+next+"'>></button>";
+    }else{
+    htmlNext += "<img id='next' src='../img/next_gray.png' alt='다음'>";
+    }
+        
+    $("#paging-prev").html(htmlPrev);    // 페이지 목록 생성
+    $("#paging-next").html(htmlNext);    // 페이지 목록 생성
+
+    $("#paging-prev").css("visibility", "visible");
+    $("#paging-next").css("visibility", "visible");
+
+    // $("#paging a").css("color", "black");
+    // $("#paging a#" + currentPage).css({"text-decoration":"none", 
+    //                                        "color":"red", 
+    //                                        "font-weight":"bold"});    // 현재 페이지 표시
+
+    for(var i=1; i<=(meetingList.length/4)+1; i++){
+      var className = '.other-videos'+''+(i-1)+'';
+      console.log('className???',className);
+      if(i == currentPage){
+        console.log(currentPage,"   추가하세용");
+        $(className).css("display","block");
+      }else{
+        console.log(currentPage,"   삭제하세용");
+        $(className).css("display","none");
+    }
+}
+
+$("#paging a").click(function(){
+            
+    var $item = $(this);
+    var $id = $item.attr("id");
+    var selectedPage = $item.text();
+            
+    if($id == "next")    selectedPage = next;
+    if($id == "prev")    selectedPage = prev;
+            
+    paging(totalPeople, dataPerPage, pageCount, selectedPage);
+});
+                                           
+}
+
+function inMobilePaging(totalPeople, dataPerPage, pageCount, currentPage){
+    
+    var totalPage = Math.ceil(totalPeople/dataPerPage);    // 총 페이지 수
+    console.log("totalPage>>>>>>>>>>>>>",totalPage);
+    var pageGroup = Math.ceil(currentPage/pageCount);    // 페이지 그룹
+
+    var htmlNext = "";
+    var htmlPrev = "";
+    var next = currentPage+1;
+    var prev = currentPage-1;
+
+    var $pingingView = $("#paging");
+    
+    console.log("prev>>>>>>>>>>>>>>",prev);
+
+    if(prev > 0){
+      console.log("prev가 0보다 크다!!!")
+      htmlPrev += "<img id='prev' src='../img/prev.png' alt='이전' onclick='clickPage(\"prev\")'/>";
+    //   "<button onclick='clickPage(\"prev\")' id='"+prev+"'><</button>"
+    }else{
+        htmlPrev += "<img id='prev' src='../img/prev_gray.png' alt='이전'/>";
+    }
+    
+    // html += "<a href='#' id=" + currentPage + ">" + currentPage + "</a> ";
+    
+    console.log("currentPage??>>>>",currentPage,"totalPage>>>>",totalPage, "totalPeople>>>>", totalPeople);
+    if(currentPage < totalPage){
+      console.log("현재 페이지가 토탈보다 작다 !!!");
+      htmlNext += "<img id='next' src='../img/next.png' alt='다음' onclick='clickPage(\"next\")'/>";
+    //   htmlNext += "<button onclick='clickPage(\"next\")' id='"+next+"'>></button>";
+    }else{
+    htmlNext += "<img id='next' src='../img/next_gray.png' alt='다음'>";
+    }
+        
+    $("#paging-prev").html(htmlPrev);    // 페이지 목록 생성
+    $("#paging-next").html(htmlNext);    // 페이지 목록 생성
+
+    $("#paging-prev").css("visibility", "visible");
+    $("#paging-next").css("visibility", "visible");
+
+    // $("#paging a").css("color", "black");
+    // $("#paging a#" + currentPage).css({"text-decoration":"none", 
+    //                                        "color":"red", 
+    //                                        "font-weight":"bold"});    // 현재 페이지 표시
+    console.log("meetingList.length>>>",meetingList.length)
+    for(var i=1; i<=(meetingList.length/2)+1; i++){
+      var className = '.other-videos'+''+(i-1)+'';
+      console.log('className???',className);
+      if(i == currentPage){
+        console.log(currentPage,"   추가하세용");
+        $(className).css("display","block");
+      }else{
+        console.log(currentPage,"   삭제하세용");
+        $(className).css("display","none");
+    }
+}
+
+$("#paging a").click(function(){
+            
+    var $item = $(this);
+    var $id = $item.attr("id");
+    var selectedPage = $item.text();
+            
+    if($id == "next")    selectedPage = next;
+    if($id == "prev")    selectedPage = prev;
+            
+    paging(totalPeople, dataPerPage, pageCount, selectedPage);
+});
+                                           
+}
 
 connection.onstreamended = function(event) {
-    var video = document.querySelector('video[data-streamid="' + event.streamid + '"]');
-    if (!video) {
-        video = document.getElementById(event.streamid);
-        if (video) {
-            video.parentNode.removeChild(video);
-            return;
+    for(var i=0; i<=meetingList.length; i++){
+        if(event == meetingList[i]){
+            meetingList.splice(i,1);
+            totalPeople --;
         }
-    }
-    if (video) {
-        video.srcObject = null;
-        video.style.display = 'none';
+    } 
+    if($(window).width() >768) {
+        inWebChange();
+    }else{
+        inMobileChange();
     }
 };
 
@@ -1619,11 +1987,11 @@ if(!!params.password) {
 }
 designer.appendTo(document.getElementById('widget-container'), function() {
     if(DetectRTC.isMobileDevice){
-        alert("모바일!")
+        //alert("모바일!")
         document.querySelector('#mobile-device-box').style.display = 'block';
         videoSelect.onclick = changeCamera;
     }else{
-        alert("DESK TOP!")
+        //alert("DESK TOP!")
     }
 
 
@@ -1994,36 +2362,122 @@ $("#save-label").click(function () {
     #mobile-device-box{
         display: none;
     }
+    /* @font-face {
+        font-family: "123rf";
+        src: url("../font/123RF.otf");
+        }
+    @font-face {
+    font-family: "Binggrae-Bold";
+    src: url("../font/Binggrae-Bold.otf");
+    }
+    @font-face {
+    font-family: "Binggrae";
+    src: url("../font/Binggrae.otf");
+    }
+    @font-face {
+    font-family: "Binggrae2-Bold";
+    src: url("../font/Binggrae2-Bold.otf");
+    }
+    @font-face {
+    font-family: "Binggrae2";
+    src: url("../font/Binggrae2.otf");
+    } */
+    @font-face {
+    font-family: "JSDongkang-Bold";
+    src: url("../font/JSDongkang-Bold.otf");
+    }
+    @font-face {
+    font-family: "JSDongkang-Regular";
+    src: url("../font/JSDongkang-Regular.otf");
+    }
+    @font-face {
+    font-family: "Fredoka One";
+    src: url("../font/FredokaOne-Regular.ttf");
+    }
+    /* logo */
+    div .logo{
+        cursor: pointer;
+        position: fixed;
+        top:1%;
+        left:1%
+        
+    }
+    .logo a{ 
+        text-decoration:none ;
+        font-size: 25px;
+        font-family: "Fredoka One";
+        color:rgb(41 58 151);
+    }
+
+    #other-videos {
+        float:left;
+        width: 80%;
+        margin-top: 5px;
+    }
+  /*    6명일때
+        /* width: 31%;
+        margin: 5px;
+        border: 1px solid black;
+        padding: 1px;
+        border-radius: 3px; */
+
+    #other-videos > div {
+        width: 100%;
+        height: 100%;
+        margin-right:0;
+    }
     .media-div{
-        display: inline-block;
-        width: 45%;
-        height: 250px;
-        margin: 10px;
+        float: left;
+        width: 48%;
+        height: 245px;
+        margin-left: 2%;
+        margin-bottom: 5%;
         /* border: 1px solid black; */
         padding: 1px;
         border-radius: 3px;
     }
-    .media-div video {
-        width: 90%;
-        height: 90%;
+    .media-div  video{
+        width: 100%;
+        height: 100%;
+        margin-left: 3%;
+        margin-bottom: 1%;
         /* border: 1px solid black; */
-        padding: 1px;
-        position: relative;
-        left:50%;
-        transform: translateX(-50%);
+        /* padding: 1px; */
+        border-radius: 3px;
     }
     .media-div p {
+        margin-left: 8%;
         width: 90%;
         height: 7%;
         text-align: center;
-        /* border: 1px solid black; */
-        padding: 1px;
-        position: relative;
+        /* border: 1px solid black; */     
         left:50%;
-        transform: translateX(-50%);
+        /* transform: translateX(-50%); */
+    }
+    
+    /* 화면 공유시 */
+    #other-videos.on{
+        margin-top: 2%;
+        margin-left: 2%;
+        padding-left: 6%;
+    }
+    .media-div.on{
+        margin-left: 1%;
+        margin-right: 1%;
+        margin-bottom: 0;
+        width: 20%;
+        height: 140px;
+    }
+    .user-info-label.on{
+        font-size: 0.8rem;
+        margin-bottom: 0;
+    }
+    .paging-button.on{
+        padding-top: 6%;
+        width: 9%;
     }
     #uploaded-container{
-        height: 450px;
+        height:  calc(100%);
         overflow-y: hidden;
         overflow-x: hidden;
         margin-right: 20px;
@@ -2031,22 +2485,37 @@ $("#save-label").click(function () {
     }
     #uploaded-list {
         text-align: left;
-        max-height: 80%;
+        max-height: 90%;
         overflow-x: hidden;
         overflow-y: scroll;
         border-top: 2px solid #a9b2e6;
         width: 110%;
         font-size: 15px
     }
+    #uploaded-container-header{
+        display:flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    #savebox-header{
+        margin:0;
+        margin-left:20px;
+    }
+    #savebox-header-day{
+        margin:0;
+        margin-right:50px;
+    }
     #saveboxact{
       margin-left: 2px;
-      background: #cc24a2;
+      background:#101742;
       width: 100%;
       left: 20px;
       height: 100%;
       overflow: hidden;
     }
-
+    .media-element{
+        cursor: pointer;
+    }
 
     /* containerA */
     #containerA{
@@ -2075,6 +2544,7 @@ $("#save-label").click(function () {
         border-top:0;
         border-bottom: 0;
     }
+    
     /* chat */
     .onUserStatusChanged {
       padding: 5px 10px;
@@ -2136,7 +2606,7 @@ $("#save-label").click(function () {
     
     /* button */
     .circle-btn i.active {
-      background: rgb(41 58 151);
+      background:rgb(41 58 151);
     }
     .circle-btn i.active .offcam {
       display: none;
@@ -2176,7 +2646,8 @@ $("#save-label").click(function () {
       width: calc(100vw - 300px);
     }
 
-    /* html { */
+
+   /* html { */
   /* overscroll-behavior-y: none; */
 /* } */
 /* .body */
@@ -2201,7 +2672,7 @@ $("#save-label").click(function () {
 /* .voracay{ */
   /* z-index: 2; */
 /* } */
-    html
+html
     body {
       overscroll-behavior-y: contain;
     }
@@ -2209,7 +2680,10 @@ $("#save-label").click(function () {
     .temp-stream-canvas{ 
       touch-action: none;
     }
+    
+    
     .voracay {
+      font-family: "JSDongkang-Regular";
       height: 100vh;
       width: 100vw;
       overflow: hidden;
@@ -2290,7 +2764,7 @@ $("#save-label").click(function () {
       z-index: 1;
       top: 0;
       right: 0;
-      background: rgb(255, 0, 0);
+      background: rgb(0, 0, 0);
       /* opacity: 0.9; */
       overflow: hidden;
     }
@@ -2315,6 +2789,7 @@ $("#save-label").click(function () {
     }
 
     .btn-zip {
+      font-family: "JSDongkang-Bold";
       display: grid;
       grid-template-columns: 1fr 1fr 1fr ;
       text-align: center;
@@ -2338,15 +2813,25 @@ $("#save-label").click(function () {
     .btn-zip input[type="radio"]:checked + label {
       background-image: linear-gradient(
         to right top,
+        /* rgb(41, 58, 151),
+        rgb(41, 58, 151),
+        rgb(35, 49, 128),
+        rgb(35, 49, 128),
+        rgb(32, 43, 146),
+        rgb(30, 36, 122),
+        rgb(35, 49, 128),
+        rgb(35, 49, 128),
+        rgb(52, 41, 151),
+        rgb(41, 58, 151) */
         #082257,
         #0d1a41,
         #111742,
-        #100b41,
-        #261355,
-        #220f47,
-        #2e135a,
-        #1a0d47,
-        #1c1257,
+        #0b0c41,
+        #131755,
+        #172d6b,
+        rgb(24, 19, 90),
+        #110d47,
+        #121757,
         #191350,
         #1b1246,
         #160e57
@@ -2380,7 +2865,7 @@ $("#save-label").click(function () {
     .chosed-box {
       width: 100%;
       height: calc(100% - 50px);
-      background: rgb(41 58 151);
+      background: #101742;
     }
     .chosed-box div.active {
       display: none;
@@ -2390,14 +2875,32 @@ $("#save-label").click(function () {
       height: 80px;
       background-image: linear-gradient(
         to right top,
-        rgb(179, 184, 255),
+         rgb(179, 184, 255),
         rgb(158, 151, 250),
         rgb(152, 162, 253),
         #a2b0ff,
         #9aa9ff,
         rgb(147, 167, 253),
-        #94a4ff
+        #94a4ff 
+        /* samsung color */
+        /* rgb(41, 58, 151),
+        rgb(41, 58, 151),
+        rgb(35, 49, 128),
+        rgb(35, 49, 128),
+        rgb(30, 44, 122),
+        rgb(30, 44, 122),
+        rgb(35, 49, 128),
+        rgb(35, 49, 128),
+        rgb(41, 58, 151),
+        rgb(41, 58, 151) */
       );
+      /*  rgb(179, 184, 255),
+        rgb(158, 151, 250),
+        rgb(152, 162, 253),
+        #a2b0ff,
+        #9aa9ff,
+        rgb(147, 167, 253),
+        #94a4ff */
       z-index: 2;
       position:absolute;
       margin-bottom: 80px;
@@ -2443,11 +2946,11 @@ $("#save-label").click(function () {
       width: 120px;
       padding: 8px;
       top: -80%;
-      left: -25%;
+      left: -40%;
       -webkit-border-radius: 8px;
       -moz-border-radius: 8px;
       border-radius: 8px;
-      background: rgba(33, 16, 131, 0.925);
+      background: rgb(12, 2, 68);
       color: #fff;
       font-size: 14px;
       opacity: 0.8;
@@ -2462,7 +2965,7 @@ $("#save-label").click(function () {
       margin-left: -10px;
       border: solid transparent;
       border-color: rgba(51, 51, 51, 0);
-      border-top-color: rgba(40, 18, 119, 0.685);
+      border-top-color: rgb(12, 2, 68);
       border-width: 10px;
       pointer-events: none;
       content: " ";
@@ -2477,6 +2980,11 @@ $("#save-label").click(function () {
     .circle-btn:hover {
       cursor: pointer;
     }
+    .circle-btn i:hover {
+      cursor: pointer;
+      /* samsung color */
+      border: 4.5px solid rgb(255, 255, 255);
+    }
 
     .circle-btn i {
       display: block;
@@ -2485,7 +2993,10 @@ $("#save-label").click(function () {
       width: 62px;
       height: 62px;
       border-radius: 40%;
-      border: 2px solid rgba(255, 255, 255, 0.562);
+      /* samsung color 
+      4px solid rgb(163, 168, 233); */
+      /* 3px solid rgb(212, 215, 255); */
+      border: 3px solid rgb(16, 24, 133);; 
       justify-content: center;
       align-items: center;
       display: flex;
@@ -2504,19 +3015,19 @@ $("#save-label").click(function () {
         position: absolute;
         right: 21%;
     }
-    
-    #btn-comments {
-        color: red;
-        margin-top: 5px;
-        font-size: 24px;
-        text-shadow: 1px 1px white;
-    }
+
     
     #other-videos {
         margin-top: 5px;
     }
   /*    6명일때
 
+    #btn-comments {
+        color: red;
+        margin-top: 5px;
+        font-size: 24px;
+        text-shadow: 1px 1px white;
+    }
         /* width: 31%;
         margin: 5px;
         border: 1px solid black;
@@ -2646,6 +3157,172 @@ $("#save-label").click(function () {
         height: 100%;
         z-index: 9999999999999;
         display: none;
+    }
+    
+    .paging-button{
+        float: left;
+        width: 10%;
+        height: 100%;
+        padding-top: 21%;
+    }
+
+    #paging-next{
+        width:90%;
+        height:100%;
+    }
+
+    #paging-prev{
+        width:90%;
+        height:100%;
+    }
+
+    #next{
+        float:left;
+        width: 35px;
+        height: 35px;
+        margin-right: 70%;
+    }
+
+    #prev{
+        width: 35px;
+        height: 35px;
+        margin-left: 45%;
+        margin-right: 25%;
+
+    }
+    #more, #close{
+            display: none;
+        }
+    @media screen and (max-width: 768px) {
+
+        #containerA{
+            width: 100%;
+        }
+
+        #other-videos{
+            width: 80%;
+            margin-top: 0;
+        }
+        .paging-button{
+            height: 100%;
+            width: 10%;
+            margin: 0;
+            padding: 0;
+            padding-top: 68%;
+            float:left;
+        }
+
+        .media-div{
+            float: left;
+            width: 100%;
+            height: 360px;
+            margin-left: 0%;
+            margin-top: 9%;
+            /* border: 1px solid black; */
+            padding: 1px;
+            border-radius: 3px;
+        }
+        .media-div  video{
+            width: 100%;
+            height: 100%;
+            margin-left: 0;
+            margin-bottom: 3%;
+            margin-top: 1%;
+            /* border: 1px solid black; */
+            /* padding: 1px; */
+            border-radius: 3px;
+        }
+        .media-div p {
+            margin-left: 5%;
+            margin-bottom: 4%;
+            width: 90%;
+            height: 7%;
+            text-align: center;
+            font-size : 1.5rem;
+            /* border: 1px solid black; */
+            left:50%;
+            /* transform: translateX(-50%); */
+        }
+        #prev{
+            width: 100%;
+            height: calc(100% - 500px);
+            margin-left: 20%;
+        }
+        #next{
+            width: 100%;
+            height: calc(100% - 500px);
+            margin-right: 0;
+        }
+
+        #sidebar{
+            display: none;
+        }
+
+        .meetingroom{
+            height: calc(100% - 130px);
+        }
+
+        /* logo  */
+        div .logo{
+        cursor: pointer;
+        position: fixed;
+        top:2%;
+        left: 33%;
+        
+         }
+         .logo a{ 
+    
+        font-size: 35px;
+       
+        }
+
+        /* MENU */
+        /* MENU-아래 메뉴 부분  */
+        .meeting-bottom {
+            height: 130px;
+        }
+        /* MENU-색  */
+        .plus-box {
+            height: 130px;
+        }
+
+        /* 버튼 */
+        .bottom-btn-box{
+            padding-top: 0;
+        }
+        #more, #close{
+            display: inline;
+        }
+        .circle-btn i{
+            width: 80px;
+            height: 80px;
+            padding: 40px;
+            margin-right: 20px;
+            border: 4px solid  rgb(16, 24, 133);
+        }
+        #more i{
+            background-color:  rgb(41 58 151);
+        }
+
+        #close i{
+            border: 4px solid  #af404c;
+             background-color:   #af404c;
+        }
+
+        .circle-btn i:hover {
+            cursor: pointer;
+            /* samsung color */
+            border: 4.5px solid rgb(16, 24, 133);
+        }
+
+        /* 버튼_ 삭제할버튼 */
+        #invitelink, #share-screen, #share-board, #record, #conference, #clear{
+            display: none;
+        }
+        .circle-btn:hover > p.arrow_box {
+            display: none;
+        }
+    
     }
   </style>
 </html>
