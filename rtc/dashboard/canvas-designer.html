@@ -220,7 +220,18 @@ input[disabled], button[disabled] {
                 <img id="btn-clear-message" src="../img/clean.png" alt="전체삭제" width="50" height="70" />
             </i>
             <p class="arrow_box">clear</p>
-            
+        </div>
+
+        <div id="more" class="circle-btn">
+            <i>
+                <img id="btn-more" src="../img/more.png" alt="더 보기" width="70" height="60" />
+            </i> 
+        </div>
+
+        <div id="close" class="circle-btn">
+            <i >
+                <img id="btn-close" src="../img/close.png" alt="종료" width="40" height="40" />
+            </i>  
         </div>
 
         <div id="more" class="circle-btn">
@@ -256,14 +267,14 @@ input[disabled], button[disabled] {
               </button>
             </div>
             <div class="modal-body">
-              <form>
+              <div>
                 <div class="form-group">
                   <p>
                     <label for="txt-media-title" class="col-form-label">영상 제목:</label>
                     <input type="text" class="form-control" id="txt-media-title">
                   </p>
                 </div>
-              </form>
+            </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn modal-close-btn">취소</button>
@@ -280,6 +291,14 @@ input[disabled], button[disabled] {
 <script>
 const recognition = new webkitSpeechRecognition();//마이크
 
+
+//$('#test').click(function(){
+//    console.log("TEST! my", connection.streamEvents[myStreamID].stream.getVideoTracks()[0]);
+//    console.log("TEST! other", connection.streamEvents[otherStreamID]);
+//    console.log("myStreamID ",myStreamID)
+//    console.log("otherStreamID" , otherStreamID)
+//    connection.streamEvents[otherStreamID].stream = null;
+//})
 
 let init_btn_sync = false; // 방버튼정보를 최초 동기화 하였는가??
 let init_share_media = false; // share정보 최초 동기화 하였는가??
@@ -675,7 +694,6 @@ function sendMediaSrc2(sharedRecordVideo,callback){
     //audio.pause();
 }
 function sendMediaSrc(sharedRecordAudio,sharedRecordVideo,callback){
-    console.log("sendMediaSrc!!!!" ,sharedRecordVideo)     
     connection.chunkInterval = 0.00000000001;
     audio.src = sharedRecordAudio
     video.src = sharedRecordVideo
@@ -1434,6 +1452,7 @@ if($(window).width() <768) {
     dataPerPage = 2;
 }
 connection.onstream = function(event) {
+    console.log("DETECT! ", DetectRTC)
     console.log("stream 은?!",connection.streamEvents)
     totalPeople++;  //누가 들어올 때 ++
     // 화면 크기 따른 함수 호출
@@ -1444,6 +1463,7 @@ connection.onstream = function(event) {
     }
 };
 
+let otherStreamID;
 function inWeb(event) {
 
     console.log("event !!! ", event)
@@ -1451,6 +1471,8 @@ function inWeb(event) {
     if(params.userFullName == event.extra.userFullName){
         console.log("내 streamID = ", event.streamid)
         myStreamID = event.streamid;
+    }else{ // <<<<<<<<<<<<<<<<<<
+        otherStreamID = event.streamid;
     }
     if (event.stream.isScreen && !event.stream.canvasStream) {
         $('#screen-viewer').get(0).srcObject = event.stream;
