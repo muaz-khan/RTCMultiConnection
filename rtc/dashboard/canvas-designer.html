@@ -90,7 +90,7 @@ input[disabled], button[disabled] {
           >
           
         </div>
-        <div class="select">
+        <div class="select" id="mobile-device-box">
             <label for="videoSource">Video source: </label><select id="videoSource"></select>
         </div>
         <div class="chosed-box">
@@ -259,7 +259,7 @@ input[disabled], button[disabled] {
 
 <script>
 const recognition = new webkitSpeechRecognition();//마이크
-
+navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
 
 let init_btn_sync = false; // 방버튼정보를 최초 동기화 하였는가??
 let init_share_media = false; // share정보 최초 동기화 하였는가??
@@ -1618,6 +1618,15 @@ if(!!params.password) {
     connection.password = params.password;
 }
 designer.appendTo(document.getElementById('widget-container'), function() {
+    if(DetectRTC.isMobileDevice){
+        alert("모바일!")
+        document.querySelector('#mobile-device-box').style.display = 'block';
+        videoSelect.onclick = changeCamera;
+    }else{
+        alert("DESK TOP!")
+    }
+
+
     if (params.open === true || params.open === 'true') {
         //console.log("개설자");
         init_btn_sync = true;
@@ -1803,12 +1812,12 @@ function gotDevices(deviceInfos){
     const deviceInfo = deviceInfos[i];
     const option = document.createElement('option');
     option.value = deviceInfo.deviceId;
-    // if (deviceInfo.kind === 'videoinput') {
+     if (deviceInfo.kind === 'videoinput') {
       option.text = deviceInfo.label || `camera ${videoSelect.length + 1}`;
       videoSelect.appendChild(option);
-    // } else {
-    //   console.log('Some other kind of source/device: ', deviceInfo);
-    // }
+     } else {
+       console.log('Some other kind of source/device: ', deviceInfo);
+     }
   }
   selectors.forEach((select, selectorIndex) => {
     if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
@@ -1842,16 +1851,6 @@ function changeCamera() {
       myVideo.srcObject = null;
       myVideo.srcObject = myVideoStream;
       replaceTrack(videoTrack, false);
-    // let PCs = connection.peers;
-    // if (!PCs.getSenders) return;
-    // let videoTrack = stream.getVideoTracks()[0];
-    // PCs.forEach(function(pc) {
-    //   var sender = pc.getSenders().find(function(s) {
-    //     return s.track.kind == videoTrack.kind;
-    //   });
-    //   console.log('found sender:', sender);
-    //   sender.replaceTrack(videoTrack);
-    // });
   })
   .catch(function(err) {
     console.error('Error happens:', err);
@@ -1869,9 +1868,6 @@ function changeCamera() {
 //   navigator.mediaDevices.getUserMedia(constraints).then(gotStream).then(gotDevices).catch(handleError);
 }
 
-videoSelect.onclick = changeCamera;
-
-navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
 
 ////////////////
 
@@ -1995,6 +1991,9 @@ $("#save-label").click(function () {
 </script>
 </body>
 <style type="text/css">
+    #mobile-device-box{
+        display: none;
+    }
     .media-div{
         display: inline-block;
         width: 45%;
