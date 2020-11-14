@@ -16,7 +16,6 @@
   <script src="/rtc/js/jquery-3.5.1.min.js"></script>
   <script src="/rtc/js/bootstrap.min.js"></script>
   
-  <script src="/rtc/js/ExpandSelect_1.00.js"></script>
   
   <link href="/rtc/css/bootstrap.min.css" rel="stylesheet">
   <script src="/node_modules/webrtc-adapter/out/adapter.js"></script>
@@ -71,7 +70,7 @@ input[disabled], button[disabled] {
     <div class="meetingroom">
       <div id="sidebar" class="sidebar">
         <video id="main-video"  playsinline autoplay></video>
-        
+        <img id="main-img"/>
         <!-- loadImage('./img/NAMU.png') -->
         <div class="btn-zip">
           <input type="radio" id="participant-btn" name="button"checked="checked" />
@@ -233,6 +232,12 @@ input[disabled], button[disabled] {
             </i>
             <p class="arrow_box">clear</p>
         </div>
+        <!-- <div id="test" class="circle-btn">
+            <i>
+                <img id="btn-clear-message" src="../img/clean.png" alt="test" width="50" height="70" />
+            </i>
+            <p class="arrow_box">test</p>
+        </div> -->
 
         <div id="more" class="circle-btn">
             <i>
@@ -305,11 +310,19 @@ const recognition = new webkitSpeechRecognition();//마이크
 navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
 
 //$('#test').click(function(){
-//    console.log("TEST! my", connection.streamEvents[myStreamID].stream.getVideoTracks()[0]);
-//    console.log("TEST! other", connection.streamEvents[otherStreamID]);
-//    console.log("myStreamID ",myStreamID)
-//    console.log("otherStreamID" , otherStreamID)
-//    connection.streamEvents[otherStreamID].stream = null;
+//    $.ajax({
+//        type: "GET",
+//        url: 'https://k3d106.p.ssafy.io/api/v2/media/17/mobile',
+//        success: function (html) {},
+//        error: function (error) {},
+//    }).done(function(data) {
+//        console.log(data);
+//        var imageReader = new FileReader();
+//        imageReader.onloadend = function() {
+//            image.src = imageReader.result;
+//        }
+//        imageReader.readAsDataURL(b64toBlob(data.video,"image/*",512));
+//    });
 //})
 
 let init_btn_sync = false; // 방버튼정보를 최초 동기화 하였는가??
@@ -330,25 +343,26 @@ let recordVideoFormData2; // 저장된 videoData
 
 let tempVideoSrc = ""; // 보내기전 데이터
 let tempAudioSrc = ""; // 
+let tempImageSrc = "";
 
 let recorder; // RTC recorder
 
 let isMediaSharing = false; // 미디어 공유중인지?
 let isShareMyMedia = false; // 자기 미디어 공유중인지? - 제어권 가짐 -> 아직 개발단계
 
+
 let finishShareMidia = false; // 공유가 끝났는지?
 // test 용 -> 나중에는 canvas 영상 재생할때만 canvas하단에 배치할것
 var audio = document.getElementById('main-audio');
 var video = document.getElementById('main-video');
+var image = document.getElementById("main-img");
 //audio.style.display = '';
 audio.addEventListener('play', audioHandler, false);
 audio.addEventListener('pause', audioHandler, false);
 audio.addEventListener('seeked', audioHandler, false);
 clearMedia();
 //videoSource
-$('#camera-selector').click(function(){
-    ExpandSelect('videoSource');
-});
+
 $('#btn-save-recorded-data').click(function(e) {
     //e.preventDefault();
     $('#mediaFormToSave').modal('show');
@@ -612,7 +626,17 @@ function clearCanvas(){
     });
     connection.send("plz-clear-canvas")
 }
-
+function syncSharedMedia2Image(sharedImage){
+    isShareMyVideo = false;
+    isShareVideo = false;
+    isMediaSharing = true; // 미디어 공유중인지?
+    isShareMyMedia = false; // 자기 미디어 공유중인지? - 제어권 가짐
+    
+    image.src = sharedImage;
+    //$('#main-video').show();
+    designer.backgroundImage();
+    
+}
 function syncSharedMedia(recordAudioFormData,recordVideoFormData){
     isShareMyVideo = false;
     isShareVideo = false;
@@ -630,17 +654,13 @@ function syncSharedMedia(recordAudioFormData,recordVideoFormData){
     designer.backgroundVideo();
     
 }
-function makeShareMediaSrc2(recordVideoFormData2){
-    var videoReader = new FileReader();
-
-    videoReader.onloadend = function() {
-        video.src = videoReader.result;
-        video.controls = true;
-        $('#main-video').show()    
-        console.log("tempVideoSrc",tempVideoSrc)     
-    }
-    videoReader.readAsDataURL(recordVideoFormData2);
-    //sendMediaClock2();
+function makeShareMediaSrc2Image(recordVideoFormData2){
+    var imageReader = new FileReader();
+        imageReader.onloadend = function() {
+            tempImageSrc = imageReader.result
+        }
+    imageReader.readAsDataURL(recordVideoFormData2);
+    sendMediaClock2Image();
 }
 function makeShareMediaSrc(recordVideoFormData2,recordAudioFormData2){
     var videoReader = new FileReader();
@@ -661,12 +681,12 @@ function makeShareMediaSrc(recordVideoFormData2,recordAudioFormData2){
 function initIntaval(){ // 문제 될수있을듯
     connection.chunkInterval = 0;
 }
-function sendMediaClock2(){
-    if(!tempVideoSrc){
-        let timerId = setTimeout(sendMediaClock2, 500);
+function sendMediaClock2Image(){
+    if(!tempImageSrc){
+        let timerId = setTimeout(sendMediaClock2Image, 500);
     }else{
-        sendMediaSrc2(tempVideoSrc);
-        tempVideoSrc = "";
+        sendMediaSrc2Image(tempImageSrc);
+        tempImageSrc = "";
     }
 }
 function sendMediaClock(){
@@ -679,17 +699,14 @@ function sendMediaClock(){
     }
 }
 
-function sendMediaSrc2(sharedRecordVideo,callback){
-    console.log("sendMediaSrc2 !!!!! ", sharedRecordVideo)
+function sendMediaSrc2Image(sharedRecordVideo,callback){
     connection.chunkInterval = 0.00000000001;
-    video.src = sharedRecordVideo
-    video.pause();
+    image.src = sharedRecordVideo
     if(connection.getAllParticipants().length >= 1){        
         connection.send({
             type:"sendMedia",
-            sharedVideo: 'plz-get-shared-video',
-            sharedRecordAudio : sharedRecordAudio,
-            sharedRecordVideo : sharedRecordVideo,
+            sharedImage: 'plz-get-shared-image',
+            sharedSaveImage : sharedRecordVideo,
             checkmark_id : connection.userid,
             requestId : connection.extra.userFullName
         });
@@ -697,7 +714,7 @@ function sendMediaSrc2(sharedRecordVideo,callback){
         alert("저장된 미디어를 불러오고있습니다.")
         finishShareMidia = true;
         initIntaval();
-        setTimeout(loadDuration2,500)
+        setTimeout(loadDuration,500,false)
         return;
     }
     //audio.src = sharedRecordAudio
@@ -728,7 +745,7 @@ function sendMediaSrc(sharedRecordAudio,sharedRecordVideo,callback){
         alert("저장된 미디어를 불러오고있습니다.")
         finishShareMidia = true;
         initIntaval();
-        setTimeout(loadDuration,500)
+        setTimeout(loadDuration,500,true)
         return;
     }
     //audio.src = sharedRecordAudio
@@ -804,7 +821,7 @@ function uploadDate(string){
 $(document).on("click",".media-element",function(){
     if(!isShareMyVideo && !isShareMyMedia  ){
         if(isShareVideo || isMediaSharing  ){
-            if(!confirm("지금 타사용자가 화면을 공유중입니다. 녹화 영상을 공유 하시겠습니까?")){
+            if(!confirm("지금 타사용자가 화면을 공유중입니다. 저장된 미디어를 공유 하시겠습니까?")){
                 return;
             }
         }
@@ -813,7 +830,7 @@ $(document).on("click",".media-element",function(){
     var tr = $(this);
     var td = tr.children();
     var title = td.eq(0).text();
-    let searchFromServer = confirm(title + " 미디어를 공유하시겠습니까?");
+    let searchFromServer = confirm("저장된" + title + " 미디어를 공유하시겠습니까?");
     if(searchFromServer){
         if(!btn_memo_flag){
             if(init_btn_sync || init_share_media){
@@ -843,8 +860,13 @@ function getMidiasFromDB(title){
     }).done(function(data) {
         console.log(data)
         if("success" === data.message){
-            shareMyMedia(b64toBlob(data.video,"video/mp4",512),b64toBlob(data.audio,"audio/webm;codecs=opus",512)) // 디코딩
-               //shareMyMedia2(b64toBlob(data.video,"video/mp4",512)) // 디코딩
+            if(data.audio){
+                shareMyMedia(b64toBlob(data.video,"video/mp4",512),b64toBlob(data.audio,"audio/webm;codecs=opus",512)) // 디코딩
+                   //shareMyMedia2(b64toBlob(data.video,"video/mp4",512)) // 디코딩
+            }else{
+                console.log("이미지다!")
+                shareMyMedia2Image(b64toBlob(data.video,"image/*",512)) // 디코딩
+            }
             isShareMyVideo = false;
             isShareVideo = false;
             isMediaSharing = true;
@@ -853,14 +875,14 @@ function getMidiasFromDB(title){
     });
 }
 // 모바일
-function shareMyMedia2(recordVideoFromData2){ // 저장된 정보로 share하는 함수
+function shareMyMedia2Image(recordVideoFromData2){ // 저장된 정보로 share하는 함수
+    console.log("shareMyMedia2 ! ", recordVideoFromData2)
     toShareCnt = connection.getAllParticipants().length;
     receiveCnt = 0;
-    console.log("toShareCnt ", toShareCnt)
     finishShareMidia = false;
     clearCanvas(); // 적던것 지우고 시작
     clearMedia();
-    makeShareMediaSrc2(recordVideoFromData2);
+    makeShareMediaSrc2Image(recordVideoFromData2);
 }
 function shareMyMedia(recordVideoFromData2,recordAudioFormData2){ // 저장된 정보로 share하는 함수
     toShareCnt = connection.getAllParticipants().length;
@@ -888,23 +910,22 @@ function startAudioRecord(){
     console.log("RECORDER START! ",recorder);
     recorder.startRecording();
 }
-async function loadDuration2(){
-    video.controls = false;
-    designer.backgroundVideo();
-    video.play();
-}
-async function loadDuration(){
-    while(audio.duration === Infinity) {
-        await new Promise(r => setTimeout(r, 1000));
-        audio.currentTime = 10000000*Math.random();
+async function loadDuration(isVideo){
+    if(isVideo){
+        while(audio.duration === Infinity) {
+            await new Promise(r => setTimeout(r, 1000));
+            audio.currentTime = 10000000*Math.random();
+        }
+        audio.style.display = '';
+        audio.currentTime = 0;
+        video.controls = false;
+        audio.controls = true; 
+        designer.backgroundVideo();
+        video.pause();
+        audio.pause();
+    }else{
+        designer.backgroundImage();
     }
-    audio.style.display = '';
-    audio.currentTime = 0;
-    video.controls = false;
-    audio.controls = true; 
-    designer.backgroundVideo();
-    video.pause();
-    audio.pause();
 }
 
 function stopAudioRecord() {
@@ -1245,7 +1266,11 @@ connection.onmessage = function(event) {
                     console.log("isShareMyMedia",isShareMyMedia)
                     initIntaval();
                     if(isShareMyMedia){
-                        loadDuration();
+                        if(event.data.isVideo){
+                            loadDuration(true);
+                        }else{
+                            loadDuration(false);
+                        }
                     }
                 }
             }else{
@@ -1253,6 +1278,32 @@ connection.onmessage = function(event) {
             }
         }
         return;
+    }
+    if(event.data.sharedImage === 'plz-get-shared-image'){
+        if(event.data.sharedSaveImage){
+            if(!event.data.target_id){
+                if(event.data.checkmark_id){
+                    connection.send({
+                        receive_success : true,
+                        target_id : event.data.checkmark_id,
+                        need_time_sync : false,
+                        isVideo : false,
+                    })
+                    finishShareMidia = true; 
+                }
+                if(isShareMyVideo){
+                    alert(event.data.requestId +" 사용자의 공유 요청으로 카메라 공유가 중지됩니다.")
+                    changeShareMyCamera(false);   
+                    isShareMyVideo = false; 
+                    isShareVideo = false;
+                }else if(isShareMyMedia){
+                    alert(event.data.requestId +" 사용자의 공유 요청으로 미디어 공유가 중지됩니다.")
+                    isShareMyMedia = false;
+                }
+                clearMedia();
+                syncSharedMedia2Image(event.data.sharedSaveImage);
+            }
+        }
     }
     if(event.data.sharedVideo ==='plz-get-shared-video'){
         if(event.data.sharedRecordAudio && event.data.sharedRecordVideo){
@@ -1266,6 +1317,7 @@ connection.onmessage = function(event) {
                         receive_success : true,
                         target_id : event.data.checkmark_id,
                         need_time_sync : false,
+                        isVideo : true,
                     })
                     finishShareMidia = true; 
                 }
@@ -1289,6 +1341,7 @@ connection.onmessage = function(event) {
                         receive_success : true,
                         target_id : event.data.checkmark_id,
                         need_time_sync : true,
+                        isVideo : true,
                     })
                     finishShareMidia = true; 
                     clearMedia();
@@ -3110,6 +3163,9 @@ html
         display: block;
         width:0px;
         height: 0px;
+    }
+    #main-img{
+        display: none;
     }
     #main-audio{
          width: 100%;

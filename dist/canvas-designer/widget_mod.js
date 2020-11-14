@@ -3712,6 +3712,12 @@ function getRecordVideoFormData() {
   var keyCode;
   //추가
   var test = {
+    drawImageToCanvas: function(image, context,width,height){
+      tempContext.clearRect(0, 0, innerWidth, innerHeight); 
+      context.clearRect(0, 0, innerWidth, innerHeight);
+      context.drawImage(image, 0, 0, width, height);
+      //drawHelper.redraw();
+    },
     findParentDocument: function (id) {
       //console.log("제발되라.. ", id);
     },
@@ -3761,6 +3767,13 @@ function getRecordVideoFormData() {
             //console.log("widget video stream id ", window.parent.makeStreamByStreamID(event.data.streamId))
             //test.drawVideoToCanvas(video, context, context.canvas.width, context.canvas.height);
           }
+        }
+        if(event.data.backgroundImage){
+          isVideoBackGround = true;
+          let image = window.parent.document.getElementById("main-img");
+          console.log("widget_mod.js : ", image);
+          test.drawVideoToCanvas(image, context, context.canvas.width, context.canvas.height);
+          //drawHelper.redraw();
         }
         if (event.data.removeMainVideo) {
           if (!isVideoBackGround) return;
