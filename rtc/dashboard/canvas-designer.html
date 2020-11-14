@@ -1725,10 +1725,9 @@ function replaceTrack(videoTrack, screenTrackId) {
                 }
                 return;
             }
-
-            if(sender.track.id !== tempStream.getTracks()[0].id) return;
             if (sender.track.kind === 'video' && trackToReplace) {
                 sender.replaceTrack(trackToReplace);
+                console.log("peer replaceTrack excute!!! ")
                 trackToReplace = null;
             }
         });
@@ -1832,8 +1831,9 @@ function changeCamera() {
   })
   .then(function(stream) {
       console.log(stream);
-      console.log(connection.addStream(stream));
-      video.lastChild.srcObject = stream;
+      let videoTrack = stream.getVideoTracks()[0];
+      console.log(videoTrack)
+      replaceTrack(videoTrack, false);
     // let PCs = connection.peers;
     // if (!PCs.getSenders) return;
     // let videoTrack = stream.getVideoTracks()[0];
