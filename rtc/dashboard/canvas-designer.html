@@ -135,6 +135,12 @@ input[disabled], button[disabled] {
       <!-- containerA -->
      
       <div id="containerA" >
+        <div class="logo">
+            <a class="logo-a" href="https://k3d106.p.ssafy.io/"><img src="../img/NAMU.png" alt="voda 로고" width="50" height="50" />VORACAY</a>
+        </div>
+        <!-- <div id="logo">
+            <img  id="btn-chat-message" src="../img/send.png"title="전송" alt="전송" width="30" height="30" disabled />
+        </div> -->
         <div id="captiondiv" class="captionBox">
         </div>
         <div class="paging-button">
@@ -215,6 +221,18 @@ input[disabled], button[disabled] {
             </i>
             <p class="arrow_box">clear</p>
             
+        </div>
+
+        <div id="more" class="circle-btn">
+            <i>
+                <img id="btn-more" src="../img/more.png" alt="더 보기" width="70" height="60" />
+            </i> 
+        </div>
+
+        <div id="close" class="circle-btn">
+            <i >
+                <img id="btn-close" src="../img/close.png" alt="종료" width="40" height="40" />
+            </i>  
         </div>
 
         <!-- <div id="onoff-reg" class="circle-btn">
@@ -2246,6 +2264,25 @@ $("#save-label").click(function () {
     font-family: "JSDongkang-Regular";
     src: url("../font/JSDongkang-Regular.otf");
     }
+    @font-face {
+    font-family: "Fredoka One";
+    src: url("../font/FredokaOne-Regular.ttf");
+    }
+    /* logo */
+    div .logo{
+        cursor: pointer;
+        position: fixed;
+        top:1%;
+        left:3%
+        
+    }
+    .logo a{ 
+        text-decoration:none ;
+        font-size: 35px;
+        font-family: "Fredoka One";
+        color:rgb(41 58 151);
+    }
+
     #other-videos {
         float:left;
         width: 80%;
@@ -3027,6 +3064,9 @@ html
         margin-right: 25%;
 
     }
+    #more, #close{
+            display: none;
+        }
     @media screen and (max-width: 768px) {
 
         #containerA{
@@ -3093,15 +3133,66 @@ html
         }
 
         .meetingroom{
-            height: calc(100% - 120px);
+            height: calc(100% - 130px);
         }
 
-        .plus-box{
-            height: 100%;
+        /* logo  */
+        div .logo{
+        cursor: pointer;
+        position: fixed;
+        top:2%;
+        left: 33%;
+        
+         }
+
+
+        /* MENU */
+        /* MENU-아래 메뉴 부분  */
+        .meeting-bottom {
+            height: 130px;
         }
+        /* MENU-색  */
+        .plus-box {
+            height: 130px;
+        }
+
+        /* 버튼 */
         .bottom-btn-box{
             padding-top: 0;
         }
+        #more, #close{
+            display: inline;
+        }
+        .circle-btn i{
+            width: 80px;
+            height: 80px;
+            padding: 40px;
+            margin-right: 20px;
+            border: 4px solid  rgb(16, 24, 133);
+        }
+        #more i{
+            background-color:  rgb(41 58 151);
+        }
+
+        #close i{
+            border: 4px solid  #af404c;
+             background-color:   #af404c;
+        }
+
+        .circle-btn i:hover {
+            cursor: pointer;
+            /* samsung color */
+            border: 4.5px solid rgb(16, 24, 133);
+        }
+
+        /* 버튼_ 삭제할버튼 */
+        #invitelink, #share-screen, #share-board, #record, #conference, #clear{
+            display: none;
+        }
+        .circle-btn:hover > p.arrow_box {
+            display: none;
+        }
+    
     }
   </style>
 </html>
