@@ -4,7 +4,8 @@
 <html lang="en" dir="ltr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, initial-scale=0.66, user-scalable=no">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>VORACAY</title>
   <meta name="description" content="WebRTC Dashboard including support for canvas drawing, canvas data syncing, video conferencing, screen sharing and video conferencing. Including chat and file sharing.">
 
@@ -60,6 +61,7 @@ input[disabled], button[disabled] {
     text-decoration: none!important;
     outline: none!important;
 } */
+
 </style>
 </head>
 <body>
@@ -246,7 +248,7 @@ input[disabled], button[disabled] {
           </div>
         </div>
       </div>
-    <canvas id="temp-stream-canvas" style="display: none;"></canvas>
+      <canvas id="temp-stream-canvas" style="display: none; touch-action: manipulation;"></canvas>
 </div>
 
 
@@ -569,6 +571,18 @@ function syncSharedMedia(recordAudioFormData,recordVideoFormData){
     designer.backgroundVideo();
 
 }
+function makeShareMediaSrc2(recordVideoFormData2){
+    var videoReader = new FileReader();
+
+    videoReader.onloadend = function() {
+        video.src = videoReader.result;
+        video.controls = true;
+        $('#main-video').show()    
+        console.log("tempVideoSrc",tempVideoSrc)     
+    }
+    videoReader.readAsDataURL(recordVideoFormData2);
+    //sendMediaClock2();
+}
 function makeShareMediaSrc(recordVideoFormData2,recordAudioFormData2){
     var videoReader = new FileReader();
     var audioReader = new FileReader();
@@ -588,6 +602,14 @@ function makeShareMediaSrc(recordVideoFormData2,recordAudioFormData2){
 function initIntaval(){ // 문제 될수있을듯
     connection.chunkInterval = 0;
 }
+function sendMediaClock2(){
+    if(!tempVideoSrc){
+        let timerId = setTimeout(sendMediaClock2, 500);
+    }else{
+        sendMediaSrc2(tempVideoSrc);
+        tempVideoSrc = "";
+    }
+}
 function sendMediaClock(){
     if(!tempAudioSrc || !tempVideoSrc){
         let timerId = setTimeout(sendMediaClock, 500);
@@ -597,7 +619,38 @@ function sendMediaClock(){
         tempVideoSrc = "";
     }
 }
+function sendMediaSrc2(sharedRecordVideo,callback){
+    console.log("sendMediaSrc2 !!!!! ", sharedRecordVideo)
+    connection.chunkInterval = 0.00000000001;
+    video.src = sharedRecordVideo
+    video.pause();
+    if(connection.getAllParticipants().length >= 1){        
+        connection.send({
+            type:"sendMedia",
+            sharedVideo: 'plz-get-shared-video',
+            sharedRecordAudio : sharedRecordAudio,
+            sharedRecordVideo : sharedRecordVideo,
+            checkmark_id : connection.userid,
+            requestId : connection.extra.userFullName
+        });
+    }else{
+        alert("저장된 미디어를 불러오고있습니다.")
+        finishShareMidia = true;
+        initIntaval();
+        setTimeout(loadDuration2,500)
+        return;
+    }
+    //audio.src = sharedRecordAudio
+    //video.src = sharedRecordVideo
+    
+    //$('#main-video').show();
+    //audio.style.display = '';
+    //designer.backgroundVideo();
+    //video.pause();
+    //audio.pause();
+}
 function sendMediaSrc(sharedRecordAudio,sharedRecordVideo,callback){
+    console.log("sendMediaSrc!!!!" ,sharedRecordVideo)
     connection.chunkInterval = 0.00000000001;
     audio.src = sharedRecordAudio
     video.src = sharedRecordVideo
@@ -716,6 +769,7 @@ function getMidiasFromDB(title){
     $.ajax({
         type: "GET",
         url: 'https://k3d106.p.ssafy.io/api/v2/media/'+params.userFullName+"/"+title,
+        //url: 'https://k3d106.p.ssafy.io/api/v2/test/5/moblie',
         success: function (html) {
 
         },
@@ -726,12 +780,23 @@ function getMidiasFromDB(title){
         console.log(data)
         if("success" === data.message){
             shareMyMedia(b64toBlob(data.video,"video/mp4",512),b64toBlob(data.audio,"audio/webm;codecs=opus",512)) // 디코딩
+            //shareMyMedia2(b64toBlob(data.video,"video/mp4",512)) // 디코딩
             isShareMyVideo = false;
             isShareVideo = false;
             isMediaSharing = true;
             isShareMyMedia = true;
         }
     });
+}
+// 모바일
+function shareMyMedia2(recordVideoFromData2){ // 저장된 정보로 share하는 함수
+    toShareCnt = connection.getAllParticipants().length;
+    receiveCnt = 0;
+    console.log("toShareCnt ", toShareCnt)
+    finishShareMidia = false;
+    clearCanvas(); // 적던것 지우고 시작
+    clearMedia();
+    makeShareMediaSrc2(recordVideoFromData2);
 }
 function shareMyMedia(recordVideoFromData2,recordAudioFormData2){ // 저장된 정보로 share하는 함수
     toShareCnt = connection.getAllParticipants().length;
@@ -758,6 +823,11 @@ function startAudioRecord(){
     connection.recorder = recorder;
     console.log("RECORDER START! ",recorder);
     recorder.startRecording();
+}
+async function loadDuration2(){
+    video.controls = false;
+    designer.backgroundVideo();
+    video.play();
 }
 async function loadDuration(){
     while(audio.duration === Infinity) {
@@ -1334,6 +1404,7 @@ if($(window).width() <768) {
     dataPerPage = 2;
 }
 connection.onstream = function(event) {
+    console.log("stream 은?!",connection.streamEvents)
     totalPeople++;  //누가 들어올 때 ++
     // 화면 크기 따른 함수 호출
     if($(window).width() >768) {
@@ -1355,12 +1426,25 @@ if(tempCount==0){   //4명이 채워질 때
 }
 console.log("event !!! ", event)
 // 파람의 유저풀네임 === 엑스트라 유저풀네임
+if(params.userFullName == event.extra.userFullName){
+        console.log("내 streamID = ", event.streamid)
+        myStreamID = event.streamid;
+    }
 if (event.stream.isScreen && !event.stream.canvasStream) {
     $('#screen-viewer').get(0).srcObject = event.stream;
     $('#screen-viewer').hide();
 }
 else if (event.extra.roomOwner === true) { // 지금은 params.open으로 구분... 되게되있음 사용안하는 if문
     console.log("check event !!! ", event.mediaElement)
+     //var video = document.getElementById('main-video');
+        //video.setAttribute('data-streamid', event.streamid);
+        //// video.style.display = 'none';
+        //if(event.type === 'local') {
+        //    video.muted = true;
+        //    video.volume = 0;
+        //}
+        //video.srcObject = event.stream;
+        //$('#main-video').show();
     event.mediaElement.controls = false;
     meetingList.push(event);
     // var otherVideos = document.querySelector('#other-videos');
@@ -1448,7 +1532,7 @@ $("#other-videos").html(newHtml);
         let p = document.createElement('p');
         div.className = 'media-div'
         p.className = 'user-info-label'
-        let temp = "["+event.extra.userInfo.user_dept+"] "+event.extra.userInfo.user_name +" "+event.extra.userInfo.user_grade;
+        let temp = "["+meetingList[i].extra.userInfo.user_dept+"] "+meetingList[i].extra.userInfo.user_name +" "+meetingList[i].extra.userInfo.user_grade;
         p.innerHTML = `${temp}`
         div.appendChild(meetingList[i].mediaElement);
         div.appendChild(p);
@@ -2317,13 +2401,48 @@ $("#save-label").click(function () {
     }
 
 
+   /* html { */
+  /* overscroll-behavior-y: none; */
+/* } */
+/* .body */
+/* .voracay{ */
+  /* position: absolute; */
+  /* top: 0px; */
+/*  */
+  /* Give them all the available space */
+  /* width: 100%; */
+  /* height: 100%; */
+/*  */
+  /* Remove the margins if any */
+  /* margin: 0; */
+/*  */
+  /* Allow them to scroll down the document */
+  /* overflow-y: hidden; */
+/* } */
+/* .body{ */
+  /* z-index: 1; */
+  /* overscroll-behavior-y: none; */
+/* } */
+/* .voracay{ */
+  /* z-index: 2; */
+/* } */
+html
+    body {
+      overscroll-behavior-y: contain;
+    }
+
+    .temp-stream-canvas{ 
+      touch-action: none;
+    }
     
     .voracay {
       height: 100vh;
       width: 100vw;
       overflow: hidden;
+      overflow-y: hidden;
       position: relative;
       background: rgb(0, 0, 0);
+      touch-action: none;
     }
     .meetingroom {
       background: rgb(0, 0, 0);
@@ -2618,7 +2737,7 @@ $("#save-label").click(function () {
         font-size: 24px;
         text-shadow: 1px 1px white;
     }
-    
+
     #txt-chat-message {
         width: 90%;
         /* resize:none;
@@ -2671,8 +2790,8 @@ $("#save-label").click(function () {
     
     #main-video {
         display: block;
-        width:0;
-        height: 0;
+        width:0px;
+        height: 0px;
     }
     #main-audio{
          width: 100%;
