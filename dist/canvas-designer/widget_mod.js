@@ -3581,7 +3581,7 @@ function getRecordVideoFormData() {
         addEvent(isAbsolute, "change", common.updateTextArea);
     })();
   var canvas = tempContext.canvas,
-    isTouch = "createTouch" in document;
+    isTouch = ('createTouch' in document) || ('ontouchstart' in document);
   addEvent(canvas, isTouch ? "touchstart mousedown" : "mousedown", function (
     e
   ) {
