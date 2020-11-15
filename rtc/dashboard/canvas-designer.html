@@ -370,7 +370,6 @@ input[disabled], button[disabled] {
 const recognition = new webkitSpeechRecognition();//마이크
 navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
 
-
 let init_btn_sync = false; // 방버튼정보를 최초 동기화 하였는가??
 let init_share_media = false; // share정보 최초 동기화 하였는가??
 
@@ -931,6 +930,15 @@ function getMidiasFromDB(title){
     });
 }
 // 모바일
+function shareMyMedia2Image(recordVideoFromData2){ // 저장된 정보로 share하는 함수
+    console.log("shareMyMedia2 ! ", recordVideoFromData2)
+    toShareCnt = connection.getAllParticipants().length;
+    receiveCnt = 0;
+    finishShareMidia = false;
+    clearCanvas(); // 적던것 지우고 시작
+    clearMedia();
+    makeShareMediaSrc2Image(recordVideoFromData2);
+}
 function moblieClickParticipant(id){
 
     var list = ['participant-boxid', 'chat-boxid', 'save-boxid'];
@@ -961,14 +969,6 @@ function mobileClickBack(){
     $('.back').css("display","none");
     $('.mobile-title').css("display","none");
     
-}
-function shareMyMedia2(recordVideoFromData2){ // 저장된 정보로 share하는 함수
-    toShareCnt = connection.getAllParticipants().length;
-    receiveCnt = 0;
-    finishShareMidia = false;
-    clearCanvas(); // 적던것 지우고 시작
-    clearMedia();
-    makeShareMediaSrc2Image(recordVideoFromData2);
 }
 function shareMyMedia(recordVideoFromData2,recordAudioFormData2){ // 저장된 정보로 share하는 함수
     toShareCnt = connection.getAllParticipants().length;
