@@ -97,7 +97,9 @@ input[disabled], button[disabled] {
             <input type="hidden" name="select_flag" id="select_flag" value="0">
         </div>
         <div class="chosed-box">
-           <div id="participant-boxid" >
+          <img src="../img/back.png" class="back" onclick="mobileClickBack()"></button>
+          <div class="mobile-title">참가자</div>
+          <div id="participant-boxid" >
                 <div id="participantboxact" class="participant-box ">
                   <div id="onUserStatusChanged">
                       <div id='participant-list'></div>
@@ -465,8 +467,8 @@ function changeMemoBtn(input){
         $('#btn-memo-message').attr('disabled', false);
         $("#isMemo").css('display', '');
 
-              // 사용자 화면 위치 변경
-              $("#captiondiv").css("display","none");
+        // 사용자 화면 위치 변경
+        $("#captiondiv").css("display","none");
         $(".media-div").addClass("on");
         $(".user-info-label").addClass("on");
         $("#other-videos").addClass("on");
@@ -926,8 +928,38 @@ function getMidiasFromDB(title){
     });
 }
 // 모바일
-function shareMyMedia2Image(recordVideoFromData2){ // 저장된 정보로 share하는 함수
-    console.log("shareMyMedia2 ! ", recordVideoFromData2)
+function moblieClickParticipant(id){
+
+    var list = ['participant-boxid', 'chat-boxid', 'save-boxid'];
+
+    for(var i=0; i<list.length; i++){
+        if(list[i]==id){
+            var tempClassName = '#'+list[i]+'';
+            $(tempClassName).removeClass('off');
+            $(tempClassName).addClass('on');
+        }
+        else{
+            var tempClassName = '#'+list[i]+'';
+            $(tempClassName).removeClass('on');
+            $(tempClassName).addClass('off');
+        }
+    }
+
+    $('#sidebar').addClass('on');
+    $('.back').css("display","block");
+    $('.btn-zip').css("display","none");
+    $('.mobile-title').css("display","block");
+
+}
+
+function mobileClickBack(){
+    $('.btn-zip').css("display","none");
+    $('#sidebar').removeClass('on');
+    $('.back').css("display","none");
+    $('.mobile-title').css("display","none");
+    
+}
+function shareMyMedia2(recordVideoFromData2){ // 저장된 정보로 share하는 함수
     toShareCnt = connection.getAllParticipants().length;
     receiveCnt = 0;
     finishShareMidia = false;
@@ -1945,7 +1977,8 @@ function appendChatMessage(event, checkmark_id) {
     div.className = 'message';
 
     if (event.data) {
-        div.innerHTML = '<img src="../img/you1.png" class="sendmark"> <b>[' + (event.extra.userFullName || event.userid) + ']: </b>' + event.data.chatMessage;
+        div.className = 'message you';
+        div.innerHTML = '<img src="../img/you1.png" class="sendmark"> <b>[' + (event.extra.userFullName || event.user) + ']: </b>' + event.data.chatMessage;
 
         if (event.data.checkmark_id) {
             connection.send({
@@ -1954,8 +1987,11 @@ function appendChatMessage(event, checkmark_id) {
             });
         }
     } else {
+        div.className = 'message me';
         div.innerHTML = '<img class="checkmark" id="' + checkmark_id + '" title="Received" src="../img/me1.png"><b>ME: </b>' + event;
-        div.style.background = 'rgb(16 23 66)';
+        // div.style.background = 'rgb(176 136 158)';
+        div.style.background = 'rgb(126, 136, 179)';
+        
     }
 
     conversationPanel.prepend(div);
@@ -2647,25 +2683,32 @@ $("#save-label").click(function () {
         width: 9%;
     }
     #uploaded-container{
-        height:  calc(100%);
+        height: calc(100%);
         overflow-y: hidden;
         overflow-x: hidden;
         margin-right: 20px;
         margin-left: 10px;
+        border-top: 2px solid #a9b2e6;
+        margin-top: 2%;
     }
     #uploaded-list {
         text-align: left;
         max-height: 90%;
         overflow-x: hidden;
         overflow-y: scroll;
-        border-top: 2px solid #a9b2e6;
+        /* border-top: 2px solid #a9b2e6; */
         width: 110%;
-        font-size: 15px
+        font-size: 15px;
+        margin-left: 2%;
+        text-align: center;
+
     }
     #uploaded-container-header{
+        margin-top: 3%;
         display:flex;
         justify-content: space-between;
         align-items: center;
+        text-align: center;
     }
     #savebox-header{
         margin:0;
@@ -2757,7 +2800,7 @@ $("#save-label").click(function () {
       overflow: hidden;
     }
     #chat-send{
-        margin: 5px;
+        margin: 3%;
         display:flex;
     }
     #chat-boxid div.active {
@@ -3237,8 +3280,9 @@ html
         height:  calc(100%);
         overflow-y: hidden;
         overflow-x: hidden;
-        margin-right: 20px;
+        margin-right: 10px;
         margin-left: 10px;
+        border-top: 2px solid #a9b2e6;
     }
     #conversation-panel {
         /* margin-bottom: 20px; */
@@ -3247,17 +3291,38 @@ html
         height:  calc(80%);
         overflow-x: hidden;
         overflow-y: scroll;
-        border-top: 2px solid #a9b2e6;
         /* width:106%; */
         /* 위에로 설정: scroll조금만 보임, 110%로하면 아예안보임 */
         width: 110%;
-        font-size: 15px
+        font-size: 15px;
+        margin-top: 3%;
     }
     
     #conversation-panel .message {
-        border-bottom: 2px solid #a9b2e6;;
-        padding: 5px 10px;
-        word-wrap:break-word;
+        border-bottom: 2px solid #a9b2e6;
+        padding: 2px 10px;
+        word-wrap: break-word;
+        border-radius: 10px;
+        /* margin-left: 2%; */
+        /* margin-right: 10%; */
+        margin-bottom: 4%;
+        /* margin-top: 1%; */
+        border: 1px solid rgb(76 78 90);
+        box-shadow: 2px 2px 3px #000000;
+        background-color: #344386;
+    }
+    .message{
+        overflow: auto;
+    }
+    .message.you{
+        float: right;
+        margin-right: 9%;
+        margin-left: 10%;
+    }
+
+    .message.me{
+        margin-right: 7%;
+        float: left;
     }
     
     #conversation-panel .message img, #conversation-panel .message video, #conversation-panel .message iframe {
@@ -3365,6 +3430,37 @@ html
     }
     #more, #close{
             display: none;
+        }
+
+    .back{
+        float: left;
+        display: none;
+        width: 10%;
+        height: 5%;
+        margin-top: 5%;
+        margin-left: 3%;
+    }
+
+    .mobile-title{
+        display: none;
+    }
+
+    #participant-table{
+        text-align: center;
+    }
+
+    #participant-table > tbody{
+     font-size: 1rem;   
+    }
+
+    #participant-table > thead {
+        background-color: #55608f;
+        border-bottom: 1px solid gray;
+    }
+
+    .media-element > td{
+        border-bottom: 1px solid #dee2e6;
+        border-top: 0px solid #dee2e6;
     }
     /* 추가메뉴  */
     input[id="menuicon"]{
@@ -3441,6 +3537,74 @@ html
             display: none;
         }
 
+
+        /* mobile sidebar css */
+        #sidebar.on{
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .sidebar.on > .chosed-box > #participant-boxid > #participantboxact > #onUserStatusChanged > #participant-list {
+            margin-right: 10%;
+            font-size: 1.6rem;
+        }
+
+        .sidebar.on > .chosed-box > #participant-boxid{
+            margin-top: 10%;
+            margin-left: 10%;
+        }   
+
+        #participant-table > tbody{
+            font-size: 1.3rem;   
+        }
+
+        .mobile-title{
+            font-size: 2.2rem;
+            margin-left: 3%;
+            margin-top: 6%;
+            margin-bottom: 5%;
+            float:left;
+        }
+
+        #chat-boxid.on > #chatboxact > #chat-send> #txt-chat-message{
+            height: 60px;
+            width: 80%;
+            font-size: 2rem;
+        }
+
+        #chat-boxid.on > #chatboxact > #chat-send> #btn-chat-message{
+            width: 8%;
+            height: 8%;
+            margin: 1%;
+        }
+
+        #chat-boxid.on > #chatboxact > #chat-send> #btn-attach-file{
+            width: 8%;
+            height: 8%;
+            margin: 1%;
+        }
+
+        #chat-boxid.on > #chatboxact > #chat-container > #conversation-panel> .message{
+            font-size: 2rem;
+            padding-top: 1.3%;
+        }
+
+        #chat-boxid.on > #chatboxact > #chat-container > #conversation-panel> .message >img{
+            height: 60px;
+            width: 60px;
+            padding-bottom: 1%;
+        }
+
+        .message.you{
+            margin-right: 10%;
+            margin-left: 10%;
+        }
+
+        .message.me{
+            margin-right: 10%;
+        }
+        
         .meetingroom{
             height: calc(100% - 130px);
         }
@@ -3568,7 +3732,51 @@ html
         .circle-btn:hover > p.arrow_box {
             display: none;
         }
-    
+        
+
+        #participant-boxid.on{
+            display: block;
+        }
+
+        #participant-boxid.off{
+            display: none;
+        }
+
+        #chat-boxid.on{
+            width: 100%;
+            display: block;
+        }
+
+        #chat-boxid.off{
+            display: none;
+        }
+
+        #save-boxid.on{
+            width: 100%;
+            padding-left: 10%;
+            padding-right: 10%;
+            display: block;
+        }
+
+        #savebox-header {
+            margin-left: 8%;
+        }
+        #savebox-header-day {
+            margin-right: 20%;
+        }
+
+        #uploaded-container-header{
+            font-size: 2rem;
+        }
+
+        #uploaded-list{
+            font-size: 1.5rem;
+        }
+
+        #save-boxid.off{
+            display: none;
+        }
+
     }
   </style>
 </html>
