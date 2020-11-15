@@ -70,9 +70,9 @@ input[disabled], button[disabled] {
 
 <div class="voracay">
     <video id="main-video"  playsinline autoplay></video>
+    <img id="main-img"/>
     <div class="meetingroom">
       <div id="sidebar" class="sidebar">
-        <img id="main-img"/>
         <!-- loadImage('./img/NAMU.png') -->
         <div class="btn-zip">
           <input type="radio" id="participant-btn" name="button"checked="checked" />
@@ -1139,6 +1139,15 @@ function changeShareMyCameraM(flag){
         $("#btn-share-my-camera-m").html("ShareMyCamera")
     }
 }
+$('.sidebar-i').click(function(){
+    if(!DetectRTC.isMobileDevice){
+        return;
+    }
+    if(document.querySelector("#menuicon").checked){
+        document.querySelector("#menuicon").checked = false
+    }
+    console.log(" 확인용 입니다 . ",document.querySelector("#menuicon").checked);
+})
 $('#btn-share-my-camera-m').click(function(){
     isShareMyVideo = !isShareMyVideo;//true false 확인?
     if(isShareMyVideo && !btn_memo_flag){
