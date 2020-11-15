@@ -231,6 +231,7 @@ function CanvasDesigner() {
         if (!designer.iframe) return;
         //console.log("canvas-designer-widget param!! : ",idData)
         // console.log("canvas-widget.js첨부된 비디오",video);
+        console.log("CANVAS DESINGER 까지 왔음 ", id)
         designer.postMessage({
             backgroundVideo: true,
             streamId : id,

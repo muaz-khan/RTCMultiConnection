@@ -3761,7 +3761,8 @@ function getRecordVideoFormData() {
           isVideoBackGround = true;
           if(!event.data.streamId){
             test.findParentDocument(event.data.id);
-            let video = window.parent.document.getElementById("main-video");
+            let video = window.parent.document.querySelector("#main-video");
+            console.log("WIDGET_MOD 까지 왔다 ", video.srcObject)
             test.drawVideoToCanvas(video, context, context.canvas.width, context.canvas.height);
           }else{
             //console.log("widget video stream id ", window.parent.makeStreamByStreamID(event.data.streamId))
