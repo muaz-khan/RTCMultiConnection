@@ -91,11 +91,6 @@ input[disabled], button[disabled] {
           >
 
         </div>
-        <div class="select" id="mobile-device-box">
-            <label for="videoSource">Video source: </label>
-            <select id="videoSource"></select>
-            <input type="hidden" name="select_flag" id="select_flag" value="0">
-        </div>
         <div class="chosed-box">
           <img src="../img/back.png" class="back" onclick="mobileClickBack()"></button>
           <div class="mobile-title">참가자</div>
@@ -143,8 +138,27 @@ input[disabled], button[disabled] {
       <!-- containerA -->
      
       <div id="containerA" >
-        <div class="logo">
-            <a class="logo-a" href="https://k3d106.p.ssafy.io/main"><img src="../img/NAMU.png" alt="voda 로고" width="50" height="50" />VORACAY</a>
+        <input type="checkbox" id="select-mobile-cam">
+        <div class="containerB">
+            <div class="logo">
+                <a class="logo-a" href="https://k3d106.p.ssafy.io/main"><img src="../img/NAMU.png" alt="voda 로고" width="50" height="50" />VORACAY</a>
+                <div id="select-mobile">
+                    <label for="select-mobile-cam" >
+                        <i>
+                            <img id="btn-mobile-cam" src="../img/cam-switch.png" alt="CAM" width="70" height="50" />
+                        </i> 
+                    </label>
+                </div>
+            </div>
+            <div class="select-mobile-cam-menu">
+                <div class="hiddenbar">
+                    <div class="select" id="mobile-device-box">
+                        <label id="mobile-device-box-label"for="videoSource">Video Select</label>
+                        <select id="videoSource"></select>
+                        <input type="hidden" name="select_flag" id="select_flag" value="0">
+                    </div>
+                </div>
+            </div>
         </div>
         <!-- <div id="logo">
             <img  id="btn-chat-message" src="../img/send.png"title="전송" alt="전송" width="30" height="30" disabled />
@@ -170,13 +184,13 @@ input[disabled], button[disabled] {
     <div class="plus-box"></div>
     <div class="meeting-bottom">
       <div class="bottom-btn-box">
-        <div id="camera-selector" class="btn btn-dark">
+        <!-- <div id="camera-selector" class="btn btn-dark">
             <i class="active">
                 <img class="oncam" src="../img/cam2.png" alt="전면" width="40" height="40" />
                 <img class="offcam" src="../img/cam1.png" alt="후면" width="40" height="40" />
             </i>
             <p class="arrow_box">카메라 선택</p>
-        </div>
+        </div> -->
         <div id="onoff-cam" class="onoff-cam circle-btn">
           <i class="active">
               <img class="oncam" src="../img/cam2.png" alt="캠" width="40" height="40" />
@@ -260,7 +274,7 @@ input[disabled], button[disabled] {
       </div>
     </div>
     <div class="plus-menu">
-        <div class="sidebar">
+        <div class="sidebar-menu">
            <div class="sidebar-first">
                 <div id="share-screen-m" class="circle-btn btn-m">
                     <i class="sidebar-i">
@@ -291,7 +305,7 @@ input[disabled], button[disabled] {
                     </i>
                     <p class="btn-label">Record</p>
                 </div>
-                <div id="invitelink-m" class="circle-btn btn-m">
+                <div id="invitelink-m" class="circle-btn btn-m invitelink">
                     <i class="sidebar-i">
                     <img src="../img/invite.png" alt="초대" width="40" height="40" />
                     </i>
@@ -1318,7 +1332,6 @@ connection.onUserStatusChanged = function(event) {
     if(userInfo.length) {
         userInfo = [connection.extra.userInfo].concat(userInfo);
     }
-
     if(userInfo.length){
         let table = document.createElement('table');
         let tbody = document.createElement('tbody')
@@ -2243,6 +2256,7 @@ designer.appendTo(document.getElementById('widget-container'), function() {
         //alert("모바일!")
         document.querySelector('#mobile-device-box').style.display = 'block';
         videoSelect.onchange = changeCamera;
+        //   
     }else{
         //console.log("DetectRTC ,", DetectRTC)
         //alert("DESK TOP!")
@@ -2253,6 +2267,10 @@ designer.appendTo(document.getElementById('widget-container'), function() {
         //console.log("개설자");
         init_btn_sync = true;
         init_share_media = true;
+        // connection.extra.manager=true;
+        // console.log("이사람이 바로 매니저요");
+        // console.log(connection.extra.userInfo);
+        // console.log(event.extra.manager);
         connection.open(params.sessionid, function(isRoomOpened, roomid, error) {
             if (error) {
                 if (error === connection.errors.ROOM_NOT_AVAILABLE) {
@@ -2455,6 +2473,7 @@ function gotStream(stream) {
   return navigator.mediaDevices.enumerateDevices();
 }
 function changeCamera() {
+    $("input:checkbox[id='select-mobile-cam']").prop("checked", false);
     const videoSource = videoSelect.value;
     navigator.mediaDevices
   .getUserMedia({
@@ -2463,6 +2482,7 @@ function changeCamera() {
   .then(function(stream) {
       let videoTrack = stream.getVideoTracks()[0];
       let myVideo = document.getElementById(myStreamID);
+      
       for(let i=0;i<meetingList.length;i++){
           if(meetingList[i].streamid == myStreamID){
             myVideo.srcObject = null;
@@ -2476,6 +2496,8 @@ function changeCamera() {
             
             //myVideo.srcObject = null;
             //myVideo.srcObject = newStream;
+          
+
             break;
           }
       }
@@ -2510,25 +2532,32 @@ function changeCamera() {
 //    button func
 //    button func
 // 초대하기
-// let copyBtn=document.getElementsByClassName("invitelink");
+//  let copyBtn=document.getElementsByClassName("invitelink");
 
 // copyBtn.addEventListener("click",function(){
 //     let text="https://k3d106.p.ssafy.io/meeting/"
+//     let createInput=document.createElement("input");
+//     createInput.setAttribute("type","text");
+//     document.getElementById("invitelink").appendChild(createInput);
+//     createInput.value=text;
+//     createInput.select();
+//     document.execCommand('copy');
+//     document.getElementById("invitelink").removeChild(createInput)
+//     alert('초대 링크 복사 완료');
 // })
-// $(".invitelink i").click(function (e) {
-//     camactiveis = $("#onoff-cam i").hasClass("active");
-//     //active: 동작중
-//     var streamByUserId = connection.streamEvents.selectFirst({
-//         userid: connection.userid,
-//     }).stream;
-//     if (camactiveis) {
-//         streamByUserId.mute("video");
-//         $(this).removeClass("active");
-//     } else {
-//         streamByUserId.unmute("video");
-//         $(this).addClass("active");
-//     }
-// });
+$(".invitelink i").click(function (e) {
+    let manager=connection.streamEvents.selectAll()[1].extra.userInfo.user_name;
+    console.log(connection.streamEvents.selectAll()[1].extra.userInfo.user_name);
+    let text="https://k3d106.p.ssafy.io/meeting/"+manager;
+    let createInput=document.createElement("input");
+    createInput.setAttribute("type","text");
+    document.getElementById("invitelink").appendChild(createInput);
+    createInput.value=text;
+    createInput.select();
+    document.execCommand('copy');
+    document.getElementById("invitelink").removeChild(createInput);
+    alert("링크를 복사하였습니다");
+});
 // 캠 끄기
 $("#onoff-cam i").click(function (e) {
     camactiveis = $("#onoff-cam i").hasClass("active");
@@ -2695,9 +2724,9 @@ $("#save-label").click(function () {
         cursor: pointer;
         position: fixed;
         top:1%;
-        left:1%
-        
+        left:1%;
     }
+
     .logo a{ 
         text-decoration:none ;
         font-size: 25px;
@@ -3563,6 +3592,9 @@ html
     .plus-menu{
         display:none;
     }
+    #select-mobile-cam, #select-mobile, .select-mobile-cam-menu{
+        display: none;
+    }
     @media screen and (max-width: 768px) {
         #widget-container {
             position: fixed;
@@ -3717,10 +3749,18 @@ html
         div .logo{
         cursor: pointer;
         position: fixed;
+        display:flex;
         top:2%;
         left: 33%;
-        
-         }
+        /* justify-content: space-between;
+        align-items: center; */
+        }
+        #btn-mobile-cam{
+            position: fixed;
+            top:2%;
+            right:7%;
+        }
+
          .logo a{ 
     
         font-size: 35px;
@@ -3761,11 +3801,45 @@ html
             height: 130px;
             border: 0px;
         }
+        #select-mobile, .select-mobile-cam-menu{
+            display:inline;
+        }
+        
+        .select-mobile-cam-menu .hiddenbar{
+            position: fixed;
+            top: 40%;
+            left:100%;
+            width: 50%;
+            bottom:40%;
+            background-color: rgb(147, 167, 253);
+            /* background-image: linear-gradient(
+                to bottom ,
+                rgb(30, 44, 122),
+                rgb(147, 167, 253)
+            ); */
+            transition: .35s; 
+            border-radius: 20%;
+            border: 5px solid  rgb(30, 44, 122);
+
+        }
+        #mobile-device-box{
+            padding-top: 40px;
+            text-align-last: center;
+            text-align: -webkit-center;
+        }
+        #mobile-device-box-label{
+            font-family: "JSDongkang-Bold";
+            font-size: 30px;
+            color:  rgb(41 58 151);
+        }
+        input[id=select-mobile-cam]:checked ~ .containerB .select-mobile-cam-menu .hiddenbar{
+            left:25%;
+        }
         /* 추가메뉴  */
         .plus-menu{
         display:inline;
     }
-        .plus-menu .sidebar {
+        .plus-menu .sidebar-menu {
            position: fixed;
            top:100%;
            right: 0px;
@@ -3780,7 +3854,7 @@ html
            z-index: 1;
            transition: .35s; 
         }
-        input[id=menuicon]:checked ~ .plus-menu .sidebar{
+        input[id=menuicon]:checked ~ .plus-menu .sidebar-menu{
             top:40%;
         }
         input[id=menuicon]:checked ~ .meeting-bottom .bottom-btn-box #more .menubtn #btn-more-click{
