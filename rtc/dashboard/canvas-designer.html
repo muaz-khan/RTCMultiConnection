@@ -69,9 +69,9 @@ input[disabled], button[disabled] {
 
 
 <div class="voracay">
+    <video id="main-video"  playsinline autoplay></video>
     <div class="meetingroom">
       <div id="sidebar" class="sidebar">
-        <video id="main-video"  playsinline autoplay></video>
         <img id="main-img"/>
         <!-- loadImage('./img/NAMU.png') -->
         <div class="btn-zip">
@@ -437,6 +437,7 @@ function audioHandler(e) {
 
 
 function mainVideoControlShow(id,callback){
+    //console.log("모바일 여기까지 왔냐? ", id)
     //if((params.open === true || params.open === 'true')){ // 개설자 -> 공유중 src정보를 가지고있어야함
     //    tempAudioSrc = '';
     //    tempVideoSrc = '';
@@ -452,6 +453,7 @@ function mainVideoControlShow(id,callback){
     sharedCameraStream = id;
     clearMedia();
     video.srcObject = makeStreamByStreamID(id);
+    //console.log("비디오에 할당헀나? ",video.srcObject);
     video.muted = true;
     video.volume = 0;
     $('#main-video').show(); // 선택된 비디오 메인비디오에 띄우기 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< 여기
@@ -612,6 +614,26 @@ $('.modal-close-btn').click(function(){
     recordAudioFormData = null;
     $('#mediaFormToSave').modal('hide');
 })
+$('#btn-memo-message-m').click(function(){
+    btn_memo_flag = !btn_memo_flag
+    if(btn_memo_flag){
+        connection.send('plz-memo-to-true')
+    }else{
+        if(isShareVideo || isMediaSharing){
+            if(isShareMyVideo || isShareMyMedia){
+                alert("공유가 중지되었습니다.")
+                changeShareMyCamera(false);
+            }
+            connection.send({
+                mainVideo: 'plz-remove-main-video'
+            });
+            mainVideoControlHide(designer.removeMainVideo);
+        }
+        designer.backgroundWhite();
+        connection.send("plz-memo-to-false")
+    }
+    changeMemoBtn(btn_memo_flag)
+})
 $('#btn-memo-message').click(function() {
     btn_memo_flag = !btn_memo_flag
     if(btn_memo_flag){
@@ -652,7 +674,30 @@ $('#btn-white-board').click(function(){
     });
     designer.backgroundWhite();
 })
+$("#btn-white-board-m").click(function(){
+    if(!btn_memo_flag){
+        btn_memo_flag = true
+        changeMemoBtn(true)
+        connection.send('plz-memo-to-true') 
+    }
+    if(isShareVideo || isMediaSharing){
+        if(isShareMyVideo || isShareMyMedia){
+            alert("공유가 중지되었습니다.")
+            changeShareMyCamera(false);
+        }else if(!confirm("지금 타사용자가 미디어를 공유중입니다. 타사용자의 미디어공유를 중지하시겠습니까?")){
+            return;
+        }
+        mainVideoControlHide(designer.removeMainVideo);
+    }
+    connection.send({
+        mainVideo: 'plz-remove-main-video'
+    });
+    designer.backgroundWhite();
+})
 $('#btn-clear-message').click(function() {
+    clearCanvas();
+});
+$('#btn-clear-message-m').click(function() {
     clearCanvas();
 });
 function clearCanvas(){
@@ -808,23 +853,27 @@ function clearMedia(){
     //console.log("CLEARMEDIA")
     audio.srcObject = null;
     audio.removeAttribute('src')
-    audio.onended = function(e) {
+    //audio.onended = function(e) {
         //audio.srcObject = null;
         //audio.src = null;
         // audio.style.display = 'none';
-    };
+      //  audio.pause();
+      //  video.pause();
+    //};
     audio.style.display = 'none';
     video.srcObject = null;
     video.removeAttribute('src')
     video.style.display = 'none';
-    video.onended = function(e) {
+    //video.onended = function(e) {
         //video.srcObject = null;
         //video.src = null;
         //video.style.display = 'none';
         //designer.postMessage({
         //    removeMainVideo: true
         //});
-    };
+        //audio.pause();
+        //video.pause();
+    //};
     video.controls = false;
     audio.controls = false;    
 }
@@ -1048,7 +1097,7 @@ $('#btn-share-my-camera').click(function(){
     toggleShareMyCamera(isShareMyVideo)
 })
 //mobile ver
-function changeShareMyCamera(flag){
+function changeShareMyCameraM(flag){
     if(flag){
         $("#btn-share-my-camera-m").html("StopShareMyCamera")
     }else{
@@ -1062,7 +1111,7 @@ $('#btn-share-my-camera-m').click(function(){
         changeMemoBtn(true)
         connection.send('plz-memo-to-true') 
     }
-    changeShareMyCamera(isShareMyVideo)
+    changeShareMyCameraM(isShareMyVideo)
     toggleShareMyCamera(isShareMyVideo)
 })
 //$('#other-videos').click(function(e){  // 방장만 타 사용자에게 공유요청을 보낼수있게? -> 개발할지말지 의논해보고 진행하자
@@ -1698,6 +1747,14 @@ function inWebChange(){
 function inMobile(event) {
     console.log("event !!! ", event)
     // 파람의 유저풀네임 === 엑스트라 유저풀네임
+    if(params.userFullName == event.extra.userFullName){
+        console.log("내 streamID = ", event.streamid)
+        myStreamID = event.streamid;        
+    }else{ // <<<<<<<<<<<<<<<<<<
+        otherStreamID = event.streamid;
+    }
+
+
     if (event.stream.isScreen && !event.stream.canvasStream) {
         $('#screen-viewer').get(0).srcObject = event.stream;
         $('#screen-viewer').hide();
