@@ -15,13 +15,14 @@
   <!-- <script src="/rtc/js/jquery.min.js"></script> -->
   <script src="/rtc/js/jquery-3.5.1.min.js"></script>
   <script src="/rtc/js/bootstrap.min.js"></script>
-  
-  
+
   <link href="/rtc/css/bootstrap.min.css" rel="stylesheet">
   <script src="/node_modules/webrtc-adapter/out/adapter.js"></script>
   <script src="/dist/RTCMultiConnection.min.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/node_modules/fbr/FileBufferReader.js"></script>
+
+
  
   <!-- <script src="/node_modules/canvas-designer/dev/webrtc-handler.js"></script>
   <script src="/node_modules/canvas-designer/canvas-designer-widget.js"></script> -->
@@ -87,7 +88,7 @@ input[disabled], button[disabled] {
           <label for="save-btn" id="save-label" class="btn-item save-btn"
             >보관함  <img  src="../img/list1.png" alt="보관함" width="25" height="25" /></label
           >
-          
+
         </div>
         <div class="select" id="mobile-device-box">
             <label for="videoSource">Video source: </label>
@@ -140,7 +141,7 @@ input[disabled], button[disabled] {
      
       <div id="containerA" >
         <div class="logo">
-            <a class="logo-a" href="https://k3d106.p.ssafy.io/"><img src="../img/NAMU.png" alt="voda 로고" width="50" height="50" />VORACAY</a>
+            <a class="logo-a" href="https://k3d106.p.ssafy.io/main"><img src="../img/NAMU.png" alt="voda 로고" width="50" height="50" />VORACAY</a>
         </div>
         <!-- <div id="logo">
             <img  id="btn-chat-message" src="../img/send.png"title="전송" alt="전송" width="30" height="30" disabled />
@@ -162,7 +163,7 @@ input[disabled], button[disabled] {
             </div> 
       </div>
     </div>
-
+    <input type="checkbox" id="menuicon">
     <div class="plus-box"></div>
     <div class="meeting-bottom">
       <div class="bottom-btn-box">
@@ -189,7 +190,7 @@ input[disabled], button[disabled] {
           <p class="arrow_box">마이크</p>
         </div>
 
-        <div id="invitelink" class="circle-btn">
+        <div id="invitelink" class="circle-btn invitelink">
             <i>
               <img src="../img/invite.png" alt="초대" width="40" height="40" />
             </i>
@@ -231,30 +232,17 @@ input[disabled], button[disabled] {
                 <img id="btn-clear-message" src="../img/clean.png" alt="전체삭제" width="50" height="70" />
             </i>
             <p class="arrow_box">clear</p>
+            
         </div>
-        <!-- <div id="test" class="circle-btn">
-            <i>
-                <img id="btn-clear-message" src="../img/clean.png" alt="test" width="50" height="70" />
-            </i>
-            <p class="arrow_box">test</p>
-        </div> -->
 
+        
         <div id="more" class="circle-btn">
-            <i>
-                <img id="btn-more" src="../img/more.png" alt="더 보기" width="70" height="60" />
-            </i> 
-        </div>
-
-        <div id="close" class="circle-btn">
-            <i >
-                <img id="btn-close" src="../img/close.png" alt="종료" width="40" height="40" />
-            </i>  
-        </div>
-
-        <div id="more" class="circle-btn">
-            <i>
-                <img id="btn-more" src="../img/more.png" alt="더 보기" width="70" height="60" />
-            </i> 
+            <label for="menuicon" class="menubtn">
+                <i >
+                    <img id="btn-more" src="../img/more.png" alt="더 보기" width="70" height="50" />
+                    <img id="btn-more-click" src="../img/more1.png" alt="더 보기" width="70" height="50" />
+                </i> 
+            </label>
         </div>
 
         <div id="close" class="circle-btn">
@@ -267,6 +255,76 @@ input[disabled], button[disabled] {
             <button class="btn btn-primary" id="btn-clear-message">clear</button>
         </div> -->
       </div>
+    </div>
+    <div class="plus-menu">
+        <div class="sidebar">
+           <div class="sidebar-first">
+                <div id="share-screen-m" class="circle-btn btn-m">
+                    <i class="sidebar-i">
+                        <img id="btn-share-my-camera-m" src="../img/Screensharing.png" alt="Screensharing" width="50" height="40" />
+                    </i>
+                    <p class="btn-label">Screen<br> Sharing</p>
+                </div>
+
+                <div id="share-board-m" class="circle-btn btn-m">
+                    <i class="sidebar-i">
+                        <img id="btn-white-board-m" src="../img/boardshare.png" alt="boardsharing" width="50" height="60" />
+                    </i>
+                    <p class="btn-label">Board <br> Sharing</p>
+                </div>
+
+                <div id="clear-m" class="circle-btn  btn-m">
+                    <i class="sidebar-i">
+                        <img id="btn-clear-message-m" src="../img/clean.png" alt="전체삭제" width="50" height="70" />
+                    </i>
+                    <p class="btn-label">Board <br> Clear</p>
+                    
+                </div>
+           </div>
+           <div class="sidebar-second">
+                <div id="record-m" class="circle-btn btn-m">
+                    <i class="sidebar-i">
+                        <img id="btn-record-message-m" src="../img/recoff.png" alt="Record" width="40" height="40" />
+                    </i>
+                    <p class="btn-label">Record</p>
+                </div>
+                <div id="invitelink-m" class="circle-btn btn-m">
+                    <i class="sidebar-i">
+                    <img src="../img/invite.png" alt="초대" width="40" height="40" />
+                    </i>
+                    <p class="btn-label">초대 링크</p>
+                </div>
+                <div id="conference-m" class="circle-btn btn-m">
+                    <i class="sidebar-i active">
+                        <img id="btn-memo-message-m" src="../img/conference.png" alt="공유정지" width="40" height="35" />
+                    </i>
+                    <p class="btn-label">회의화면</p>
+                    
+                </div>
+           </div>
+           <div class="sidebar-third">
+                <div id="participant-m" class="circle-btn btn-m">
+                    <i class="sidebar-i">
+                        <img id="btn-participant-m" src="../img/participant-btn.png" alt="participant" width="40" height="40" />
+                    </i>
+                    <p class="btn-label">참가자</p>
+                </div>
+                <div id="chat-m" class="circle-btn btn-m">
+                    <i class="sidebar-i">
+                    <img id="btn-chat-m"src="../img/chat-btn.png" alt="채팅" width="40" height="40" />
+                    </i>
+                    <p class="btn-label">채팅</p>
+                </div>
+                <div id="savebox-m" class="circle-btn btn-m">
+                    <i class="sidebar-i ">
+                        <img id="btn-savebox-m" src="../img/list1-btn.png" alt="보관함" width="40" height="35" />
+                    </i>
+                    <p class="btn-label">보관함</p>
+                    
+                </div>
+           </div>
+           
+        </div>
     </div>
   </div>
   
@@ -291,7 +349,7 @@ input[disabled], button[disabled] {
                     <input type="text" class="form-control" id="txt-media-title">
                   </p>
                 </div>
-            </div>
+                </div>
             </div>
             <div class="modal-footer">
               <button type="button" class="btn modal-close-btn">취소</button>
@@ -309,21 +367,6 @@ input[disabled], button[disabled] {
 const recognition = new webkitSpeechRecognition();//마이크
 navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
 
-//$('#test').click(function(){
-//    $.ajax({
-//        type: "GET",
-//        url: 'https://k3d106.p.ssafy.io/api/v2/media/17/mobile',
-//        success: function (html) {},
-//        error: function (error) {},
-//    }).done(function(data) {
-//        console.log(data);
-//        var imageReader = new FileReader();
-//        imageReader.onloadend = function() {
-//            image.src = imageReader.result;
-//        }
-//        imageReader.readAsDataURL(b64toBlob(data.video,"image/*",512));
-//    });
-//})
 
 let init_btn_sync = false; // 방버튼정보를 최초 동기화 하였는가??
 let init_share_media = false; // share정보 최초 동기화 하였는가??
@@ -350,7 +393,6 @@ let recorder; // RTC recorder
 let isMediaSharing = false; // 미디어 공유중인지?
 let isShareMyMedia = false; // 자기 미디어 공유중인지? - 제어권 가짐 -> 아직 개발단계
 
-
 let finishShareMidia = false; // 공유가 끝났는지?
 // test 용 -> 나중에는 canvas 영상 재생할때만 canvas하단에 배치할것
 var audio = document.getElementById('main-audio');
@@ -361,8 +403,6 @@ audio.addEventListener('play', audioHandler, false);
 audio.addEventListener('pause', audioHandler, false);
 audio.addEventListener('seeked', audioHandler, false);
 clearMedia();
-//videoSource
-
 $('#btn-save-recorded-data').click(function(e) {
     //e.preventDefault();
     $('#mediaFormToSave').modal('show');
@@ -626,6 +666,7 @@ function clearCanvas(){
     });
     connection.send("plz-clear-canvas")
 }
+
 function syncSharedMedia2Image(sharedImage){
     isShareMyVideo = false;
     isShareVideo = false;
@@ -637,6 +678,7 @@ function syncSharedMedia2Image(sharedImage){
     designer.backgroundImage();
     
 }
+
 function syncSharedMedia(recordAudioFormData,recordVideoFormData){
     isShareMyVideo = false;
     isShareVideo = false;
@@ -654,6 +696,7 @@ function syncSharedMedia(recordAudioFormData,recordVideoFormData){
     designer.backgroundVideo();
     
 }
+
 function makeShareMediaSrc2Image(recordVideoFormData2){
     var imageReader = new FileReader();
         imageReader.onloadend = function() {
@@ -661,6 +704,7 @@ function makeShareMediaSrc2Image(recordVideoFormData2){
         }
     imageReader.readAsDataURL(recordVideoFormData2);
     sendMediaClock2Image();
+
 }
 function makeShareMediaSrc(recordVideoFormData2,recordAudioFormData2){
     var videoReader = new FileReader();
@@ -681,6 +725,7 @@ function makeShareMediaSrc(recordVideoFormData2,recordAudioFormData2){
 function initIntaval(){ // 문제 될수있을듯
     connection.chunkInterval = 0;
 }
+
 function sendMediaClock2Image(){
     if(!tempImageSrc){
         let timerId = setTimeout(sendMediaClock2Image, 500);
@@ -727,6 +772,7 @@ function sendMediaSrc2Image(sharedRecordVideo,callback){
     //audio.pause();
 }
 function sendMediaSrc(sharedRecordAudio,sharedRecordVideo,callback){
+      
     connection.chunkInterval = 0.00000000001;
     audio.src = sharedRecordAudio
     video.src = sharedRecordVideo
@@ -833,7 +879,7 @@ $(document).on("click",".media-element",function(){
     
     var tr = $(this);
     var td = tr.children();
-    var title = td.eq(0).text();
+    var title = td.eq(1).text();
     let searchFromServer = confirm("저장된" + title + " 미디어를 공유하시겠습니까?");
     if(searchFromServer){
         if(!btn_memo_flag){
@@ -914,6 +960,7 @@ function startAudioRecord(){
     console.log("RECORDER START! ",recorder);
     recorder.startRecording();
 }
+
 async function loadDuration(isVideo){
     if(isVideo){
         while(audio.duration === Infinity) {
@@ -990,6 +1037,24 @@ function changeShareMyCamera(flag){
     }
 }
 $('#btn-share-my-camera').click(function(){
+    isShareMyVideo = !isShareMyVideo;//true false 확인?
+    if(isShareMyVideo && !btn_memo_flag){
+        btn_memo_flag = true //그림판
+        changeMemoBtn(true)
+        connection.send('plz-memo-to-true') 
+    }
+    changeShareMyCamera(isShareMyVideo)
+    toggleShareMyCamera(isShareMyVideo)
+})
+//mobile ver
+function changeShareMyCamera(flag){
+    if(flag){
+        $("#btn-share-my-camera-m").html("StopShareMyCamera")
+    }else{
+        $("#btn-share-my-camera-m").html("ShareMyCamera")
+    }
+}
+$('#btn-share-my-camera-m').click(function(){
     isShareMyVideo = !isShareMyVideo;//true false 확인?
     if(isShareMyVideo && !btn_memo_flag){
         btn_memo_flag = true //그림판
@@ -1269,7 +1334,7 @@ connection.onmessage = function(event) {
                     finishShareMidia = true;
                     console.log("isShareMyMedia",isShareMyMedia)
                     initIntaval();
-                    if(isShareMyMedia){
+                    if(isShareMyMedia){ 
                         if(event.data.isVideo){
                             loadDuration(true);
                         }else{
@@ -1283,6 +1348,7 @@ connection.onmessage = function(event) {
         }
         return;
     }
+    
     if(event.data.sharedImage === 'plz-get-shared-image'){
         if(event.data.sharedSaveImage){
             if(!event.data.target_id){
@@ -1536,14 +1602,23 @@ connection.onstream = function(event) {
     }
 };
 
+
 let otherStreamID;
 function inWeb(event) {
 
+    // if(tempCount==0){   //4명이 채워질 때
+    //     tempCount=4;    //tempCount 원상복구
+    //     tempPageCount++;    // 총 페이지 수 ++
+    //     newHtml += '<div class=\"other-videos'+tempPageCount+'\"> </div>';
+    //     // 숫자를 붙인 div 태그 추가해주기
+    // }else {
+    //     tempCount--; 
+    // }
     console.log("event !!! ", event)
     // 파람의 유저풀네임 === 엑스트라 유저풀네임
     if(params.userFullName == event.extra.userFullName){
         console.log("내 streamID = ", event.streamid)
-        myStreamID = event.streamid;
+        myStreamID = event.streamid;        
     }else{ // <<<<<<<<<<<<<<<<<<
         otherStreamID = event.streamid;
     }
@@ -1682,9 +1757,9 @@ function inMobileChange(){
         p.innerHTML = `${temp}`
         div.appendChild(meetingList[i].mediaElement);
         div.appendChild(p);
-        otherVideos.appendChild(div);
-        j--;
-    }
+        otherVideos.appendChild(div);  
+           j--;  
+          }
     inMobilePaging(totalPeople, dataPerPage, pageCount, currentPage);
 }
 
@@ -2045,6 +2120,7 @@ designer.appendTo(document.getElementById('widget-container'), function() {
         document.querySelector('#mobile-device-box').style.display = 'block';
         videoSelect.onchange = changeCamera;
     }else{
+        //console.log("DetectRTC ,", DetectRTC)
         //alert("DESK TOP!")
     }
 
@@ -2136,7 +2212,6 @@ function addStreamStopListener(stream, callback) {
         }, false);
     });
 }
-
 function replaceTrack(videoTrack, screenTrackId) {
     if (!videoTrack) return;
     if (videoTrack.readyState === 'ended') {
@@ -2309,6 +2384,27 @@ function changeCamera() {
 ////////////////
 
 //    button func
+//    button func
+// 초대하기
+// let copyBtn=document.getElementsByClassName("invitelink");
+
+// copyBtn.addEventListener("click",function(){
+//     let text="https://k3d106.p.ssafy.io/meeting/"
+// })
+// $(".invitelink i").click(function (e) {
+//     camactiveis = $("#onoff-cam i").hasClass("active");
+//     //active: 동작중
+//     var streamByUserId = connection.streamEvents.selectFirst({
+//         userid: connection.userid,
+//     }).stream;
+//     if (camactiveis) {
+//         streamByUserId.mute("video");
+//         $(this).removeClass("active");
+//     } else {
+//         streamByUserId.unmute("video");
+//         $(this).addClass("active");
+//     }
+// });
 // 캠 끄기
 $("#onoff-cam i").click(function (e) {
     camactiveis = $("#onoff-cam i").hasClass("active");
@@ -2428,7 +2524,7 @@ $("#save-label").click(function () {
 </script>
 </body>
 <style type="text/css">
-    #mobile-device-box{
+   #mobile-device-box{
         display: none;
     }
     .rec_class{
@@ -3268,7 +3364,17 @@ html
     }
     #more, #close{
             display: none;
-        }
+    }
+    /* 추가메뉴  */
+    input[id="menuicon"]{
+        display: none;
+    }  
+    .btn-m{
+        display:none;
+    }
+    .plus-menu{
+        display:none;
+    }
     @media screen and (max-width: 768px) {
 
         #containerA{
@@ -3356,13 +3462,76 @@ html
         /* MENU-아래 메뉴 부분  */
         .meeting-bottom {
             height: 130px;
+            border: 0px;
         }
+        .sidebar-first,.sidebar-second,.sidebar-third{
+            display:flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+           
+        }
+        .sidebar-first{
+            margin-top: 30px;
+        }
+        .sidebar-i{
+            margin-left: 20px;
+        }
+        .btn-m{
+            text-align: -webkit-center;
+            margin:0;
+        }
+        .btn-label{
+            margin-top: 10px;
+            font-family: "JSDongkang-Bold";
+            font-size: 23px;
+        }
+        
         /* MENU-색  */
         .plus-box {
             height: 130px;
+            border: 0px;
         }
+        /* 추가메뉴  */
+        .plus-menu{
+        display:inline;
+    }
+        .plus-menu .sidebar {
+           position: fixed;
+           top:100%;
+           right: 0px;
+           width: 100%;
+           height: calc(60% - 124px);
+           background-image: linear-gradient(
+                to bottom ,
+                rgb(30, 44, 122),
+                rgb(147, 167, 253)
+            );
+           /* border: 1px solid #eee; */
+           z-index: 1;
+           transition: .35s; 
+        }
+        input[id=menuicon]:checked ~ .plus-menu .sidebar{
+            top:40%;
+        }
+        input[id=menuicon]:checked ~ .meeting-bottom .bottom-btn-box #more .menubtn #btn-more-click{
+            display: inline;
+        }
+        input[id=menuicon]:checked ~ .meeting-bottom .bottom-btn-box #more .menubtn #btn-more{
+            display: none;
+        }
+        .menubtn{
+            margin-bottom: 0px;
+        }
+ 
 
+        #btn-more-click{
+            display: none;
+        }
         /* 버튼 */
+        .btn-m{
+            display:inline;
+        }
         .bottom-btn-box{
             padding-top: 0;
         }
@@ -3392,7 +3561,7 @@ html
         }
 
         /* 버튼_ 삭제할버튼 */
-        #invitelink, #share-screen, #share-board, #record, #conference, #clear{
+         #invitelink, #share-screen, #share-board, #record, #conference, #clear{
             display: none;
         }
         .circle-btn:hover > p.arrow_box {
