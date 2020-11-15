@@ -136,7 +136,7 @@ input[disabled], button[disabled] {
      
       <div id="containerA" >
         <div class="logo">
-            <a class="logo-a" href="https://k3d106.p.ssafy.io/"><img src="../img/NAMU.png" alt="voda 로고" width="50" height="50" />VORACAY</a>
+            <a class="logo-a" href="https://k3d106.p.ssafy.io/main"><img src="../img/NAMU.png" alt="voda 로고" width="50" height="50" />VORACAY</a>
         </div>
         <!-- <div id="logo">
             <img  id="btn-chat-message" src="../img/send.png"title="전송" alt="전송" width="30" height="30" disabled />
@@ -158,7 +158,7 @@ input[disabled], button[disabled] {
             </div> 
       </div>
     </div>
-
+    <input type="checkbox" id="menuicon">
     <div class="plus-box"></div>
     <div class="meeting-bottom">
       <div class="bottom-btn-box">
@@ -223,10 +223,14 @@ input[disabled], button[disabled] {
             
         </div>
 
+        
         <div id="more" class="circle-btn">
-            <i>
-                <img id="btn-more" src="../img/more.png" alt="더 보기" width="70" height="60" />
-            </i> 
+            <label for="menuicon" class="menubtn">
+                <i >
+                    <img id="btn-more" src="../img/more.png" alt="더 보기" width="70" height="50" />
+                    <img id="btn-more-click" src="../img/more1.png" alt="더 보기" width="70" height="50" />
+                </i> 
+            </label>
         </div>
 
         <div id="close" class="circle-btn">
@@ -239,6 +243,76 @@ input[disabled], button[disabled] {
             <button class="btn btn-primary" id="btn-clear-message">clear</button>
         </div> -->
       </div>
+    </div>
+    <div class="plus-menu">
+        <div class="sidebar">
+           <div class="sidebar-first">
+                <div id="share-screen-m" class="circle-btn btn-m">
+                    <i class="sidebar-i">
+                        <img id="btn-share-my-camera-m" src="../img/Screensharing.png" alt="Screensharing" width="50" height="40" />
+                    </i>
+                    <p class="btn-label">Screen<br> Sharing</p>
+                </div>
+
+                <div id="share-board-m" class="circle-btn btn-m">
+                    <i class="sidebar-i">
+                        <img id="btn-white-board-m" src="../img/boardshare.png" alt="boardsharing" width="50" height="60" />
+                    </i>
+                    <p class="btn-label">Board <br> Sharing</p>
+                </div>
+
+                <div id="clear-m" class="circle-btn  btn-m">
+                    <i class="sidebar-i">
+                        <img id="btn-clear-message-m" src="../img/clean.png" alt="전체삭제" width="50" height="70" />
+                    </i>
+                    <p class="btn-label">Board <br> Clear</p>
+                    
+                </div>
+           </div>
+           <div class="sidebar-second">
+                <div id="record-m" class="circle-btn btn-m">
+                    <i class="sidebar-i">
+                        <img id="btn-record-message-m" src="../img/recoff.png" alt="Record" width="40" height="40" />
+                    </i>
+                    <p class="btn-label">Record</p>
+                </div>
+                <div id="invitelink-m" class="circle-btn btn-m">
+                    <i class="sidebar-i">
+                    <img src="../img/invite.png" alt="초대" width="40" height="40" />
+                    </i>
+                    <p class="btn-label">초대 링크</p>
+                </div>
+                <div id="conference-m" class="circle-btn btn-m">
+                    <i class="sidebar-i active">
+                        <img id="btn-memo-message-m" src="../img/conference.png" alt="공유정지" width="40" height="35" />
+                    </i>
+                    <p class="btn-label">회의화면</p>
+                    
+                </div>
+           </div>
+           <div class="sidebar-third">
+                <div id="participant-m" class="circle-btn btn-m">
+                    <i class="sidebar-i">
+                        <img id="btn-participant-m" src="../img/participant-btn.png" alt="participant" width="40" height="40" />
+                    </i>
+                    <p class="btn-label">참가자</p>
+                </div>
+                <div id="chat-m" class="circle-btn btn-m">
+                    <i class="sidebar-i">
+                    <img id="btn-chat-m"src="../img/chat-btn.png" alt="채팅" width="40" height="40" />
+                    </i>
+                    <p class="btn-label">채팅</p>
+                </div>
+                <div id="savebox-m" class="circle-btn btn-m">
+                    <i class="sidebar-i ">
+                        <img id="btn-savebox-m" src="../img/list1-btn.png" alt="보관함" width="40" height="35" />
+                    </i>
+                    <p class="btn-label">보관함</p>
+                    
+                </div>
+           </div>
+           
+        </div>
     </div>
   </div>
   
@@ -931,6 +1005,24 @@ function changeShareMyCamera(flag){
     }
 }
 $('#btn-share-my-camera').click(function(){
+    isShareMyVideo = !isShareMyVideo;//true false 확인?
+    if(isShareMyVideo && !btn_memo_flag){
+        btn_memo_flag = true //그림판
+        changeMemoBtn(true)
+        connection.send('plz-memo-to-true') 
+    }
+    changeShareMyCamera(isShareMyVideo)
+    toggleShareMyCamera(isShareMyVideo)
+})
+//mobile ver
+function changeShareMyCamera(flag){
+    if(flag){
+        $("#btn-share-my-camera-m").html("StopShareMyCamera")
+    }else{
+        $("#btn-share-my-camera-m").html("ShareMyCamera")
+    }
+}
+$('#btn-share-my-camera-m').click(function(){
     isShareMyVideo = !isShareMyVideo;//true false 확인?
     if(isShareMyVideo && !btn_memo_flag){
         btn_memo_flag = true //그림판
@@ -3066,7 +3158,17 @@ html
     }
     #more, #close{
             display: none;
-        }
+    }
+    /* 추가메뉴  */
+    input[id="menuicon"]{
+        display: none;
+    }  
+    .btn-m{
+        display:none;
+    }
+    .plus-menu{
+        display:none;
+    }
     @media screen and (max-width: 768px) {
 
         #containerA{
@@ -3154,13 +3256,76 @@ html
         /* MENU-아래 메뉴 부분  */
         .meeting-bottom {
             height: 130px;
+            border: 0px;
         }
+        .sidebar-first,.sidebar-second,.sidebar-third{
+            display:flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+           
+        }
+        .sidebar-first{
+            margin-top: 30px;
+        }
+        .sidebar-i{
+            margin-left: 20px;
+        }
+        .btn-m{
+            text-align: -webkit-center;
+            margin:0;
+        }
+        .btn-label{
+            margin-top: 10px;
+            font-family: "JSDongkang-Bold";
+            font-size: 23px;
+        }
+        
         /* MENU-색  */
         .plus-box {
             height: 130px;
+            border: 0px;
         }
+        /* 추가메뉴  */
+        .plus-menu{
+        display:inline;
+    }
+        .plus-menu .sidebar {
+           position: fixed;
+           top:100%;
+           right: 0px;
+           width: 100%;
+           height: calc(60% - 124px);
+           background-image: linear-gradient(
+                to bottom ,
+                rgb(30, 44, 122),
+                rgb(147, 167, 253)
+            );
+           /* border: 1px solid #eee; */
+           z-index: 1;
+           transition: .35s; 
+        }
+        input[id=menuicon]:checked ~ .plus-menu .sidebar{
+            top:40%;
+        }
+        input[id=menuicon]:checked ~ .meeting-bottom .bottom-btn-box #more .menubtn #btn-more-click{
+            display: inline;
+        }
+        input[id=menuicon]:checked ~ .meeting-bottom .bottom-btn-box #more .menubtn #btn-more{
+            display: none;
+        }
+        .menubtn{
+            margin-bottom: 0px;
+        }
+ 
 
+        #btn-more-click{
+            display: none;
+        }
         /* 버튼 */
+        .btn-m{
+            display:inline;
+        }
         .bottom-btn-box{
             padding-top: 0;
         }
@@ -3190,7 +3355,7 @@ html
         }
 
         /* 버튼_ 삭제할버튼 */
-        #invitelink, #share-screen, #share-board, #record, #conference, #clear{
+         #invitelink, #share-screen, #share-board, #record, #conference, #clear{
             display: none;
         }
         .circle-btn:hover > p.arrow_box {
