@@ -236,13 +236,20 @@ function CanvasDesigner() {
             streamId : id,
         });
     }
+    designer.backgroundImage = function(){
+        console.log("designer : backgroundImage ")
+        if (!designer.iframe) return;
+        designer.postMessage({
+            backgroundImage: true,
+        });
+    }
     designer.backgroundWhite = function(){
         if(!designer.iframe) return;
         designer.postMessage({
             backgroundWhite: true
         });
     }
-    designer.removeMainVideo = function(){
+    designer.removeMainVideo = function(){ // image도 같이 처리됨
         if(!designer.iframe) return;
         designer.postMessage({
             removeMainVideo: true
