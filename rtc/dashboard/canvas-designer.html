@@ -829,6 +829,8 @@ function clearMedia(){
     };
     video.controls = false;
     audio.controls = false;    
+
+    image.src = null;
 }
 
 function selectAllMedia(){
@@ -900,6 +902,7 @@ $(document).on("click",".media-element",function(){
 }); 
 
 function getMidiasFromDB(title){
+    console.log("GETMIDA")
     $.ajax({
         type: "GET",
         url: 'https://k3d106.p.ssafy.io/api/v2/media/'+params.userFullName+"/"+title,
@@ -1972,13 +1975,14 @@ var conversationPanel = document.getElementById('conversation-panel');
 
 function appendChatMessage(event, checkmark_id) {
     //console.log("append chatmessage")
+    //console.log("message check!!!! ", event)
     var div = document.createElement('div');
 
     div.className = 'message';
 
     if (event.data) {
         div.className = 'message you';
-        div.innerHTML = '<img src="../img/you1.png" class="sendmark"> <b>[' + (event.extra.userFullName || event.user) + ']: </b>' + event.data.chatMessage;
+        div.innerHTML = '<img src="../img/you1.png" class="sendmark"> <b>[ ' + (`${event.extra.userInfo.user_name}(${event.extra.userInfo.user_dept})` || event.userid) + ' ] </b><div class="chat-contents">' + event.data.chatMessage + '</div>';
 
         if (event.data.checkmark_id) {
             connection.send({
@@ -1988,7 +1992,7 @@ function appendChatMessage(event, checkmark_id) {
         }
     } else {
         div.className = 'message me';
-        div.innerHTML = '<img class="checkmark" id="' + checkmark_id + '" title="Received" src="../img/me1.png"><b>ME: </b>' + event;
+        div.innerHTML = '<img class="checkmark" id="' + checkmark_id + '" title="Received" src="../img/me1.png"><b>[ ' + (`${connection.extra.userInfo.user_name}(${connection.extra.userInfo.user_dept})` || event.userid) + ' ] </b><div class="chat-contents">' + event + '</div>';
         // div.style.background = 'rgb(176 136 158)';
         div.style.background = 'rgb(126, 136, 179)';
         
@@ -2027,7 +2031,7 @@ document.getElementById('btn-chat-message').onclick = function() {
 
     connection.send({
         chatMessage: chatMessage,
-        checkmark_id: checkmark_id
+        checkmark_id: checkmark_id,
     });
 
     connection.send({
@@ -2071,18 +2075,23 @@ function getUserInfo(userid){
 function getFullName(userid) {
     var _userFullName = userid;
     if (connection.peers[userid] && connection.peers[userid].extra.userFullName) {
-        _userFullName = connection.peers[userid].extra.userFullName;
+        //console.log("FILE getFULLNAME CHECK ! ", connection.peers[userid])
+        _userFullName = ` ${connection.peers[userid].extra.userInfo.user_name}(${connection.peers[userid].extra.userInfo.user_dept}) ` || connection.peers[userid].userid;
     }
     return _userFullName;
 }
 
 connection.onFileEnd = function(file) {
     var html = getFileHTML(file);
+    //console.log("FILE CHECK",file)
     var div = progressHelper[file.uuid].div;
-
+    console.log("file END !!!! " ,fileSendCnt)
     if (file.userid === connection.userid) {
-        div.innerHTML =  '<img src="../img/me1.png" class="sendmark"><b>ME: </b><br>' + html;
+        //if(fileSendCnt == 1){
+        div.className = 'message me';
+        div.innerHTML =  `<img src="../img/me1.png" class="sendmark"><b>[ ${connection.extra.userInfo.user_name}(${connection.extra.userInfo.user_dept} ] </b><br>` + html;
         div.style.background = '#101742';
+        //}
 
         if(recentFile) {
             recentFile.userIndex++;
@@ -2098,6 +2107,7 @@ connection.onFileEnd = function(file) {
             recentFile = null;
         }
     } else {
+        div.className = 'message you';
         div.innerHTML = '<img src="../img/you1.png" class="sendmark"> <b>[' + getFullName(file.userid) + ']:</b><br>' + html;
     }
 };
@@ -2106,6 +2116,9 @@ connection.onFileEnd = function(file) {
 connection.autoSaveToDisk = false;
 
 var progressHelper = {};
+let fileSendCnt = 0;
+let fileuuid_now;
+let fileuuid_prv;
 
 connection.onFileProgress = function(chunk, uuid) {
     var helper = progressHelper[chunk.uuid];
@@ -2114,6 +2127,13 @@ connection.onFileProgress = function(chunk, uuid) {
 };
 
 connection.onFileStart = function(file) {
+    fileuuid_now = file.uuid;
+    if(fileuuid_now == fileuuid_prv){
+        fileSendCnt ++;
+    }else{
+        fileSendCnt = 1;
+        fileuuid_prv = fileuuid_now;
+    }
     var div = document.createElement('div');
     div.className = 'message';
 
@@ -2121,6 +2141,7 @@ connection.onFileStart = function(file) {
         var userFullName = file.remoteUserId;
         if(connection.peersBackup[file.remoteUserId]) {
             userFullName = connection.peersBackup[file.remoteUserId].extra.userFullName;
+            //console.log("final FILE CHECK !!! ", connection.peersBackup[file.remoteUserId]) // 프로그래스바 to 수정할건지
         }
 
         div.innerHTML = '<b>You (to: ' + userFullName + '):</b><br><label>0%</label> <progress></progress>';
@@ -2519,7 +2540,7 @@ $("#participant-label").click(function () {
 });
 // 채팅 sidebar 클릭시
 $("#chat-label").click(function () {
-    console.log("chat!!!!");
+    //console.log("chat!!!!");
     // offsaveboxmenu();
     participantactiveis = $("#participantboxact").hasClass("active");
     chatactiveis = $("#chatboxact").hasClass("active");
@@ -2561,7 +2582,10 @@ $("#save-label").click(function () {
 </script>
 </body>
 <style type="text/css">
-   #mobile-device-box{
+    .chat-contents{
+        padding-left: 40px;
+    }
+    #mobile-device-box{
         display: none;
     }
     .rec_class{
