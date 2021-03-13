@@ -1,36 +1,36 @@
 # iOS and Android
 
 > Note: RTCMultiConnection supports Safari-11 browser both on iOS and MacOSX.
-> 
+>
 > So you do not need to build a cordova or ionic application.
 
-Here is list of all cordova/iosnic demos: 
+Here is list of all cordova/iosnic rtc:
 
-* https://github.com/muaz-khan/cordova-mobile-apps
+- https://github.com/muaz-khan/cordova-mobile-apps
 
 Please check these docs as well:
 
-* [Write iOS apps using RTCMultiConnection](http://www.rtcmulticonnection.org/docs/Write-iOS-Apps/)
-* [Write Android apps using RTCMultiConnection](http://www.rtcmulticonnection.org/docs/Write-Android-Apps/)
+- [Write iOS apps using RTCMultiConnection](http://www.rtcmulticonnection.org/docs/Write-iOS-Apps/)
+- [Write Android apps using RTCMultiConnection](http://www.rtcmulticonnection.org/docs/Write-Android-Apps/)
 
-----
+---
 
 ## iPhone, iPad, Nexus, Samsung, many other devices
 
 > This page explains how to write iOS+Android phonegap/cordova applications for RTCMultiConnection.
 
-# Cordova Demos
+# Cordova rtc
 
-Please check all iOS+Android demos here:
+Please check all iOS+Android rtc here:
 
-* https://webrtcweb.com/cordova-apps/
+- https://webrtcweb.com/cordova-apps/
 
-| DemoTitle        | DownloadZip           | AndroidAPK | AllFiles |
-| ------------- |-------------|-------------|-------------|
+| DemoTitle          | DownloadZip                                                                         | AndroidAPK                                                                                   | AllFiles                                                           |
+| ------------------ | ----------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
 | Scalable Broadcast | [Source](https://webrtcweb.com/cordova-apps/scalable-broadcast/Download-Source.zip) | [Android APK](https://webrtcweb.com/cordova-apps/scalable-broadcast/Install-Android-App.apk) | [All files](https://webrtcweb.com/cordova-apps/scalable-broadcast) |
 | Audio Conferencing | [Source](https://webrtcweb.com/cordova-apps/audio-conferencing/Download-Source.zip) | [Android APK](https://webrtcweb.com/cordova-apps/audio-conferencing/Install-Android-App.apk) | [All files](https://webrtcweb.com/cordova-apps/audio-conferencing) |
 | Video Conferencing | [Source](https://webrtcweb.com/cordova-apps/video-conferencing/Download-Source.zip) | [Android APK](https://webrtcweb.com/cordova-apps/video-conferencing/Install-Android-App.apk) | [All files](https://webrtcweb.com/cordova-apps/video-conferencing) |
-| File Sharing | [Source](https://webrtcweb.com/cordova-apps/filesharing/Download-Source.zip) | [Android APK](https://webrtcweb.com/cordova-apps/filesharing/Install-Android-App.apk) | [All files](https://webrtcweb.com/cordova-apps/filesharing) |
+| File Sharing       | [Source](https://webrtcweb.com/cordova-apps/filesharing/Download-Source.zip)        | [Android APK](https://webrtcweb.com/cordova-apps/filesharing/Install-Android-App.apk)        | [All files](https://webrtcweb.com/cordova-apps/filesharing)        |
 
 # Prerequisites
 
@@ -40,7 +40,7 @@ Please check all iOS+Android demos here:
 
 Check xcode-build-version: `xcodebuild -version`
 
-* https://cordova.apache.org/docs/en/latest/guide/platforms/ios/
+- https://cordova.apache.org/docs/en/latest/guide/platforms/ios/
 
 Make sure that terminal is using latest xcode:
 
@@ -165,7 +165,7 @@ An example `config.xml` file (make sure that `icon.png` has valid path):
         Muaz khan
     </author>
     <content src="index.html" />
-    
+
     <allow-navigation href="*" />
     <allow-intent href="*" />
     <access origin="*" />
@@ -214,37 +214,40 @@ Download and link [`RTCMultiConnection.js`](https://github.com/muaz-khan/RTCMult
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <title>CordovaApp using RTCMultiConnection</title>
-    <link rel="stylesheet" href="css/index.css">
-</head>
-<body>
+    <link rel="stylesheet" href="css/index.css" />
+  </head>
+  <body>
     <!-- your UI code -->
 
     <script src="cordova.js"></script>
     <script src="js/socket.io.js"></script>
     <script src="js/RTCMultiConnection.js"></script>
     <script src="js/index.js"></script>
-</body>
+  </body>
 </html>
 ```
 
 `www/js/index.js`:
 
-
 ```javascript
 // please read below comments:
-document.addEventListener('deviceready', function() {
+document.addEventListener(
+  "deviceready",
+  function () {
     // you can put your custom-ui-codes here
     // e.g.
     // var connection = new RTCMultiConnection();
-}, false);
+  },
+  false
+);
 ```
 
 # Select Speakers as default audio output device on iOS
 
 ```javascript
-window.iOSDefaultAudioOutputDevice = 'speaker'; // earpiece or speaker
+window.iOSDefaultAudioOutputDevice = "speaker"; // earpiece or speaker
 
 // set above line, before below one
 var connection = new RTCMultiConnection();
@@ -262,7 +265,7 @@ var connection = new RTCMultiConnection();
 
 ## Twitter
 
-* https://twitter.com/WebRTCWeb i.e. @WebRTCWeb
+- https://twitter.com/WebRTCWeb i.e. @WebRTCWeb
 
 ## License
 
