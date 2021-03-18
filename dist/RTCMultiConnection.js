@@ -1,9 +1,9 @@
 'use strict';
 
-// Last time updated: 2019-06-15 4:26:11 PM UTC
+// Last time updated: 2020-04-28 4:44:36 AM UTC
 
 // _________________________
-// RTCMultiConnection v3.6.9
+// RTCMultiConnection v3.7.0
 
 // Open-Sourced: https://github.com/muaz-khan/RTCMultiConnection
 
@@ -13,7 +13,7 @@
 // --------------------------------------------------
 
 var RTCMultiConnection = function(roomid, forceOptions) {
-    var isNegotiating = false;
+
     var browserFakeUserAgent = 'Fake/5.0 (FakeOS) AppleWebKit/123 (KHTML, like Gecko) Fake/12.3.4567.89 Fake/123.45';
 
     (function(that) {
@@ -470,9 +470,9 @@ var RTCMultiConnection = function(roomid, forceOptions) {
                 }
                 return allPeers;
             },
-            forEach: function(callbcak) {
+            forEach: function(callback) {
                 this.getAllParticipants().forEach(function(participant) {
-                    callbcak(connection.peers[participant]);
+                    callback(connection.peers[participant]);
                 });
             },
             send: function(data, remoteUserId) {
@@ -905,10 +905,10 @@ var RTCMultiConnection = function(roomid, forceOptions) {
 
     'use strict';
 
-    // Last Updated On: 2019-01-10 5:32:55 AM UTC
+    // Last Updated On: 2020-03-23 2:31:22 AM UTC
 
     // ________________
-    // DetectRTC v1.3.9
+    // DetectRTC v1.4.0
 
     // Open-Sourced: https://github.com/muaz-khan/DetectRTC
 
@@ -985,7 +985,7 @@ var RTCMultiConnection = function(roomid, forceOptions) {
         var isEdge = navigator.userAgent.indexOf('Edge') !== -1 && (!!navigator.msSaveOrOpenBlob || !!navigator.msSaveBlob);
 
         var isOpera = !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0;
-        var isFirefox = typeof window.InstallTrigger !== 'undefined';
+        var isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1 && ('netscape' in window) && / rv:/.test(navigator.userAgent);
         var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
         var isChrome = !!window.chrome && !isOpera;
         var isIE = typeof document !== 'undefined' && !!document.documentMode && !isEdge;
@@ -1000,12 +1000,6 @@ var RTCMultiConnection = function(roomid, forceOptions) {
             var fullVersion = '' + parseFloat(navigator.appVersion);
             var majorVersion = parseInt(navigator.appVersion, 10);
             var nameOffset, verOffset, ix;
-
-            // both and safri and chrome has same userAgent
-            if (isSafari && !isChrome && nAgt.indexOf('CriOS') !== -1) {
-                isSafari = false;
-                isChrome = true;
-            }
 
             // In Opera, the true version is after 'Opera' or after 'Version'
             if (isOpera) {
@@ -1038,17 +1032,28 @@ var RTCMultiConnection = function(roomid, forceOptions) {
             }
             // In Safari, the true version is after 'Safari' or after 'Version' 
             else if (isSafari) {
-                verOffset = nAgt.indexOf('Safari');
+                // both and safri and chrome has same userAgent
+                if (nAgt.indexOf('CriOS') !== -1) {
+                    verOffset = nAgt.indexOf('CriOS');
+                    browserName = 'Chrome';
+                    fullVersion = nAgt.substring(verOffset + 6);
+                } else if (nAgt.indexOf('FxiOS') !== -1) {
+                    verOffset = nAgt.indexOf('FxiOS');
+                    browserName = 'Firefox';
+                    fullVersion = nAgt.substring(verOffset + 6);
+                } else {
+                    verOffset = nAgt.indexOf('Safari');
 
-                browserName = 'Safari';
-                fullVersion = nAgt.substring(verOffset + 7);
+                    browserName = 'Safari';
+                    fullVersion = nAgt.substring(verOffset + 7);
 
-                if ((verOffset = nAgt.indexOf('Version')) !== -1) {
-                    fullVersion = nAgt.substring(verOffset + 8);
-                }
+                    if ((verOffset = nAgt.indexOf('Version')) !== -1) {
+                        fullVersion = nAgt.substring(verOffset + 8);
+                    }
 
-                if (navigator.userAgent.indexOf('Version/') !== -1) {
-                    fullVersion = navigator.userAgent.split('Version/')[1].split(' ')[0];
+                    if (navigator.userAgent.indexOf('Version/') !== -1) {
+                        fullVersion = navigator.userAgent.split('Version/')[1].split(' ')[0];
+                    }
                 }
             }
             // In Firefox, the true version is after 'Firefox' 
@@ -1257,6 +1262,9 @@ var RTCMultiConnection = function(roomid, forceOptions) {
 
             var os = unknown;
             var clientStrings = [{
+                s: 'Chrome OS',
+                r: /CrOS/
+            }, {
                 s: 'Windows 10',
                 r: /(Windows 10.0|Windows NT 10.0)/
             }, {
@@ -1635,6 +1643,12 @@ var RTCMultiConnection = function(roomid, forceOptions) {
             var alreadyUsedDevices = {};
 
             navigator.enumerateDevices(function(devices) {
+                MediaDevices = [];
+
+                audioInputDevices = [];
+                audioOutputDevices = [];
+                videoInputDevices = [];
+
                 devices.forEach(function(_device) {
                     var device = {};
                     for (var d in _device) {
@@ -1788,8 +1802,12 @@ var RTCMultiConnection = function(roomid, forceOptions) {
         } else if (DetectRTC.browser.isFirefox && DetectRTC.browser.version >= 34) {
             isScreenCapturingSupported = true;
         } else if (DetectRTC.browser.isEdge && DetectRTC.browser.version >= 17) {
-            isScreenCapturingSupported = true; // navigator.getDisplayMedia
+            isScreenCapturingSupported = true;
         } else if (DetectRTC.osName === 'Android' && DetectRTC.browser.isChrome) {
+            isScreenCapturingSupported = true;
+        }
+
+        if (!!navigator.getDisplayMedia || (navigator.mediaDevices && navigator.mediaDevices.getDisplayMedia)) {
             isScreenCapturingSupported = true;
         }
 
@@ -2013,7 +2031,7 @@ var RTCMultiConnection = function(roomid, forceOptions) {
         DetectRTC.isPromisesSupported = !!('Promise' in window);
 
         // version is generated by "grunt"
-        DetectRTC.version = '1.3.9';
+        DetectRTC.version = '1.4.0';
 
         if (typeof DetectRTC === 'undefined') {
             window.DetectRTC = {};
@@ -2649,10 +2667,6 @@ var RTCMultiConnection = function(roomid, forceOptions) {
         });
 
         peer.oniceconnectionstatechange = peer.onsignalingstatechange = function() {
-            if(self.signalingState != "stable") {
-                console.log("Negotiation skipped in stable");
-                return;
-            }
             var extra = self.extra;
             if (connection.peers[self.userid]) {
                 extra = connection.peers[self.userid].extra || extra;
@@ -2995,6 +3009,7 @@ var RTCMultiConnection = function(roomid, forceOptions) {
     // CodecsHandler.js
 
     var CodecsHandler = (function() {
+        // use "RTCRtpTransceiver.setCodecPreferences"
         function preferCodec(sdp, codecName) {
             var info = splitLines(sdp);
 
@@ -4086,6 +4101,9 @@ var RTCMultiConnection = function(roomid, forceOptions) {
                 if (typeof StreamsHandler !== 'undefined') {
                     StreamsHandler.setHandlers(stream, true, connection);
                 }
+                var isAudioMuted = stream.getAudioTracks().filter(function(track) {
+                    return track.enabled;
+                }).length === 0;
 
                 connection.streamEvents[stream.streamid] = {
                     stream: stream,
@@ -4094,7 +4112,7 @@ var RTCMultiConnection = function(roomid, forceOptions) {
                     userid: connection.userid,
                     extra: connection.extra,
                     streamid: stream.streamid,
-                    isAudioMuted: true
+                    isAudioMuted: isAudioMuted
                 };
 
                 try {
@@ -4256,6 +4274,7 @@ var RTCMultiConnection = function(roomid, forceOptions) {
 
                     var connectionDescription = {
                         remoteUserId: connection.sessionid,
+                        senderextra: connection.extra,
                         message: {
                             newParticipationRequest: true,
                             isOneWay: isOneWay,
@@ -4424,6 +4443,7 @@ var RTCMultiConnection = function(roomid, forceOptions) {
 
             var connectionDescription = {
                 remoteUserId: connection.sessionid,
+                senderextra: connection.extra,
                 message: {
                     newParticipationRequest: true,
                     isOneWay: isOneWay,
@@ -5837,7 +5857,7 @@ var RTCMultiConnection = function(roomid, forceOptions) {
         };
 
         connection.trickleIce = true;
-        connection.version = '3.6.9';
+        connection.version = '3.7.0';
 
         connection.onSettingLocalDescription = function(event) {
             if (connection.enableLogs) {
