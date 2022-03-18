@@ -71,6 +71,11 @@ connection.session = {
     video: true
 };
 
+connection.mediaConstraints = {
+    audio: true,
+    video: false
+};
+
 connection.sdpConstraints.mandatory = {
     OfferToReceiveAudio: true,
     OfferToReceiveVideo: true
@@ -100,6 +105,18 @@ document.getElementById('btn-join-room').onclick = function() {
 Now you are DONE. Congrats!!
 
 Now try above codes on any HTTPs page. Remember HTTPs is required.
+
+You might also want to use [ice servers](https://www.rtcmulticonnection.org/docs/iceServers). In this case, add:
+```javascript
+connection.iceServers = [{
+    'urls': [
+        'stun:stun.l.google.com:19302',
+        'stun:stun1.l.google.com:19302',
+        'stun:stun2.l.google.com:19302',
+        'stun:stun.l.google.com:19302?transport=udp',
+    ]
+}];
+```
 
 You can use `jsfiddle.net` for testing purpose.
 
