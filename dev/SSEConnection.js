@@ -197,10 +197,6 @@ function SSEConnection(connection, connectCallback) {
             return;
         }
 
-        if (message.message.readyForOffer || message.message.addMeAsBroadcaster) {
-            connection.addNewBroadcaster(message.sender);
-        }
-
         if (message.message.newParticipationRequest && message.sender !== connection.userid) {
             if (connection.peers[message.sender]) {
                 connection.deletePeer(message.sender);
@@ -221,16 +217,7 @@ function SSEConnection(connection, connectCallback) {
                 dontGetRemoteStream: typeof message.message.isOneWay !== 'undefined' ? message.message.isOneWay : !!connection.session.oneway || connection.direction === 'one-way',
                 dontAttachLocalStream: !!message.message.dontGetRemoteStream,
                 connectionDescription: message,
-                successCallback: function() {
-                    // if its oneway----- todo: THIS SEEMS NOT IMPORTANT.
-                    if (typeof message.message.isOneWay !== 'undefined' ? message.message.isOneWay : !!connection.session.oneway || connection.direction === 'one-way') {
-                        connection.addNewBroadcaster(message.sender, userPreferences);
-                    }
-
-                    if (!!connection.session.oneway || connection.direction === 'one-way' || isData(connection.session)) {
-                        connection.addNewBroadcaster(message.sender, userPreferences);
-                    }
-                }
+                successCallback: function() {}
             };
 
             connection.onNewParticipant(message.sender, userPreferences);
