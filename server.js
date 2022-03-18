@@ -5,6 +5,10 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 var httpServer = require('http');
+var requestip = require('request-ip');
+const winston = require('winston');
+require('winston-daily-rotate-file');
+require('date-utils');
 
 const ioServer = require('socket.io');
 const RTCMultiConnectionServer = require('rtcmulticonnection-server');
@@ -34,11 +38,40 @@ if(isUseHTTPs === false) {
     isUseHTTPs = config.isUseHTTPs;
 }
 
+const logger = (() => {
+    if(config.enableAccessLogs === true) {
+        return winston.createLogger({
+            level: 'debug',
+            transports: [
+                new winston.transports.DailyRotateFile({
+                    filename : 'access_logs/access_log',
+                    zippedArchive: true,
+                    format: winston.format.printf(
+                        info => `${new Date().toFormat('YYYY-MM-DD HH24:MI:SS')} [${info.level.toUpperCase()}] - ${info.message}`)
+                }),
+                new winston.transports.Console({
+                    format: winston.format.printf(
+                        info => `${new Date().toFormat('YYYY-MM-DD HH24:MI:SS')} [${info.level.toUpperCase()}] - ${info.message}`)
+                })
+            ]
+        });
+        } else {
+            return null;
+        }
+})();
+
+module.exports = logger;
+
 function serverHandler(request, response) {
     // to make sure we always get valid info from json file
     // even if external codes are overriding it
     config = getValuesFromConfigJson(jsonPath);
     config = getBashParameters(config, BASH_COLORS_HELPER);
+
+    // logs to write access IP of users.
+    if (config.enableAccessLogs === true && logger != null) {
+        logger.debug(requestip.getClientIp(request));
+    }
 
     // HTTP_GET handling code goes below
     try {
