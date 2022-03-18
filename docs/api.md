@@ -21,10 +21,7 @@ connection.socketURL = '/'; // same domain
 // or a free signaling server:
 
 // v3.4.7 or newer
-connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
-
-// v3.4.6 or older
-connection.socketURL = 'https://webrtcweb.com:9001/';
+connection.socketURL = 'https://muazkhan.com:9001/';
 ```
 
 ### `socketCustomParameters`
@@ -500,8 +497,8 @@ Please check [`FirebaseConnection`](https://github.com/muaz-khan/RTCMultiConnect
 
 For more information:
 
-* https://rtcmulticonnection.herokuapp.com/demos/Audio+Video+TextChat+FileSharing.html#comment-2670178473
-* https://rtcmulticonnection.herokuapp.com/demos/Audio+Video+TextChat+FileSharing.html#comment-2670182313
+* https://muazkhan.com:9001/demos/Audio+Video+TextChat+FileSharing.html#comment-2670178473
+* https://muazkhan.com:9001/demos/Audio+Video+TextChat+FileSharing.html#comment-2670182313
 
 ## `enableLogs`
 
@@ -1161,10 +1158,10 @@ Live Demos:
 
 | DemoTitle        | TestLive           | ViewSource |
 | ------------- |-------------|-------------|
-| Scalable Audio/Video Broadcast | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Scalable-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Scalable-Broadcast.html) |
-| Scalable Screen Broadcast | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Scalable-Screen-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Scalable-Screen-Broadcast.html) |
-| Scalable Video Broadcast | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Video-Scalable-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Video-Scalable-Broadcast.html) |
-| Scalable File Sharing | [Demo](https://rtcmulticonnection.herokuapp.com/demos/Files-Scalable-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Files-Scalable-Broadcast.html) |
+| Scalable Audio/Video Broadcast | [Demo](https://muazkhan.com:9001/demos/Scalable-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Scalable-Broadcast.html) |
+| Scalable Screen Broadcast | [Demo](https://muazkhan.com:9001/demos/Scalable-Screen-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Scalable-Screen-Broadcast.html) |
+| Scalable Video Broadcast | [Demo](https://muazkhan.com:9001/demos/Video-Scalable-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Video-Scalable-Broadcast.html) |
+| Scalable File Sharing | [Demo](https://muazkhan.com:9001/demos/Files-Scalable-Broadcast.html) | [Source](https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/Files-Scalable-Broadcast.html) |
 
 ## `onNumberOfBroadcastViewersUpdated`
 
@@ -1393,7 +1390,7 @@ connection.onstream = function(event) {
 </script>
 ```
 
-Demo: https://rtcmulticonnection.herokuapp.com/demos/StreamHasData.html
+Demo: https://muazkhan.com:9001/demos/StreamHasData.html
 
 ## File Sharing
 

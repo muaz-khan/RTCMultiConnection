@@ -6,7 +6,7 @@
 
 Copy any demo source from this page:
 
-* https://rtcmulticonnection.herokuapp.com/
+* https://muazkhan.com:9001/demos/
 
 Now search for `socket.io.js` file. You will find this:
 
@@ -17,20 +17,20 @@ Now search for `socket.io.js` file. You will find this:
 Replace above line with this one:
 
 ```html
-<script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
+<script src="https://muazkhan.com:9001/socket.io/socket.io.js"></script>
 ```
 
 Last step is: search for `connection.socketURL`. You will find these two lines:
 
 ```javascript
 connection.socketURL = '/';
-// connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+// connection.socketURL = 'https://muazkhan.com:9001/';
 ```
 
 Second line is commented. Simply remove `//` from the beginning of second line. Or in simple words: Uncomment second line:
 
 ```javascript
-connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+connection.socketURL = 'https://muazkhan.com:9001/';
 ```
 
 Now you are DONE. Congrats!!
@@ -45,8 +45,8 @@ You can use `jsfiddle.net` for testing purpose.
 First of all, add these two lines:
 
 ```html
-<script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
-<script src="https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"></script>
+<script src="https://muazkhan.com:9001/dist/RTCMultiConnection.min.js"></script>
+<script src="https://muazkhan.com:9001/socket.io/socket.io.js"></script>
 ```
 
 Now add two buttons:
@@ -62,7 +62,7 @@ Now add this javascript (somewhere on bottom of your page):
 var connection = new RTCMultiConnection();
 
 // this line is VERY_important
-connection.socketURL = 'https://rtcmulticonnection.herokuapp.com:443/';
+connection.socketURL = 'https://muazkhan.com:9001/';
 
 // all below lines are optional; however recommended.
 

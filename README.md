@@ -14,7 +14,7 @@ Signaling server has a separate repository:
 
 ## Demos
 
-* https://rtcmulticonnection.herokuapp.com/
+* https://muazkhan.com:9001/demos/
 
 ## Getting Started Without Any Installation
 

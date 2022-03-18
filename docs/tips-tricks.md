@@ -168,7 +168,7 @@ videoElement.onclick = function() {
 // add this script before loading "RTCMultiConnection.min.js"
 window.getExternalIceServers = true;
 </script>
-<script src="https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
+<script src="https://muazkhan.com:9001/dist/RTCMultiConnection.min.js"></script>
 ```
 
 Now you will get maximum WebRTC success across all devices.

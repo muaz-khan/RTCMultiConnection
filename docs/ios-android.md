@@ -4,10 +4,6 @@
 > 
 > So you do not need to build a cordova or ionic application.
 
-Here is list of all cordova/iosnic demos: 
-
-* https://github.com/muaz-khan/cordova-mobile-apps
-
 Please check these docs as well:
 
 * [Write iOS apps using RTCMultiConnection](http://www.rtcmulticonnection.org/docs/Write-iOS-Apps/)
@@ -19,18 +15,6 @@ Please check these docs as well:
 
 > This page explains how to write iOS+Android phonegap/cordova applications for RTCMultiConnection.
 
-# Cordova Demos
-
-Please check all iOS+Android demos here:
-
-* https://webrtcweb.com/cordova-apps/
-
-| DemoTitle        | DownloadZip           | AndroidAPK | AllFiles |
-| ------------- |-------------|-------------|-------------|
-| Scalable Broadcast | [Source](https://webrtcweb.com/cordova-apps/scalable-broadcast/Download-Source.zip) | [Android APK](https://webrtcweb.com/cordova-apps/scalable-broadcast/Install-Android-App.apk) | [All files](https://webrtcweb.com/cordova-apps/scalable-broadcast) |
-| Audio Conferencing | [Source](https://webrtcweb.com/cordova-apps/audio-conferencing/Download-Source.zip) | [Android APK](https://webrtcweb.com/cordova-apps/audio-conferencing/Install-Android-App.apk) | [All files](https://webrtcweb.com/cordova-apps/audio-conferencing) |
-| Video Conferencing | [Source](https://webrtcweb.com/cordova-apps/video-conferencing/Download-Source.zip) | [Android APK](https://webrtcweb.com/cordova-apps/video-conferencing/Install-Android-App.apk) | [All files](https://webrtcweb.com/cordova-apps/video-conferencing) |
-| File Sharing | [Source](https://webrtcweb.com/cordova-apps/filesharing/Download-Source.zip) | [Android APK](https://webrtcweb.com/cordova-apps/filesharing/Install-Android-App.apk) | [All files](https://webrtcweb.com/cordova-apps/filesharing) |
 
 # Prerequisites
 

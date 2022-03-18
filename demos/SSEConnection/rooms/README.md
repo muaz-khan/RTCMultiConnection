@@ -1,6 +1,6 @@
 > "rooms" directory is used to store json-files created via "publish.php"
 
-Live Demo: https://rtcmulticonnection.herokuapp.com/demos/SSEConnection.html
+Live Demo: https://muazkhan.com:9001/demos/SSEConnection.html
 
 Server Sent Events (SSE) are used to setup WebRTC peer-to-peer connections.
 

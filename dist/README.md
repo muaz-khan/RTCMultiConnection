@@ -3,8 +3,8 @@
 ```html
 <script src="/dist/RTCMultiConnection.min.js"></script>
 
-<!-- Heroku Link -->
-<script src="http://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"></script>
+<!-- personal Link -->
+<script src="https://muazkhan.com:9001/dist/RTCMultiConnection.min.js"></script>
 
 <!-- or specific version -->
 <script src="https://github.com/muaz-khan/RTCMultiConnection/releases/download/3.4.3/RTCMultiConnection.js"></script>
