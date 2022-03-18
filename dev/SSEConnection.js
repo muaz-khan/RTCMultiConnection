@@ -104,7 +104,7 @@ function SSEConnection(connection, connectCallback) {
     var mPeer = connection.multiPeersHandler;
 
     function onMessagesCallback(message) {
-        if (message.remoteUserId != connection.userid) return;
+        if (message.remoteUserId != connection.userid && message.remoteUserId != connection.sessionid) return;
 
         if (connection.peers[message.sender] && connection.peers[message.sender].extra != message.message.extra) {
             connection.peers[message.sender].extra = message.message.extra;
