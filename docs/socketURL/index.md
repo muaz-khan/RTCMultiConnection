@@ -12,7 +12,7 @@ connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00
 connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00a33f">'/'</span>; <span style="color:#919191">// same domain</span>
 
 <span style="color:#919191">// or a free signaling server</span>
-connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00a33f">'https://rtcmulticonnection.herokuapp.com:443/'</span>;
+connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00a33f">'https://muazkhan.com:9001/'</span>;
 </pre>
   </section>
 
@@ -66,14 +66,14 @@ connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00
   
   <section id="demo">
     <h2><a href="#demo">Demo</a></h2>
-    <pre style="background:#fff;color:#000"><span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
-<span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
+    <pre style="background:#fff;color:#000"><span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"https://muazkhan.com:9001/dist/RTCMultiConnection.min.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
+<span style="color:#ff5600">&lt;</span>script src<span style="color:#ff5600">=</span><span style="color:#00a33f">"https://muazkhan.com:9001/socket.io/socket.io.js"</span><span style="color:#ff5600">></span><span style="color:#ff5600">&lt;</span>/script<span style="color:#ff5600">></span>
 
 <span style="color:#ff5600">&lt;</span>script<span style="color:#ff5600">></span>
 <span style="color:#ff5600">var</span> connection <span style="color:#ff5600">=</span> <span style="color:#ff5600">new</span> <span style="color:#21439c">RTCMultiConnection</span>();
 
 <span style="color:#919191">// this line is VERY_important</span>
-connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00a33f">'https://rtcmulticonnection.herokuapp.com:443/'</span>;
+connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00a33f">'https://muazkhan.com:9001/'</span>;
 
 <span style="color:#919191">// if you want audio+video conferencing</span>
 connection.session <span style="color:#ff5600">=</span> {

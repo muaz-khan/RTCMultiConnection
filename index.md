@@ -6,7 +6,7 @@ description: WebRTC JavaScript library for peer-to-peer applications (screen sha
 {% capture html %}
 
   <section style="text-align: center;">
-    <p>Newbie? Please check built-in demos: <a href="https://rtcmulticonnection.herokuapp.com/demos/">List Of All Demos</a></p>
+    <p>Newbie? Please check built-in demos: <a href="https://muazkhan.com:9001/demos/">List Of All Demos</a></p>
     <input type="search" id="txt-search" placeholder="Search API">
     <small id="results" style="margin-left: 11px;font-size: 15px;">Results: 0</small>
   </section>

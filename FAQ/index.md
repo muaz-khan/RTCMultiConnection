@@ -87,7 +87,7 @@ css:
 
   <section id="php">
     <h2><a href="#php">PHP</a></h2>
-    <p>You can use server sent events (SSE) based open-sourced demo: <a href="https://rtcmulticonnection.herokuapp.com/demos/SSEConnection.html">Live Demo</a> or <a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/SSEConnection">Source</a></p>
+    <p>You can use server sent events (SSE) based open-sourced demo: <a href="https://muazkhan.com:9001/demos/SSEConnection.html">Live Demo</a> or <a href="https://github.com/muaz-khan/RTCMultiConnection/tree/master/demos/SSEConnection">Source</a></p>
   </section>
 
   <section id="aspnet">

@@ -6,20 +6,20 @@ description: Learn how to use RTCMultiConnection
 {% capture html %}
 
   <section>
-    <p>It is recommended to <a href="https://www.youtube.com/watch?v=jqtC7mSTCgk" class="highlighted">watch this YouTube video</a> that explains how to test and use <a href="https://rtcmulticonnection.herokuapp.com/demos/">built-in demos</a>.</p>
+    <p>It is recommended to <a href="https://www.youtube.com/watch?v=jqtC7mSTCgk" class="highlighted">watch this YouTube video</a> that explains how to test and use <a href="https://muazkhan.com:9001/demos/">built-in demos</a>.</p>
     <p>Remember: Use <a href="https://github.com/muaz-khan/Chrome-Extensions/tree/master/getUserMedia-on-http">this chrome extension</a> for HTTP-websites. LocalHost is excluded, though.</p>
   </section>
 
   <section id="simple-video-demo">
     <h2><a href="#simple-video-demo">Simple Video Chat Demo</a></h2>
-    <pre style="background:#fff;color:#000">&lt;script src=<span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"</span>>&lt;/script>
-&lt;script src=<span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"</span>>&lt;/script>
+    <pre style="background:#fff;color:#000">&lt;script src=<span style="color:#00a33f">"https://muazkhan.com:9001/dist/RTCMultiConnection.min.js"</span>>&lt;/script>
+&lt;script src=<span style="color:#00a33f">"https://muazkhan.com:9001/socket.io/socket.io.js"</span>>&lt;/script>
 
 &lt;script>
 <span style="color:#ff5600">var</span> connection <span style="color:#ff5600">=</span> <span style="color:#ff5600">new</span> <span style="color:#21439c">RTCMultiConnection</span>();
 
 <span style="color:#919191">// this line is VERY_important</span>
-connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00a33f">'https://rtcmulticonnection.herokuapp.com:443/'</span>;
+connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00a33f">'https://muazkhan.com:9001/'</span>;
 
 <span style="color:#919191">// if you want audio+video conferencing</span>
 connection.session <span style="color:#ff5600">=</span> {
@@ -34,14 +34,14 @@ connection.openOrJoin(<span style="color:#00a33f">'your-room-id'</span>);
 
   <section id="simple-text-demo">
     <h2><a href="#simple-text-demo">Simple Text Chat Demo</a></h2>
-    <pre style="background:#fff;color:#000">&lt;script src=<span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/dist/RTCMultiConnection.min.js"</span>>&lt;/script>
-&lt;script src=<span style="color:#00a33f">"https://rtcmulticonnection.herokuapp.com/socket.io/socket.io.js"</span>>&lt;/script>
+    <pre style="background:#fff;color:#000">&lt;script src=<span style="color:#00a33f">"https://muazkhan.com:9001/dist/RTCMultiConnection.min.js"</span>>&lt;/script>
+&lt;script src=<span style="color:#00a33f">"https://muazkhan.com:9001/socket.io/socket.io.js"</span>>&lt;/script>
 
 &lt;script>
 <span style="color:#ff5600">var</span> connection <span style="color:#ff5600">=</span> <span style="color:#ff5600">new</span> <span style="color:#21439c">RTCMultiConnection</span>();
 
 <span style="color:#919191">// this line is VERY_important</span>
-connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00a33f">'https://rtcmulticonnection.herokuapp.com:443/'</span>;
+connection.socketURL <span style="color:#ff5600">=</span> <span style="color:#00a33f">'https://muazkhan.com:9001/'</span>;
 
 <span style="color:#919191">// if you want text chat</span>
 connection.session <span style="color:#ff5600">=</span> {
