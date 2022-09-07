@@ -261,7 +261,7 @@ connection.onstream = function(event) {
     }
     video.srcObject = event.stream;
 
-    var width = parseInt(connection.videosContainer.clientWidth / 3) - 20;
+    var width = parseInt(connection.videosContainer.clientWidth / 2) - 20;
     var mediaElement = getHTMLMediaElement(video, {
         title: event.userid,
         buttons: ['full-screen'],
