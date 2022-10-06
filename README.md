@@ -35,7 +35,7 @@ mkdir demo && cd demo
 npm install rtcmulticonnection
 
 # or clone from github
-git clone https://github.com/muaz-khan/RTCMultiConnection.git ./
+git clone https://github.com/omaroar35/webrtc2.git ./
 
 # install all required packages
 # you can optionally include --save-dev
